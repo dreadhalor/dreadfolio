@@ -43,11 +43,7 @@ function ParentApp() {
         <Button label="Talk to child" onClick={() => clicked(message)} />
       </div>
       Child says: {childMessage}
-      <iframe
-        id="viewer"
-        src="http://localhost:5173/"
-        className="h-full w-full"
-      />
+      <iframe id="viewer" src="/test-child" className="h-full w-full" />
     </div>
   );
 }

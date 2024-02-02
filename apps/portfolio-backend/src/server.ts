@@ -34,34 +34,11 @@ app.use(
   express.static(path.join(__dirname, "../../../apps/test-child/dist")),
 );
 
-// Serve app1
+// Serve portfolio
 app.use(
-  "/app1",
-  createProxyMiddleware({
-    target: "http://localhost:5173", // Target the Vite dev server
-    changeOrigin: true,
-    ws: true, // Proxy websockets if you're using features like HMR
-    pathRewrite: { "^/app1": "" }, // Rewrite the URL path
-    router: function (req) {
-      // Dynamically route to the correct target based on the request path
-      if (req.url.startsWith("/@vite") || req.url.startsWith("/src")) {
-        return "http://localhost:5173";
-      }
-      // Default target
-      return "http://localhost:5173";
-    },
-  }),
+  "/",
+  express.static(path.join(__dirname, "../../../apps/portfolio/dist")),
 );
-
-// // Serve app2
-// app.use(
-//   "/app2",
-//   createProxyMiddleware({
-//     target: "http://localhost:3002",
-//     changeOrigin: true,
-//     pathRewrite: { "^/app2": "" },
-//   }),
-// );
 
 // Optionally, you can set up a catch-all route to handle undefined routes
 // and redirect or respond with a default app or a 404 page
