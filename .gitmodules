@@ -7,3 +7,6 @@
 [submodule "apps/enlight"]
 	path = apps/enlight
 	url = https://github.com/Dreadhalor/enlight.git
+[submodule "apps/ascii-video"]
+	path = apps/ascii-video
+	url = https://github.com/Dreadhalor/ascii-video.git
