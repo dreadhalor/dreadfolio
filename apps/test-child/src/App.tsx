@@ -1,7 +1,7 @@
 import { Button } from "dread-ui";
 import { useEffect, useState } from "react";
 
-function App() {
+function ChildApp() {
   const [message, setMessage] = useState("");
   const [parentMessage, setParentMessage] = useState("");
 
@@ -47,4 +47,4 @@ function App() {
   );
 }
 
-export { App };
+export { ChildApp as App };
