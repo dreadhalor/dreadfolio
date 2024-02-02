@@ -1,5 +1,4 @@
 import express, { Express, Request, Response } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import path from "path";
 
 const app: Express = express();
@@ -26,6 +25,18 @@ app.use(
 app.use(
   "/enlight",
   express.static(path.join(__dirname, "../../../apps/enlight/dist")),
+);
+
+// Serve matrix-cam
+app.use(
+  "/ascii-video",
+  express.static(path.join(__dirname, "../../../apps/ascii-video/dist")),
+);
+
+// Serve dread-ui
+app.use(
+  "/dread-ui",
+  express.static(path.join(__dirname, "../../../packages/dread-ui/dist")),
 );
 
 // Serve test-child
