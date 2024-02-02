@@ -1,12 +1,26 @@
 import express, { Express, Request, Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
-// import path from "path";
+import path from "path";
 
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT as string, 10) || 3000;
 
 // Middleware to serve static files
 app.use(express.static("public"));
+
+// Serve pathfinder-visualizer
+app.use(
+  "/pathfinder-visualizer",
+  express.static(
+    path.join(__dirname, "../../../apps/pathfinder-visualizer/build"),
+  ),
+);
+
+// Serve test-child
+app.use(
+  "/test-child",
+  express.static(path.join(__dirname, "../../../apps/test-child/dist")),
+);
 
 // Serve app1
 app.use(

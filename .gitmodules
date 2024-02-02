@@ -1,0 +1,3 @@
+[submodule "apps/algorithm-visualizer"]
+	path = apps/algorithm-visualizer
+	url = https://github.com/Dreadhalor/AlgorithmVisualizer.git
