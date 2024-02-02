@@ -4,3 +4,6 @@
 [submodule "apps/minesweeper"]
 	path = apps/minesweeper
 	url = https://github.com/Dreadhalor/minesweeper.git
+[submodule "apps/enlight"]
+	path = apps/enlight
+	url = https://github.com/Dreadhalor/enlight.git
