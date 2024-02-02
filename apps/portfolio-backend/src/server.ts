@@ -16,6 +16,12 @@ app.use(
   ),
 );
 
+// Serve minesweeper
+app.use(
+  "/minesweeper",
+  express.static(path.join(__dirname, "../../../apps/minesweeper/dist")),
+);
+
 // Serve test-child
 app.use(
   "/test-child",
