@@ -1,0 +1,3 @@
+[submodule "apps/pathfinder-visualizer"]
+	path = apps/pathfinder-visualizer
+	url = https://github.com/dreadhalor/AlgorithmVisualizer.git
