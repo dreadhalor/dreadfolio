@@ -7,3 +7,6 @@
 [submodule "apps/enlight"]
 	path = apps/enlight
 	url = https://github.com/Dreadhalor/enlight.git
+[submodule "apps/shareme"]
+	path = apps/shareme
+	url = https://github.com/Dreadhalor/shareme.git
