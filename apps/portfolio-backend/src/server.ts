@@ -22,6 +22,12 @@ app.use(
   express.static(path.join(__dirname, "../../../apps/minesweeper/dist")),
 );
 
+// Serve enlight
+app.use(
+  "/enlight",
+  express.static(path.join(__dirname, "../../../apps/enlight/dist")),
+);
+
 // Serve test-child
 app.use(
   "/test-child",
