@@ -1,4 +1,4 @@
-import { Button, Button2 } from "test-ui";
+import { Button, Button2 } from "../../../packages/dread-ui/src";
 
 function App() {
   return (

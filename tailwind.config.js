@@ -6,7 +6,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "../../packages/test-ui/**/*.{js,ts,jsx,tsx}", // Add the test-ui package
+    "../../packages/dread-ui/**/*.{js,ts,jsx,tsx}", // Add the dread-ui package
   ],
   theme: {
     container: {
