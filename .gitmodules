@@ -1,3 +1,6 @@
 [submodule "apps/pathfinder-visualizer"]
 	path = apps/pathfinder-visualizer
 	url = https://github.com/dreadhalor/AlgorithmVisualizer.git
+[submodule "apps/minesweeper"]
+	path = apps/minesweeper
+	url = https://github.com/Dreadhalor/minesweeper.git
