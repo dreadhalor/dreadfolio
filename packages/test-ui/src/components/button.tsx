@@ -1,5 +1,5 @@
+import { cn } from "@repo/utils";
 import "./button.scss";
-import { cn } from "../../../../lib/utils";
 
 interface ButtonProps {
   /**

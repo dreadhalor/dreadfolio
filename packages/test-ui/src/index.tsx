@@ -1,4 +1,4 @@
 // import "./index.scss";
 
-export * from "./stories/button";
-export * from "./stories/Button2";
+export * from "./components/button";
+export * from "./components/button2";
