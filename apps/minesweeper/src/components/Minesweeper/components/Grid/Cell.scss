@@ -1,0 +1,22 @@
+.closed-square-border {
+  border-left: rgb(245, 245, 245) solid 2px;
+  border-top: rgb(245, 245, 245) solid 2px;
+  border-right: rgb(128, 128, 128) solid 2px;
+  border-bottom: rgb(128, 128, 128) solid 2px;
+  &:hover:active {
+    border-left: rgb(128, 128, 128) solid 1px;
+    border-top: rgb(128, 128, 128) solid 1px;
+    border-right: none;
+    border-bottom: none;
+  }
+}
+.closed-square-border-no-hover {
+  border-left: rgb(245, 245, 245) solid 2px;
+  border-top: rgb(245, 245, 245) solid 2px;
+  border-right: rgb(128, 128, 128) solid 2px;
+  border-bottom: rgb(128, 128, 128) solid 2px;
+}
+.open-square-border {
+  border-left: rgb(128, 128, 128) solid 1px;
+  border-top: rgb(128, 128, 128) solid 1px;
+}

@@ -1,0 +1,33 @@
+.minesweeper-border-colors-inset {
+  border-left-color: #808080;
+  border-top-color: #808080;
+  border-bottom-color: white;
+  border-right-color: white;
+}
+
+.minesweeper-border-colors-outset {
+  border-left-color: white;
+  border-top-color: white;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+}
+.mine__face {
+  border-color: rgb(245, 245, 245) rgb(128, 128, 128) rgb(128, 128, 128)
+    rgb(245, 245, 245);
+  &:active:hover {
+    border-width: 1px;
+    border-color: rgb(128, 128, 128);
+    img {
+      transform: translate(1px, 1px);
+    }
+    img:nth-child(1) {
+      display: none;
+    }
+    img:nth-child(2) {
+      display: block;
+    }
+  }
+  img:nth-child(2) {
+    display: none;
+  }
+}
