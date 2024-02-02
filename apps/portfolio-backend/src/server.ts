@@ -12,7 +12,7 @@ app.use(express.static("public"));
 app.use(
   "/pathfinder-visualizer",
   express.static(
-    path.join(__dirname, "../../../apps/pathfinder-visualizer/build"),
+    path.join(__dirname, "../../../apps/pathfinder-visualizer/dist"),
   ),
 );
 
