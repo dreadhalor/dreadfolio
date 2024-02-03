@@ -27,7 +27,6 @@ const AppSpace = ({ src, alt, onClick, className, style }: AppSpaceProps) => {
       className="flex h-full w-full shrink-0 items-center justify-center border-2 p-4"
       style={{
         scrollSnapAlign: "center",
-        perspective: "100px",
       }}
     >
       <AppIcon
@@ -44,7 +43,7 @@ const AppIcon = ({ src, alt, onClick, className }: AppSpaceProps) => {
   return (
     <button
       className={cn(
-        "flex items-center justify-center overflow-hidden border border-gray-500 p-0 transition-transform duration-300 ease-in-out",
+        "flex items-center justify-center overflow-hidden rounded-lg border border-gray-500 p-0 transition-transform duration-300 ease-in-out",
         "aspect-square h-full",
         // "hover:scale-110",
         className,
@@ -56,6 +55,45 @@ const AppIcon = ({ src, alt, onClick, className }: AppSpaceProps) => {
     </button>
   );
 };
+
+const apps = [
+  {
+    name: "test-child",
+    url: "/test-child",
+    icon: "",
+    alt: "Test App",
+  },
+  {
+    name: "enlight",
+    url: "/enlight",
+    icon: EnlightIcon,
+    alt: "Enlight Icon",
+  },
+  {
+    name: "minesweeper",
+    url: "/minesweeper",
+    icon: MinesweeperIcon,
+    alt: "Minesweeper Icon",
+  },
+  {
+    name: "pathfinder-visualizer",
+    url: "/pathfinder-visualizer",
+    icon: PathfinderVisualizerIcon,
+    alt: "Pathfinder Visualizer Icon",
+  },
+  {
+    name: "ascii-video",
+    url: "/ascii-video",
+    icon: AsciiVideoIcon,
+    alt: "Matrix-Cam Icon",
+  },
+  {
+    name: "dread-ui",
+    url: "/dread-ui",
+    icon: "",
+    alt: "dread ui",
+  },
+];
 
 function ParentApp() {
   const [message, setMessage] = useState("");
@@ -95,11 +133,12 @@ function ParentApp() {
   function useParallax(value: MotionValue<number>, distance: number) {
     return useTransform(value, [0, 1], [-distance, distance]);
   }
-  const y = useParallax(scrollYProgress, 300);
+  const y = useParallax(scrollYProgress, 10);
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     setWidth(latest * 100);
   });
   const [width, setWidth] = useState(0);
+  const appIconSize = 48;
 
   return (
     <div
@@ -110,28 +149,31 @@ function ParentApp() {
         className="fixed left-0 top-0 z-10 h-1 w-full bg-gray-500"
         style={{ width: `${width}%` }}
       />
-      <AppSpace alt="Test App" onClick={() => setApp("/test-child")} />
-      <AppSpace
-        src={EnlightIcon}
-        alt="Enlight Icon"
-        onClick={() => setApp("/enlight")}
+      <div
+        className="fixed right-0 top-1/2 z-10 h-1 w-full bg-gray-500"
+        style={{ width: `100%` }}
       />
-      <AppSpace
-        src={MinesweeperIcon}
-        alt="Minesweeper Icon"
-        onClick={() => setApp("/minesweeper")}
-      />
-      <AppSpace
-        src={PathfinderVisualizerIcon}
-        alt="Pathfinder Visualizer Icon"
-        onClick={() => setApp("/pathfinder-visualizer")}
-      />
-      <AppSpace
-        src={AsciiVideoIcon}
-        alt="Matrix-Cam Icon"
-        onClick={() => setApp("/ascii-video")}
-      />
-      <AppSpace alt="dread ui" onClick={() => setApp("/dread-ui")} />
+
+      {apps.map(({ name, icon, alt }, index) => (
+        <img
+          key={name}
+          src={icon}
+          alt={alt}
+          className="fixed overflow-hidden rounded-md border border-gray-500"
+          style={{
+            width: appIconSize,
+            height: appIconSize,
+            right: 0,
+            top: `calc(50% - ${
+              scrollYProgress.get() * (apps.length - 1) * appIconSize
+            }px)`,
+            transform: `translateY(${-50 + 100 * index}%)`,
+          }}
+        />
+      ))}
+      {apps.map(({ name, url, icon, alt }) => (
+        <AppSpace key={name} src={icon} alt={alt} onClick={() => setApp(url)} />
+      ))}
       {/* <iframe id="viewer" className="h-full w-full" /> */}
       {/* <iframe id="viewer" src={app} className="h-full w-full" /> */}
     </div>
