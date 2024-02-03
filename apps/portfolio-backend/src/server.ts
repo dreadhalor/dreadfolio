@@ -51,11 +51,8 @@ app.use(
   express.static(path.join(__dirname, "../../../apps/portfolio/dist")),
 );
 
-// Optionally, you can set up a catch-all route to handle undefined routes
-// and redirect or respond with a default app or a 404 page
-app.get("*", (req: Request, res: Response) => {
-  // res.sendFile(path.join(__dirname, "../apps/defaultApp/index.html"));
-  // Or send a 404 page
+app.use("*", (req: Request, res: Response) => {
+  // Send a 404 page
   res.status(404).send("App not found");
 });
 

@@ -1,5 +1,12 @@
 import { Button } from "dread-ui";
-import { useEffect, useState } from "react";
+import {
+  MotionValue,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@repo/utils";
 import {
   AsciiVideoIcon,
   EnlightIcon,
@@ -7,19 +14,43 @@ import {
   PathfinderVisualizerIcon,
 } from "@repo/assets";
 
-const AppIcon = ({
-  src,
-  alt,
-  onClick,
-}: {
+type AppSpaceProps = {
   src?: string;
   alt: string;
   onClick: () => void;
-}) => {
+  className?: string;
+  style?: React.CSSProperties;
+};
+const AppSpace = ({ src, alt, onClick, className, style }: AppSpaceProps) => {
+  return (
+    <div
+      className="flex h-full w-full shrink-0 items-center justify-center border-2 p-4"
+      style={{
+        scrollSnapAlign: "center",
+        perspective: "100px",
+      }}
+    >
+      <AppIcon
+        src={src}
+        alt={alt}
+        onClick={onClick}
+        className={className}
+        style={style}
+      />
+    </div>
+  );
+};
+const AppIcon = ({ src, alt, onClick, className }: AppSpaceProps) => {
   return (
     <button
-      className="flex h-12 w-12 items-center justify-center overflow-hidden border border-gray-500 p-0 transition-transform duration-300 ease-in-out hover:scale-110"
+      className={cn(
+        "flex items-center justify-center overflow-hidden border border-gray-500 p-0 transition-transform duration-300 ease-in-out",
+        "aspect-square h-full",
+        // "hover:scale-110",
+        className,
+      )}
       onClick={onClick}
+      // style={{ ...style, width, height }}
     >
       {src ? <img src={src} alt={alt} className="h-full w-full" /> : alt}
     </button>
@@ -57,43 +88,52 @@ function ParentApp() {
     );
   };
 
+  const parentRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    container: parentRef,
+  });
+  function useParallax(value: MotionValue<number>, distance: number) {
+    return useTransform(value, [0, 1], [-distance, distance]);
+  }
+  const y = useParallax(scrollYProgress, 300);
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    setWidth(latest * 100);
+  });
+  const [width, setWidth] = useState(0);
+
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-4 border-8 border-red-500 p-4">
-      Hey, I'm a parent app.
-      <div className="flex gap-2">
-        <input
-          placeholder="Send message to child"
-          onChange={(e) => setMessage(e.target.value)}
-          value={message}
-        />
-        <Button label="Talk to child" onClick={() => clicked(message)} />
-      </div>
-      Child says: {childMessage}
-      <div className="flex flex-nowrap gap-2">
-        <AppIcon alt="Test App" onClick={() => setApp("/test-child")} />
-        <AppIcon
-          src={EnlightIcon}
-          alt="Enlight Icon"
-          onClick={() => setApp("/enlight")}
-        />
-        <AppIcon
-          src={MinesweeperIcon}
-          alt="Minesweeper Icon"
-          onClick={() => setApp("/minesweeper")}
-        />
-        <AppIcon
-          src={PathfinderVisualizerIcon}
-          alt="Pathfinder Visualizer Icon"
-          onClick={() => setApp("/pathfinder-visualizer")}
-        />
-        <AppIcon
-          src={AsciiVideoIcon}
-          alt="Matrix-Cam Icon"
-          onClick={() => setApp("/ascii-video")}
-        />
-        <AppIcon alt="dread ui" onClick={() => setApp("/dread-ui")} />
-      </div>
-      <iframe id="viewer" src={app} className="h-full w-full" />
+    <div
+      className="flex h-full w-full snap-y snap-mandatory flex-col flex-nowrap items-center overflow-auto border border-red-500"
+      ref={parentRef}
+    >
+      <div
+        className="fixed left-0 top-0 z-10 h-1 w-full bg-gray-500"
+        style={{ width: `${width}%` }}
+      />
+      <AppSpace alt="Test App" onClick={() => setApp("/test-child")} />
+      <AppSpace
+        src={EnlightIcon}
+        alt="Enlight Icon"
+        onClick={() => setApp("/enlight")}
+      />
+      <AppSpace
+        src={MinesweeperIcon}
+        alt="Minesweeper Icon"
+        onClick={() => setApp("/minesweeper")}
+      />
+      <AppSpace
+        src={PathfinderVisualizerIcon}
+        alt="Pathfinder Visualizer Icon"
+        onClick={() => setApp("/pathfinder-visualizer")}
+      />
+      <AppSpace
+        src={AsciiVideoIcon}
+        alt="Matrix-Cam Icon"
+        onClick={() => setApp("/ascii-video")}
+      />
+      <AppSpace alt="dread ui" onClick={() => setApp("/dread-ui")} />
+      {/* <iframe id="viewer" className="h-full w-full" /> */}
+      {/* <iframe id="viewer" src={app} className="h-full w-full" /> */}
     </div>
   );
 }
