@@ -9,21 +9,34 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@repo/utils";
 import {
   AsciiVideoIcon,
+  AsciiVideoScreenshot,
   EnlightIcon,
+  EnlightScreenshot,
   MinesweeperIcon,
+  MinesweeperScreenshot,
   PathfinderVisualizerIcon,
+  PathfinderVisualizerScreenshot,
 } from "@repo/assets";
 
 type AppSpaceProps = {
+  name?: string;
   src?: string;
   alt: string;
   onClick: () => void;
   className?: string;
   style?: React.CSSProperties;
 };
-const AppSpace = ({ src, alt, onClick, className, style }: AppSpaceProps) => {
+const AppSpace = ({
+  name,
+  src,
+  alt,
+  onClick,
+  className,
+  style,
+}: AppSpaceProps) => {
   return (
     <div
+      id={`${name}-space`}
       className="flex h-full w-full shrink-0 items-center justify-center border-2 p-4"
       style={{
         scrollSnapAlign: "center",
@@ -62,36 +75,42 @@ const apps = [
     url: "/test-child",
     icon: "",
     alt: "Test App",
+    image: "",
   },
   {
     name: "enlight",
     url: "/enlight",
     icon: EnlightIcon,
     alt: "Enlight Icon",
+    image: EnlightScreenshot,
   },
   {
     name: "minesweeper",
     url: "/minesweeper",
     icon: MinesweeperIcon,
     alt: "Minesweeper Icon",
+    image: MinesweeperScreenshot,
   },
   {
     name: "pathfinder-visualizer",
     url: "/pathfinder-visualizer",
     icon: PathfinderVisualizerIcon,
     alt: "Pathfinder Visualizer Icon",
+    image: PathfinderVisualizerScreenshot,
   },
   {
     name: "ascii-video",
     url: "/ascii-video",
     icon: AsciiVideoIcon,
     alt: "Matrix-Cam Icon",
+    image: AsciiVideoScreenshot,
   },
   {
     name: "dread-ui",
     url: "/dread-ui",
     icon: "",
     alt: "dread ui",
+    image: "",
   },
 ];
 
@@ -142,7 +161,7 @@ function ParentApp() {
 
   return (
     <div
-      className="flex h-full w-full snap-y snap-mandatory flex-col flex-nowrap items-center overflow-auto border border-red-500"
+      className="hide-scrollbar flex h-full w-full snap-y snap-mandatory flex-col flex-nowrap items-center overflow-auto border border-red-500"
       ref={parentRef}
     >
       <div
@@ -155,10 +174,8 @@ function ParentApp() {
       />
 
       {apps.map(({ name, icon, alt }, index) => (
-        <img
+        <button
           key={name}
-          src={icon}
-          alt={alt}
           className="fixed overflow-hidden rounded-md border border-gray-500"
           style={{
             width: appIconSize,
@@ -169,10 +186,22 @@ function ParentApp() {
             }px)`,
             transform: `translateY(${-50 + 100 * index}%)`,
           }}
-        />
+          onClick={() => {
+            const appSpace = document.getElementById(`${name}-space`);
+            appSpace?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          <img src={icon} alt={alt} />
+        </button>
       ))}
-      {apps.map(({ name, url, icon, alt }) => (
-        <AppSpace key={name} src={icon} alt={alt} onClick={() => setApp(url)} />
+      {apps.map(({ name, url, image, alt }) => (
+        <AppSpace
+          key={name}
+          name={name}
+          src={image}
+          alt={alt}
+          onClick={() => setApp(url)}
+        />
       ))}
       {/* <iframe id="viewer" className="h-full w-full" /> */}
       {/* <iframe id="viewer" src={app} className="h-full w-full" /> */}
