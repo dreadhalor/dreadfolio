@@ -1,0 +1,61 @@
+import {
+  AsciiVideoIcon,
+  AsciiVideoScreenshot,
+  EnlightIcon,
+  EnlightScreenshot,
+  MinesweeperIcon,
+  MinesweeperScreenshot,
+  PathfinderVisualizerIcon,
+  PathfinderVisualizerScreenshot,
+} from "@repo/assets";
+
+export const apps = [
+  {
+    name: "test-child",
+    url: "/test-child",
+    icon: "",
+    alt: "Test App",
+    image: "",
+    background: "bg-red-500",
+  },
+  {
+    name: "enlight",
+    url: "/enlight",
+    icon: EnlightIcon,
+    alt: "Enlight Icon",
+    image: EnlightScreenshot,
+    background: "bg-blue-500",
+  },
+  {
+    name: "minesweeper",
+    url: "/minesweeper",
+    icon: MinesweeperIcon,
+    alt: "Minesweeper Icon",
+    image: MinesweeperScreenshot,
+    background: "bg-green-500",
+  },
+  {
+    name: "pathfinder-visualizer",
+    url: "/pathfinder-visualizer",
+    icon: PathfinderVisualizerIcon,
+    alt: "Pathfinder Visualizer Icon",
+    image: PathfinderVisualizerScreenshot,
+    background: "bg-yellow-500",
+  },
+  {
+    name: "ascii-video",
+    url: "/ascii-video",
+    icon: AsciiVideoIcon,
+    alt: "Matrix-Cam Icon",
+    image: AsciiVideoScreenshot,
+    background: "bg-purple-500",
+  },
+  {
+    name: "dread-ui",
+    url: "/dread-ui",
+    icon: "",
+    alt: "dread ui",
+    image: "",
+    background: "bg-pink-500",
+  },
+] as const;
