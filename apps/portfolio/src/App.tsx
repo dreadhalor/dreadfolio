@@ -2,18 +2,8 @@
 import { useMotionValueEvent, useScroll } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@repo/utils";
-import {
-  AsciiVideoIcon,
-  AsciiVideoScreenshot,
-  EnlightIcon,
-  EnlightScreenshot,
-  MinesweeperIcon,
-  MinesweeperScreenshot,
-  PathfinderVisualizerIcon,
-  PathfinderVisualizerScreenshot,
-} from "@repo/assets";
-// import AppSpaceMask from "./assets/app-space-mask.svg";
 import { motion } from "framer-motion";
+import { apps } from "./apps";
 
 type AppSpaceProps = {
   onClick: () => void;
@@ -75,15 +65,8 @@ const AppSpace = ({
       style={{
         scrollSnapAlign: "center",
         clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
-        // maskImage: `url(${AppSpaceMask})`,
-        // WebkitMaskImage: `url(${AppSpaceMask})`,
-        // maskSize: "100% 100%",
-        // WebkitMaskSize: "100% 100%",
-        // maskRepeat: "no-repeat",
-        // WebkitMaskRepeat: "no-repeat",
       }}
     >
-      {/* <img src={AppSpaceMask} className="absolute" /> */}
       {/* create a polygon that is a parallelogram that connects the top-left corner to the bottom-right corner  */}
       {/* <div
         className="absolute left-0 top-0 h-full w-full bg-yellow-500"
@@ -136,57 +119,6 @@ const AppIcon = ({
     </button>
   );
 };
-
-const apps = [
-  {
-    name: "test-child",
-    url: "/test-child",
-    icon: "",
-    alt: "Test App",
-    image: "",
-    background: "bg-red-500",
-  },
-  {
-    name: "enlight",
-    url: "/enlight",
-    icon: EnlightIcon,
-    alt: "Enlight Icon",
-    image: EnlightScreenshot,
-    background: "bg-blue-500",
-  },
-  {
-    name: "minesweeper",
-    url: "/minesweeper",
-    icon: MinesweeperIcon,
-    alt: "Minesweeper Icon",
-    image: MinesweeperScreenshot,
-    background: "bg-green-500",
-  },
-  {
-    name: "pathfinder-visualizer",
-    url: "/pathfinder-visualizer",
-    icon: PathfinderVisualizerIcon,
-    alt: "Pathfinder Visualizer Icon",
-    image: PathfinderVisualizerScreenshot,
-    background: "bg-yellow-500",
-  },
-  {
-    name: "ascii-video",
-    url: "/ascii-video",
-    icon: AsciiVideoIcon,
-    alt: "Matrix-Cam Icon",
-    image: AsciiVideoScreenshot,
-    background: "bg-purple-500",
-  },
-  {
-    name: "dread-ui",
-    url: "/dread-ui",
-    icon: "",
-    alt: "dread ui",
-    image: "",
-    background: "bg-pink-500",
-  },
-] as const;
 
 function ParentApp() {
   const [message, setMessage] = useState("");
