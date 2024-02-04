@@ -2,9 +2,8 @@
   "name": "@repo/assets",
   "version": "1.0.0",
   "private": true,
-  "exports": {
-    ".": {
-      "import": "./index.ts"
-    }
-  }
+  "files": [
+    "index.ts",
+    "app-space-mask.svg"
+  ]
 }
