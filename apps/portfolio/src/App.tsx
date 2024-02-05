@@ -21,25 +21,39 @@ const AppSpace = ({
 }: AppSpaceProps) => {
   const { name, background } = app;
   const ref = useRef(null);
-  const [width, setWidth] = useState(0);
   const { scrollYProgress } = useScroll({
     target: ref,
     container: parentRef,
     offset: ["end start", "start end"],
   });
-  const offset = 100;
+  const o_1 = 100;
+  const o_2 = 0;
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    // console.log(`latest from ${name}`, scrollYProgress.get());
-    // setWidth(latest);
     setCoords((prev) => {
       let newCoords = prev;
-      const deltaY = latest * 100;
+      const t = latest;
+      const o_high = Math.max(o_1, o_2);
+      const o_low = Math.min(o_1, o_2);
+      const leftHigh = o_1 > o_2;
+      const topHigh = (-2 * o_high - 400) * t + 200;
+      const topLow = (-2 * o_high - 400) * t + o_high - o_low + 200;
+      const bottomHigh = (-2 * o_high - 400) * t + o_high + o_low + 300;
+      const bottomLow = (-2 * o_high - 400) * t + 2 * o_high + 300;
       // if (name === "enlight") console.log(`deltaY from ${name}`, deltaY);
       newCoords = {
-        topLeft: { x: 0, y: 50 - offset - deltaY - (deltaY - 50) * 5 },
-        topRight: { x: 100, y: 50 - deltaY - (deltaY - 50) * 4 },
-        bottomRight: { x: 100, y: 150 + offset - deltaY - (deltaY - 50) * 5 },
-        bottomLeft: { x: 0, y: 150 - deltaY - (deltaY - 50) * 5 },
+        topLeft: { x: 0, y: leftHigh ? topHigh : topLow },
+        topRight: {
+          x: 100,
+          y: leftHigh ? topLow : topHigh,
+        },
+        bottomRight: {
+          x: 100,
+          y: leftHigh ? bottomLow : bottomHigh,
+        },
+        bottomLeft: {
+          x: 0,
+          y: leftHigh ? bottomHigh : bottomLow,
+        },
       };
       return newCoords;
     });
@@ -59,17 +73,23 @@ const AppSpace = ({
       ref={ref}
       id={`${name}-space`}
       className={cn(
-        "relative flex h-full w-full shrink-0 items-center justify-center overflow-visible border-2 p-4",
+        "relative flex h-full w-full shrink-0 items-center justify-center overflow-visible p-4",
+        // scrollYProgress.get() > 0 && scrollYProgress.get() < 1 && "visible",
         // background,
+        className,
       )}
       style={{
         scrollSnapAlign: "center",
         clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
+        ...style,
       }}
     >
       {/* create a polygon that is a parallelogram that connects the top-left corner to the bottom-right corner  */}
       {/* <div
-        className="absolute left-0 top-0 h-full w-full bg-yellow-500"
+        className={cn(
+          "absolute left-0 top-0 h-full w-full border-4",
+          background,
+        )}
         style={{
           clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
         }}
@@ -83,15 +103,16 @@ const AppSpace = ({
       <AppIcon
         app={app}
         onClick={onClick}
-        className={className}
-        style={{
-          // clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
-          ...style,
-        }}
+        style={
+          {
+            // clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
+            // ...style,
+          }
+        }
       />
       <motion.div
         className={cn(
-          "absolute -top-full left-0 -z-10 h-[500%] w-full",
+          "absolute -top-full left-0 -z-10 h-[300%] w-full",
           background,
         )}
       ></motion.div>
@@ -166,50 +187,57 @@ function ParentApp() {
   const appIconSize = 48;
 
   return (
-    <div
-      className="hide-scrollbar relative flex h-full w-full snap-y snap-mandatory flex-col flex-nowrap items-center overflow-auto border border-red-500"
-      ref={parentRef}
-    >
-      <motion.div
-        className="fixed left-0 top-0 z-10 h-1 w-full bg-gray-500"
-        style={{ width: `${scrollYProgress.get() * 100}%` }}
-      />
-      {/* <div
+    <div className="flex h-full w-full overflow-visible bg-blue-400 p-[100px]">
+      <div
+        className="hide-scrollbar relative flex h-full w-full snap-y snap-mandatory flex-col flex-nowrap items-center overflow-auto border border-red-500"
+        ref={parentRef}
+      >
+        <motion.div
+          className="fixed left-0 top-0 z-10 h-1 w-full bg-gray-500"
+          style={{ width: `${scrollYProgress.get() * 100}%` }}
+        />
+        {/* <div
         className="fixed right-0 top-1/2 z-10 h-1 w-full bg-gray-500"
         style={{ width: `100%` }}
       /> */}
 
-      {apps.map(({ name, icon, alt }, index) => (
-        <button
-          key={name}
-          className="fixed z-10 overflow-hidden rounded-md border border-gray-500"
-          style={{
-            width: appIconSize,
-            height: appIconSize,
-            right: 0,
-            top: `calc(50% - ${
-              scrollYProgress.get() * (apps.length - 1) * appIconSize
-            }px)`,
-            transform: `translateY(${-50 + 100 * index}%)`,
-          }}
-          onClick={() => {
-            const appSpace = document.getElementById(`${name}-space`);
-            appSpace?.scrollIntoView({ behavior: "smooth" });
-          }}
-        >
-          <img src={icon} alt={alt} />
-        </button>
-      ))}
-      {apps.map((app) => (
-        <AppSpace
-          key={app.name}
-          app={app}
-          onClick={() => setApp(app.url)}
-          parentRef={parentRef}
-        />
-      ))}
-      {/* <iframe id="viewer" className="h-full w-full" /> */}
-      {/* <iframe id="viewer" src={app} className="h-full w-full" /> */}
+        {apps.map(({ name, icon, alt }, index) => (
+          <button
+            key={name}
+            className="fixed z-10 overflow-hidden rounded-md border border-gray-500"
+            style={{
+              width: appIconSize,
+              height: appIconSize,
+              right: 0,
+              top: `calc(50% - ${
+                scrollYProgress.get() * (apps.length - 1) * appIconSize
+              }px)`,
+              transform: `translateY(${-50 + 100 * index}%)`,
+            }}
+            onClick={() => {
+              const appSpace = document.getElementById(`${name}-space`);
+              appSpace?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            <img src={icon} alt={alt} />
+          </button>
+        ))}
+        {apps.map((app, index) => (
+          <AppSpace
+            key={app.name}
+            app={app}
+            onClick={() => setApp(app.url)}
+            parentRef={parentRef}
+            style={
+              {
+                // zIndex: 10 - index,
+              }
+            }
+          />
+        ))}
+        {/* <iframe id="viewer" className="h-full w-full" /> */}
+        {/* <iframe id="viewer" src={app} className="h-full w-full" /> */}
+      </div>
     </div>
   );
 }
