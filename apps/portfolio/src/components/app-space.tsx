@@ -17,8 +17,8 @@ const AppSpace = ({
   style,
   parentRef,
 }: AppSpaceProps) => {
-  const { name, background } = app;
-  const ref = useRef(null);
+  const { description, name, background, image, alt } = app;
+  const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     container: parentRef,
@@ -63,6 +63,10 @@ const AppSpace = ({
     bottomRight: { x: 0, y: 0 },
     bottomLeft: { x: 0, y: 0 },
   });
+  const descriptionWidth = 300;
+  const clientHeight = ref.current?.clientHeight ?? 0;
+  const clientWidth = ref.current?.clientWidth ?? 0;
+  const cubeSize = Math.min(clientHeight, clientWidth);
 
   return (
     <motion.div
@@ -75,6 +79,7 @@ const AppSpace = ({
       style={{
         scrollSnapAlign: "center",
         clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
+        transformStyle: "preserve-3d",
         ...style,
       }}
     >
@@ -88,17 +93,61 @@ const AppSpace = ({
           clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
         }}
       /> */}
-      <motion.div
+      {/* <motion.div
         className="absolute left-0 top-1/2 z-10 h-[5px] bg-yellow-500"
         style={{
           width: `${scrollYProgress.get() * 100}%`,
         }}
-      />
-      <div className="flex h-full flex-1 items-center justify-center border-4">
-        <AppIcon app={app} onClick={onClick} />
+      /> */}
+      <div className="absolute inset-0 flex place-items-center overflow-hidden">
+        <motion.div
+          className="absolute z-10 flex flex-col items-center justify-center gap-4 rounded-lg bg-black/60 p-5 text-center text-white"
+          style={{
+            width: descriptionWidth,
+            left: `calc(50% - ${descriptionWidth / 2}px - ${
+              appIconSize / 2
+            }px)`,
+            transform: `translateX(${(scrollYProgress.get() - 0.5) * 100}%)`,
+          }}
+        >
+          <h1 className="text-2xl font-bold">{name}</h1>
+          {description}
+        </motion.div>
+      </div>
+
+      <div
+        className="relative flex h-full flex-1 items-center justify-center p-4 md:p-8"
+        style={{
+          perspective: 1000,
+        }}
+      >
+        {image ? (
+          // <div className="z-10 flex h-full w-full items-center justify-center rounded-lg p-8">
+          <img
+            className="m-auto max-h-full max-w-full rounded-lg"
+            src={image}
+            alt={alt}
+            style={{
+              transform: `rotateX(${-(scrollYProgress.get() - 0.5) * 90}deg)`,
+            }}
+          />
+        ) : (
+          // </div>
+          alt
+        )}
+        {/* <AppIcon
+          app={app}
+          onClick={onClick}
+          style={{
+            transform: `translate3d(0, 0, -100px) rotateX(${
+              -(scrollYProgress.get() - 0.5) * 20
+            }deg)`,
+            filter: "blur(2px)",
+          }}
+        /> */}
       </div>
       <div
-        className="h-full shrink-0 border"
+        className="h-full shrink-0"
         style={{
           width: appIconSize,
         }}

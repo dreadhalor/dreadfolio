@@ -21,7 +21,7 @@ function ParentApp() {
   const [width, setWidth] = useState(0);
 
   return (
-    <div className="flex h-full w-full overflow-visible bg-blue-400 p-[0px]">
+    <div className="flex h-full w-full bg-blue-400 p-[0px]">
       <div
         className="hide-scrollbar relative flex h-full flex-1 snap-y snap-mandatory flex-col flex-nowrap items-center overflow-auto"
         ref={parentRef}

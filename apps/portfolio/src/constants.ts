@@ -17,6 +17,7 @@ export const apps = [
     alt: "Test App",
     image: "",
     background: "bg-red-500",
+    description: "This is a test child app",
   },
   {
     name: "enlight",
@@ -25,6 +26,7 @@ export const apps = [
     alt: "Enlight Icon",
     image: EnlightScreenshot,
     background: "bg-blue-500",
+    description: "A simple, elegant, and modern web browser.",
   },
   {
     name: "minesweeper",
@@ -33,6 +35,7 @@ export const apps = [
     alt: "Minesweeper Icon",
     image: MinesweeperScreenshot,
     background: "bg-green-500",
+    description: "A classic game of Minesweeper.",
   },
   {
     name: "pathfinder-visualizer",
@@ -41,6 +44,7 @@ export const apps = [
     alt: "Pathfinder Visualizer Icon",
     image: PathfinderVisualizerScreenshot,
     background: "bg-yellow-500",
+    description: "A visualizer for pathfinding algorithms.",
   },
   {
     name: "ascii-video",
@@ -49,6 +53,7 @@ export const apps = [
     alt: "Matrix-Cam Icon",
     image: AsciiVideoScreenshot,
     background: "bg-purple-500",
+    description: "A webcam that renders video as ASCII.",
   },
   {
     name: "dread-ui",
@@ -57,7 +62,8 @@ export const apps = [
     alt: "dread ui",
     image: "",
     background: "bg-pink-500",
+    description: "A simple, elegant, and modern web browser.",
   },
 ] as const;
 
-export const appIconSize = 48;
+export const appIconSize = 36;
