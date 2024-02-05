@@ -59,3 +59,5 @@ export const apps = [
     background: "bg-pink-500",
   },
 ] as const;
+
+export const appIconSize = 48;
