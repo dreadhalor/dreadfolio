@@ -127,9 +127,11 @@ const AppSpace = ({
             className="m-auto max-h-full max-w-full rounded-lg"
             src={image}
             alt={alt}
-            style={{
-              transform: `rotateX(${-(scrollYProgress.get() - 0.5) * 90}deg)`,
-            }}
+            style={
+              {
+                // transform: `rotateX(${-(scrollYProgress.get() - 0.5) * 90}deg)`,
+              }
+            }
           />
         ) : (
           // </div>
