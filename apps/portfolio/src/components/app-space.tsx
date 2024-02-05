@@ -1,8 +1,9 @@
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { appIconSize, apps } from "../constants";
-import { AppIcon } from "./app-icon";
+// import { AppIcon } from "./app-icon";
 import { cn } from "@repo/utils";
 import { useRef, useState } from "react";
+import { useApp } from "../providers/app-provider";
 type AppSpaceProps = {
   onClick: () => void;
   className?: string;
@@ -12,7 +13,7 @@ type AppSpaceProps = {
 };
 const AppSpace = ({
   app,
-  onClick,
+  // onClick,
   className,
   style,
   parentRef,
@@ -23,6 +24,7 @@ const AppSpace = ({
     target: ref,
     container: parentRef,
     offset: ["end start", "start end"],
+    layoutEffect: false,
   });
   const o_1 = 100;
   const o_2 = 0;
@@ -64,25 +66,29 @@ const AppSpace = ({
     bottomLeft: { x: 0, y: 0 },
   });
   const descriptionWidth = 300;
-  const clientHeight = ref.current?.clientHeight ?? 0;
-  const clientWidth = ref.current?.clientWidth ?? 0;
-  const cubeSize = Math.min(clientHeight, clientWidth);
+  const { app: loadedApp, setApp } = useApp();
 
   return (
     <motion.div
       ref={ref}
       id={`${name}-space`}
       className={cn(
-        "relative flex h-full w-full shrink-0 items-center justify-center overflow-visible p-0",
+        "relative flex h-full w-full shrink-0 items-center justify-center overflow-visible p-0 duration-300 ease-in-out",
         className,
       )}
       style={{
         scrollSnapAlign: "center",
         clipPath: `polygon(${coords.topLeft.x}% ${coords.topLeft.y}%, ${coords.topRight.x}% ${coords.topRight.y}%, ${coords.bottomRight.x}% ${coords.bottomRight.y}%, ${coords.bottomLeft.x}% ${coords.bottomLeft.y}%)`,
         transformStyle: "preserve-3d",
+        transitionProperty: "transform, filter, opacity",
+        opacity: loadedApp ? 0 : 1,
+        filter: loadedApp ? "blur(10px)" : "none",
+        scale: loadedApp ? 1.2 : 1,
+        pointerEvents: loadedApp ? "none" : "auto",
         ...style,
       }}
     >
+      <canvas className="absolute" />
       {/* create a polygon that is a parallelogram that connects the top-left corner to the bottom-right corner  */}
       {/* <div
         className={cn(
@@ -112,26 +118,28 @@ const AppSpace = ({
         >
           <h1 className="text-2xl font-bold">{name}</h1>
           {description}
+          <button
+            className="rounded-md border-2 p-2"
+            onClick={() =>
+              setApp(
+                process.env.NODE_ENV === "production"
+                  ? app.url
+                  : "https://google.com",
+              )
+            }
+          >
+            Start {app.name}
+          </button>
         </motion.div>
       </div>
 
-      <div
-        className="relative flex h-full flex-1 items-center justify-center p-4 md:p-8"
-        style={{
-          perspective: 1000,
-        }}
-      >
+      <div className="relative flex h-full flex-1 items-center justify-center p-4 md:p-8">
         {image ? (
           // <div className="z-10 flex h-full w-full items-center justify-center rounded-lg p-8">
           <img
             className="m-auto max-h-full max-w-full rounded-lg"
             src={image}
             alt={alt}
-            style={
-              {
-                // transform: `rotateX(${-(scrollYProgress.get() - 0.5) * 90}deg)`,
-              }
-            }
           />
         ) : (
           // </div>

@@ -1,7 +1,6 @@
 import { cn } from "@repo/utils";
 import { apps } from "../constants";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 
 type AppIconProps = {
   app: (typeof apps)[number];
