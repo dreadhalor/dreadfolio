@@ -1,6 +1,2 @@
-export default {
-  plugins: {
-    tailwindcss: { config: "../../tailwind.config.js" },
-    autoprefixer: {},
-  },
-};
+import config from "@repo/config/postcss.config.js";
+export default config;
