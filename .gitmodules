@@ -10,3 +10,6 @@
 [submodule "apps/ascii-video"]
 	path = apps/ascii-video
 	url = https://github.com/Dreadhalor/ascii-video.git
+[submodule "packages/dread-ui"]
+	path = packages/dread-ui
+	url = https://github.com/Dreadhalor/dread-ui
