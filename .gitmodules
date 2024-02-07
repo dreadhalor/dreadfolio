@@ -13,3 +13,6 @@
 [submodule "packages/dread-ui"]
 	path = packages/dread-ui
 	url = https://github.com/Dreadhalor/dread-ui
+[submodule "apps/shareme"]
+	path = apps/shareme
+	url = https://github.com/Dreadhalor/shareme
