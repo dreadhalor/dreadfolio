@@ -16,3 +16,6 @@
 [submodule "apps/shareme"]
 	path = apps/shareme
 	url = https://github.com/Dreadhalor/shareme
+[submodule "apps/portfolio"]
+	path = apps/portfolio
+	url = https://github.com/Dreadhalor/portfolio
