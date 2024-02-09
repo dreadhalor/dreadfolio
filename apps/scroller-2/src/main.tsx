@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app';
+import 'dread-ui/style.scss';
 import './index.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

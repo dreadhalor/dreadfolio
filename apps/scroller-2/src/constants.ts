@@ -70,6 +70,8 @@ export const appIconSizeSmall = 30;
 export const appIconSizeLarge = 80;
 export const appIconJumpTopBound = 160;
 export const perspective = 500;
+export const appImageSize = 400;
+export const appSnapSpaceSize = 50;
 
 export const navbarMargin = 10; // margin between navbar & the side of the screen
 export const getK = (iconSize: number, parentWidth: number) => {

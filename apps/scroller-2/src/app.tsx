@@ -1,129 +1,15 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import './app.scss';
-import {
-  appIconSizeLarge,
-  appIconSizeSmall,
-  getK,
-  perspective,
-} from './constants';
+import { appIconSizeSmall, appSnapSpaceSize, perspective } from './constants';
 import { throttle } from 'lodash';
-import { motion, Variants } from 'framer-motion';
-
-const appImageSize = 250;
-const appSnapSpaceSize = 100;
-
-type AppIconProps = {
-  index: number;
-  offset: number;
-  isOpen?: boolean;
-  parentRef?: React.RefObject<HTMLDivElement>;
-};
-const AppIcon = ({ index, offset, isOpen, parentRef }: AppIconProps) => {
-  const [size, setSize] = useState(appIconSizeSmall);
-  const [animating, setAnimating] = useState(false);
-  const [open2, setOpen2] = useState(false);
-
-  useLayoutEffect(() => {
-    if (isOpen) {
-      setOpen2(() => true);
-    } else {
-      setOpen2(() => false);
-    }
-    setAnimating(() => true);
-  }, [isOpen]);
-
-  const percent = offset / appSnapSpaceSize;
-  // const newOffset = percent * size;
-
-  const getParentHeight = () => {
-    return parentRef?.current?.offsetHeight ?? 0;
-  };
-  const getParentWidth = () => {
-    return parentRef?.current?.offsetWidth ?? 0;
-  };
-
-  const getScrollingYOffset = () => {
-    return (getParentHeight() / 100) * 12;
-  };
-  const getTranslateZ = (dist: number, iconSize: number) => {
-    return -getK(iconSize, getParentWidth()) * Math.pow(dist, 2);
-  };
-
-  // const zeroX = getParentWidth() / 2 - size / 2;
-  // const iconX = zeroX + index * size - newOffset;
-  // const dist = Math.abs(iconX - zeroX);
-
-  const iconVariants: Variants = {
-    false: {
-      width: appIconSizeSmall,
-      height: appIconSizeSmall,
-      bottom: 0,
-      left: `calc(50% - ${appIconSizeSmall / 2}px + ${
-        appIconSizeSmall * index
-      }px - ${percent * appIconSizeSmall}px)`,
-      transform: `translate3d(0px, 0px, 0px)`,
-      transition: animating ? { duration: 0.3 } : { duration: 0 },
-    },
-    true: {
-      width: appIconSizeLarge,
-      height: appIconSizeLarge,
-      bottom: size / 2 + getScrollingYOffset(),
-      left: `calc(50% - ${appIconSizeLarge / 2}px + ${
-        appIconSizeLarge * index
-      }px - ${percent * appIconSizeLarge}px)`,
-      transform: `translate3d(0px, 0px, ${getTranslateZ(
-        Math.abs((index - percent) * appIconSizeLarge),
-        appIconSizeLarge,
-      )}px)`,
-      transition: animating ? { duration: 0.3 } : { duration: 0 },
-    },
-  };
-
-  return (
-    <motion.div
-      className='absolute flex items-center justify-center rounded-lg border-4 border-white'
-      style={{
-        willChange: 'transform', // Hint to browsers for optimizations
-      }}
-      variants={iconVariants}
-      animate={open2 ? 'true' : 'false'}
-      onAnimationComplete={() => {
-        setAnimating(() => false);
-      }}
-    >
-      {index}
-    </motion.div>
-  );
-};
-
-type AppImageProps = {
-  index: number;
-  offset: number;
-};
-const AppImage = ({ index, offset }: AppImageProps) => {
-  const percent = offset / appSnapSpaceSize;
-  const newOffset = percent * appImageSize;
-  return (
-    <div
-      id={`image-${index}`}
-      className='absolute z-10 flex h-full w-full min-w-0 transform-gpu items-center justify-center rounded-lg border'
-      style={{
-        width: appImageSize,
-        left: `calc(50% - ${appImageSize / 2 - index * appImageSize}px)`,
-        transform: `translate3d(${-newOffset}px, 0, 0)`,
-        willChange: 'transform',
-      }}
-    >
-      {index}
-    </div>
-  );
-};
+import { AppIcon } from './components/app-icon';
+import { AppImage } from './components/app-image';
 
 function App() {
   const items = Array(20).fill(0);
   const ref = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleScroll = throttle(() => {
     const _offset = ref.current?.scrollLeft ?? 0;
@@ -142,7 +28,7 @@ function App() {
       onScroll={handleScroll}
     >
       <button
-        className='fixed left-1/2 top-1/2 -translate-x-1/2'
+        className='fixed left-1/2 top-1/2 z-10 -translate-x-1/2'
         onClick={() => setIsOpen((prev) => !prev)}
       >
         Toggle transform
@@ -156,7 +42,7 @@ function App() {
       ))}
       <div className='pointer-events-none fixed inset-0 overflow-hidden'>
         {items.map((_, index) => (
-          <AppImage key={index} index={index} offset={offset} />
+          <AppImage key={index} index={index} offset={offset} parentRef={ref} />
         ))}
         <div
           className='absolute bottom-0 left-0 right-0 overflow-visible'
