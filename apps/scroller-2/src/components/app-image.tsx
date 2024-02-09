@@ -1,13 +1,12 @@
-import { appIconSizeLarge, appSnapSpaceSize } from '../constants';
+import { appIconSizeLarge } from '../constants';
 
 type AppImageProps = {
   index: number;
-  offset: number;
+  scrollIndex: number;
   parentRef?: React.RefObject<HTMLDivElement>;
 };
-const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
-  const scrollIndex = offset / appSnapSpaceSize;
-
+const AppImage = ({ index, scrollIndex, parentRef }: AppImageProps) => {
+  const normalizedX = index - scrollIndex;
   const getParentHeight = () => {
     return parentRef?.current?.offsetHeight ?? 0;
   };
@@ -22,7 +21,7 @@ const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
   const marginX = 20;
   const marginY = 15;
   const getBoxWidth = () => {
-    return document.body.offsetWidth;
+    return getParentWidth();
   };
   const getBoxHeight = () => {
     const iconBottom = getIconBottom();
@@ -47,18 +46,19 @@ const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
   };
 
   const newOffset = scrollIndex * getWidthWithMargin();
-  const dist = Math.abs((index - scrollIndex) * getWidthWithMargin());
+  const dist = Math.abs(normalizedX * getWidthWithMargin());
 
   const getBottom = () => {
     const iconTop = getIconBottom() + appIconSizeLarge; // height of top of the icon
     const unadjustedBottom = iconTop + marginY; // bottom of the space available for the description
-    const adjustment = Math.pow(Math.abs(dist / 4), 2) / 300;
+    const adjustment =
+      Math.pow(Math.abs((dist * getWidth()) / getParentWidth() / 4), 2) / 300;
     return unadjustedBottom + adjustment;
   };
 
   return (
     <div
-      className='absolute flex items-center justify-center rounded-md border-8'
+      className='absolute flex items-center justify-center rounded-md border-8 transition-opacity duration-200'
       style={{
         width: getHeight(),
         height: getWidth(),
@@ -66,6 +66,7 @@ const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
         bottom: getBottom(),
         left: `calc(50% - ${getWidth() / 2 - index * getWidthWithMargin()}px)`,
         transform: `translate3d(${-newOffset}px, 0, 0)`,
+        opacity: Math.abs(normalizedX) > 1.1 ? 0 : 1,
       }}
     >
       {index}

@@ -72,7 +72,7 @@ export const appIconJumpTopBound = 160;
 export const selectedAppIconMarginLarge = 20;
 export const selectedAppIconMarginSmall = 8;
 export const perspective = 500;
-export const appSnapSpaceSize = 50;
+export const appSnapSpaceSize = 80;
 
 export const navbarMargin = 10; // margin between navbar & the side of the screen
 // very mathy value to create the navbar margin via perspective

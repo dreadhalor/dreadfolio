@@ -1,15 +1,16 @@
 import { useRef, useState } from 'react';
-import './app.scss';
 import { appIconSizeSmall, appSnapSpaceSize, perspective } from './constants';
 import { throttle } from 'lodash';
 import { AppIcon } from './components/app-icon';
 import { AppImage } from './components/app-image';
 import { cn } from '@repo/utils';
+import './app.scss';
 
 function App() {
   const items = Array(20).fill(0);
   const ref = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
+  const scrollIndex = offset / appSnapSpaceSize;
   const [isOpen, setIsOpen] = useState(true);
 
   const handleScroll = throttle(() => {
@@ -46,7 +47,12 @@ function App() {
       ))}
       <div className='pointer-events-none fixed inset-0 overflow-hidden'>
         {items.map((_, index) => (
-          <AppImage key={index} index={index} offset={offset} parentRef={ref} />
+          <AppImage
+            key={index}
+            index={index}
+            scrollIndex={scrollIndex}
+            parentRef={ref}
+          />
         ))}
         <div
           className={cn(
@@ -66,7 +72,7 @@ function App() {
             <AppIcon
               key={index}
               index={index}
-              offset={offset}
+              scrollIndex={scrollIndex}
               parentRef={ref}
               isOpen={isOpen}
             />

@@ -3,34 +3,31 @@ import { useLayoutEffect, useState } from 'react';
 import {
   appIconSizeLarge,
   appIconSizeSmall,
-  appSnapSpaceSize,
   getK,
   selectedAppIconMarginLarge,
   selectedAppIconMarginSmall,
 } from '../constants';
 type AppIconProps = {
   index: number;
-  offset: number;
+  scrollIndex: number;
   isOpen?: boolean;
   parentRef?: React.RefObject<HTMLDivElement>;
 };
 const AppIcon = ({
   index,
-  offset,
+  scrollIndex,
   isOpen = false,
   parentRef,
 }: AppIconProps) => {
   const [animating, setAnimating] = useState(false);
   const [open2, setOpen2] = useState(false);
+  const normalizedX = index - scrollIndex;
 
   useLayoutEffect(() => {
     // we need to set open internally to trigger the animation
     setOpen2(() => isOpen);
     setAnimating(() => true);
   }, [isOpen]);
-
-  const scrollIndex = offset / appSnapSpaceSize;
-  // const newOffset = percent * size;
 
   const getParentHeight = () => {
     return parentRef?.current?.offsetHeight ?? 0;
@@ -46,16 +43,14 @@ const AppIcon = ({
     return -getK(iconSize, getParentWidth()) * Math.pow(dist, 2);
   };
   const getZIndex = () => {
-    const dist = Math.abs((index - scrollIndex) * appIconSizeLarge);
+    const dist = Math.abs(normalizedX * appIconSizeLarge);
     return -Math.round(dist);
   };
 
-  const getX = () => index - scrollIndex;
   const getMarginOffset = (margin: number) => {
-    const x = getX();
-    if (x > 0.5) return margin;
-    if (x < -0.5) return -margin;
-    return margin * 2 * x;
+    if (normalizedX > 0.5) return margin;
+    if (normalizedX < -0.5) return -margin;
+    return margin * 2 * normalizedX;
   };
 
   const iconVariants: Variants = {
@@ -64,7 +59,7 @@ const AppIcon = ({
       height: appIconSizeSmall,
       bottom: 0,
       left: `calc(50% + ${
-        (index - scrollIndex - 0.5) * appIconSizeSmall
+        (normalizedX - 0.5) * appIconSizeSmall
       }px + ${getMarginOffset(selectedAppIconMarginSmall)}px)`,
       transform: `translate3d(0px, 0px, 0px)`,
       transition: { duration: animating ? 0.2 : 0 },
@@ -74,10 +69,10 @@ const AppIcon = ({
       height: appIconSizeLarge,
       bottom: getIconBottom(),
       left: `calc(50% + ${
-        (index - scrollIndex - 0.5) * appIconSizeLarge
+        (normalizedX - 0.5) * appIconSizeLarge
       }px + ${getMarginOffset(selectedAppIconMarginLarge)}px)`,
       transform: `translate3d(0px, 0px, ${getTranslateZ(
-        Math.abs((index - scrollIndex) * appIconSizeLarge),
+        Math.abs(normalizedX * appIconSizeLarge),
         appIconSizeLarge,
       )}px)`,
       transition: { duration: animating ? 0.2 : 0 },
