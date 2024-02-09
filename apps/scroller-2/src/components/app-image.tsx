@@ -7,7 +7,6 @@ type AppImageProps = {
 };
 const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
   const percent = offset / appSnapSpaceSize;
-  const newOffset = percent * appImageSize;
 
   const getParentHeight = () => {
     return parentRef?.current?.offsetHeight ?? 0;
@@ -40,8 +39,11 @@ const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
     return min * description_scale;
   };
 
-  const zeroX = (getParentWidth() - appImageSize) / 2;
-  const iconX = zeroX + index * appImageSize - newOffset;
+  const newOffset = percent * getDescriptionHeight();
+  // const newOffset = 0;
+
+  const zeroX = (getParentWidth() - getDescriptionHeight()) / 2;
+  const iconX = zeroX + index * getDescriptionHeight() - newOffset;
   const dist = Math.abs(iconX - zeroX);
 
   const getDescriptionBottom = () => {
@@ -57,28 +59,19 @@ const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
 
   return (
     <div
-      id={`image-${index}`}
-      className='absolute z-10 flex h-full w-full min-w-0 transform-gpu items-center justify-center border-0'
+      className='absolute flex items-center justify-center rounded-md border-8'
       style={{
-        width: appImageSize,
-        left: `calc(50% - ${appImageSize / 2 - index * appImageSize}px)`,
+        width: getDescriptionHeight(),
+        height: getDescriptionHeight(),
+        background: `hsl(${(index * 360) / 20}, 100%, 50%)`,
+        bottom: getDescriptionBottom(),
+        left: `calc(50% - ${
+          getDescriptionHeight() / 2 - index * getDescriptionHeight()
+        }px)`,
         transform: `translate3d(${-newOffset}px, 0, 0)`,
-        willChange: 'transform',
       }}
     >
-      <div className='relative flex h-full w-full items-center justify-center'>
-        <div
-          className='absolute flex items-center justify-center rounded-md border-8'
-          style={{
-            width: getDescriptionHeight(),
-            height: getDescriptionHeight(),
-            background: `hsl(${(index * 360) / 20}, 100%, 50%)`,
-            bottom: getDescriptionBottom(),
-          }}
-        >
-          {index}
-        </div>
-      </div>
+      {index}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { appIconSizeSmall, appSnapSpaceSize, perspective } from './constants';
 import { throttle } from 'lodash';
 import { AppIcon } from './components/app-icon';
 import { AppImage } from './components/app-image';
+import { cn } from '@repo/utils';
 
 function App() {
   const items = Array(20).fill(0);
@@ -27,12 +28,14 @@ function App() {
       }}
       onScroll={handleScroll}
     >
-      <button
-        className='fixed left-1/2 top-1/2 z-10 -translate-x-1/2'
-        onClick={() => setIsOpen((prev) => !prev)}
-      >
-        Toggle transform
-      </button>
+      {isOpen && (
+        <button
+          className='fixed bottom-4 left-1/2 h-12 w-12 -translate-x-1/2 rounded-full border'
+          onClick={() => setIsOpen(false)}
+        >
+          X
+        </button>
+      )}
       {items.map((_, index) => (
         <div
           key={index}
@@ -45,10 +48,17 @@ function App() {
           <AppImage key={index} index={index} offset={offset} parentRef={ref} />
         ))}
         <div
-          className='absolute bottom-0 left-0 right-0 overflow-visible'
+          className={cn(
+            'absolute bottom-0 left-0 right-0 flex overflow-visible',
+            isOpen ? 'pointer-events-none' : 'pointer-events-auto',
+          )}
           style={{
             perspective,
             height: appIconSizeSmall,
+          }}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            setIsOpen(true);
           }}
         >
           {items.map((_, index) => (
