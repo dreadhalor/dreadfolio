@@ -5,6 +5,8 @@ import {
   appIconSizeSmall,
   appSnapSpaceSize,
   getK,
+  selectedAppIconMarginLarge,
+  selectedAppIconMarginSmall,
 } from '../constants';
 type AppIconProps = {
   index: number;
@@ -27,7 +29,7 @@ const AppIcon = ({
     setAnimating(() => true);
   }, [isOpen]);
 
-  const percent = offset / appSnapSpaceSize;
+  const scrollIndex = offset / appSnapSpaceSize;
   // const newOffset = percent * size;
 
   const getParentHeight = () => {
@@ -43,42 +45,52 @@ const AppIcon = ({
   const getTranslateZ = (dist: number, iconSize: number) => {
     return -getK(iconSize, getParentWidth()) * Math.pow(dist, 2);
   };
+  const getZIndex = () => {
+    const dist = Math.abs((index - scrollIndex) * appIconSizeLarge);
+    return -Math.round(dist);
+  };
 
-  // const zeroX = getParentWidth() / 2 - size / 2;
-  // const iconX = zeroX + index * size - newOffset;
-  // const dist = Math.abs(iconX - zeroX);
+  const getX = () => index - scrollIndex;
+  const getMarginOffset = (margin: number) => {
+    const x = getX();
+    if (x > 0.5) return margin;
+    if (x < -0.5) return -margin;
+    return margin * 2 * x;
+  };
 
   const iconVariants: Variants = {
     false: {
       width: appIconSizeSmall,
       height: appIconSizeSmall,
       bottom: 0,
-      left: `calc(50% - ${appIconSizeSmall / 2}px + ${
-        appIconSizeSmall * index
-      }px - ${percent * appIconSizeSmall}px)`,
+      left: `calc(50% + ${
+        (index - scrollIndex - 0.5) * appIconSizeSmall
+      }px + ${getMarginOffset(selectedAppIconMarginSmall)}px)`,
       transform: `translate3d(0px, 0px, 0px)`,
-      transition: { duration: animating ? 0.3 : 0 },
+      transition: { duration: animating ? 0.2 : 0 },
     },
     true: {
       width: appIconSizeLarge,
       height: appIconSizeLarge,
       bottom: getIconBottom(),
-      left: `calc(50% - ${appIconSizeLarge / 2}px + ${
-        appIconSizeLarge * index
-      }px - ${percent * appIconSizeLarge}px)`,
+      left: `calc(50% + ${
+        (index - scrollIndex - 0.5) * appIconSizeLarge
+      }px + ${getMarginOffset(selectedAppIconMarginLarge)}px)`,
       transform: `translate3d(0px, 0px, ${getTranslateZ(
-        Math.abs((index - percent) * appIconSizeLarge),
+        Math.abs((index - scrollIndex) * appIconSizeLarge),
         appIconSizeLarge,
       )}px)`,
-      transition: { duration: animating ? 0.3 : 0 },
+      transition: { duration: animating ? 0.2 : 0 },
     },
   };
 
   return (
     <motion.div
-      className='absolute flex items-center justify-center rounded-sm border-4 border-white'
+      className='absolute flex items-center justify-center rounded-sm border border-white'
       style={{
+        background: `hsl(${(index * 360) / 20}, 100%, 50%)`,
         willChange: 'transform', // Hint to browsers for optimizations
+        zIndex: getZIndex(),
       }}
       variants={iconVariants}
       animate={open2 ? 'true' : 'false'}

@@ -1,4 +1,4 @@
-import { appIconSizeLarge, appImageSize, appSnapSpaceSize } from '../constants';
+import { appIconSizeLarge, appSnapSpaceSize } from '../constants';
 
 type AppImageProps = {
   index: number;
@@ -6,7 +6,7 @@ type AppImageProps = {
   parentRef?: React.RefObject<HTMLDivElement>;
 };
 const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
-  const percent = offset / appSnapSpaceSize;
+  const scrollIndex = offset / appSnapSpaceSize;
 
   const getParentHeight = () => {
     return parentRef?.current?.offsetHeight ?? 0;
@@ -19,55 +19,52 @@ const AppImage = ({ index, offset, parentRef }: AppImageProps) => {
     return (getParentHeight() / 100) * 12;
   };
 
-  const getAvailableDescriptionWidth = () => {
+  const marginX = 20;
+  const marginY = 15;
+  const getBoxWidth = () => {
     return document.body.offsetWidth;
   };
-  const getAvailableDescriptionHeight = () => {
-    const icon_bottom = getIconBottom();
-    const icon_height = appIconSizeLarge;
-    const icon_space = icon_bottom + icon_height;
-    const available_height = getParentHeight() - icon_space;
-    return available_height;
+  const getBoxHeight = () => {
+    const iconBottom = getIconBottom();
+    const iconHeight = appIconSizeLarge;
+    const iconSpace = iconBottom + iconHeight;
+    const result = getParentHeight() - iconSpace;
+    return result;
   };
 
-  const description_scale = 0.8;
-  const getDescriptionHeight = () => {
+  const getHeight = () => {
     const min = Math.min(
-      getAvailableDescriptionHeight(),
-      getAvailableDescriptionWidth(),
+      getBoxHeight() - 2 * marginY,
+      getBoxWidth() - 2 * marginX,
     );
-    return min * description_scale;
+    return min;
+  };
+  const getWidth = () => {
+    return getHeight();
+  };
+  const getWidthWithMargin = () => {
+    return getWidth() + 2 * marginX;
   };
 
-  const newOffset = percent * getDescriptionHeight();
-  // const newOffset = 0;
+  const newOffset = scrollIndex * getWidthWithMargin();
+  const dist = Math.abs((index - scrollIndex) * getWidthWithMargin());
 
-  const zeroX = (getParentWidth() - getDescriptionHeight()) / 2;
-  const iconX = zeroX + index * getDescriptionHeight() - newOffset;
-  const dist = Math.abs(iconX - zeroX);
-
-  const getDescriptionBottom = () => {
-    const available_height = getAvailableDescriptionHeight(); // height of the space above the icon
-    const remaining_to_center = (available_height - getDescriptionHeight()) / 2; // height to center the bottom of the description
-    const icon_top = getIconBottom() + appIconSizeLarge; // height of top of the icon
-    const gap = Math.max(15, remaining_to_center * 0.3); // gap between the icon and the description
-    const bottom_of_usable_space = icon_top + gap; // bottom of the space available for the description
+  const getBottom = () => {
+    const iconTop = getIconBottom() + appIconSizeLarge; // height of top of the icon
+    const unadjustedBottom = iconTop + marginY; // bottom of the space available for the description
     const adjustment = Math.pow(Math.abs(dist / 4), 2) / 300;
-    // return bottom_of_usable_space;
-    return bottom_of_usable_space + adjustment;
+    return unadjustedBottom + adjustment;
   };
 
   return (
     <div
       className='absolute flex items-center justify-center rounded-md border-8'
       style={{
-        width: getDescriptionHeight(),
-        height: getDescriptionHeight(),
+        width: getHeight(),
+        height: getWidth(),
         background: `hsl(${(index * 360) / 20}, 100%, 50%)`,
-        bottom: getDescriptionBottom(),
-        left: `calc(50% - ${
-          getDescriptionHeight() / 2 - index * getDescriptionHeight()
-        }px)`,
+        bottom: getBottom(),
+        left: `calc(50% - ${getWidth() / 2 - index * getWidthWithMargin()}px)`,
         transform: `translate3d(${-newOffset}px, 0, 0)`,
       }}
     >

@@ -28,6 +28,7 @@ function App() {
       }}
       onScroll={handleScroll}
     >
+      <div className='fixed left-1/2 z-10 h-full w-px bg-white'></div>
       {isOpen && (
         <button
           className='fixed bottom-4 left-1/2 h-12 w-12 -translate-x-1/2 rounded-full border'

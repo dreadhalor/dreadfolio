@@ -69,14 +69,15 @@ export const apps = [
 export const appIconSizeSmall = 30;
 export const appIconSizeLarge = 80;
 export const appIconJumpTopBound = 160;
+export const selectedAppIconMarginLarge = 20;
+export const selectedAppIconMarginSmall = 8;
 export const perspective = 500;
-export const appImageSize = 400;
 export const appSnapSpaceSize = 50;
 
 export const navbarMargin = 10; // margin between navbar & the side of the screen
+// very mathy value to create the navbar margin via perspective
 export const getK = (iconSize: number, parentWidth: number) => {
-  // very mathy value to create the navbar margin via perspective
-  const excess = navbarMargin + iconSize;
+  const excess = navbarMargin + iconSize + selectedAppIconMarginLarge;
   const k = perspective / Math.pow(parentWidth - excess, 2);
   return k;
 };
