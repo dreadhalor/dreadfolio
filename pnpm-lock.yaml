@@ -58,7 +58,7 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
       turbo:
-        specifier: latest
+        specifier: ^1.12.2
         version: 1.12.2
       vite-tsconfig-paths:
         specifier: ^4.3.1
