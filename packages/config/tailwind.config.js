@@ -7,6 +7,7 @@ export default {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
     '../../packages/dread-ui/**/*.{js,ts,jsx,tsx}', // Add the dread-ui package
+    '../../../packages/dread-ui/**/*.{js,ts,jsx,tsx}', // Add the dread-ui package for nested frontend/backend apps
   ],
   theme: {
     container: {
