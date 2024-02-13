@@ -52,6 +52,7 @@ function App() {
             index={index}
             scrollIndex={scrollIndex}
             parentRef={ref}
+            isOpen={isOpen}
           />
         ))}
         <div

@@ -1,11 +1,28 @@
+import { useLayoutEffect, useState } from 'react';
 import { appIconSizeLarge } from '../constants';
+import { Variants, motion } from 'framer-motion';
 
 type AppImageProps = {
   index: number;
   scrollIndex: number;
   parentRef?: React.RefObject<HTMLDivElement>;
+  isOpen?: boolean;
 };
-const AppImage = ({ index, scrollIndex, parentRef }: AppImageProps) => {
+const AppImage = ({
+  index,
+  scrollIndex,
+  parentRef,
+  isOpen = false,
+}: AppImageProps) => {
+  const [animating, setAnimating] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  useLayoutEffect(() => {
+    // we need to set open internally to trigger the animation
+    setInternalOpen(() => isOpen);
+    setAnimating(() => true);
+  }, [isOpen]);
+
   const normalizedX = index - scrollIndex;
   const getParentHeight = () => {
     return parentRef?.current?.offsetHeight ?? 0;
@@ -56,21 +73,43 @@ const AppImage = ({ index, scrollIndex, parentRef }: AppImageProps) => {
     return unadjustedBottom + adjustment;
   };
 
+  const variants: Variants = {
+    false: {
+      bottom: 0,
+      opacity: 0,
+    },
+    true: {
+      bottom: getBottom(),
+      opacity: 1,
+    },
+  };
+
   return (
-    <div
-      className='absolute flex items-center justify-center rounded-md border-8 transition-opacity duration-200'
+    <motion.div
+      className='absolute'
       style={{
         width: getHeight(),
         height: getWidth(),
-        background: `hsl(${(index * 360) / 20}, 100%, 50%)`,
-        bottom: getBottom(),
         left: `calc(50% - ${getWidth() / 2 - index * getWidthWithMargin()}px)`,
         transform: `translate3d(${-newOffset}px, 0, 0)`,
-        opacity: Math.abs(normalizedX) > 1.1 ? 0 : 1,
+      }}
+      variants={variants}
+      transition={{ duration: animating ? 0.2 : 0 }}
+      animate={internalOpen ? 'true' : 'false'}
+      onAnimationComplete={() => {
+        setAnimating(() => false);
       }}
     >
-      {index}
-    </div>
+      <div
+        className='flex h-full w-full items-center justify-center rounded-md border-8 transition-opacity duration-200'
+        style={{
+          background: `hsl(${(index * 360) / 20}, 100%, 30%)`,
+          opacity: Math.abs(normalizedX) > 1.1 ? 0 : 1,
+        }}
+      >
+        {index}
+      </div>
+    </motion.div>
   );
 };
 

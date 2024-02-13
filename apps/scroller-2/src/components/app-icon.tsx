@@ -20,12 +20,12 @@ const AppIcon = ({
   parentRef,
 }: AppIconProps) => {
   const [animating, setAnimating] = useState(false);
-  const [open2, setOpen2] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const normalizedX = index - scrollIndex;
 
   useLayoutEffect(() => {
     // we need to set open internally to trigger the animation
-    setOpen2(() => isOpen);
+    setInternalOpen(() => isOpen);
     setAnimating(() => true);
   }, [isOpen]);
 
@@ -53,7 +53,7 @@ const AppIcon = ({
     return margin * 2 * normalizedX;
   };
 
-  const iconVariants: Variants = {
+  const variants: Variants = {
     false: {
       width: appIconSizeSmall,
       height: appIconSizeSmall,
@@ -62,7 +62,6 @@ const AppIcon = ({
         (normalizedX - 0.5) * appIconSizeSmall
       }px + ${getMarginOffset(selectedAppIconMarginSmall)}px)`,
       transform: `translate3d(0px, 0px, 0px)`,
-      transition: { duration: animating ? 0.2 : 0 },
     },
     true: {
       width: appIconSizeLarge,
@@ -75,7 +74,6 @@ const AppIcon = ({
         Math.abs(normalizedX * appIconSizeLarge),
         appIconSizeLarge,
       )}px)`,
-      transition: { duration: animating ? 0.2 : 0 },
     },
   };
 
@@ -87,8 +85,9 @@ const AppIcon = ({
         willChange: 'transform', // Hint to browsers for optimizations
         zIndex: getZIndex(),
       }}
-      variants={iconVariants}
-      animate={open2 ? 'true' : 'false'}
+      variants={variants}
+      animate={internalOpen ? 'true' : 'false'}
+      transition={{ duration: animating ? 0.2 : 0 }}
       onAnimationComplete={() => {
         setAnimating(() => false);
       }}
