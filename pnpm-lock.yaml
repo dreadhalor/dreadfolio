@@ -214,6 +214,9 @@ importers:
       '@repo/su-done-ku-backend':
         specifier: workspace:*
         version: link:../../su-done-ku/backend
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.5
       express:
         specifier: ^4.18.2
         version: 4.18.2
