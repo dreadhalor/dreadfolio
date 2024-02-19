@@ -22,3 +22,6 @@
 [submodule "apps/su-done-ku"]
 	path = apps/su-done-ku
 	url = https://github.com/Dreadhalor/su-done-ku
+[submodule "apps/gifster"]
+	path = apps/gifster
+	url = https://github.com/dreadhalor/gifster
