@@ -3,3 +3,4 @@ export { default as MinesweeperScreenshot } from './minesweeper.png';
 export { default as PathfinderVisualizerScreenshot } from './pathfinder-visualizer.png';
 export { default as AsciiVideoScreenshot } from './ascii-video.jpg';
 export { default as ShareMeScreenshot } from './shareme.png';
+export { default as SuDoneKuScreenshot } from './su-done-ku.png';
