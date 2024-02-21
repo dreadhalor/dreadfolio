@@ -2,7 +2,7 @@ import P5 from 'p5';
 
 // this has issues with the mouse position because perspective isn't being taken into account
 // just ignore it yo
-export const CubesSketch = (p5: P5) => {
+export const Cubes = (p5: P5) => {
   const spacing = 100;
   const boxSize = 50;
   const margin = 0;
