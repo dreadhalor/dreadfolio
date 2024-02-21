@@ -1,31 +1,25 @@
-import { squareSize } from '..';
+import { circleMargin, squareSize } from '..';
 import { Corners } from './classes/point';
 
 type ZeroOneMap = [0 | 1, 0 | 1, 0 | 1, 0 | 1];
 
-const mapValueTo = (
+export const mapValueTo = (
   value: number,
   oldMin: number,
   oldMax: number,
   newMin: number,
   newMax: number,
 ) => {
+  if (oldMin < oldMax != newMin < newMax)
+    return ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
   return ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin;
 };
 const mapPoints = (corners: Corners) => {
-  return corners.map((point) => point.value) as ZeroOneMap;
-};
-
-const mapPoints2 = (corners: Corners) => {
-  return corners.map((point) => {
-    return mapValueTo(point.value, 0, 25, 0, 1);
-  }) as [number, number, number, number];
+  return corners.map((point) => (point.value >= 1 ? 1 : 0)) as ZeroOneMap;
 };
 
 const getState = (corners: Corners) => {
-  const [tl, tr, br, bl] = mapPoints2(corners).map((v) =>
-    v > 1 ? 0 : 1,
-  ) as ZeroOneMap;
+  const [tl, tr, br, bl] = mapPoints(corners);
   return tl * 8 + tr * 4 + br * 2 + bl;
 };
 
@@ -42,10 +36,10 @@ export const getLines = (
     case 2:
       return [
         [
-          x + squareSize / 2,
-          y + squareSize,
           x + squareSize,
           y + squareSize / 2,
+          x + squareSize / 2,
+          y + squareSize,
         ],
       ];
     case 3:
@@ -112,53 +106,143 @@ export const getLinesAveraged = (
   // 1 = bottomLeft, 2 = bottomRight, 4 = topRight, 8 = topLeft
   switch (state) {
     case 1:
-      return [[x, y + squareSize / 2, x + squareSize / 2, y + squareSize]];
+      return [
+        [
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize,
+        ],
+      ];
     case 2:
       return [
         [
-          x + squareSize / 2,
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
           y + squareSize,
           x + squareSize,
-          y + squareSize / 2,
+          y + squareSize * getEdgeAverage(corners, 'right'),
         ],
       ];
     case 3:
-      return [[x, y + squareSize / 2, x + squareSize, y + squareSize / 2]];
-    case 4:
-      return [[x + squareSize / 2, y, x + squareSize, y + squareSize / 2]];
-    case 5:
-      return [
-        [x, y + squareSize / 2, x + squareSize / 2, y + squareSize],
-        [x + squareSize / 2, y, x + squareSize, y + squareSize / 2],
-      ];
-    case 6:
-      return [[x + squareSize / 2, y, x + squareSize / 2, y + squareSize]];
-    case 7:
-      return [[x + squareSize / 2, y, x, y + squareSize / 2]];
-    case 8:
-      return [[x, y + squareSize / 2, x + squareSize / 2, y]];
-    case 9:
-      return [[x + squareSize / 2, y, x + squareSize / 2, y + squareSize]];
-    case 10:
-      return [
-        [x + squareSize / 2, y, x + squareSize, y + squareSize / 2],
-        [x, y + squareSize / 2, x + squareSize / 2, y + squareSize],
-      ];
-    case 11:
-      return [[x + squareSize / 2, y, x + squareSize, y + squareSize / 2]];
-    case 12:
-      return [[x, y + squareSize / 2, x + squareSize, y + squareSize / 2]];
-    case 13:
       return [
         [
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
           x + squareSize,
-          y + squareSize / 2,
-          x + squareSize / 2,
+          y + squareSize * getEdgeAverage(corners, 'right'),
+        ],
+      ];
+    case 4:
+      return [
+        [
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+          x + squareSize,
+          y + squareSize * getEdgeAverage(corners, 'right'),
+        ],
+      ];
+    case 5:
+      return [
+        [
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize,
+        ],
+        [
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+          x + squareSize,
+          y + squareSize * getEdgeAverage(corners, 'right'),
+        ],
+      ];
+    case 6:
+      return [
+        [
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
           y + squareSize,
         ],
       ];
+    case 7:
+      return [
+        [
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
+        ],
+      ];
+    case 8:
+      return [
+        [
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+        ],
+      ];
+    case 9:
+      return [
+        [
+          x - squareSize * getEdgeAverage(corners, 'top'),
+          y,
+          x - squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize,
+        ],
+      ];
+    case 10:
+      return [
+        [
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize,
+          x + squareSize,
+          y + squareSize * getEdgeAverage(corners, 'right'),
+        ],
+        [
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+        ],
+      ];
+    case 11:
+      return [
+        [
+          x + squareSize * getEdgeAverage(corners, 'top'),
+          y,
+          x + squareSize,
+          y + squareSize * getEdgeAverage(corners, 'right'),
+        ],
+      ];
+    case 12:
+      return [
+        [
+          x,
+          y - squareSize * getEdgeAverage(corners, 'left'),
+          x + squareSize,
+          y - squareSize * getEdgeAverage(corners, 'right'),
+        ],
+      ];
+    case 13:
+      return [
+        [
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize,
+          x + squareSize,
+          y + squareSize * getEdgeAverage(corners, 'right'),
+        ],
+      ];
     case 14:
-      return [[x, y + squareSize / 2, x + squareSize / 2, y + squareSize]];
+      return [
+        [
+          x,
+          y + squareSize * getEdgeAverage(corners, 'left'),
+          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize,
+        ],
+      ];
     default:
       return [];
   }

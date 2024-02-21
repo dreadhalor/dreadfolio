@@ -1,5 +1,5 @@
 import P5 from 'p5';
-import { circleRadius } from '../marching-squares';
+import { circleMargin, circleRadius } from '../marching-squares';
 export class Circle {
   p5: P5;
   x: number;
@@ -25,8 +25,12 @@ export class Circle {
   }
 
   draw() {
+    this.p5.push();
     this.p5.stroke(255);
     this.p5.noFill();
     this.p5.ellipse(this.x, this.y, circleRadius * 2);
+    this.p5.stroke(122);
+    this.p5.ellipse(this.x, this.y, (circleRadius + circleMargin) * 2);
+    this.p5.pop();
   }
 }

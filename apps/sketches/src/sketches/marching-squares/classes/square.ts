@@ -1,6 +1,6 @@
 import P5 from 'p5';
 import { Corners } from './point';
-import { getLines } from '../utils';
+import { getLines, getLinesAveraged } from '../utils';
 
 export class Square {
   p5: P5;
@@ -21,6 +21,7 @@ export class Square {
     this.p5.strokeWeight(1);
     this.p5.noFill();
     // this.p5.rect(this.x, this.y, squareSize, squareSize);
+    // const lines = getLines(this.corners);
     const lines = getLines(this.corners);
     lines.forEach((line) => this.p5.line(...line));
     this.p5.pop();
