@@ -1,6 +1,7 @@
 import P5 from 'p5';
 import { Corners } from './point';
 import { getLines, getLinesInterpolated, getState } from '../utils';
+import { linearInterpolation, showGrid, squareSize } from '../marching-squares';
 
 export class Square {
   p5: P5;
@@ -17,13 +18,19 @@ export class Square {
 
   draw() {
     this.p5.push();
+    if (showGrid) {
+      this.p5.noFill();
+      this.p5.stroke(255, 30);
+      this.p5.rect(this.x, this.y, squareSize, squareSize);
+    }
     this.p5.stroke(255);
     this.p5.strokeWeight(1);
     this.p5.noFill();
-    // this.p5.rect(this.x, this.y, squareSize, squareSize);
     // const lines = getLines(this.corners);
     const state = getState(this.corners);
-    const lines = getLinesInterpolated(this.corners);
+    let lines;
+    if (linearInterpolation) lines = getLinesInterpolated(this.corners);
+    else lines = getLines(this.corners);
     if (state === 1) this.p5.stroke(0, 255, 255);
     if (state === 2) this.p5.stroke(0, 255, 0);
     if (state === 3) this.p5.stroke(255, 255, 0);

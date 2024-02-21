@@ -102,6 +102,7 @@ const findContourPoint = (corners: Corners, side: Side) => {
       return findLinearInterpolationValue(1, tl, bl);
   }
 };
+// for the ambiguous cases I decided to go against the consensus because I think it looks better
 export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
   const state = getState(corners);
   const { x, y } = corners[0];
@@ -146,8 +147,18 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
       ];
     case 5:
       return [
-        [x, y + squareSize / 2, x + squareSize / 2, y + squareSize],
-        [x + squareSize / 2, y, x + squareSize, y + squareSize / 2],
+        [
+          x,
+          y + squareSize * findContourPoint(corners, 'left'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
+          y + squareSize,
+        ],
+        [
+          x + squareSize * findContourPoint(corners, 'top'),
+          y,
+          x + squareSize,
+          y + squareSize * findContourPoint(corners, 'right'),
+        ],
       ];
     case 6:
       return [

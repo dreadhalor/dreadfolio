@@ -1,6 +1,6 @@
 import P5 from 'p5';
 import { mapValueTo } from '../utils';
-import { circleMargin } from '../marching-squares';
+import { circleMargin, showValues } from '../marching-squares';
 export class Point {
   p5: P5;
   x: number;
@@ -15,6 +15,7 @@ export class Point {
   }
 
   draw() {
+    if (!showValues) return;
     this.p5.push();
     this.p5.strokeWeight(4);
     this.p5.stroke(255, this.value * 255);
