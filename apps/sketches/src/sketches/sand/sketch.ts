@@ -84,7 +84,7 @@ export const SandSketch = (p5: P5CanvasInstance<FpsSketchProps>) => {
         const occupant = grid[i]?.[j]?.occupant;
         if (occupant) {
           occupant.tick();
-          occupant.show();
+          occupant.draw();
         }
       }
     }

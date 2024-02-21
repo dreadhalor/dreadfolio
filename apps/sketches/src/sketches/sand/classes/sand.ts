@@ -52,7 +52,7 @@ export class Sand {
     }
   }
 
-  show() {
+  draw() {
     if (this.drawnSettled) return;
     const renderer = this.settled ? this.cell.buffer : this.cell.p5;
     renderer.noStroke();

@@ -1,5 +1,5 @@
 import { ReactP5Wrapper } from '@p5-wrapper/react';
-import { Cubes, Sand, Waves } from './sketches';
+import { Cubes, Sand, Waves, MarchingSquares } from './sketches';
 import { useRef, useState } from 'react';
 import { throttle } from 'lodash';
 import {
@@ -17,11 +17,17 @@ import {
 } from 'dread-ui';
 import { cn } from '@repo/utils';
 
+type Sketches = 'sand' | 'waves' | 'cubes' | 'marching-squares';
+
 const App = () => {
   const [fps, setFps] = useState(60);
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState('sand');
+  const [sketch, setSketch] = useState<Sketches>('marching-squares');
   const [selectOpen, setSelectOpen] = useState(false);
+
+  const loadSketch = (sketch: string) => {
+    setSketch(sketch as Sketches);
+  };
 
   const getSketch = () => {
     switch (sketch) {
@@ -31,6 +37,8 @@ const App = () => {
         return Waves;
       case 'cubes':
         return Cubes;
+      case 'marching-squares':
+        return MarchingSquares;
       default:
         return Sand;
     }
@@ -65,7 +73,7 @@ const App = () => {
               <AccordionContent className='p-2 pt-0'>
                 <Select
                   value={sketch}
-                  onValueChange={(value) => setSketch(value)}
+                  onValueChange={(value) => loadSketch(value)}
                   open={selectOpen}
                   onOpenChange={setSelectOpen}
                 >
@@ -76,6 +84,9 @@ const App = () => {
                     <SelectItem value='sand'>Sand</SelectItem>
                     <SelectItem value='waves'>Waves</SelectItem>
                     <SelectItem value='cubes'>Cubes</SelectItem>
+                    <SelectItem value='marching-squares'>
+                      Marching Squares
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </AccordionContent>
