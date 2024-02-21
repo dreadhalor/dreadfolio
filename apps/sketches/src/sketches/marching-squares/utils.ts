@@ -2,6 +2,7 @@ import { circleMargin, squareSize } from '..';
 import { Corners } from './classes/point';
 
 type ZeroOneMap = [0 | 1, 0 | 1, 0 | 1, 0 | 1];
+type ValuesMap = [number, number, number, number];
 
 export const mapValueTo = (
   value: number,
@@ -18,7 +19,7 @@ const mapPoints = (corners: Corners) => {
   return corners.map((point) => (point.value >= 1 ? 1 : 0)) as ZeroOneMap;
 };
 
-const getState = (corners: Corners) => {
+export const getState = (corners: Corners) => {
   const [tl, tr, br, bl] = mapPoints(corners);
   return tl * 8 + tr * 4 + br * 2 + bl;
 };
@@ -83,163 +84,164 @@ export const getLines = (
       return [];
   }
 };
+
+const findLinearInterpolationValue = (x: number, x_1: number, x_2: number) =>
+  (x - x_1) / (x_2 - x_1);
+
 type Side = 'top' | 'right' | 'bottom' | 'left';
-const getEdgeAverage = (corners: Corners, side: Side) => {
-  const [tl, tr, br, bl] = mapPoints2(corners);
+const findContourPoint = (corners: Corners, side: Side) => {
+  const [tl, tr, br, bl] = corners.map((point) => point.value) as ValuesMap;
   switch (side) {
     case 'top':
-      return (tl + tr) / 2;
+      return findLinearInterpolationValue(1, tl, tr);
     case 'right':
-      return (tr + br) / 2;
+      return findLinearInterpolationValue(1, tr, br);
     case 'bottom':
-      return (br + bl) / 2;
+      return findLinearInterpolationValue(1, bl, br);
     case 'left':
-      return (bl + tl) / 2;
+      return findLinearInterpolationValue(1, tl, bl);
   }
 };
-export const getLinesAveraged = (
-  corners: Corners,
-): [number, number, number, number][] => {
+export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
   const state = getState(corners);
   const { x, y } = corners[0];
   // draw a line connecting midpoints of the edges that are "on"
   // 1 = bottomLeft, 2 = bottomRight, 4 = topRight, 8 = topLeft
   switch (state) {
     case 1:
+      // return [[x, y + squareSize / 2, x + squareSize / 2, y + squareSize]];
       return [
         [
           x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize * findContourPoint(corners, 'left'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
           y + squareSize,
         ],
       ];
     case 2:
       return [
         [
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
-          y + squareSize,
           x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
+          y + squareSize,
         ],
       ];
     case 3:
       return [
         [
           x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
+          y + squareSize * findContourPoint(corners, 'left'),
           x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
         ],
       ];
     case 4:
+      // return [[x + squareSize / 2, y, x + squareSize, y + squareSize / 2]];
       return [
         [
-          x + squareSize * getEdgeAverage(corners, 'top'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
           x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
         ],
       ];
     case 5:
       return [
-        [
-          x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
-          y + squareSize,
-        ],
-        [
-          x + squareSize * getEdgeAverage(corners, 'top'),
-          y,
-          x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
-        ],
+        [x, y + squareSize / 2, x + squareSize / 2, y + squareSize],
+        [x + squareSize / 2, y, x + squareSize, y + squareSize / 2],
       ];
     case 6:
       return [
         [
-          x + squareSize * getEdgeAverage(corners, 'top'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
           y + squareSize,
         ],
       ];
     case 7:
       return [
         [
-          x + squareSize * getEdgeAverage(corners, 'top'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
           x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
+          y + squareSize * findContourPoint(corners, 'left'),
         ],
       ];
     case 8:
+      // return [[x, y + squareSize / 2, x + squareSize / 2, y]];
       return [
         [
           x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
-          x + squareSize * getEdgeAverage(corners, 'top'),
+          y + squareSize * findContourPoint(corners, 'left'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
         ],
       ];
     case 9:
+      // return [[x + squareSize / 2, y, x + squareSize / 2, y + squareSize]];
       return [
         [
-          x - squareSize * getEdgeAverage(corners, 'top'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
-          x - squareSize * getEdgeAverage(corners, 'bottom'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
           y + squareSize,
         ],
       ];
     case 10:
       return [
+        // [x + squareSize / 2, y, x + squareSize, y + squareSize / 2],
+        // [x, y + squareSize / 2, x + squareSize / 2, y + squareSize],
         [
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
-          y + squareSize,
           x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
+          y + squareSize,
         ],
         [
           x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
-          x + squareSize * getEdgeAverage(corners, 'top'),
+          y + squareSize * findContourPoint(corners, 'left'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
         ],
       ];
     case 11:
+      // return [[x + squareSize / 2, y, x + squareSize, y + squareSize / 2]];
       return [
         [
-          x + squareSize * getEdgeAverage(corners, 'top'),
+          x + squareSize * findContourPoint(corners, 'top'),
           y,
           x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
         ],
       ];
     case 12:
+      // return [[x, y + squareSize / 2, x + squareSize, y + squareSize / 2]];
       return [
         [
           x,
-          y - squareSize * getEdgeAverage(corners, 'left'),
+          y + squareSize * findContourPoint(corners, 'left'),
           x + squareSize,
-          y - squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
         ],
       ];
     case 13:
       return [
         [
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
-          y + squareSize,
           x + squareSize,
-          y + squareSize * getEdgeAverage(corners, 'right'),
+          y + squareSize * findContourPoint(corners, 'right'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
+          y + squareSize,
         ],
       ];
     case 14:
+      // return [[x, y + squareSize / 2, x + squareSize / 2, y + squareSize]];
       return [
         [
           x,
-          y + squareSize * getEdgeAverage(corners, 'left'),
-          x + squareSize * getEdgeAverage(corners, 'bottom'),
+          y + squareSize * findContourPoint(corners, 'left'),
+          x + squareSize * findContourPoint(corners, 'bottom'),
           y + squareSize,
         ],
       ];
