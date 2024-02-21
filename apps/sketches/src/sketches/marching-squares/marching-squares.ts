@@ -107,7 +107,6 @@ export const MarchingSquares = (p5: MetaballProps) => {
   };
 
   const resetMetaballs = () => {
-    console.log('resetting metaballs');
     circles = [];
     for (let i = 0; i < metaballs; i++) {
       circles.push(
