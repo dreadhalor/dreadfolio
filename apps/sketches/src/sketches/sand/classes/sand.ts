@@ -8,11 +8,11 @@ export class Sand {
   settled: boolean = false;
   drawnSettled: boolean = false;
 
-  constructor(cell: Cell) {
+  constructor(cell: Cell, baseHue: number = 30) {
     this.cell = cell;
     this.velocity = new P5.Vector(0, 0);
     // make the hue a sand color, but randomize it
-    this.hue = Math.random() * 10 + 30;
+    this.hue = Math.random() * 10 + baseHue;
   }
 
   swapCells(cellToSwap: Cell) {
@@ -35,8 +35,10 @@ export class Sand {
         step++;
       }
       if (cellToSwap !== this.cell) this.swapCells(cellToSwap);
-      // if we can't move at all, stop
-      else this.velocity = new P5.Vector(0, 0);
+      else {
+        // if we can't move at all, stop
+        this.velocity.y = 0;
+      }
     }
     if (this.velocity.y === 0) {
       const neighborsBelow = this.cell.getCellNeighborsBelow(this.cell);
@@ -45,7 +47,7 @@ export class Sand {
         neighborsBelow.every((c) => c?.occupant?.settled)
       ) {
         this.settled = true;
-        this.hue = 0;
+        // this.hue = 0; // for debugging
       }
     }
   }

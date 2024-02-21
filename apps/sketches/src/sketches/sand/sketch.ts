@@ -6,7 +6,7 @@ import { Cell } from './classes/cell';
 // How would you do this with a
 // higher order function????
 
-export const cellSize = 1;
+export const cellSize = 2;
 const gravity = 0.2;
 export const gravityVector = new P5.Vector(0, gravity);
 
@@ -14,7 +14,7 @@ export const SandSketch = (p5: P5) => {
   let buffer: P5.Graphics; // Declare the off-screen graphics buffer
   // The grid
   let grid: Cell[][];
-  const generationRadius = 50;
+  const generationRadius = 15;
   let cols: number, rows: number;
 
   function make2DArray(cols: number, rows: number): Cell[][] {
@@ -42,6 +42,7 @@ export const SandSketch = (p5: P5) => {
   };
 
   p5.draw = () => {
+    console.log(p5.frameRate());
     if (p5.mouseIsPressed) {
       const mouseCol = Math.floor(p5.mouseX / cellSize);
       const mouseRow = Math.floor(p5.mouseY / cellSize);
@@ -58,7 +59,13 @@ export const SandSketch = (p5: P5) => {
           ) {
             if (p5.random(1) > 0.8) {
               const cell = grid[col][row];
-              cell.occupant = new Sand(cell);
+              // slowly cycle through all hues, but start with a nice sand color
+              const hue = (p5.frameCount / 2 + 20) % 360;
+              if (!cell.occupant) cell.occupant = new Sand(cell, hue);
+              else {
+                cell.occupant.hue = hue;
+                cell.occupant.drawnSettled = false;
+              }
             }
           }
         }
