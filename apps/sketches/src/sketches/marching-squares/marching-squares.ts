@@ -4,7 +4,7 @@ import { Square } from './classes/square';
 import { Corners, Point } from './classes/point';
 import { Circle } from './classes/circle';
 
-export const squareSize = 50;
+export const squareSize = 25;
 export const circleRadius = 50;
 export const circleMargin = 50;
 
@@ -14,12 +14,15 @@ export const MarchingSquares = (p5: P5CanvasInstance<FpsSketchProps>) => {
     if (props.setFps) setFps = props.setFps;
   };
 
+  const framerate = 0;
   const squares: Square[] = [];
-  const circles: Circle[] = [new Circle(p5, 200, 200, p5.createVector(2, 1))];
+  const circles: Circle[] = [
+    new Circle(p5, 200, 200, p5.createVector(2, 1)),
+    new Circle(p5, 400, 400, p5.createVector(1, 2)),
+  ];
   const points: Point[] = [];
 
   const noiseLevel = 255;
-  // const noiseScale = 0.009;
   const noiseScale = 0.05;
 
   const ensurePoint = (x: number, y: number) => {
@@ -49,7 +52,7 @@ export const MarchingSquares = (p5: P5CanvasInstance<FpsSketchProps>) => {
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
-    p5.frameRate(20);
+    if (framerate) p5.frameRate(framerate);
     // set squares
     for (let x = 0; x < p5.width; x += squareSize) {
       for (let y = 0; y < p5.height; y += squareSize) {
@@ -76,7 +79,7 @@ export const MarchingSquares = (p5: P5CanvasInstance<FpsSketchProps>) => {
       p5.push();
       // point.value = getPointNoise(point.x, point.y);
       point.value = getMetaballValue(point.x, point.y);
-      point.draw();
+      // point.draw();
       p5.pop();
     });
 

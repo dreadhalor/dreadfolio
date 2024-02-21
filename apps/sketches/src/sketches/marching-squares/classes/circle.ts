@@ -29,8 +29,8 @@ export class Circle {
     this.p5.stroke(255);
     this.p5.noFill();
     this.p5.ellipse(this.x, this.y, circleRadius * 2);
-    this.p5.stroke(122);
-    this.p5.ellipse(this.x, this.y, (circleRadius + circleMargin) * 2);
+    // this.p5.stroke(122);
+    // this.p5.ellipse(this.x, this.y, (circleRadius + circleMargin) * 2);
     this.p5.pop();
   }
 }

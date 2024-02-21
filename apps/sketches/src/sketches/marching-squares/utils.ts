@@ -109,7 +109,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
   // 1 = bottomLeft, 2 = bottomRight, 4 = topRight, 8 = topLeft
   switch (state) {
     case 1:
-      // return [[x, y + squareSize / 2, x + squareSize / 2, y + squareSize]];
       return [
         [
           x,
@@ -137,7 +136,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
         ],
       ];
     case 4:
-      // return [[x + squareSize / 2, y, x + squareSize, y + squareSize / 2]];
       return [
         [
           x + squareSize * findContourPoint(corners, 'top'),
@@ -170,7 +168,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
         ],
       ];
     case 8:
-      // return [[x, y + squareSize / 2, x + squareSize / 2, y]];
       return [
         [
           x,
@@ -180,7 +177,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
         ],
       ];
     case 9:
-      // return [[x + squareSize / 2, y, x + squareSize / 2, y + squareSize]];
       return [
         [
           x + squareSize * findContourPoint(corners, 'top'),
@@ -191,8 +187,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
       ];
     case 10:
       return [
-        // [x + squareSize / 2, y, x + squareSize, y + squareSize / 2],
-        // [x, y + squareSize / 2, x + squareSize / 2, y + squareSize],
         [
           x + squareSize,
           y + squareSize * findContourPoint(corners, 'right'),
@@ -207,7 +201,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
         ],
       ];
     case 11:
-      // return [[x + squareSize / 2, y, x + squareSize, y + squareSize / 2]];
       return [
         [
           x + squareSize * findContourPoint(corners, 'top'),
@@ -217,7 +210,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
         ],
       ];
     case 12:
-      // return [[x, y + squareSize / 2, x + squareSize, y + squareSize / 2]];
       return [
         [
           x,
@@ -236,7 +228,6 @@ export const getLinesInterpolated = (corners: Corners): ValuesMap[] => {
         ],
       ];
     case 14:
-      // return [[x, y + squareSize / 2, x + squareSize / 2, y + squareSize]];
       return [
         [
           x,
