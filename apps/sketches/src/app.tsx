@@ -1,6 +1,6 @@
 import { ReactP5Wrapper } from '@p5-wrapper/react';
 import { Cubes, Sand, Waves } from './sketches';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { throttle } from 'lodash';
 import {
   Accordion,
