@@ -23,7 +23,7 @@ export class Cell {
   }
 
   getCellNeighborsBelow(cell: Cell) {
-    const neighbors = [];
+    const neighbors: Cell[] = [];
     const { x, y } = cell;
     for (let i = -1; i <= 1; i++) {
       const col = x + i;
@@ -32,9 +32,9 @@ export class Cell {
         col > -1 &&
         row > -1 &&
         col < this.grid.length &&
-        row < this.grid[0].length
+        row < this.grid[0]!.length
       ) {
-        neighbors.push(this.grid[col][row]);
+        if (this.grid[col]![row]) neighbors.push(this.grid[col]![row]!);
       }
     }
     return neighbors;
@@ -60,12 +60,5 @@ export class Cell {
     const randomEmptySide =
       emptySides[Math.floor(Math.random() * emptySides.length)];
     return randomEmptySide;
-  }
-  takeStepSideways(cell: Cell, direction: number) {
-    const side = this.grid[cell.x + direction][cell.y];
-    if (side.occupant) {
-      return;
-    }
-    return side;
   }
 }

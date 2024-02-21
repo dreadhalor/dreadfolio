@@ -1,16 +1,19 @@
 import P5 from 'p5';
 import { Sand } from './classes/sand';
 import { Cell } from './classes/cell';
-// Create a 2D array
-// Sorry if you are used to matrix math!
-// How would you do this with a
-// higher order function????
+import { P5CanvasInstance } from '@p5-wrapper/react';
+import { FpsSketchProps } from '../index';
 
 export const cellSize = 2;
 const gravity = 0.2;
 export const gravityVector = new P5.Vector(0, gravity);
 
-export const SandSketch = (p5: P5) => {
+export const SandSketch = (p5: P5CanvasInstance<FpsSketchProps>) => {
+  let setFps: (framerate: number) => void;
+  p5.updateWithProps = (props) => {
+    if (props.setFps) setFps = props.setFps;
+  };
+
   let buffer: P5.Graphics; // Declare the off-screen graphics buffer
   // The grid
   let grid: Cell[][];
@@ -42,7 +45,7 @@ export const SandSketch = (p5: P5) => {
   };
 
   p5.draw = () => {
-    console.log(p5.frameRate());
+    if (setFps) setFps(p5.frameRate());
     if (p5.mouseIsPressed) {
       const mouseCol = Math.floor(p5.mouseX / cellSize);
       const mouseRow = Math.floor(p5.mouseY / cellSize);
@@ -58,13 +61,15 @@ export const SandSketch = (p5: P5) => {
             Math.pow(generationRadius, 2)
           ) {
             if (p5.random(1) > 0.8) {
-              const cell = grid[col][row];
-              // slowly cycle through all hues, but start with a nice sand color
-              const hue = (p5.frameCount / 2 + 20) % 360;
-              if (!cell.occupant) cell.occupant = new Sand(cell, hue);
-              else {
-                cell.occupant.hue = hue;
-                cell.occupant.drawnSettled = false;
+              const cell = grid[col]?.[row];
+              if (cell) {
+                // slowly cycle through all hues, but start with a nice sand color
+                const hue = (p5.frameCount / 2 + 20) % 360;
+                if (!cell.occupant) cell.occupant = new Sand(cell, hue);
+                else {
+                  cell.occupant.hue = hue;
+                  cell.occupant.drawnSettled = false;
+                }
               }
             }
           }
@@ -76,7 +81,7 @@ export const SandSketch = (p5: P5) => {
 
     for (let i = 0; i < cols; i++) {
       for (let j = rows - 1; j >= 0; j--) {
-        const occupant = grid[i][j].occupant;
+        const occupant = grid[i]?.[j]?.occupant;
         if (occupant) {
           occupant.tick();
           occupant.show();
@@ -86,4 +91,6 @@ export const SandSketch = (p5: P5) => {
 
     p5.image(buffer, 0, 0); // Display the off-screen buffer each frame
   };
+
+  return p5;
 };

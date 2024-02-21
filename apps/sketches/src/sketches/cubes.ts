@@ -1,8 +1,14 @@
-import P5 from 'p5';
+import { P5CanvasInstance } from '@p5-wrapper/react';
+import { FpsSketchProps } from '.';
 
 // this has issues with the mouse position because perspective isn't being taken into account
 // just ignore it yo
-export const Cubes = (p5: P5) => {
+export const Cubes = (p5: P5CanvasInstance<FpsSketchProps>) => {
+  let setFps: (framerate: number) => void;
+  p5.updateWithProps = (props) => {
+    if (props.setFps) setFps = props.setFps;
+  };
+
   const spacing = 100;
   const boxSize = 50;
   const margin = 0;
@@ -13,6 +19,7 @@ export const Cubes = (p5: P5) => {
   };
 
   p5.draw = () => {
+    if (setFps) setFps(p5.frameRate());
     p5.background(255);
     const numBoxesX = Math.trunc(
       (p5.width - 2 * margin + spacing) / (boxSize + spacing),

@@ -1,6 +1,12 @@
-import P5 from 'p5';
+import { FpsSketchProps } from '.';
+import { P5CanvasInstance } from '@p5-wrapper/react';
 
-export const Waves = (p5: P5) => {
+export const Waves = (p5: P5CanvasInstance<FpsSketchProps>) => {
+  let setFps: (framerate: number) => void;
+  p5.updateWithProps = (props) => {
+    if (props.setFps) setFps = props.setFps;
+  };
+
   let t = 0; // Time variable
 
   p5.setup = () => {
@@ -9,6 +15,7 @@ export const Waves = (p5: P5) => {
   };
 
   p5.draw = () => {
+    if (setFps) setFps(p5.frameRate());
     p5.background(255);
     p5.stroke('rgb(55, 80, 224)');
 

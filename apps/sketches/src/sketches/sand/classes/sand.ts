@@ -12,7 +12,7 @@ export class Sand {
     this.cell = cell;
     this.velocity = new P5.Vector(0, 0);
     // make the hue a sand color, but randomize it
-    this.hue = Math.random() * 10 + baseHue;
+    this.hue = Math.random() * 20 + baseHue;
   }
 
   swapCells(cellToSwap: Cell) {
