@@ -61,9 +61,6 @@ export const MarchingSquares = (p5: MetaballProps) => {
     // new Circle(p5, 400, 400, p5.createVector(1, 2)),
   ];
 
-  const noiseLevel = 255;
-  const noiseScale = 0.05;
-
   const ensurePoint = (x: number, y: number) => {
     // if the point doesn't exist, add it
     const point = points.find((p) => p.x === x && p.y === y);
@@ -72,14 +69,16 @@ export const MarchingSquares = (p5: MetaballProps) => {
     return points[newLen - 1]!;
   };
 
-  const getPointNoise = (x: number, y: number) => {
-    const nx = noiseScale * x;
-    const ny = noiseScale * y;
-    const nt = noiseScale * p5.frameCount;
-    // Compute noise value.
-    const c = noiseLevel * p5.noise(nx, ny, nt);
-    return c < 130 ? 0 : 1;
-  };
+  // const noiseLevel = 255;
+  // const noiseScale = 0.05;
+  // const getPointNoise = (x: number, y: number) => {
+  //   const nx = noiseScale * x;
+  //   const ny = noiseScale * y;
+  //   const nt = noiseScale * p5.frameCount;
+  //   // Compute noise value.
+  //   const c = noiseLevel * p5.noise(nx, ny, nt);
+  //   return c < 130 ? 0 : 1;
+  // };
   const getMetaballValue = (x: number, y: number) => {
     let forceSum = 0;
     circles.forEach((circle) => {

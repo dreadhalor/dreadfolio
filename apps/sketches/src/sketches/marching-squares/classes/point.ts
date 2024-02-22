@@ -1,6 +1,5 @@
 import P5 from 'p5';
-import { mapValueTo } from '../utils';
-import { circleMargin, showValues } from '../marching-squares';
+import { showValues } from '../marching-squares';
 export class Point {
   p5: P5;
   x: number;

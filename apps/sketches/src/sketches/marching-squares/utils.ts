@@ -1,4 +1,4 @@
-import { circleMargin, squareSize } from '..';
+import { squareSize } from '..';
 import { Corners } from './classes/point';
 
 type ZeroOneMap = [0 | 1, 0 | 1, 0 | 1, 0 | 1];

@@ -1,4 +1,4 @@
-import { ReactP5Wrapper } from '@p5-wrapper/react';
+import { ReactP5Wrapper, Sketch, SketchProps } from '@p5-wrapper/react';
 import {
   Cubes,
   Sand,
@@ -70,7 +70,7 @@ const App = () => {
         setMetaballSize={setMetaballSize}
       />
       <ReactP5Wrapper
-        sketch={getSketch()}
+        sketch={getSketch() as Sketch<SketchProps>}
         setFps={throttledSetFps.current}
         distanceField={distanceField}
         showMetaballs={showMetaballs}

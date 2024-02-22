@@ -1,5 +1,5 @@
 import P5 from 'p5';
-import { circleDiameter, circleMargin, showBalls } from '../marching-squares';
+import { circleDiameter, showBalls } from '../marching-squares';
 export class Circle {
   p5: P5;
   x: number;
