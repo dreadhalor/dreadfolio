@@ -8,10 +8,10 @@ services:
 
   nginx:
     build: ./infra/nginx
-    container_name: nginx
     ports:
-      - '8080:80'
+      - '443:443'
+    volumes:
+      - ./localhost+2.pem:/etc/ssl/cert.pem
+      - ./localhost+2-key.pem:/etc/ssl/cert-key.pem
     depends_on:
-      - portfolio
-    links:
       - portfolio
