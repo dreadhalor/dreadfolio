@@ -20,3 +20,6 @@ Dockerfile
 
 # Ignore the README
 README.md
+
+# nginx configuration, that's a different image
+infra

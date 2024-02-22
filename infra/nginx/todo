@@ -1,0 +1,4 @@
+- make Dockerfile
+- make Nginx configuration
+- Ssl certificate?
+- docker-compose?
