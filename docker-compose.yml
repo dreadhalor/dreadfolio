@@ -1,17 +1,11 @@
 version: '3.8'
+# config for AWS
 services:
   portfolio:
-    build: .
+    build:
+      context: .
+      args:
+        VERCEL_TOKEN: ${VERCEL_TOKEN}
     container_name: portfolio
     ports:
-      - '3001:3000' # Optional: Only needed if you want to access the app directly for debugging
-
-  nginx:
-    build: ./infra/nginx
-    ports:
-      - '443:443'
-    volumes:
-      - ./localhost+2.pem:/etc/ssl/cert.pem
-      - ./localhost+2-key.pem:/etc/ssl/cert-key.pem
-    depends_on:
-      - portfolio
+      - '3000:3000'

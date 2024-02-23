@@ -1,0 +1,15 @@
+version: '3.8'
+# overrides for local development
+services:
+  portfolio:
+    ports:
+      - '3001:3000' # Local development port mapping
+  nginx:
+    build: ./infra/nginx
+    ports:
+      - '443:443'
+    volumes:
+      - ./localhost+2.pem:/etc/ssl/cert.pem
+      - ./localhost+2-key.pem:/etc/ssl/cert-key.pem
+    depends_on:
+      - portfolio

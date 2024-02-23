@@ -25,5 +25,7 @@ README.md
 infra
 
 # local ssl certificates
-localhost+2-key.pem
-localhost+2.pem
+**.pem
+
+# Ignore the .env file
+.env

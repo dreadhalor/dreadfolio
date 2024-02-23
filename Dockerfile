@@ -2,8 +2,10 @@ ARG NODE_VERSION=21.6.1
 ARG PNPM_VERSION=8.15.1
 
 # Use node image for base image for all stages.
-# FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
-FROM node:${NODE_VERSION}-alpine as base
+FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
+# FROM node:${NODE_VERSION}-alpine as base
+
+ARG VERCEL_TOKEN
 
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
@@ -18,13 +20,13 @@ COPY . .
 RUN pnpm i
 
 # Build all the apps.
-RUN pnpm build
+RUN npx turbo run build --remote-only --token=${VERCEL_TOKEN}
 
-# Go to the portfolio backend directory.
+# # Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend
 
-# Expose the port.
+# # Expose the port.
 EXPOSE 3000
 
-# Start the portfolio backend.
+# # Start the portfolio backend.
 ENTRYPOINT ["pnpm", "start"]
