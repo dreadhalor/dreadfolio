@@ -23,3 +23,7 @@ README.md
 
 # nginx configuration, that's a different image
 infra
+
+# local ssl certificates
+localhost+2-key.pem
+localhost+2.pem
