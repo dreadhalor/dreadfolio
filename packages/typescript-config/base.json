@@ -20,7 +20,8 @@
     "baseUrl": "./",
     "outDir": "./dist/",
     "paths": {
-      "@dread-ui/*": ["../dread-ui/src/*"]
+      "@dread-ui/*": ["../dread-ui/src/*"],
+      "@shareme/*": ["../../apps/shareme/frontend/src/*"]
     }
   }
 }
