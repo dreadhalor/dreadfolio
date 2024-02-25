@@ -79,7 +79,6 @@ export const GosperCurve = (p5: P5) => {
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
     p5.colorMode(p5.HSB);
-    // p5.noLoop();
     p5.stroke(255);
     p5.strokeWeight(1);
     p5.noFill();
@@ -137,11 +136,11 @@ export const GosperCurve = (p5: P5) => {
 
   p5.draw = () => {
     p5.background(0);
-    p5.translate(p5.width / 2 + 300, p5.height / 2 - 200);
+    p5.translate(p5.width / 2 + 300, p5.height / 2 - 100);
     incrementProgress();
 
     newPoints.forEach((points) => {
-      drawShape(points);
+      drawShapeInstant(points);
     });
   };
 };

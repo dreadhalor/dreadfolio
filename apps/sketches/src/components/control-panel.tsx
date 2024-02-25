@@ -99,6 +99,8 @@ const ControlPanel = ({
                   <SelectItem value='waves'>Waves</SelectItem>
                   <SelectItem value='cubes'>Cubes</SelectItem>
                   <SelectItem value='metaballs'>Metaballs</SelectItem>
+                  <SelectItem value='gosper-curve'>Gosper Curve</SelectItem>
+                  <SelectItem value='flow-field'>Flow Field</SelectItem>
                 </SelectContent>
               </Select>
               {sketch === 'metaballs' && (
