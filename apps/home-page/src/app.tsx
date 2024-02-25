@@ -3,6 +3,7 @@ import { Title } from './components/title';
 import { Button } from 'dread-ui';
 import { useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
+import { Blobs } from './components/blobs';
 
 function App() {
   const {
@@ -25,6 +26,7 @@ function App() {
   return (
     <div className='relative flex h-full w-full border-0 bg-white'>
       {/* <div className='absolute inset-x-0 top-1/2 z-10 h-[2px] -translate-y-1/2 bg-white'></div> */}
+      <Blobs />
       <Title variant='topBackground' />
       <Title variant='middleBackground' />
       <Title variant='bottomBackground' />
