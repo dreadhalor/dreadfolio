@@ -35,14 +35,23 @@ export class Particle {
     this.acc.add(force);
   }
 
-  show(p5: P5) {
+  show(buffer1: P5.Graphics, buffer2: P5.Graphics, p5: P5) {
     // make the hue shift based on time
-    p5.colorMode(p5.HSB);
-    p5.stroke(p5.map(p5.sin(p5.frameCount / 1000), -1, 1, 0, 360), 50, 100);
-    p5.strokeWeight(2);
+    buffer1.colorMode(buffer1.HSB);
+    buffer1.stroke(
+      buffer1.map(buffer1.sin(p5.frameCount / 1000), -1, 1, 0, 360),
+      50,
+      100,
+    );
+    buffer1.strokeWeight(2);
     // if the particle teleported to the other side of the canvas, don't draw a line
-    if (p5.dist(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y) < 100)
-      p5.line(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y);
+    if (
+      buffer1.dist(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y) < 100
+    )
+      buffer1.line(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y);
+    buffer2.stroke(255);
+    buffer2.fill(0);
+    buffer2.circle(this.pos.x, this.pos.y, 5);
   }
 
   edges() {
