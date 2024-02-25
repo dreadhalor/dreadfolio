@@ -19,7 +19,7 @@ const Title = ({ variant }: TitleProps) => {
   const [height, setHeight] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  const { animateTitle, retractBackground } = useHomePage();
+  const { animateTitle } = useHomePage();
 
   useLayoutEffect(() => {
     setHeight((_) => heightRef.current?.offsetHeight ?? 0);
@@ -48,11 +48,11 @@ const Title = ({ variant }: TitleProps) => {
   const variants: Variants = {
     top: {
       y: -dy - height / 2,
-      opacity: retractBackground ? 0 : 1,
+      opacity: 1,
     },
     topResting: {
       y: -height / 2,
-      opacity: retractBackground ? 0 : 1,
+      opacity: 1,
     },
     middle: {
       y: -height / 2,
@@ -63,23 +63,23 @@ const Title = ({ variant }: TitleProps) => {
     },
     middleResting: {
       y: -height / 2,
-      opacity: retractBackground ? 0 : 1,
+      opacity: 1,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
     },
     middleOutline: {
       y: -height / 2,
-      WebkitTextStroke: '2px hsl(120,100%,50%)',
+      WebkitTextStroke: '0.02em hsl(120,100%,50%)',
       WebkitTextFillColor: 'transparent',
-      opacity: retractBackground ? 0 : 1,
+      opacity: 1,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
     },
     middleOutlineResting: {
       y: -height / 2,
-      WebkitTextStroke: '2px hsl(120,100%,50%)',
+      WebkitTextStroke: '0.02em hsl(120,100%,50%)',
       WebkitTextFillColor: 'transparent',
 
       opacity: 0,
@@ -89,18 +89,18 @@ const Title = ({ variant }: TitleProps) => {
     },
     bottom: {
       y: dy - height / 2,
-      opacity: retractBackground ? 0 : 1,
+      opacity: 1,
     },
     bottomResting: {
       y: -height / 2,
-      opacity: retractBackground ? 0 : 1,
+      opacity: 1,
     },
     topBackground: {
       y: -dy - height / 2,
     },
     middleBackground: {
       y: -height / 2,
-      WebkitTextStroke: '3px black',
+      WebkitTextStroke: '0.03em black',
       WebkitTextFillColor: 'transparent',
     },
     bottomBackground: {

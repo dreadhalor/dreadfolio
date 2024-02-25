@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Title } from './components/title';
 import { Button } from 'dread-ui';
-import { TitleBackground } from './components/title-background';
 import { useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
 
@@ -31,7 +30,7 @@ function App() {
       <Title variant='bottomBackground' />
       <TitleFrontLayer />
 
-      <div className='absolute flex gap-2'>
+      <div className='absolute z-20 flex gap-2'>
         <Button onClick={() => setAnimateTitle((prev) => !prev)}>
           Animate Title
         </Button>

@@ -1,121 +1,65 @@
-import { Variants, motion, useAnimation } from 'framer-motion';
+import { Variants, motion, useAnimationControls } from 'framer-motion';
 import { useHomePage } from '../providers/home-page-provider';
 import { Title } from './title';
-import { TitleBackground } from './title-background';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const TitleFrontLayer = () => {
-  const { animateBackground, retractBackground } = useHomePage();
   const sizeRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
+
+  const [maxRadius, setMaxRadius] = useState<number | null>(null);
+
+  const { animateBackground, retractBackground } = useHomePage();
+
+  useLayoutEffect(() => {
+    if (sizeRef.current) {
+      const height = sizeRef.current.offsetHeight;
+      const width = sizeRef.current.offsetWidth;
+      // This will calculate the maximum radius to cover the whole element.
+      const newMaxRadius = Math.sqrt(height ** 2 + width ** 2) / 2;
+      setMaxRadius(() => newMaxRadius);
+    }
+  }, [sizeRef]);
+
+  const controls = useAnimationControls();
 
   useEffect(() => {
-    setHeight((_) => sizeRef.current?.offsetHeight ?? 0);
-    setWidth((_) => sizeRef.current?.offsetWidth ?? 0);
-  }, [
-    sizeRef.current?.offsetHeight,
-    sizeRef.current?.offsetWidth,
-    height,
-    width,
-  ]);
+    if (maxRadius) {
+      if (retractBackground) {
+        // Respond to changes in animateBackground and retractBackground
+        controls.start('hidden'); // Shrink to 0
+        return;
+      }
+      if (animateBackground) {
+        controls.start('shrink'); // Shrink to min(95vh, 95vw)
+        return;
+      }
+    }
+    controls.start('visible'); // Expand back to maxRadius
+  }, [animateBackground, retractBackground, controls, maxRadius]);
 
+  // Define the animation variants
   const variants: Variants = {
-    initial: {
-      transition: {
-        duration: 0.5,
-      },
-    },
-    animate: {
-      // clipPath: (
-      //   <svg>
-      //     <circle></circle>
-      //   </svg>
-      // ),
-      transition: {
-        type: 'spring',
-        stiffness: 400,
-        damping: 100,
-      },
-    },
-    retract: {
-      clipPath: 'circle(0% at 50% 50%)',
-      transition: {
-        type: 'spring',
-        stiffness: 800,
-        damping: 100,
-      },
-    },
+    visible: { clipPath: `circle(${maxRadius}px at 50% 50%)` },
+    shrink: { clipPath: `circle(calc(min(95vh,95vw) / 2) at 50% 50%)` },
+    hidden: { clipPath: `circle(0px at 50% 50%)` },
   };
-
-  const [clipPathId] = useState(
-    () => `clipPath-${Math.random().toString(16).slice(2)}`,
-  );
-  const clipControl = useAnimation();
-  const maxRadius = Math.sqrt(height ** 2 + width ** 2) / 2;
-  console.log(maxRadius);
-
-  useEffect(() => {
-    clipControl.start({
-      r: [maxRadius, 0], // Animate radius from 50 to 0
-      transition: { duration: 2, repeat: Infinity, repeatType: 'reverse' },
-    });
-  }, [clipControl, maxRadius]);
-
   return (
-    // <motion.div
-    //   className='relative h-full w-full'
-    //   style={{
-    //     width: 'max(100vh,100vw)',
-    //     height: 'max(100vh,100vw)',
-    //   }}
-    //   variants={variants}
-    //   initial='initial'
-    //   animate={
-    //     retractBackground
-    //       ? 'retract'
-    //       : animateBackground
-    //         ? 'animate'
-    //         : 'initial'
-    //   }
-    // >
-    //   <TitleBackground />
-    //   <Title variant='top' />
-    //   <Title variant='middle' />
-    //   <Title variant='middleOutline' />
-    //   <Title variant='bottom' />
-    // </motion.div>
     <div
       ref={sizeRef}
-      className='pointer-events-none relative z-20 h-full w-full border-4'
-      // style={{ width: 'max(100vh,100vw)', height: 'max(100vh,100vw)' }}
+      className='pointer-events-none relative z-20 h-full w-full overflow-hidden'
     >
-      <svg className='absolute h-full w-full translate-x-1/2'>
-        <defs>
-          <clipPath id={clipPathId}>
-            <motion.circle
-              cx='50%'
-              cy='50%'
-              r='50'
-              initial={{ r: maxRadius }}
-              animate={clipControl}
-            />
-          </clipPath>
-        </defs>
-      </svg>
-      <div
-        style={{
-          clipPath: `url(#${clipPathId})`,
-          WebkitClipPath: `url(#${clipPathId})`,
-        }}
+      <motion.div
+        className='h-full w-full'
+        initial='visible'
+        animate={controls}
+        variants={variants}
       >
-        {/* <div> */}
-        <TitleBackground />
+        <div className='absolute inset-0 bg-black' />
         <Title variant='top' />
         <Title variant='middle' />
         <Title variant='middleOutline' />
         <Title variant='bottom' />
-      </div>
+      </motion.div>
     </div>
   );
 };
