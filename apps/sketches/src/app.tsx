@@ -7,17 +7,18 @@ import {
   circleMargin,
   squareSize,
   circleDiameter,
+  GosperCurve,
 } from './sketches';
 import { useRef, useState } from 'react';
 import { throttle } from 'lodash';
 import { ControlPanel } from './components/control-panel';
 
-type Sketches = 'sand' | 'waves' | 'cubes' | 'metaballs';
+type Sketches = 'sand' | 'waves' | 'cubes' | 'metaballs' | 'gosper-curve';
 
 const App = () => {
   const [fps, setFps] = useState(60);
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<Sketches>('metaballs');
+  const [sketch, setSketch] = useState<Sketches>('gosper-curve');
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);
@@ -41,8 +42,10 @@ const App = () => {
         return Cubes;
       case 'metaballs':
         return MarchingSquares;
+      case 'gosper-curve':
+        return GosperCurve;
       default:
-        return Sand;
+        return GosperCurve;
     }
   };
 
