@@ -1,5 +1,5 @@
 import { P5CanvasInstance } from '@p5-wrapper/react';
-import { FpsSketchProps } from '.';
+import { FpsSketchProps } from '..';
 
 // this has issues with the mouse position because perspective isn't being taken into account
 // just ignore it yo

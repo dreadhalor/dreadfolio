@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
-import { Title } from './components/title';
 import { Button } from 'dread-ui';
 import { useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
-import { SketchKey, sketches } from '../../sketches/src/sketches';
+import { type SketchKey } from '../../sketches/src/sketches';
 import { TitleBackLayer } from './components/title-back-layer';
 
 function App() {
@@ -124,6 +123,12 @@ function App() {
             onClick={() => setSketch1('waves')}
           >
             Back: Waves
+          </Button>
+          <Button
+            variant={sketch1 === 'breathing-plane' ? 'secondary' : 'default'}
+            onClick={() => setSketch1('breathing-plane')}
+          >
+            Back: Breathing Plane
           </Button>
         </div>
       </div>

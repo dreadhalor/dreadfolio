@@ -17,7 +17,7 @@ const getLastSketch = () => getSketchNames().at(-1)!;
 const App = () => {
   const [fps, setFps] = useState(60);
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<SketchKey>('flow-field');
+  const [sketch, setSketch] = useState<SketchKey>(getLastSketch());
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);

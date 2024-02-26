@@ -1,4 +1,4 @@
-import { FpsSketchProps } from '.';
+import { FpsSketchProps } from '..';
 import { P5CanvasInstance } from '@p5-wrapper/react';
 
 export const Waves = (p5: P5CanvasInstance<FpsSketchProps>) => {

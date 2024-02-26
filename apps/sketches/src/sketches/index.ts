@@ -1,14 +1,17 @@
 import { SketchProps } from '@p5-wrapper/react';
 
 import { SandSketch } from './sand/sketch';
-import { Cubes } from './cubes';
-import { Waves } from './waves';
+import { Cubes } from './cubes/cubes';
+import { Waves } from './waves/waves';
 import { MarchingSquares } from './marching-squares/marching-squares';
 import { GosperCurve } from './gosper-curve/gosper-curve';
 import { FlowField } from './flow-field/flow-field';
 import { DvdLogo } from './dvd-logo/dvd-logo';
 import { Scrunching } from './scrunching/scrunching';
 import { MoonlightOcean } from './moonlight-ocean/moonlight-ocean';
+import { BreathingPlane } from './breathing-plane/breathing-plane';
+import { DotGlobe } from './dot-globe/dot-globe';
+import { CircleMesh } from './circle-mesh/circle-mesh';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -51,6 +54,18 @@ export const sketches = {
   'moonlight-ocean': {
     name: 'Moonlight Ocean',
     sketch: MoonlightOcean,
+  },
+  'breathing-plane': {
+    name: 'Breathing Plane',
+    sketch: BreathingPlane,
+  },
+  'dot-globe': {
+    name: 'Dot Globe',
+    sketch: DotGlobe,
+  },
+  'circle-mesh': {
+    name: 'Circle Mesh',
+    sketch: CircleMesh,
   },
 } as const;
 
