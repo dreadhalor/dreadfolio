@@ -7,6 +7,7 @@ import { MarchingSquares } from './marching-squares/marching-squares';
 import { GosperCurve } from './gosper-curve/gosper-curve';
 import { FlowField } from './flow-field/flow-field';
 import { DvdLogo } from './dvd-logo/dvd-logo';
+import { Scrunching } from './scrunching/scrunching';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -41,6 +42,10 @@ export const sketches = {
   'dvd-logo': {
     name: 'DVD Logo',
     sketch: DvdLogo,
+  },
+  scrunching: {
+    name: 'Scrunching',
+    sketch: Scrunching,
   },
 } as const;
 
