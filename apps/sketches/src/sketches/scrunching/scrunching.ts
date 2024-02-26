@@ -2,18 +2,18 @@ import { P5CanvasInstance } from '@p5-wrapper/react';
 import { FpsSketchProps } from '..';
 import P5 from 'p5';
 
-const speed = 1 / 3600;
-let t = 0;
-const colorValue = 200;
-let scaleValue = 1;
-let scaleDirection = 1;
-const scaleSpeed = 0.0005;
-const minScale = 0.5;
-const maxScale = 1.0;
-let minDimension: number;
-
 // we get the boxes overlapping in small screens, but we can fix it later maybe
 export const Scrunching = (p5: P5CanvasInstance<FpsSketchProps>) => {
+  const speed = 1 / 3600;
+  let t = 0;
+  const colorValue = 200;
+  let scaleValue = 1;
+  let scaleDirection = 1;
+  const scaleSpeed = 0.0005;
+  const minScale = 0.5;
+  const maxScale = 1.0;
+  let minDimension: number;
+
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
     minDimension = Math.min(p5.windowWidth, p5.windowHeight) / 2;

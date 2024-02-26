@@ -4,16 +4,17 @@ import P5 from 'p5';
 import { Particle } from './classes/particle';
 
 export const scl = 10;
-let cols: number, rows: number;
-let zoff = 0;
-const zInc = 0.0003;
-const particles: Particle[] = [];
-let flowfield: P5.Vector[];
-let buffer: P5.Graphics;
-let buffer2: P5.Graphics;
-const background = 51;
 
 export const FlowField = (p5: P5CanvasInstance<FpsSketchProps>) => {
+  let cols: number, rows: number;
+  let zoff = 0;
+  const zInc = 0.0003;
+  const particles: Particle[] = [];
+  let flowfield: P5.Vector[];
+  let buffer: P5.Graphics;
+  let buffer2: P5.Graphics;
+  const background = 51;
+
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
     buffer = p5.createGraphics(p5.width, p5.height);
@@ -26,6 +27,7 @@ export const FlowField = (p5: P5CanvasInstance<FpsSketchProps>) => {
       particles.push(new Particle(p5));
     }
 
+    p5.frameRate(60);
     p5.background(background);
   };
 
