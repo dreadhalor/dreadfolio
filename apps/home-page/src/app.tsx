@@ -5,12 +5,13 @@ import { useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
 import { SketchPane } from './components/sketch-pane';
 import { SketchKey, sketches } from '../../sketches/src/sketches';
+import { TitleBackLayer } from './components/title-back-layer';
 
 function App() {
   const {
     setCount,
     setAnimateTitle,
-    setAnimateBackground,
+    setShrinkBackground,
     setRetractBackground,
     sketch1,
     setSketch1,
@@ -52,17 +53,15 @@ function App() {
     <div className='relative flex h-full w-full border-0 bg-white'>
       {/* <div className='absolute inset-x-0 top-1/2 z-10 h-[2px] -translate-y-1/2 bg-white'></div> */}
       {/* <SketchPane /> */}
-      <SketchPane sketchKey={sketch1} />
-      <Title variant='topBackground' />
-      <Title variant='middleBackground' />
-      <Title variant='bottomBackground' />
+
+      <TitleBackLayer />
       <TitleFrontLayer />
 
       <div className='absolute z-20 flex gap-2'>
         <Button onClick={() => setAnimateTitle((prev) => !prev)}>
           Animate Title
         </Button>
-        <Button onClick={() => setAnimateBackground((prev) => !prev)}>
+        <Button onClick={() => setShrinkBackground((prev) => !prev)}>
           Animate Background
         </Button>
         <Button onClick={() => setRetractBackground((prev) => !prev)}>

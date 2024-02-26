@@ -7,10 +7,14 @@ type HomePageContextValue = {
   setCount: React.Dispatch<React.SetStateAction<number>>;
   animateTitle: boolean;
   setAnimateTitle: React.Dispatch<React.SetStateAction<boolean>>;
-  animateBackground: boolean;
-  setAnimateBackground: React.Dispatch<React.SetStateAction<boolean>>;
+  shrinkBackground: boolean;
+  setShrinkBackground: React.Dispatch<React.SetStateAction<boolean>>;
   retractBackground: boolean;
   setRetractBackground: React.Dispatch<React.SetStateAction<boolean>>;
+  shrinkForeground: boolean;
+  setShrinkForeground: React.Dispatch<React.SetStateAction<boolean>>;
+  retractForeground: boolean;
+  setRetractForeground: React.Dispatch<React.SetStateAction<boolean>>;
   sketch1: SketchKey | null;
   setSketch1: React.Dispatch<React.SetStateAction<SketchKey | null>>;
   sketch2: SketchKey | null;
@@ -35,8 +39,10 @@ type HomePageProviderProps = {
 
 export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   const [animateTitle, setAnimateTitle] = useState(false);
-  const [animateBackground, setAnimateBackground] = useState(false);
+  const [shrinkBackground, setShrinkBackground] = useState(false);
   const [retractBackground, setRetractBackground] = useState(true);
+  const [shrinkForeground, setShrinkForeground] = useState(false);
+  const [retractForeground, setRetractForeground] = useState(true);
   const [sketch1, setSketch1] = useState<SketchKey | null>(null);
   const [sketch2, setSketch2] = useState<SketchKey | null>(null);
   const [count, setCount] = useState(0);
@@ -48,10 +54,14 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
         setCount,
         animateTitle,
         setAnimateTitle,
-        animateBackground,
-        setAnimateBackground,
+        shrinkBackground,
+        setShrinkBackground,
         retractBackground,
         setRetractBackground,
+        shrinkForeground,
+        setShrinkForeground,
+        retractForeground,
+        setRetractForeground,
         sketch1,
         setSketch1,
         sketch2,
