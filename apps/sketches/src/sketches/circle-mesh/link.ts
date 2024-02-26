@@ -23,7 +23,7 @@ export class Link {
     if (this.followsMouse) {
       const mouseForce = this.getMouseForce();
       this.vel.add(mouseForce);
-      this.vel.mult(0.2); // Damping mouse spring differently for now
+      this.vel.mult(0.01); // Damping mouse spring differently for now
     } else {
       const neighborForce = this.getNeighborForce();
       this.vel.add(neighborForce);

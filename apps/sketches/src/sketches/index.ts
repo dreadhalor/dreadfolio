@@ -12,6 +12,8 @@ import { MoonlightOcean } from './moonlight-ocean/moonlight-ocean';
 import { BreathingPlane } from './breathing-plane/breathing-plane';
 import { DotGlobe } from './dot-globe/dot-globe';
 import { CircleMesh } from './circle-mesh/circle-mesh';
+import { SpinningMesh, SpinningMesh2 } from './spinning-mesh/spinning-mesh';
+import { Honeycombing } from './honeycombing/honeycombing';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -66,6 +68,18 @@ export const sketches = {
   'circle-mesh': {
     name: 'Circle Mesh',
     sketch: CircleMesh,
+  },
+  'spinning-mesh2': {
+    name: 'Spinning Mesh2',
+    sketch: SpinningMesh2,
+  },
+  'spinning-mesh': {
+    name: 'Spinning Mesh',
+    sketch: SpinningMesh,
+  },
+  honeycombing: {
+    name: 'Honeycombing',
+    sketch: Honeycombing,
   },
 } as const;
 
