@@ -8,6 +8,7 @@ import { GosperCurve } from './gosper-curve/gosper-curve';
 import { FlowField } from './flow-field/flow-field';
 import { DvdLogo } from './dvd-logo/dvd-logo';
 import { Scrunching } from './scrunching/scrunching';
+import { MoonlightOcean } from './moonlight-ocean/moonlight-ocean';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -46,6 +47,10 @@ export const sketches = {
   scrunching: {
     name: 'Scrunching',
     sketch: Scrunching,
+  },
+  'moonlight-ocean': {
+    name: 'Moonlight Ocean',
+    sketch: MoonlightOcean,
   },
 } as const;
 
