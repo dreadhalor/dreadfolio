@@ -23,7 +23,7 @@ export const BreathingPlane = (p5: P5CanvasInstance<FpsSketchProps>) => {
   };
 
   function setupScene() {
-    p5.background(39);
+    p5.background(51);
     p5.fill(250);
     p5.stroke(0);
     p5.strokeWeight(2);

@@ -3,7 +3,7 @@ import P5 from 'p5';
 export const Honeycombing = (p5: P5) => {
   let cycle = 0;
   const colors = {
-    bg: [200] as [number],
+    bg: [255] as [number],
     lines: [0, 0, 0] as [number, number, number],
   };
 

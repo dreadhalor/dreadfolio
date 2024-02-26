@@ -14,6 +14,8 @@ import { DotGlobe } from './dot-globe/dot-globe';
 import { CircleMesh } from './circle-mesh/circle-mesh';
 import { SpinningMesh, SpinningMesh2 } from './spinning-mesh/spinning-mesh';
 import { Honeycombing } from './honeycombing/honeycombing';
+import { JoyDivision } from './joy-division/joy-division';
+import { InfinityMirror } from './infinity-mirror/infinity-mirror';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -80,6 +82,14 @@ export const sketches = {
   honeycombing: {
     name: 'Honeycombing',
     sketch: Honeycombing,
+  },
+  'joy-division': {
+    name: 'Joy Division',
+    sketch: JoyDivision,
+  },
+  'infinity-mirror': {
+    name: 'Infinity Mirror',
+    sketch: InfinityMirror,
   },
 } as const;
 
