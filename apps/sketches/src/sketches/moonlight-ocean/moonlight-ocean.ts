@@ -61,7 +61,6 @@ function drawWaves(p5: P5) {
   p5.fill(39);
 
   for (let wave = 0; wave < waves.count; wave++) {
-    console.log(p5.drawingContext);
     if (p5.drawingContext.setLineDash) {
       const distance = easeInQuad(wave / waves.count, 0, 1, 1);
       const gapBetweenWaves = p5.map(distance, 0, 1, 1, 40);

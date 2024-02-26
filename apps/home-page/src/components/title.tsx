@@ -19,7 +19,7 @@ const Title = ({ variant }: TitleProps) => {
   const [height, setHeight] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  const { animateTitle } = useHomePage();
+  const { animateTitle, sketch2 } = useHomePage();
 
   useLayoutEffect(() => {
     setHeight((_) => heightRef.current?.offsetHeight ?? 0);
@@ -27,7 +27,10 @@ const Title = ({ variant }: TitleProps) => {
   }, [heightRef.current?.offsetHeight, height]);
 
   const titleVariants = cva(
-    ['absolute top-1/2 w-full border-0 text-center uppercase mix-blend-screen'],
+    cn([
+      'absolute top-1/2 w-full border-0 text-center uppercase',
+      (!sketch2 || !animateTitle) && 'mix-blend-screen',
+    ]),
     {
       variants: {
         position: {

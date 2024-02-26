@@ -1,20 +1,19 @@
 import P5 from 'p5';
 import { scl } from '../flow-field';
-import { Vector } from '../../../utils';
 
 export class Particle {
-  pos: Vector;
-  prevPos: Vector;
-  vel: Vector;
-  acc: Vector;
+  pos: P5.Vector;
+  prevPos: P5.Vector;
+  vel: P5.Vector;
+  acc: P5.Vector;
   maxSpeed = 4;
   mass = 20;
 
   constructor(private p5: P5) {
-    this.pos = new Vector(p5.random(p5.width), p5.random(p5.height));
+    this.pos = p5.createVector(p5.random(p5.width), p5.random(p5.height));
     this.prevPos = this.pos.copy();
-    this.vel = new Vector(0, 0);
-    this.acc = new Vector(0, 0);
+    this.vel = p5.createVector(0, 0);
+    this.acc = p5.createVector(0, 0);
   }
 
   update() {
@@ -25,7 +24,7 @@ export class Particle {
     this.acc.mult(0);
   }
 
-  follow(vectors: Vector[]) {
+  follow(vectors: P5.Vector[]) {
     const x = Math.floor(this.pos.x / scl);
     const y = Math.floor(this.pos.y / scl);
     const index = x + y * Math.floor(this.p5.width / scl);
@@ -33,7 +32,7 @@ export class Particle {
     if (force) this.applyForce(force);
   }
 
-  applyForce(force: Vector) {
+  applyForce(force: P5.Vector) {
     this.acc.add(force.div(this.mass));
   }
 

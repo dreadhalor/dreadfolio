@@ -2,13 +2,15 @@ import { Variants, motion, useAnimationControls } from 'framer-motion';
 import { useHomePage } from '../providers/home-page-provider';
 import { Title } from './title';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { SketchPane } from './sketch-pane';
+import { sketch } from '../../../ascii-video/src/sketch';
 
 const TitleFrontLayer = () => {
   const sizeRef = useRef<HTMLDivElement>(null);
 
   const [maxRadius, setMaxRadius] = useState<number | null>(null);
 
-  const { animateBackground, retractBackground } = useHomePage();
+  const { animateBackground, retractBackground, sketch2 } = useHomePage();
 
   useLayoutEffect(() => {
     if (sizeRef.current) {
@@ -55,6 +57,7 @@ const TitleFrontLayer = () => {
         variants={variants}
       >
         <div className='absolute inset-0 bg-black' />
+        <SketchPane sketchKey={sketch2} />
         <Title variant='top' />
         <Title variant='middle' />
         <Title variant='middleOutline' />
