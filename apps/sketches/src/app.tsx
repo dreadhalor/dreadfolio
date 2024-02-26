@@ -1,31 +1,23 @@
 import { ReactP5Wrapper, Sketch, SketchProps } from '@p5-wrapper/react';
 import {
-  Cubes,
-  Sand,
-  Waves,
-  MarchingSquares,
   circleMargin,
   squareSize,
   circleDiameter,
-  GosperCurve,
-  FlowField,
+  sketches,
+  SketchKey,
 } from './sketches';
 import { useRef, useState } from 'react';
 import { throttle } from 'lodash';
 import { ControlPanel } from './components/control-panel';
 
-type Sketches =
-  | 'sand'
-  | 'waves'
-  | 'cubes'
-  | 'metaballs'
-  | 'gosper-curve'
-  | 'flow-field';
-
+const getSketchNames = () => {
+  return Object.keys(sketches) as SketchKey[];
+};
+const getLastSketch = () => getSketchNames().at(-1)!;
 const App = () => {
   const [fps, setFps] = useState(60);
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<Sketches>('flow-field');
+  const [sketch, setSketch] = useState<SketchKey>(getLastSketch());
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);
@@ -36,26 +28,12 @@ const App = () => {
   const [metaballSize, setMetaballSize] = useState(circleDiameter);
 
   const loadSketch = (sketch: string) => {
-    setSketch(sketch as Sketches);
+    setSketch(sketch as SketchKey);
   };
 
   const getSketch = () => {
-    switch (sketch) {
-      case 'sand':
-        return Sand;
-      case 'waves':
-        return Waves;
-      case 'cubes':
-        return Cubes;
-      case 'metaballs':
-        return MarchingSquares;
-      case 'gosper-curve':
-        return GosperCurve;
-      case 'flow-field':
-        return FlowField;
-      default:
-        return FlowField;
-    }
+    // use sketches to get the sketch
+    return sketches[sketch].sketch as Sketch<SketchProps>;
   };
 
   return (
@@ -82,7 +60,7 @@ const App = () => {
         setMetaballSize={setMetaballSize}
       />
       <ReactP5Wrapper
-        sketch={getSketch() as Sketch<SketchProps>}
+        sketch={getSketch()}
         setFps={throttledSetFps.current}
         distanceField={distanceField}
         showMetaballs={showMetaballs}

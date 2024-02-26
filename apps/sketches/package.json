@@ -10,11 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dread-ui": "workspace:*",
     "@p5-wrapper/react": "^4.3.4",
+    "dread-ui": "workspace:*",
     "p5": "^1.4.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "simplex-noise": "^4.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.55",

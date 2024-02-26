@@ -2,7 +2,7 @@ import P5 from 'p5';
 import { Turtle } from './classes/turtle';
 import { throttle } from 'lodash';
 
-export let points: P5.Vector[] = [];
+export const points: P5.Vector[] = [];
 
 export const GosperCurve = (p5: P5) => {
   const rules = {
@@ -58,7 +58,7 @@ export const GosperCurve = (p5: P5) => {
     // Generate the sequence
     for (let i = 0; i < depth; i++) {
       let newSeq = '';
-      for (let char of sequence) {
+      for (const char of sequence) {
         if (char === 'X') newSeq += 'X+YF+';
         else if (char === 'Y') newSeq += '-FX-Y';
         else newSeq += char;
@@ -66,7 +66,7 @@ export const GosperCurve = (p5: P5) => {
       sequence = newSeq;
     }
     // Draw the curve
-    for (let char of sequence) {
+    for (const char of sequence) {
       if (char === 'F') {
         turtle.forward(len);
         points.push(p5.createVector(turtle.x, turtle.y)); // Assuming x and y are public
@@ -103,8 +103,8 @@ export const GosperCurve = (p5: P5) => {
       if (index === 0) p5.vertex(p.x, p.y);
       else {
         const dist = p5.dist(
-          points[index - 1].x,
-          points[index - 1].y,
+          points[index - 1]!.x,
+          points[index - 1]!.y,
           p.x,
           p.y,
         );
@@ -126,7 +126,7 @@ export const GosperCurve = (p5: P5) => {
       const hue = p5.map(index, 0, points.length, 360, 0);
       p5.stroke(Math.floor(hue), 50, 100);
       if (index > 0) {
-        p5.line(points[index - 1].x, points[index - 1].y, p.x, p.y);
+        p5.line(points[index - 1]!.x, points[index - 1]!.y, p.x, p.y);
       }
       // console.log(hue);
       // p5.vertex(p.x, p.y);

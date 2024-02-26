@@ -1,18 +1,20 @@
 import P5 from 'p5';
 import { scl } from '../flow-field';
+import { Vector } from '../../../utils';
 
 export class Particle {
-  pos: P5.Vector;
-  prevPos: P5.Vector;
-  vel: P5.Vector;
-  acc: P5.Vector;
+  pos: Vector;
+  prevPos: Vector;
+  vel: Vector;
+  acc: Vector;
   maxSpeed = 4;
+  mass = 20;
 
   constructor(private p5: P5) {
-    this.pos = p5.createVector(p5.random(p5.width), p5.random(p5.height));
+    this.pos = new Vector(p5.random(p5.width), p5.random(p5.height));
     this.prevPos = this.pos.copy();
-    this.vel = p5.createVector(0, 0);
-    this.acc = p5.createVector(0, 0);
+    this.vel = new Vector(0, 0);
+    this.acc = new Vector(0, 0);
   }
 
   update() {
@@ -23,7 +25,7 @@ export class Particle {
     this.acc.mult(0);
   }
 
-  follow(vectors: P5.Vector[]) {
+  follow(vectors: Vector[]) {
     const x = Math.floor(this.pos.x / scl);
     const y = Math.floor(this.pos.y / scl);
     const index = x + y * Math.floor(this.p5.width / scl);
@@ -31,15 +33,15 @@ export class Particle {
     if (force) this.applyForce(force);
   }
 
-  applyForce(force: P5.Vector) {
-    this.acc.add(force);
+  applyForce(force: Vector) {
+    this.acc.add(force.div(this.mass));
   }
 
   show(buffer1: P5.Graphics, buffer2: P5.Graphics, p5: P5) {
     // make the hue shift based on time
     buffer1.colorMode(buffer1.HSB);
     buffer1.stroke(
-      buffer1.map(buffer1.sin(p5.frameCount / 1000), -1, 1, 0, 360),
+      buffer1.map(buffer1.sin(p5.frameCount / 100), -1, 1, 0, 360),
       50,
       100,
     );

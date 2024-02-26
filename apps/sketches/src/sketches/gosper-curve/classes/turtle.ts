@@ -2,10 +2,10 @@ import P5 from 'p5';
 import { points } from '../gosper-curve';
 
 export class Turtle {
-  private p5: P5;
-  private x: number;
-  private y: number;
-  private angle: number;
+  p5: P5;
+  x: number;
+  y: number;
+  angle: number;
 
   constructor(p5: P5, x: number, y: number, angle: number = -90) {
     this.p5 = p5;

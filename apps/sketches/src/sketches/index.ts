@@ -1,12 +1,47 @@
 import { SketchProps } from '@p5-wrapper/react';
 
-export { SandSketch as Sand } from './sand/sketch';
-export * from './cubes';
-export * from './waves';
+import { SandSketch } from './sand/sketch';
+import { Cubes } from './cubes';
+import { Waves } from './waves';
+import { MarchingSquares } from './marching-squares/marching-squares';
+import { GosperCurve } from './gosper-curve/gosper-curve';
+import { FlowField } from './flow-field/flow-field';
+import { DvdLogo } from './dvd-logo/dvd-logo';
 export * from './marching-squares/marching-squares';
-export * from './gosper-curve/gosper-curve';
-export * from './flow-field/flow-field';
 
 export type FpsSketchProps = SketchProps & {
   setFps: (framerate: number) => void;
 };
+
+export const sketches = {
+  sand: {
+    name: 'Sand',
+    sketch: SandSketch,
+  },
+  cubes: {
+    name: 'Cubes',
+    sketch: Cubes,
+  },
+  waves: {
+    name: 'Waves',
+    sketch: Waves,
+  },
+  metaballs: {
+    name: 'Metaballs',
+    sketch: MarchingSquares,
+  },
+  'gosper-curve': {
+    name: 'Gosper Curve',
+    sketch: GosperCurve,
+  },
+  'flow-field': {
+    name: 'Flow Field',
+    sketch: FlowField,
+  },
+  'dvd-logo': {
+    name: 'DVD Logo',
+    sketch: DvdLogo,
+  },
+} as const;
+
+export type SketchKey = keyof typeof sketches;

@@ -16,6 +16,7 @@ import {
 } from 'dread-ui';
 import { cn } from '@repo/utils';
 import { useState } from 'react';
+import { sketches } from '../sketches';
 
 type ControlPanelProps = {
   fps: number;
@@ -95,12 +96,11 @@ const ControlPanel = ({
                   <span>Sketch: {sketch}</span>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='sand'>Sand</SelectItem>
-                  <SelectItem value='waves'>Waves</SelectItem>
-                  <SelectItem value='cubes'>Cubes</SelectItem>
-                  <SelectItem value='metaballs'>Metaballs</SelectItem>
-                  <SelectItem value='gosper-curve'>Gosper Curve</SelectItem>
-                  <SelectItem value='flow-field'>Flow Field</SelectItem>
+                  {Object.entries(sketches).map(([key, { name }]) => (
+                    <SelectItem key={key} value={key}>
+                      {name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               {sketch === 'metaballs' && (

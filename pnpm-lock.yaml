@@ -180,12 +180,18 @@ importers:
 
   apps/home-page:
     dependencies:
+      '@p5-wrapper/react':
+        specifier: ^4.3.4
+        version: 4.3.4(react-dom@18.2.0)(react@18.2.0)
       dread-ui:
         specifier: workspace:*
         version: link:../../packages/dread-ui
       framer-motion:
         specifier: ^11.0.3
         version: 11.0.3(react-dom@18.2.0)(react@18.2.0)
+      p5:
+        specifier: ^1.4.1
+        version: 1.9.0
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -541,6 +547,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      simplex-noise:
+        specifier: ^4.0.1
+        version: 4.0.1
     devDependencies:
       '@types/react':
         specifier: ^18.2.55
@@ -14288,6 +14297,10 @@ packages:
 
   /simple-wcswidth@1.0.1:
     resolution: {integrity: sha512-xMO/8eNREtaROt7tJvWJqHBDTMFN4eiQ5I4JRMuilwfnFcV5W9u7RUkueNkdw0jPqGMX36iCywelS5yilTuOxg==}
+    dev: false
+
+  /simplex-noise@4.0.1:
+    resolution: {integrity: sha512-zl/+bdSqW7HJOQ0oDbxrNYaF4F5ik0i7M6YOYmEoIJNtg16NpvWaTTM1Y7oV/7T0jFljawLgYPS81Uu2rsfo1A==}
     dev: false
 
   /sisteransi@1.0.5:

@@ -30,7 +30,7 @@ const TitleFrontLayer = () => {
         return;
       }
       if (animateBackground) {
-        controls.start('shrink'); // Shrink to min(95vh, 95vw)
+        controls.start('shrink'); // Shrink to half size
         return;
       }
     }
@@ -40,7 +40,7 @@ const TitleFrontLayer = () => {
   // Define the animation variants
   const variants: Variants = {
     visible: { clipPath: `circle(${maxRadius}px at 50% 50%)` },
-    shrink: { clipPath: `circle(calc(min(95vh,95vw) / 2) at 50% 50%)` },
+    shrink: { clipPath: `circle(calc(min(50vh,50vw) / 2) at 50% 50%)` },
     hidden: { clipPath: `circle(0px at 50% 50%)` },
   };
   return (
