@@ -15,7 +15,7 @@ export const JoyDivision = (p5: P5) => {
   const size = 10;
   const gridSize = Math.ceil((biggestSquare * 0.8) / size) + 1;
   const gridOffset = Math.round(biggestSquare * 0.1);
-  const maxHeight = 300;
+  const maxHeight = 600;
 
   const noiseScale = 0.2;
   let noiseOffsetX = 0;
@@ -46,7 +46,8 @@ export const JoyDivision = (p5: P5) => {
       (p5.width - biggestSquare) / 2,
       (p5.height - biggestSquare) / 2,
     );
-    // Mouse controlled noise offset
+
+    // Move noise
     noiseOffsetX += p5.map(p5.width * 0.7, 0, p5.width, 1, -1);
     noiseOffsetY += p5.map(p5.height * 0.3, 0, p5.height, -1, 1);
 
@@ -58,7 +59,7 @@ export const JoyDivision = (p5: P5) => {
             (point.posX - noiseOffsetX) * noiseScale,
             (point.posY + noiseOffsetY) * noiseScale,
           ),
-          0.5,
+          0.44,
           1,
         ) *
           maxHeight -

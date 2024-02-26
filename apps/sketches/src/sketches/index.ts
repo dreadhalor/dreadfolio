@@ -16,6 +16,7 @@ import { SpinningMesh, SpinningMesh2 } from './spinning-mesh/spinning-mesh';
 import { Honeycombing } from './honeycombing/honeycombing';
 import { JoyDivision } from './joy-division/joy-division';
 import { InfinityMirror } from './infinity-mirror/infinity-mirror';
+import { LoFiMountains } from './lo-fi-mountains/lo-fi-mountains';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -90,6 +91,10 @@ export const sketches = {
   'infinity-mirror': {
     name: 'Infinity Mirror',
     sketch: InfinityMirror,
+  },
+  'lo-fi-mountains': {
+    name: 'Lo-Fi Mountains',
+    sketch: LoFiMountains,
   },
 } as const;
 

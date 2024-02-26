@@ -32,7 +32,7 @@ export const InfinityMirror = (p5: P5) => {
     p5.translate(
       cubeMiddle * -2 + offset,
       cubeMiddle * -2 + cubeGap * 0.5 + offset / 2,
-      300,
+      400,
     );
 
     // Build matrix
