@@ -19,6 +19,8 @@ type HomePageContextValue = {
   setSketch1: React.Dispatch<React.SetStateAction<SketchKey | null>>;
   sketch2: SketchKey | null;
   setSketch2: React.Dispatch<React.SetStateAction<SketchKey | null>>;
+  swapLayers: boolean;
+  setSwapLayers: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const HomePageContext = createContext<HomePageContextValue>(
@@ -40,11 +42,12 @@ type HomePageProviderProps = {
 export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   const [animateTitle, setAnimateTitle] = useState(false);
   const [shrinkBackground, setShrinkBackground] = useState(false);
-  const [retractBackground, setRetractBackground] = useState(true);
+  const [retractBackground, setRetractBackground] = useState(false);
   const [shrinkForeground, setShrinkForeground] = useState(false);
   const [retractForeground, setRetractForeground] = useState(true);
   const [sketch1, setSketch1] = useState<SketchKey | null>(null);
   const [sketch2, setSketch2] = useState<SketchKey | null>(null);
+  const [swapLayers, setSwapLayers] = useState(false);
   const [count, setCount] = useState(0);
 
   return (
@@ -62,6 +65,8 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
         setShrinkForeground,
         retractForeground,
         setRetractForeground,
+        swapLayers,
+        setSwapLayers,
         sketch1,
         setSketch1,
         sketch2,

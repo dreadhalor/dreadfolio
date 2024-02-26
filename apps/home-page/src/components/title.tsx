@@ -29,6 +29,7 @@ const Title = ({ variant }: TitleProps) => {
   const titleVariants = cva(
     cn([
       'absolute top-1/2 w-full border-0 text-center uppercase',
+      // 'mix-blend-screen',
       (!sketch2 || !animateTitle) && 'mix-blend-screen',
     ]),
     {
@@ -47,15 +48,21 @@ const Title = ({ variant }: TitleProps) => {
   );
 
   const dy = Math.min(height * 0.65);
+  const dropShadow =
+    'drop-shadow(0 20px 13px rgb(0 0 0 / 0.6)) drop-shadow(0 8px 5px rgb(0 0 0 / 0.1))';
+  const outlineDropShadow =
+    'drop-shadow(0 20px 13px rgb(0 0 0 / 1)) drop-shadow(0 8px 5px rgb(0 0 0 / 1))';
 
   const variants: Variants = {
     top: {
       y: -dy - height / 2,
       opacity: 1,
+      filter: dropShadow,
     },
     topResting: {
       y: -height / 2,
       opacity: 1,
+      filter: dropShadow,
     },
     middle: {
       y: -height / 2,
@@ -67,6 +74,7 @@ const Title = ({ variant }: TitleProps) => {
     middleResting: {
       y: -height / 2,
       opacity: 1,
+      filter: dropShadow,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
@@ -76,6 +84,7 @@ const Title = ({ variant }: TitleProps) => {
       WebkitTextStroke: '0.02em hsl(120,100%,50%)',
       WebkitTextFillColor: 'transparent',
       opacity: 1,
+      filter: outlineDropShadow,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
@@ -93,10 +102,12 @@ const Title = ({ variant }: TitleProps) => {
     bottom: {
       y: dy - height / 2,
       opacity: 1,
+      filter: dropShadow,
     },
     bottomResting: {
       y: -height / 2,
       opacity: 1,
+      filter: dropShadow,
     },
     topBackground: {
       y: -dy - height / 2,
