@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'dread-ui';
-import { useHomePage } from './providers/home-page-provider';
+import { steps, useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
 import { sketches } from '../../sketches/src/sketches';
 import { TitleBackLayer } from './components/title-back-layer';
@@ -31,11 +31,13 @@ function App() {
     sketch2,
     setSketch1,
     setSketch2,
+    step,
+    setStep,
   } = useHomePage();
 
-  useEffect(() => {
-    setSketch1('flow-field');
-  }, [setSketch1, setSketch2]);
+  // useEffect(() => {
+  //   setSketch1('flow-field');
+  // }, [setSketch1, setSketch2]);
 
   useEffect(() => {
     const listener = () => {
@@ -55,6 +57,18 @@ function App() {
       <TitleBackLayer index={swapLayers ? 2 : 1} />
 
       <div className='absolute z-20 flex gap-2'>
+        <Select value={step} onValueChange={setStep}>
+          <SelectTrigger className='w-[160px]'>
+            <SelectValue>Step: {step}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {steps.map((step) => (
+              <SelectItem key={step} value={step}>
+                {step}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button
           variant={animateTitle ? 'default' : 'secondary'}
           onClick={() => setAnimateTitle((prev) => !prev)}

@@ -1,6 +1,6 @@
 import { Variants, motion } from 'framer-motion';
 import { cn } from '@repo/utils';
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { useHomePage } from '../providers/home-page-provider';
 
@@ -42,8 +42,8 @@ const Title = ({ variant }: TitleProps) => {
   const titleVariants = cva(
     cn([
       'absolute top-1/2 w-full border-0 text-center uppercase',
-      // 'mix-blend-screen',
-      (!sketch2 || !animateTitle) && 'mix-blend-screen',
+      'mix-blend-screen',
+      // (!sketch2 || !animateTitle) && 'mix-blend-screen',
     ]),
     {
       variants: {
@@ -61,65 +61,41 @@ const Title = ({ variant }: TitleProps) => {
   );
 
   const variants: Variants = {
-    top: {
+    topAnimated: {
       y: -dy - height / 2,
-      opacity: 1,
-      filter: dropShadow,
     },
-    topResting: {
+    top: {
       y: -height / 2,
-      opacity: 1,
-      filter: dropShadow,
     },
     middle: {
       y: -height / 2,
-      opacity: 0,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
     },
-    middleResting: {
+    middleAnimated: {
       y: -height / 2,
-      opacity: 1,
-      color: 'hsl(120,100%,50%)',
-      filter: dropShadow,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
     },
     middleOutline: {
       y: -height / 2,
-      // WebkitTextStroke: '0.02em hsl(120,100%,50%)',
-      // WebkitTextFillColor: 'transparent',
-      // fillOpacity: 0,
-      // color: 'transparent',
-      opacity: 1,
-      // filter: outlineDropShadow,
-      // textShadow:
-      //   '1px 1px 2px rgba(255, 255, 255, 0.7),  2px 2px 4px rgba(0, 0, 0, 0.5),  -1px -1px 2px rgba(0, 0, 0, 0.3)',
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
     },
     middleOutlineResting: {
       y: -height / 2,
-      // WebkitTextStroke: '0.02em hsl(120,100%,50%)',
-      // WebkitTextFillColor: 'transparent',
-
-      opacity: 0,
       transition: {
         duration: initialLoad ? 0 : 0.2,
       },
     },
-    bottom: {
+    bottomAnimated: {
       y: dy - height / 2,
-      opacity: 1,
-      filter: dropShadow,
     },
-    bottomResting: {
+    bottom: {
       y: -height / 2,
-      opacity: 1,
-      filter: dropShadow,
     },
     topBackground: {
       y: -dy - height / 2,
@@ -137,13 +113,13 @@ const Title = ({ variant }: TitleProps) => {
   const getVariant = (variant: TitleProps['variant']) => {
     switch (variant) {
       case 'top':
-        return animateTitle ? 'top' : 'topResting';
+        return animateTitle ? 'topAnimated' : 'top';
       case 'middle':
-        return animateTitle ? 'middle' : 'middleResting';
+        return animateTitle ? 'middleAnimated' : 'middle';
       case 'middleOutline':
         return animateTitle ? 'middleOutline' : 'middleOutlineResting';
       case 'bottom':
-        return animateTitle ? 'bottom' : 'bottomResting';
+        return animateTitle ? 'bottomAnimated' : 'bottom';
       case 'topBackground':
         return 'topBackground';
       case 'middleBackground':
@@ -160,10 +136,10 @@ const Title = ({ variant }: TitleProps) => {
       case 'top':
         return 'hsl(0,100%,50%)';
       case 'middle':
-        if (animateTitle) return 'hsl(120,100%,50%)';
-        return 'hsl(120,100%,50%)';
-      case 'middleOutline':
-        return 'transparent';
+        if (animateTitle) return 'hsl(120,100%,50%,0)';
+        return 'hsl(120,100%,50%,1)';
+      // case 'middleOutline':
+      //   return 'transparent';
       case 'bottom':
         return 'hsl(240,100%,50%)';
       case 'topBackground':
@@ -181,7 +157,8 @@ const Title = ({ variant }: TitleProps) => {
       case 'top':
         return 'hsl(0,100%,50%)';
       case 'middle':
-        return 'hsl(120,100%,50%)';
+        if (animateTitle) return 'hsl(120,100%,50%,1)';
+        return 'hsl(120,100%,50%,0)';
       case 'middleBackground':
         return 'hsl(0,0%,0%)';
       case 'bottom':
@@ -194,7 +171,7 @@ const Title = ({ variant }: TitleProps) => {
     switch (variant) {
       case 'top':
         return '0';
-      case 'middleOutline':
+      case 'middle':
       case 'middleBackground':
         return '0.02em';
       case 'bottom':
@@ -208,9 +185,7 @@ const Title = ({ variant }: TitleProps) => {
       case 'top':
         return 1;
       case 'middleBackground':
-        return animateTitle ? 1 : 0;
       case 'middle':
-        return animateTitle ? 0 : 1;
       case 'bottom':
         return 1;
       default:
@@ -232,6 +207,27 @@ const Title = ({ variant }: TitleProps) => {
       default:
         return 'black';
     }
+  };
+
+  const textVariants: Variants = {
+    top: {
+      fill: 'hsl(0,100%,50%)',
+    },
+    middle: {
+      fill: 'hsl(120,100%,50%)',
+      fillOpacity: 1,
+      strokeOpacity: 0,
+    },
+    middleAnimated: {
+      fill: 'hsl(120,100%,50%)',
+      fillOpacity: 0,
+      strokeOpacity: 1,
+      stroke: 'hsl(120,100%,50%)',
+      strokeWidth: '0.02em',
+    },
+    bottom: {
+      fill: 'hsl(240,100%,50%)',
+    },
   };
 
   return (
@@ -265,7 +261,7 @@ const Title = ({ variant }: TitleProps) => {
             />
           </filter>
         </defs>
-        <text
+        <motion.text
           ref={textRef}
           textAnchor='middle' // Center the text horizontally
           x='50%' // Position the center of the text in the middle of the SVG
@@ -274,14 +270,16 @@ const Title = ({ variant }: TitleProps) => {
           dominantBaseline='middle'
           fontSize='min(15vw, 130px)'
           fontFamily='LigaSans'
-          fill={getFill()}
-          stroke={getOutline()}
-          strokeWidth={getStrokeWidth()}
           filter={`url(#${`shadow-${shadowId}`})`}
-          opacity={getOpacity()}
+          variants={textVariants}
+          transition={{
+            type: 'spring',
+            ...(!initialLoad ? { stiffness: 600, damping: 100 } : {}),
+            duration: initialLoad ? 0 : 0.5,
+          }}
         >
           Hi, I'm Scott
-        </text>
+        </motion.text>
       </svg>
     </motion.h1>
     // <motion.h1

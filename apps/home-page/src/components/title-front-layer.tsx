@@ -42,7 +42,6 @@ const TitleFrontLayer = ({ index }: TitleFrontLayerProps) => {
         <SketchPane sketchKey={sketch2} />
         <Title variant='top' />
         <Title variant='middle' />
-        <Title variant='middleOutline' />
         <Title variant='bottom' />
       </motion.div>
     </div>

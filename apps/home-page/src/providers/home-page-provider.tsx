@@ -1,5 +1,4 @@
-import { P5CanvasInstance, Sketch, SketchProps } from '@p5-wrapper/react';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SketchKey } from '../../../sketches/src/sketches';
 
 type HomePageContextValue = {
@@ -21,7 +20,19 @@ type HomePageContextValue = {
   setSketch2: React.Dispatch<React.SetStateAction<SketchKey | null>>;
   swapLayers: boolean;
   setSwapLayers: React.Dispatch<React.SetStateAction<boolean>>;
+  step: Steps;
+  setStep: React.Dispatch<React.SetStateAction<Steps>>;
 };
+
+export const steps = [
+  'init',
+  'split-text',
+  'first-app',
+  'first-close',
+  'second-app',
+  'third-app',
+] as const;
+export type Steps = (typeof steps)[number];
 
 const HomePageContext = createContext<HomePageContextValue>(
   {} as HomePageContextValue,
@@ -44,11 +55,49 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   const [shrinkBackground, setShrinkBackground] = useState(false);
   const [retractBackground, setRetractBackground] = useState(false);
   const [shrinkForeground, setShrinkForeground] = useState(false);
-  const [retractForeground, setRetractForeground] = useState(true);
-  const [sketch1, setSketch1] = useState<SketchKey | null>(null);
-  const [sketch2, setSketch2] = useState<SketchKey | null>(null);
+  const [retractForeground, setRetractForeground] = useState(false);
+  const [sketchBackground, setSketchBackground] = useState<SketchKey | null>(
+    null,
+  );
+  const [sketchForeground, setSketchForeground] = useState<SketchKey | null>(
+    null,
+  );
   const [swapLayers, setSwapLayers] = useState(false);
   const [count, setCount] = useState(0);
+  const [step, setStep] = useState<Steps>('init');
+
+  useEffect(() => {
+    switch (step) {
+      case 'init':
+        setAnimateTitle(false);
+        break;
+      case 'split-text':
+        setAnimateTitle(true);
+        break;
+      case 'first-app':
+        setShrinkForeground(true);
+        setSketchBackground('lo-fi-mountains');
+        break;
+      case 'first-close':
+        setShrinkForeground(false);
+        setRetractForeground(true);
+        break;
+      case 'second-app':
+        setRetractForeground(false);
+        setTimeout(() => {
+          setRetractBackground(true);
+        }, 300);
+        setSketchForeground('scrunching');
+        break;
+      case 'third-app':
+        setRetractBackground(false);
+        setTimeout(() => {
+          setRetractForeground(true);
+        }, 300);
+        setSketchBackground('honeycombing');
+        break;
+    }
+  }, [step]);
 
   return (
     <HomePageContext.Provider
@@ -67,10 +116,12 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
         setRetractForeground,
         swapLayers,
         setSwapLayers,
-        sketch1,
-        setSketch1,
-        sketch2,
-        setSketch2,
+        sketch1: sketchBackground,
+        setSketch1: setSketchBackground,
+        sketch2: sketchForeground,
+        setSketch2: setSketchForeground,
+        step,
+        setStep,
       }}
     >
       {children}
