@@ -1,8 +1,15 @@
 import { useEffect } from 'react';
-import { Button } from 'dread-ui';
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'dread-ui';
 import { useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
-import { type SketchKey } from '../../sketches/src/sketches';
+import { sketches } from '../../sketches/src/sketches';
 import { TitleBackLayer } from './components/title-back-layer';
 
 function App() {
@@ -30,9 +37,6 @@ function App() {
     setSketch1('flow-field');
   }, [setSketch1, setSketch2]);
 
-  const sketchOrder: SketchKey[] = ['flow-field', 'waves'];
-  const darkSketches: SketchKey[] = ['scrunching', 'moonlight-ocean'];
-
   useEffect(() => {
     const listener = () => {
       setCount((prev) => prev + 1);
@@ -52,20 +56,20 @@ function App() {
 
       <div className='absolute z-20 flex gap-2'>
         <Button
-          variant={animateTitle ? 'secondary' : 'default'}
+          variant={animateTitle ? 'default' : 'secondary'}
           onClick={() => setAnimateTitle((prev) => !prev)}
         >
           Animate Title
         </Button>
         <div className='flex flex-col gap-2'>
           <Button
-            variant={shrinkForeground ? 'secondary' : 'default'}
+            variant={shrinkForeground ? 'default' : 'secondary'}
             onClick={() => setShrinkForeground((prev) => !prev)}
           >
             Shrink Foreground
           </Button>
           <Button
-            variant={retractForeground ? 'secondary' : 'default'}
+            variant={retractForeground ? 'default' : 'secondary'}
             onClick={() => setRetractForeground((prev) => !prev)}
           >
             Retract Foreground
@@ -73,64 +77,50 @@ function App() {
         </div>
         <div className='flex flex-col gap-2'>
           <Button
-            variant={shrinkBackground ? 'secondary' : 'default'}
+            variant={shrinkBackground ? 'default' : 'secondary'}
             onClick={() => setShrinkBackground((prev) => !prev)}
           >
             Shrink Background
           </Button>
           <Button
-            variant={retractBackground ? 'secondary' : 'default'}
+            variant={retractBackground ? 'default' : 'secondary'}
             onClick={() => setRetractBackground((prev) => !prev)}
           >
             Retract Background
           </Button>
         </div>
         <Button
-          variant={swapLayers ? 'secondary' : 'default'}
+          variant={swapLayers ? 'default' : 'secondary'}
           onClick={() => setSwapLayers((prev) => !prev)}
         >
           Swap Layers
         </Button>
-        <div className='flex flex-col gap-2'>
-          <Button
-            variant={!sketch2 ? 'secondary' : 'default'}
-            onClick={() => setSketch2(null)}
-          >
-            Front: None
-          </Button>
-          <Button
-            variant={sketch2 === 'scrunching' ? 'secondary' : 'default'}
-            onClick={() => setSketch2('scrunching')}
-          >
-            Front: Scrunching
-          </Button>
-          <Button
-            variant={sketch2 === 'moonlight-ocean' ? 'secondary' : 'default'}
-            onClick={() => setSketch2('moonlight-ocean')}
-          >
-            Front: Moonlight Ocean
-          </Button>
-        </div>
-        <div className='flex flex-col gap-2'>
-          <Button
-            variant={sketch1 === 'flow-field' ? 'secondary' : 'default'}
-            onClick={() => setSketch1('flow-field')}
-          >
-            Back: Flow Field
-          </Button>
-          <Button
-            variant={sketch1 === 'waves' ? 'secondary' : 'default'}
-            onClick={() => setSketch1('waves')}
-          >
-            Back: Waves
-          </Button>
-          <Button
-            variant={sketch1 === 'breathing-plane' ? 'secondary' : 'default'}
-            onClick={() => setSketch1('breathing-plane')}
-          >
-            Back: Breathing Plane
-          </Button>
-        </div>
+        <Select value={sketch2} onValueChange={setSketch2}>
+          <SelectTrigger className='w-[200px]'>
+            <SelectValue>Front: {sketch2}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={null}>None</SelectItem>
+            {Object.entries(sketches).map(([key, { name }]) => (
+              <SelectItem key={key} value={key}>
+                {name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sketch1} onValueChange={setSketch1}>
+          <SelectTrigger className='w-[200px]'>
+            <SelectValue>Back: {sketch1}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={null}>None</SelectItem>
+            {Object.entries(sketches).map(([key, sketch]) => (
+              <SelectItem key={key} value={key}>
+                {sketch.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );
