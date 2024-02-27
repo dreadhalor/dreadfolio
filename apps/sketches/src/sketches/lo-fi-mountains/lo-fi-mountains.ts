@@ -89,7 +89,7 @@ export const LoFiMountains = (p5: p5) => {
     const dusk = p5.map(timer, 0, 1, 1, 0.5);
     for (let j = 0; j < levels.length; j++) {
       p5.noiseDetail(4, 0.3);
-      p5.fill(levels[j][0], levels[j][1], levels[j][2] * dusk);
+      p5.fill(levels[j]![0]!, levels[j]![1]!, levels[j]![2]! * dusk);
       p5.beginShape();
       drawMountainRange(j);
       p5.endShape(p5.CLOSE);
@@ -98,7 +98,7 @@ export const LoFiMountains = (p5: p5) => {
 
   const mountainXStep = 5; // Bleed over the edge to avoid gaps
   // Helper function to draw each mountain range
-  function drawMountainRange(levelIndex) {
+  function drawMountainRange(levelIndex: number) {
     p5.vertex(p5.width, p5.height);
     p5.vertex(0, p5.height);
     const scale = p5.map(levelIndex, 0, levels.length - 1, 100, 250);
@@ -117,7 +117,13 @@ export const LoFiMountains = (p5: p5) => {
   }
 
   // Create linear gradient
-  function createLinearGradient(w, h, c1, c2, axis) {
+  function createLinearGradient(
+    w: number,
+    h: number,
+    c1: [number, number, number, number],
+    c2: [number, number, number, number],
+    axis: 'x' | 'y',
+  ) {
     const gfx = p5.createGraphics(w, h);
     gfx.noFill();
     for (let i = 0; i <= (axis === 'y' ? h : w); i++) {

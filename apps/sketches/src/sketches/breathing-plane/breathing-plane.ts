@@ -52,11 +52,11 @@ export const BreathingPlane = (p5: P5CanvasInstance<FpsSketchProps>) => {
       const zOffset = calculateZOffset(x, y, z, boxesTimer);
       p5.push();
       p5.translate(
-        x * config.boxSize,
-        y * config.boxSize,
+        x * config.boxSize + x * 0.1, // Add a slight gap between boxes horizontally
+        y * config.boxSize + y * 0.1, // Add a slight gap between boxes vertically
         z * 2.4 * config.boxSize + zOffset,
       );
-      p5.box(config.boxSize);
+      p5.box(config.boxSize * 0.9); // Slightly reduce the box size to enhance the gap effect
       p5.pop();
     }
   }

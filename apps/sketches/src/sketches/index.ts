@@ -17,6 +17,8 @@ import { Honeycombing } from './honeycombing/honeycombing';
 import { JoyDivision } from './joy-division/joy-division';
 import { InfinityMirror } from './infinity-mirror/infinity-mirror';
 import { LoFiMountains } from './lo-fi-mountains/lo-fi-mountains';
+import { DancingRays } from './dancing-rays/dancing-rays';
+import { Skyscraper } from './skyscraper/skyscraper';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -95,6 +97,14 @@ export const sketches = {
   'lo-fi-mountains': {
     name: 'Lo-Fi Mountains',
     sketch: LoFiMountains,
+  },
+  'dancing-rays': {
+    name: 'Dancing Rays',
+    sketch: DancingRays,
+  },
+  skyscraper: {
+    name: 'Skyscraper',
+    sketch: Skyscraper,
   },
 } as const;
 
