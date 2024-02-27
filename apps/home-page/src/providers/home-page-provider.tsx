@@ -31,6 +31,9 @@ export const steps = [
   'first-close',
   'second-app',
   'third-app',
+  'fourth-app',
+  'fifth-app',
+  'sixth-app',
 ] as const;
 export type Steps = (typeof steps)[number];
 
@@ -66,6 +69,22 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   const [count, setCount] = useState(0);
   const [step, setStep] = useState<Steps>('init');
 
+  const swapApps = (key: SketchKey, layer: 'front' | 'back') => {
+    if (layer === 'front') {
+      setRetractBackground(false);
+      setTimeout(() => {
+        setRetractForeground(true);
+      }, 300);
+      setSketchBackground(key);
+    } else {
+      setRetractForeground(false);
+      setTimeout(() => {
+        setRetractBackground(true);
+      }, 300);
+      setSketchForeground(key);
+    }
+  };
+
   useEffect(() => {
     switch (step) {
       case 'init':
@@ -83,18 +102,19 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
         setRetractForeground(true);
         break;
       case 'second-app':
-        setRetractForeground(false);
-        setTimeout(() => {
-          setRetractBackground(true);
-        }, 300);
-        setSketchForeground('scrunching');
+        swapApps('scrunching', 'back');
         break;
       case 'third-app':
-        setRetractBackground(false);
-        setTimeout(() => {
-          setRetractForeground(true);
-        }, 300);
-        setSketchBackground('honeycombing');
+        swapApps('infinity-mirror', 'front');
+        break;
+      case 'fourth-app':
+        swapApps('flow-field', 'back');
+        break;
+      case 'fifth-app':
+        swapApps('breathing-plane', 'front');
+        break;
+      case 'sixth-app':
+        swapApps('dvd-logo', 'back');
         break;
     }
   }, [step]);
