@@ -7,8 +7,9 @@ import { motion } from 'framer-motion';
 
 type TitleBackLayerProps = {
   index: number;
+  blur?: boolean;
 };
-const TitleBackLayer = ({ index }: TitleBackLayerProps) => {
+const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
   const sizeRef = useRef<HTMLDivElement>(null);
   const { sketch1, shrinkBackground, retractBackground, setSwapLayers } =
     useHomePage();
@@ -37,7 +38,7 @@ const TitleBackLayer = ({ index }: TitleBackLayerProps) => {
           }
         }}
       >
-        <SketchPane sketchKey={sketch1} />
+        <SketchPane blur={blur} sketchKey={sketch1} />
         <Title variant='topBackground' />
         <Title variant='middleBackground' />
         <Title variant='bottomBackground' />

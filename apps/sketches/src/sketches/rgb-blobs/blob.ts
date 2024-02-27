@@ -7,12 +7,12 @@ export class Blob {
   acc: P5.Vector;
   color: P5.Color;
   radius = 150;
-  mass = 10;
+  mass = 20;
 
   constructor(layer: P5.Graphics, x: number, y: number, color: P5.Color) {
     this.layer = layer;
     this.pos = this.layer.createVector(x, y);
-    this.vel = this.layer.createVector(layer.random(3), layer.random(3));
+    this.vel = this.layer.createVector(0, 0);
     this.acc = this.layer.createVector(0, 0);
     this.color = color;
   }

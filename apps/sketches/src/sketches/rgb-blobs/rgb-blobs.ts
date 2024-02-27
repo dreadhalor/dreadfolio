@@ -44,6 +44,14 @@ export const RgbBlobs = (p5: P5) => {
           colors[i]!,
         ),
       );
+      blobs.push(
+        new Blob(
+          blobLayer,
+          p5.random(p5.width),
+          p5.random(p5.height),
+          colors[i]!,
+        ),
+      );
     }
   };
 

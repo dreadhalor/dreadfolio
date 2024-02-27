@@ -1,6 +1,6 @@
 import { Variants, motion } from 'framer-motion';
 import { cn } from '@repo/utils';
-import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { cva } from 'class-variance-authority';
 import { useHomePage } from '../providers/home-page-provider';
 
@@ -13,22 +13,34 @@ type TitleProps = {
     | 'topBackground'
     | 'middleBackground'
     | 'bottomBackground';
+  text?: string;
 };
-const Title = ({ variant }: TitleProps) => {
+const Title = ({ variant, text = `Hi, I'm Scott` }: TitleProps) => {
   const heightRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<SVGTextElement>(null);
   const [height, setHeight] = useState(0);
   const [textHeight, setTextHeight] = useState(0);
+  const [textWidth, setTextWidth] = useState(0);
   const [initialLoad, setInitialLoad] = useState(true);
   const shadowId = useId();
 
-  const { animateTitle, sketch2, swapLayers } = useHomePage();
+  const [effect, setEffect] = useState(false);
+  const [hidden, setHidden] = useState(true);
+
+  const { animateTitle, font, showText } = useHomePage();
+
+  useEffect(() => {
+    setEffect(showText);
+  }, [showText]);
+
+  useEffect(() => {
+    if (variant === 'top') setHidden(!effect);
+    else if (variant === 'middle') setTimeout(() => setHidden(!effect), 100);
+    else if (variant === 'bottom') setTimeout(() => setHidden(!effect), 200);
+    else setHidden(!effect);
+  }, [effect, variant]);
 
   const dy = Math.min(textHeight * 0.9);
-  const dropShadow =
-    'drop-shadow(0 20px 13px rgb(0 0 0 / 0.6)) drop-shadow(0 8px 5px rgb(0 0 0 / 0.1))';
-  const outlineDropShadow =
-    'drop-shadow(0 20px 13px rgb(0 0 0 / 1)) drop-shadow(0 8px 5px rgb(0 0 0 / 1))';
 
   useLayoutEffect(() => {
     setHeight((_) => heightRef.current?.offsetHeight ?? 0);
@@ -36,8 +48,10 @@ const Title = ({ variant }: TitleProps) => {
   }, [heightRef.current?.offsetHeight, height]);
 
   useLayoutEffect(() => {
-    setTextHeight((_) => textRef.current?.getBBox().height ?? 0);
-  }, [textHeight]);
+    const dimensions = textRef.current?.getBBox();
+    setTextHeight((_) => dimensions?.height ?? 0);
+    setTextWidth((_) => dimensions?.width ?? 0);
+  }, [textHeight, textWidth]);
 
   const titleVariants = cva(
     cn([
@@ -68,6 +82,12 @@ const Title = ({ variant }: TitleProps) => {
       y: -height / 2,
     },
     middle: {
+      y: -height / 2,
+      transition: {
+        duration: initialLoad ? 0 : 0.2,
+      },
+    },
+    decoding: {
       y: -height / 2,
       transition: {
         duration: initialLoad ? 0 : 0.2,
@@ -112,6 +132,8 @@ const Title = ({ variant }: TitleProps) => {
 
   const getVariant = (variant: TitleProps['variant']) => {
     switch (variant) {
+      // case 'hidden':
+      //   return 'hidden';
       case 'top':
         return animateTitle ? 'topAnimated' : 'top';
       case 'middle':
@@ -128,68 +150,6 @@ const Title = ({ variant }: TitleProps) => {
         return 'bottomBackground';
       default:
         return 'middle';
-    }
-  };
-
-  const getFill = () => {
-    switch (variant) {
-      case 'top':
-        return 'hsl(0,100%,50%)';
-      case 'middle':
-        if (animateTitle) return 'hsl(120,100%,50%,0)';
-        return 'hsl(120,100%,50%,1)';
-      // case 'middleOutline':
-      //   return 'transparent';
-      case 'bottom':
-        return 'hsl(240,100%,50%)';
-      case 'topBackground':
-      case 'bottomBackground':
-        return 'hsl(0,0%,0%)';
-      case 'middleBackground':
-        return 'transparent';
-      default:
-        return 'hsl(0,0%,0%)';
-    }
-  };
-
-  const getOutline = () => {
-    switch (variant) {
-      case 'top':
-        return 'hsl(0,100%,50%)';
-      case 'middle':
-        if (animateTitle) return 'hsl(120,100%,50%,1)';
-        return 'hsl(120,100%,50%,0)';
-      case 'middleBackground':
-        return 'hsl(0,0%,0%)';
-      case 'bottom':
-        return 'hsl(240,100%,50%)';
-      default:
-        return 'hsl(120,100%,50%)';
-    }
-  };
-  const getStrokeWidth = () => {
-    switch (variant) {
-      case 'top':
-        return '0';
-      case 'middle':
-      case 'middleBackground':
-        return '0.02em';
-      case 'bottom':
-        return '0';
-      default:
-        return '0';
-    }
-  };
-  const getOpacity = () => {
-    switch (variant) {
-      case 'top':
-        return 1;
-      case 'middleBackground':
-      case 'middle':
-      case 'bottom':
-        return 1;
-      default:
-        return 1;
     }
   };
 
@@ -228,12 +188,29 @@ const Title = ({ variant }: TitleProps) => {
     bottom: {
       fill: 'hsl(240,100%,50%)',
     },
+    middleBackground: {
+      fill: 'hsl(0,0%,0%, 0)',
+      fillOpacity: 0,
+      strokeOpacity: 1,
+      stroke: 'hsl(0,0%,0%)',
+      strokeWidth: '0.03em',
+    },
+  };
+
+  const whiteoutVariants: Variants = {
+    start: {
+      left: 0,
+    },
+    end: {
+      left: 0,
+      // left: '100%',
+    },
   };
 
   return (
     <motion.h1
       ref={heightRef}
-      className={cn(titleVariants({ position: variant }))}
+      className={cn(titleVariants({ position: variant }), 'overflow-hidden')}
       style={{
         fontSize: `min(15vw, 130px)`,
       }}
@@ -246,9 +223,12 @@ const Title = ({ variant }: TitleProps) => {
       }}
     >
       <svg
-        className={cn(variant === 'bottom' && 'border-0')}
         xmlns='http://www.w3.org/2000/svg'
-        style={{ overflow: 'visible', width: '100%', height: '100%' }}
+        style={{
+          overflow: 'hidden',
+          width: '100%',
+          height: '100%',
+        }}
         // preserveAspectRatio='xMidYMid meet' // This ensures that the SVG content is centered
       >
         <defs>
@@ -269,35 +249,54 @@ const Title = ({ variant }: TitleProps) => {
           alignmentBaseline='central' // Adjust the vertical alignment to center the text
           dominantBaseline='middle'
           fontSize='min(15vw, 130px)'
-          fontFamily='LigaSans'
-          filter={`url(#${`shadow-${shadowId}`})`}
+          fontFamily={font}
+          // filter={`url(#${`shadow-${shadowId}`})`}
           variants={textVariants}
+          animate={{
+            transform: hidden ? 'translateY(100%)' : 'translateY(0%)',
+            opacity: hidden ? 0 : 1,
+            transition: {
+              type: 'spring',
+              stiffness: 600,
+              damping: 75,
+              // delay: 0.1,
+            },
+          }}
+          // initial='hidden'
           transition={{
             type: 'spring',
             ...(!initialLoad ? { stiffness: 600, damping: 100 } : {}),
             duration: initialLoad ? 0 : 0.5,
           }}
         >
-          Hi, I'm Scott
+          {text}
         </motion.text>
       </svg>
+      {/* <motion.div
+        // onMouseOver={() => setEffect(true)}
+        // onMouseOut={() => setEffect(false)}
+        className='absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2'
+        style={{
+          width: textWidth,
+          height: textHeight,
+        }}
+      >
+        <div className='relative h-full w-full'>
+          <motion.div
+            className='absolute inset-y-0 right-0 bg-green-200 opacity-20'
+            variants={whiteoutVariants}
+            transition={{
+              type: 'spring',
+              stiffness: 600,
+              damping: 50,
+              // duration: 0.2,
+            }}
+            initial='start'
+            animate={effect ? 'end' : 'start'}
+          />
+        </div>
+      </motion.div> */}
     </motion.h1>
-    // <motion.h1
-    //   ref={heightRef}
-    //   className={cn(titleVariants({ position: variant }))}
-    //   style={{
-    //     fontSize: `min(15vw, 130px)`,
-    //   }}
-    //   variants={variants}
-    //   animate={getVariant(variant)}
-    //   transition={{
-    //     type: 'spring',
-    //     ...(!initialLoad ? { stiffness: 600, damping: 100 } : {}),
-    //     duration: initialLoad ? 0 : 0.5,
-    //   }}
-    // >
-    //   Hi, I'm Scott
-    // </motion.h1>
   );
 };
 

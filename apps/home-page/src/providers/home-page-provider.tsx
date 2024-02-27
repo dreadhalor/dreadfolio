@@ -22,10 +22,17 @@ type HomePageContextValue = {
   setSwapLayers: React.Dispatch<React.SetStateAction<boolean>>;
   step: Steps;
   setStep: React.Dispatch<React.SetStateAction<Steps>>;
+  font: string;
+  setFont: React.Dispatch<React.SetStateAction<string>>;
+  showText: boolean;
+  setShowText: React.Dispatch<React.SetStateAction<boolean>>;
+  startAnimating: boolean;
+  setStartAnimating: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const steps = [
   'init',
+  'show-text',
   'split-text',
   'first-app',
   'first-close',
@@ -34,6 +41,7 @@ export const steps = [
   'fourth-app',
   'fifth-app',
   'sixth-app',
+  'homepage',
 ] as const;
 export type Steps = (typeof steps)[number];
 
@@ -54,6 +62,7 @@ type HomePageProviderProps = {
 };
 
 export const HomePageProvider = ({ children }: HomePageProviderProps) => {
+  const [showText, setShowText] = useState(false);
   const [animateTitle, setAnimateTitle] = useState(false);
   const [shrinkBackground, setShrinkBackground] = useState(false);
   const [retractBackground, setRetractBackground] = useState(false);
@@ -67,7 +76,60 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   );
   const [swapLayers, setSwapLayers] = useState(false);
   const [count, setCount] = useState(0);
+  const [font, setFont] = useState('LigaSans');
   const [step, setStep] = useState<Steps>('init');
+  const [startAnimating, setStartAnimating] = useState(false);
+
+  const getFont = () => {
+    // randomize font
+    // make a big list of random fonts that are native to the web
+    const fonts = [
+      'Arial',
+      'Helvetica',
+      'Times New Roman',
+      'Courier New',
+      'Verdana',
+      'Georgia',
+      'Palatino',
+      'Garamond',
+      'Bookman',
+      'Comic Sans MS',
+      'Trebuchet MS',
+      'Arial Black',
+      'Impact',
+      'Lucida Console',
+      'Tahoma',
+      'Geneva',
+      'Courier New',
+      'Lucida Sans Unicode',
+      'Palatino Linotype',
+      'Book Antiqua',
+      'Nimbus Sans L',
+      'Nimbus Roman No9 L',
+      'Nimbus Mono',
+    ];
+    let randomFont;
+    do {
+      randomFont = fonts[Math.floor(Math.random() * fonts.length)]!;
+    } while (randomFont === font);
+    return randomFont;
+  };
+
+  useEffect(() => {
+    if (startAnimating) {
+      const interval = setInterval(() => {
+        setStep((prev) => {
+          const index = steps.indexOf(prev);
+          if (index === steps.length - 1) {
+            setStartAnimating(false);
+            return steps.at(-1)!;
+          }
+          return steps[index + 1]!;
+        });
+      }, 800);
+      return () => clearInterval(interval);
+    }
+  }, [startAnimating]);
 
   const swapApps = (key: SketchKey, layer: 'front' | 'back') => {
     if (layer === 'front') {
@@ -88,7 +150,10 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   useEffect(() => {
     switch (step) {
       case 'init':
-        setAnimateTitle(false);
+        setShowText(false);
+        break;
+      case 'show-text':
+        setShowText(true);
         break;
       case 'split-text':
         setAnimateTitle(true);
@@ -116,6 +181,9 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
       case 'sixth-app':
         swapApps('dvd-logo', 'back');
         break;
+      case 'homepage':
+        swapApps('rgb-blobs', 'front');
+        break;
     }
   }, [step]);
 
@@ -142,6 +210,12 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
         setSketch2: setSketchForeground,
         step,
         setStep,
+        font,
+        setFont,
+        showText,
+        setShowText,
+        startAnimating,
+        setStartAnimating,
       }}
     >
       {children}
