@@ -20,8 +20,8 @@ type HomePageContextValue = {
   setSketch2: React.Dispatch<React.SetStateAction<SketchKey | null>>;
   swapLayers: boolean;
   setSwapLayers: React.Dispatch<React.SetStateAction<boolean>>;
-  step: Steps;
-  setStep: React.Dispatch<React.SetStateAction<Steps>>;
+  step: StepKey;
+  setStep: React.Dispatch<React.SetStateAction<StepKey>>;
   font: string;
   setFont: React.Dispatch<React.SetStateAction<string>>;
   showText: boolean;
@@ -31,19 +31,20 @@ type HomePageContextValue = {
 };
 
 export const steps = [
-  'init',
-  'show-text',
-  'split-text',
-  'first-app',
-  'first-close',
-  'second-app',
-  'third-app',
-  'fourth-app',
-  'fifth-app',
-  'sixth-app',
-  'homepage',
+  { key: 'init', duration: 200 },
+  { key: 'show-text', duration: 800 },
+  { key: 'split-text', duration: 1000 },
+  { key: 'first-app', duration: 700 },
+  { key: 'first-close', duration: 500 },
+  { key: 'second-app', duration: 800 },
+  { key: 'third-app', duration: 800 },
+  { key: 'fourth-app', duration: 800 },
+  { key: 'fifth-app', duration: 800 },
+  { key: 'sixth-app', duration: 800 },
+  { key: 'homepage', duration: 0 },
 ] as const;
-export type Steps = (typeof steps)[number];
+export type Step = (typeof steps)[number];
+export type StepKey = (typeof steps)[number]['key'];
 
 const HomePageContext = createContext<HomePageContextValue>(
   {} as HomePageContextValue,
@@ -77,59 +78,29 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   const [swapLayers, setSwapLayers] = useState(false);
   const [count, setCount] = useState(0);
   const [font, setFont] = useState('LigaSans');
-  const [step, setStep] = useState<Steps>('init');
+  const [step, setStep] = useState<StepKey>('init');
   const [startAnimating, setStartAnimating] = useState(false);
 
-  const getFont = () => {
-    // randomize font
-    // make a big list of random fonts that are native to the web
-    const fonts = [
-      'Arial',
-      'Helvetica',
-      'Times New Roman',
-      'Courier New',
-      'Verdana',
-      'Georgia',
-      'Palatino',
-      'Garamond',
-      'Bookman',
-      'Comic Sans MS',
-      'Trebuchet MS',
-      'Arial Black',
-      'Impact',
-      'Lucida Console',
-      'Tahoma',
-      'Geneva',
-      'Courier New',
-      'Lucida Sans Unicode',
-      'Palatino Linotype',
-      'Book Antiqua',
-      'Nimbus Sans L',
-      'Nimbus Roman No9 L',
-      'Nimbus Mono',
-    ];
-    let randomFont;
-    do {
-      randomFont = fonts[Math.floor(Math.random() * fonts.length)]!;
-    } while (randomFont === font);
-    return randomFont;
+  const animateStep = (step: StepKey) => {
+    const delay = steps.find((_step) => _step.key === step)!.duration;
+    setTimeout(() => {
+      setStep((prev) => {
+        const currentIndex = steps.findIndex((step) => step.key === prev);
+        const nextIndex = currentIndex + 1;
+        if (nextIndex === steps.length) {
+          setStartAnimating(false);
+          return steps.at(-1)!.key;
+        }
+        return steps[nextIndex]!.key;
+      });
+    }, delay);
   };
 
   useEffect(() => {
     if (startAnimating) {
-      const interval = setInterval(() => {
-        setStep((prev) => {
-          const index = steps.indexOf(prev);
-          if (index === steps.length - 1) {
-            setStartAnimating(false);
-            return steps.at(-1)!;
-          }
-          return steps[index + 1]!;
-        });
-      }, 800);
-      return () => clearInterval(interval);
+      animateStep(step);
     }
-  }, [startAnimating]);
+  }, [startAnimating, step]);
 
   const swapApps = (key: SketchKey, layer: 'front' | 'back') => {
     if (layer === 'front') {

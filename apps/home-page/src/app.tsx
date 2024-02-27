@@ -11,6 +11,7 @@ import { steps, useHomePage } from './providers/home-page-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
 import { sketches } from '../../sketches/src/sketches';
 import { TitleBackLayer } from './components/title-back-layer';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function App() {
   const {
@@ -58,15 +59,23 @@ function App() {
 
       <TitleFrontLayer index={swapLayers ? 1 : 2} />
       <TitleBackLayer index={swapLayers ? 2 : 1} blur={step === 'homepage'} />
-      {!startAnimating && step !== 'homepage' && (
-        <Button
-          onClick={() => setStartAnimating(true)}
-          variant='outline'
-          className='absolute left-1/2 top-1/2 z-20 h-24 w-24 -translate-x-1/2 -translate-y-1/2 text-white'
-        >
-          Start
-        </Button>
-      )}
+      <AnimatePresence>
+        {!startAnimating && step !== 'homepage' && (
+          <motion.div
+            className='absolute inset-0 z-20'
+            initial={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+          >
+            <Button
+              onClick={() => setStartAnimating(true)}
+              variant='outline'
+              className='absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 animate-[scale-0] text-white transition-colors'
+            >
+              Start
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {false && (
         <div className='absolute inset-x-0 z-20 overflow-auto'>
