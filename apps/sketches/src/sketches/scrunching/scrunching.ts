@@ -4,7 +4,7 @@ import P5 from 'p5';
 
 // we get the boxes overlapping in small screens, but we can fix it later maybe
 export const Scrunching = (p5: P5CanvasInstance<FpsSketchProps>) => {
-  const speed = 1 / 3600;
+  const speed = 1 / 1800;
   let t = 0;
   const colorValue = 200;
   let scaleValue = 1;

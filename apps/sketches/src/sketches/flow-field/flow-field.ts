@@ -18,7 +18,7 @@ export const FlowField = (p5: P5CanvasInstance<FpsSketchProps>) => {
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
-    p5.frameRate(30);
+    p5.frameRate(60);
     buffer = p5.createGraphics(p5.width, p5.height);
     buffer2 = p5.createGraphics(p5.width, p5.height);
     cols = Math.floor(p5.width / scl);
