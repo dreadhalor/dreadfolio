@@ -19,6 +19,7 @@ import { InfinityMirror } from './infinity-mirror/infinity-mirror';
 import { LoFiMountains } from './lo-fi-mountains/lo-fi-mountains';
 import { DancingRays } from './dancing-rays/dancing-rays';
 import { Skyscraper } from './skyscraper/skyscraper';
+import { RgbBlobs } from './rgb-blobs/rgb-blobs';
 export * from './marching-squares/marching-squares';
 
 export type FpsSketchProps = SketchProps & {
@@ -105,6 +106,10 @@ export const sketches = {
   skyscraper: {
     name: 'Skyscraper',
     sketch: Skyscraper,
+  },
+  'rgb-blobs': {
+    name: 'RGB Blobs',
+    sketch: RgbBlobs,
   },
 } as const;
 
