@@ -16,6 +16,7 @@ export const Scrunching = (p5: P5CanvasInstance<FpsSketchProps>) => {
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
+    p5.frameRate(30);
     minDimension = Math.min(p5.windowWidth, p5.windowHeight) / 2;
   };
 

@@ -12,6 +12,7 @@ export const InfinityMirror = (p5: P5) => {
   // Setup function
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
+    p5.frameRate(30);
     p5.smooth();
     p5.pixelDensity(2);
 

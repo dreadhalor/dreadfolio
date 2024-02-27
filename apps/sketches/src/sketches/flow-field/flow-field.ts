@@ -18,6 +18,7 @@ export const FlowField = (p5: P5CanvasInstance<FpsSketchProps>) => {
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
+    p5.frameRate(30);
     buffer = p5.createGraphics(p5.width, p5.height);
     buffer2 = p5.createGraphics(p5.width, p5.height);
     cols = Math.floor(p5.width / scl);
@@ -49,24 +50,4 @@ export const FlowField = (p5: P5CanvasInstance<FpsSketchProps>) => {
     p5.image(buffer, 0, 0);
     p5.image(buffer2, 0, 0);
   };
-
-  // function generateFlowField(p5: P5) {
-  //   for (let y = 0; y < rows; y++) {
-  //     for (let x = 0; x < cols; x++) {
-  //       // Map the position to a circular range
-  //       const angleX = p5.map(x, 0, cols, 0, p5.TWO_PI);
-  //       const angleY = p5.map(y, 0, rows, 0, p5.TWO_PI);
-
-  //       // Use the circular mapping to calculate noise offsets
-  //       const xoff = p5.cos(angleX) * 0.5 + 1; // 0.5 + 1 to ensure positive values
-  //       const yoff = p5.sin(angleY) * 0.5 + 1;
-
-  //       const index = x + y * cols;
-  //       const angle = p5.noise(xoff, yoff, zoff) * p5.TWO_PI * 4;
-  //       const vector = p5.createVector(Math.cos(angle), Math.sin(angle));
-  //       flowfield[index] = vector;
-  //     }
-  //   }
-  //   zoff += zInc;
-  // }
 };
