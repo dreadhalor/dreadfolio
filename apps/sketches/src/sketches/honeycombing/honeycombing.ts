@@ -3,7 +3,7 @@ import P5 from 'p5';
 export const Honeycombing = (p5: P5) => {
   let cycle = 0;
   const colors = {
-    bg: [255] as [number],
+    bg: [51, 51, 51] as [number, number, number],
     lines: [0, 0, 0] as [number, number, number],
   };
 
@@ -107,6 +107,13 @@ export const Honeycombing = (p5: P5) => {
 
     render() {
       this.p5.push();
+      // adjust hue based on rotation
+      this.p5.colorMode(this.p5.HSB);
+      this.p5.stroke(
+        this.p5.map(this.rotation, 0, this.p5.TWO_PI / 6, 50, 50),
+        100,
+        this.p5.map(this.rotation, 0, this.p5.TWO_PI / 6, 70, 100),
+      );
       this.p5.translate(this.x, this.y);
       this.p5.rotate(this.rotation); // Use updated rotation
 
