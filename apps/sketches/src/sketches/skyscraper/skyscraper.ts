@@ -12,12 +12,13 @@ interface LineData {
 
 // Encapsulate the sketch
 export const Skyscraper = (p5: P5) => {
-  const lines = 18;
+  const linesOnScreen = 18;
   let timer = 0;
-  const biggestSquare = Math.min(p5.windowWidth, p5.windowHeight);
-  const margin = {
-    x: (p5.windowWidth - biggestSquare) / 2,
-    y: (p5.windowHeight - biggestSquare) / 2,
+  const maxDimension = Math.max(p5.windowWidth, p5.windowHeight);
+  const aspectRatio = p5.windowWidth / p5.windowHeight;
+  const overflow = {
+    x: (p5.windowWidth - maxDimension) / 2,
+    y: (p5.windowHeight - maxDimension) / 2,
   };
 
   p5.setup = () => {
@@ -26,22 +27,18 @@ export const Skyscraper = (p5: P5) => {
   };
 
   p5.draw = () => {
-    p5.translate(margin.x, margin.y);
+    p5.translate(overflow.x, overflow.y);
+    // scale to where the biggest square is the size of the biggest dimension
+    // p5.scale(maxDimension / minDimension / 1.55);
+    // p5.scale(minDimension / maxDimension);
+    // p5.translate(overflow.x, overflow.y);
+
     drawBackground();
     const lineData = calculateLineData();
     renderLines(lineData);
     p5.stroke(255);
     p5.strokeWeight(6);
-    p5.quad(
-      0,
-      0,
-      biggestSquare,
-      0,
-      biggestSquare,
-      biggestSquare,
-      0,
-      biggestSquare,
-    );
+    // p5.quad(0, 0, maxDimension, 0, maxDimension, maxDimension, 0, maxDimension);
     updateTimer();
   };
 
@@ -56,39 +53,38 @@ export const Skyscraper = (p5: P5) => {
     p5.fill(46);
     p5.noStroke();
     const x = 0;
-    const y = -margin.y;
-    const topLeft = [x, y] as [number, number];
-    const topRight = [x + biggestSquare + margin.x, y] as [number, number];
-    const bottomRight = [
-      biggestSquare + margin.x,
-      y + margin.y + biggestSquare,
-    ] as [number, number];
-    const bottomLeftBottom = [biggestSquare, y + margin.y + biggestSquare] as [
-      number,
-      number,
-    ];
-    const bottomLeftTop = [0, y + margin.y] as [number, number];
+    const y = 0;
+    const topLeft = { x, y };
+    const topRight = { x: topLeft.x + maxDimension, y: topLeft.y };
+    const bottomRight = { x: topRight.x, y: topRight.y + maxDimension };
+    const bottomLeftBottom = { x: bottomRight.x, y: bottomRight.y };
+    const bottomLeftTop = { x: topLeft.x, y: topLeft.y };
     p5.beginShape();
-    p5.vertex(...topLeft);
-    p5.vertex(...topRight);
-    p5.vertex(...bottomRight);
-    p5.vertex(...bottomLeftBottom);
-    p5.vertex(...bottomLeftTop);
+    p5.vertex(topLeft.x, topLeft.y);
+    p5.vertex(topRight.x, topRight.y);
+    p5.vertex(bottomRight.x, bottomRight.y);
+    p5.vertex(bottomLeftBottom.x, bottomLeftBottom.y);
+    p5.vertex(bottomLeftTop.x, bottomLeftTop.y);
     p5.endShape();
     p5.noFill();
   }
 
   function calculateLineData(): LineData[] {
-    const lineDist = biggestSquare / lines;
+    const fullHeight = p5.height > p5.width;
+    const heightToRender = fullHeight ? p5.height : maxDimension / aspectRatio;
+    const lineDist = heightToRender / linesOnScreen;
+    const linesToRender = fullHeight
+      ? linesOnScreen
+      : Math.ceil(p5.width / lineDist);
     const lineData: LineData[] = [];
 
-    for (let i = 0; i < lines; i++) {
+    for (let i = 0; i < linesToRender; i++) {
       const horizontalStartY = (i + timer) * lineDist;
-      const easeSine = easeInSine((i + timer) / lines, 0, 1, 1);
-      const midX = easeSine * biggestSquare;
+      const easeSine = easeInSine((i + timer) / linesToRender, 0, 1, 1);
+      const midX = easeSine * maxDimension;
       const midY = midX;
       const rightY = horizontalStartY;
-      const rightX = biggestSquare;
+      const rightX = maxDimension;
 
       lineData.push({
         horizontalStartX: 0,
@@ -114,7 +110,7 @@ export const Skyscraper = (p5: P5) => {
     p5.strokeWeight(1.5);
     lineData.forEach((line) => {
       p5.beginShape();
-      p5.vertex(line.midX, biggestSquare);
+      p5.vertex(line.midX, maxDimension);
       p5.vertex(line.midX, line.midY);
       p5.vertex(line.endX, 0);
       p5.endShape();
@@ -124,7 +120,7 @@ export const Skyscraper = (p5: P5) => {
   function renderHorizontalLines(lineData: LineData[]): void {
     p5.noFill();
     p5.stroke(239);
-    p5.strokeWeight(6);
+    p5.strokeWeight(4);
     lineData.forEach((line) => {
       p5.beginShape();
       p5.vertex(line.horizontalStartX, line.horizontalStartY);
