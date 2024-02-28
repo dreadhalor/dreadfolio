@@ -60,7 +60,7 @@ function App() {
       <TitleFrontLayer index={swapLayers ? 1 : 2} />
       <TitleBackLayer index={swapLayers ? 2 : 1} blur={step === 'homepage'} />
       <AnimatePresence>
-        {!startAnimating && step !== 'homepage' && (
+        {!startAnimating && step === 'init' && (
           <motion.div
             className='absolute inset-0 z-20'
             initial={{ opacity: 1, scale: 1 }}
@@ -77,7 +77,7 @@ function App() {
         )}
       </AnimatePresence>
 
-      {false && (
+      {true && (
         <div className='absolute inset-x-0 z-20 overflow-auto'>
           <div className='flex min-w-max gap-2'>
             <Button
@@ -91,9 +91,9 @@ function App() {
                 <SelectValue>Step: {step}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {steps.map((step) => (
-                  <SelectItem key={step} value={step}>
-                    {step}
+                {steps.map(({ key }) => (
+                  <SelectItem key={key} value={key}>
+                    {key}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -157,9 +157,9 @@ function App() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={null}>None</SelectItem>
-                {Object.entries(sketches).map(([key, sketch]) => (
+                {Object.entries(sketches).map(([key, { name }]) => (
                   <SelectItem key={key} value={key}>
-                    {sketch.name}
+                    {name}
                   </SelectItem>
                 ))}
               </SelectContent>

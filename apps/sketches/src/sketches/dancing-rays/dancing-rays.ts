@@ -1,6 +1,12 @@
 import P5 from 'p5';
+import badSunsBg from '../../assets/bad-suns-bg.png';
+import badSunsFg from '../../assets/bad-suns-fg.png';
 
 export const DancingRays = (p5: P5) => {
+  const colors = {
+    background: '#E13865',
+    lines: [0, 0, 0, 100],
+  };
   const PRAMAS = {
     numOfLines: 0,
     freq: 4,
@@ -10,10 +16,20 @@ export const DancingRays = (p5: P5) => {
     offset: 0,
   };
   let phase = 1;
+  let bg: P5.Image;
+  let fg: P5.Image;
+  let buffer: P5.Graphics;
+
+  p5.preload = () => {
+    bg = p5.loadImage(badSunsBg);
+    fg = p5.loadImage(badSunsFg);
+  };
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
     p5.frameRate(60);
+    buffer = p5.createGraphics(p5.width, p5.height);
+    buffer.colorMode(p5.HSB, 360, 100, 100, 100);
 
     PRAMAS.numOfLines = p5.round(p5.random(150, 250));
     PRAMAS.freq = p5.random(4, 8);
@@ -27,11 +43,18 @@ export const DancingRays = (p5: P5) => {
   };
 
   p5.draw = () => {
-    p5.background(51);
-    p5.stroke(239);
-    p5.strokeWeight(2);
+    p5.background(colors.background);
+    const maxDimension = Math.max(p5.windowWidth, p5.windowHeight);
+    const minDimension = Math.min(p5.windowWidth, p5.windowHeight);
+    p5.image(bg, 0, 0, maxDimension, maxDimension, 0, 0, bg.width, bg.height);
 
-    p5.translate(p5.width / 2, p5.height / 2);
+    // p5.translate(buffer.width / 2, buffer.height / 2);
+    buffer.resetMatrix();
+    buffer.clear();
+    buffer.stroke(0, 0, 0, 100);
+    buffer.strokeWeight(6);
+
+    buffer.translate(buffer.width / 2, buffer.height / 2);
 
     const rotatePhase = p5.frameCount * 0.0025;
 
@@ -39,13 +62,32 @@ export const DancingRays = (p5: P5) => {
       const a = i * (p5.TWO_PI / PRAMAS.numOfLines) + rotatePhase;
 
       const easedPhase = easeInOutQuart(p5.constrain(phase * 1.5, 0, 1));
-      const radius = p5.lerp(
+      const radius = buffer.lerp(
         PRAMAS.lineRadius[i]!,
         PRAMAS.lineTarget[i]!,
         easedPhase,
       );
-      p5.line(0, 0, p5.cos(a) * radius, p5.sin(a) * radius);
+      buffer.line(
+        buffer.cos(a) * minDimension * 0.3,
+        buffer.sin(a) * minDimension * 0.3,
+        buffer.cos(a) * radius,
+        buffer.sin(a) * radius,
+      );
     }
+
+    const fgCopy = fg.get();
+    fgCopy.mask(buffer.get(0, 0, fgCopy.width, fgCopy.height));
+    p5.image(
+      fgCopy,
+      0,
+      0,
+      maxDimension,
+      maxDimension,
+      0,
+      0,
+      maxDimension,
+      maxDimension,
+    );
 
     // Update the phase every 60 frames to simulate 60 BPM
     if (p5.frameCount % 40 === 0) {
@@ -73,8 +115,8 @@ export const DancingRays = (p5: P5) => {
           p5.sin(a * PRAMAS.freq) + PRAMAS.offset,
           dynamicFrameCount,
         ) *
-        p5.max(p5.width, p5.height) *
-        0.5;
+        p5.min(p5.width, p5.height) *
+        0.8;
       PRAMAS.lineTarget[i]! = radius;
     }
   }
