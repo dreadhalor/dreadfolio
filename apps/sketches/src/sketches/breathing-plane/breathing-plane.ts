@@ -14,6 +14,7 @@ export const BreathingPlane = (p5: P5CanvasInstance<FpsSketchProps>) => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
     p5.pixelDensity(2);
     p5.smooth();
+    p5.colorMode(p5.HSB, 360, 100, 100, 1);
   };
 
   p5.draw = () => {
@@ -23,8 +24,8 @@ export const BreathingPlane = (p5: P5CanvasInstance<FpsSketchProps>) => {
   };
 
   function setupScene() {
-    p5.background(51);
-    p5.fill(250);
+    p5.background(0, 80, 30);
+    p5.fill(0, 0, 100);
     p5.stroke(0);
     p5.strokeWeight(2);
     p5.rotateX(p5.HALF_PI);

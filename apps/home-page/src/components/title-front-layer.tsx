@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useHomePage } from '../providers/home-page-provider';
-import { Title } from './title';
+import { Title } from './title/title';
 import { SketchPane } from './sketch-pane';
 import { useClippingPathAnimation } from '../hooks/use-clipping-path-animation'; // Assuming the hook is in the same directory
 

@@ -1,11 +1,9 @@
 import P5 from 'p5';
-import badSunsBg from '../../assets/bad-suns-bg.png';
-import badSunsFg from '../../assets/bad-suns-fg.png';
 
-export const DancingRays = (p5: P5) => {
+export const BadSuns = (p5: P5) => {
   const colors = {
-    background: '#E13865',
-    lines: [0, 0, 0, 100],
+    background: [344, 82, 89] as [number, number, number],
+    lines: [41, 159, 147],
   };
   const PRAMAS = {
     numOfLines: 0,
@@ -16,18 +14,12 @@ export const DancingRays = (p5: P5) => {
     offset: 0,
   };
   let phase = 1;
-  let bg: P5.Image;
-  let fg: P5.Image;
   let buffer: P5.Graphics;
-
-  p5.preload = () => {
-    bg = p5.loadImage(badSunsBg);
-    fg = p5.loadImage(badSunsFg);
-  };
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
     p5.frameRate(60);
+    p5.colorMode(p5.HSB, 360, 100, 100, 100);
     buffer = p5.createGraphics(p5.width, p5.height);
     buffer.colorMode(p5.HSB, 360, 100, 100, 100);
 
@@ -46,12 +38,9 @@ export const DancingRays = (p5: P5) => {
     p5.background(colors.background);
     const maxDimension = Math.max(p5.windowWidth, p5.windowHeight);
     const minDimension = Math.min(p5.windowWidth, p5.windowHeight);
-    p5.image(bg, 0, 0, maxDimension, maxDimension, 0, 0, bg.width, bg.height);
-
-    // p5.translate(buffer.width / 2, buffer.height / 2);
     buffer.resetMatrix();
     buffer.clear();
-    buffer.stroke(0, 0, 0, 100);
+    buffer.stroke(colors.lines);
     buffer.strokeWeight(6);
 
     buffer.translate(buffer.width / 2, buffer.height / 2);
@@ -75,19 +64,8 @@ export const DancingRays = (p5: P5) => {
       );
     }
 
-    const fgCopy = fg.get();
-    fgCopy.mask(buffer.get(0, 0, fgCopy.width, fgCopy.height));
-    p5.image(
-      fgCopy,
-      0,
-      0,
-      maxDimension,
-      maxDimension,
-      0,
-      0,
-      maxDimension,
-      maxDimension,
-    );
+    buffer.noFill();
+    p5.image(buffer, 0, 0);
 
     // Update the phase every 60 frames to simulate 60 BPM
     if (p5.frameCount % 40 === 0) {

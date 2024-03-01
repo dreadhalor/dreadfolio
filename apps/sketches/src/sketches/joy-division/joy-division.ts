@@ -15,7 +15,7 @@ export const JoyDivision = (p5: P5) => {
   const size = 10;
   const gridSize = Math.ceil((biggestSquare * 0.8) / size) + 1;
   const gridOffset = Math.round(biggestSquare * 0.1);
-  const maxHeight = 600;
+  const maxHeight = 200;
 
   const noiseScale = 0.2;
   let noiseOffsetX = 0;
@@ -41,7 +41,7 @@ export const JoyDivision = (p5: P5) => {
   };
 
   p5.draw = () => {
-    p5.background(51);
+    p5.background(0);
     p5.translate(
       (p5.width - biggestSquare) / 2,
       (p5.height - biggestSquare) / 2,

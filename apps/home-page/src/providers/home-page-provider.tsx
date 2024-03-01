@@ -127,6 +127,7 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
         setShowText(true);
         break;
       case 'split-text':
+        setShowText(true);
         setAnimateTitle(true);
         break;
       case 'first-app':

@@ -7,7 +7,7 @@ export const InfinityMirror = (p5: P5) => {
   let offset = 0;
   let plus = 0;
   let counter = 0;
-  const zColor: number[] = [];
+  const zColor: [number, number, number][] = [];
 
   // Setup function
   p5.setup = () => {
@@ -15,16 +15,17 @@ export const InfinityMirror = (p5: P5) => {
     p5.frameRate(30);
     p5.smooth();
     p5.pixelDensity(2);
+    p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
     // Pre-calculate Z-axis colors
     for (let z = 0; z < cubeSize; z++) {
-      zColor[z] = easeInCirc((z + 1) / cubeSize, 0, 1, 1) * 215;
+      zColor[z] = [70, 50, easeInCirc((z + 1) / cubeSize, 0, 1, 1) * 100];
     }
   };
 
   // Draw function
   p5.draw = () => {
-    p5.background(40);
+    p5.background(70, 10, 5);
 
     offset = cubeGap * 2 * counter;
     plus = p5.map(p5.sin(p5.PI * counter), -1, 1, 0, 1);
@@ -41,7 +42,8 @@ export const InfinityMirror = (p5: P5) => {
       for (let y = 0; y < cubeSize * 2; y++) {
         for (let z = 0; z < cubeSize; z++) {
           // Style
-          p5.stroke(zColor[z]! * plus + 40);
+          const [h, s, b] = zColor[z]!;
+          p5.stroke(h, s, b * plus + 35);
           p5.strokeWeight(p5.map(z, 0, cubeSize, 4, 26));
           // Position
           p5.push();

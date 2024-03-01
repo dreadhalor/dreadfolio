@@ -11,10 +11,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dread-ui": "workspace:*",
     "@p5-wrapper/react": "^4.3.4",
-    "p5": "^1.4.1",
+    "@splinetool/react-spline": "^2.2.6",
+    "dread-ui": "workspace:*",
     "framer-motion": "^11.0.3",
+    "p5": "^1.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

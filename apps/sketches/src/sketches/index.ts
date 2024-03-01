@@ -17,7 +17,7 @@ import { Honeycombing } from './honeycombing/honeycombing';
 import { JoyDivision } from './joy-division/joy-division';
 import { InfinityMirror } from './infinity-mirror/infinity-mirror';
 import { LoFiMountains } from './lo-fi-mountains/lo-fi-mountains';
-import { DancingRays } from './dancing-rays/dancing-rays';
+import { BadSuns } from './bad-suns/bad-suns';
 import { Skyscraper } from './skyscraper/skyscraper';
 import { RgbBlobs } from './rgb-blobs/rgb-blobs';
 export * from './marching-squares/marching-squares';
@@ -58,6 +58,11 @@ export const sketches = {
   scrunching: {
     name: 'Scrunching',
     sketch: Scrunching,
+    colors: {
+      top: [0, 100, 100],
+      middle: [120, 100, 100],
+      bottom: [240, 100, 100],
+    },
   },
   'moonlight-ocean': {
     name: 'Moonlight Ocean',
@@ -99,9 +104,9 @@ export const sketches = {
     name: 'Lo-Fi Mountains',
     sketch: LoFiMountains,
   },
-  'dancing-rays': {
-    name: 'Dancing Rays',
-    sketch: DancingRays,
+  'bad-suns': {
+    name: 'Bad Suns',
+    sketch: BadSuns,
   },
   skyscraper: {
     name: 'Skyscraper',

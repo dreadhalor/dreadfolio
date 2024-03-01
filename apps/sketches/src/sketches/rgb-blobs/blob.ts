@@ -6,8 +6,8 @@ export class Blob {
   vel: P5.Vector;
   acc: P5.Vector;
   color: P5.Color;
-  radius = 150;
-  mass = 20;
+  radius = 200;
+  mass = 40;
 
   constructor(layer: P5.Graphics, x: number, y: number, color: P5.Color) {
     this.layer = layer;
