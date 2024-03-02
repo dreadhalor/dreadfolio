@@ -15,7 +15,7 @@ function App() {
       <TitleBackLayer index={swapLayers ? 2 : 1} blur={step === 'homepage'} />
       <StartButton />
 
-      {true && <Controls />}
+      {false && <Controls />}
     </div>
   );
 }
