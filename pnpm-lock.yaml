@@ -284,6 +284,9 @@ importers:
       '@mui/material':
         specifier: ^5.4.1
         version: 5.15.7(@emotion/react@11.11.3)(@emotion/styled@11.11.0)(@types/react@18.2.55)(react-dom@18.2.0)(react@18.2.0)
+      dread-ui:
+        specifier: workspace:*
+        version: link:../../packages/dread-ui
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -318,6 +321,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.5
         version: 0.4.5(eslint@8.56.0)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
       vite:
         specifier: ^5.0.8
         version: 5.1.1(@types/node@20.11.16)(sass@1.70.0)
