@@ -238,6 +238,9 @@ importers:
       '@use-gesture/react':
         specifier: ^10.2.12
         version: 10.3.0(react@18.2.0)
+      dread-ui:
+        specifier: workspace:*
+        version: link:../../packages/dread-ui
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -269,6 +272,9 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.5
         version: 0.4.5(eslint@8.56.0)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
       vite:
         specifier: ^5.0.8
         version: 5.1.1(@types/node@20.11.16)(sass@1.70.0)
