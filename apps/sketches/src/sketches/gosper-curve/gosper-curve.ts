@@ -1,57 +1,57 @@
 import P5 from 'p5';
 import { Turtle } from './classes/turtle';
-import { throttle } from 'lodash';
+// import { throttle } from 'lodash';
 
 export const points: P5.Vector[] = [];
 
 export const GosperCurve = (p5: P5) => {
-  const rules = {
-    A: 'A-B--B+A++AA+B-',
-    B: '+A-BB--B-A++A+B',
-  };
+  // const rules = {
+  //   A: 'A-B--B+A++AA+B-',
+  //   B: '+A-BB--B-A++A+B',
+  // };
 
-  const applyRules = (sequence: string): string => {
-    let nextSequence = '';
-    for (const char of sequence) {
-      if (char in rules) {
-        nextSequence += rules[char as keyof typeof rules];
-      } else {
-        nextSequence += char;
-      }
-    }
-    return nextSequence;
-  };
+  // const applyRules = (sequence: string): string => {
+  //   let nextSequence = '';
+  //   for (const char of sequence) {
+  //     if (char in rules) {
+  //       nextSequence += rules[char as keyof typeof rules];
+  //     } else {
+  //       nextSequence += char;
+  //     }
+  //   }
+  //   return nextSequence;
+  // };
 
-  const generateGosperSequence = (depth: number): string => {
-    let sequence = 'A';
-    for (let i = 0; i < depth; i++) {
-      sequence = applyRules(sequence);
-    }
-    return sequence;
-  };
+  // const generateGosperSequence = (depth: number): string => {
+  //   let sequence = 'A';
+  //   for (let i = 0; i < depth; i++) {
+  //     sequence = applyRules(sequence);
+  //   }
+  //   return sequence;
+  // };
 
-  const gosperCurve = (
-    turtle: Turtle,
-    len: number,
-    depth: number,
-    reverse: boolean = false,
-  ) => {
-    const sequence = generateGosperSequence(depth);
-    for (const char of sequence) {
-      switch (char) {
-        case 'A':
-        case 'B':
-          turtle.forward(len);
-          break;
-        case '+':
-          reverse ? turtle.right(60) : turtle.left(60);
-          break;
-        case '-':
-          reverse ? turtle.left(60) : turtle.right(60);
-          break;
-      }
-    }
-  };
+  // const gosperCurve = (
+  //   turtle: Turtle,
+  //   len: number,
+  //   depth: number,
+  //   reverse: boolean = false,
+  // ) => {
+  //   const sequence = generateGosperSequence(depth);
+  //   for (const char of sequence) {
+  //     switch (char) {
+  //       case 'A':
+  //       case 'B':
+  //         turtle.forward(len);
+  //         break;
+  //       case '+':
+  //         reverse ? turtle.right(60) : turtle.left(60);
+  //         break;
+  //       case '-':
+  //         reverse ? turtle.left(60) : turtle.right(60);
+  //         break;
+  //     }
+  //   }
+  // };
 
   const dragonCurve = (turtle: Turtle, len: number, depth: number) => {
     let sequence = 'FX';
@@ -90,35 +90,35 @@ export const GosperCurve = (p5: P5) => {
     // newPoints = [points];
     newPoints = [points.slice(0, middle + 1).reverse(), points.slice(middle)];
   };
-  let progress = 0;
-  const incrementProgress = throttle(() => {
-    progress += 100;
-    // console.log(progress);
-  }, 10);
+  // let progress = 0;
+  // const incrementProgress = throttle(() => {
+  //   progress += 100;
+  //   // console.log(progress);
+  // }, 10);
 
-  const drawShape = (points: P5.Vector[]) => {
-    p5.beginShape();
-    let len = 0;
-    points.forEach((p, index) => {
-      if (index === 0) p5.vertex(p.x, p.y);
-      else {
-        const dist = p5.dist(
-          points[index - 1]!.x,
-          points[index - 1]!.y,
-          p.x,
-          p.y,
-        );
-        len += dist;
-        if (len > progress) {
-          p5.endShape();
-          return;
-        } else {
-          p5.vertex(p.x, p.y);
-        }
-      }
-    });
-    p5.endShape();
-  };
+  // const drawShape = (points: P5.Vector[]) => {
+  //   p5.beginShape();
+  //   let len = 0;
+  //   points.forEach((p, index) => {
+  //     if (index === 0) p5.vertex(p.x, p.y);
+  //     else {
+  //       const dist = p5.dist(
+  //         points[index - 1]!.x,
+  //         points[index - 1]!.y,
+  //         p.x,
+  //         p.y,
+  //       );
+  //       len += dist;
+  //       if (len > progress) {
+  //         p5.endShape();
+  //         return;
+  //       } else {
+  //         p5.vertex(p.x, p.y);
+  //       }
+  //     }
+  //   });
+  //   p5.endShape();
+  // };
   const drawShapeInstant = (points: P5.Vector[]) => {
     // p5.beginShape();
     points.forEach((p, index) => {
@@ -137,7 +137,7 @@ export const GosperCurve = (p5: P5) => {
   p5.draw = () => {
     p5.background(0);
     p5.translate(p5.width / 2 + 300, p5.height / 2 - 100);
-    incrementProgress();
+    // incrementProgress();
 
     newPoints.forEach((points) => {
       drawShapeInstant(points);

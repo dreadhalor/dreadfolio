@@ -12,7 +12,6 @@ import { MoonlightOcean } from './moonlight-ocean/moonlight-ocean';
 import { BreathingPlane } from './breathing-plane/breathing-plane';
 import { DotGlobe } from './dot-globe/dot-globe';
 import { CircleMesh } from './circle-mesh/circle-mesh';
-import { SpinningMesh, SpinningMesh2 } from './spinning-mesh/spinning-mesh';
 import { Honeycombing } from './honeycombing/honeycombing';
 import { JoyDivision } from './joy-division/joy-division';
 import { InfinityMirror } from './infinity-mirror/infinity-mirror';
@@ -79,14 +78,6 @@ export const sketches = {
   'circle-mesh': {
     name: 'Circle Mesh',
     sketch: CircleMesh,
-  },
-  'spinning-mesh2': {
-    name: 'Spinning Mesh2',
-    sketch: SpinningMesh2,
-  },
-  'spinning-mesh': {
-    name: 'Spinning Mesh',
-    sketch: SpinningMesh,
   },
   honeycombing: {
     name: 'Honeycombing',

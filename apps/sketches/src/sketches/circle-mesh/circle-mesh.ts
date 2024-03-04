@@ -23,20 +23,20 @@ export const CircleMesh = (p5: P5) => {
 
     links.forEach((link, i) => {
       if (i % 9 !== 0) {
-        link.connect(links[i - 1]);
+        link.connect(links[i - 1]!);
       }
       if (i > 8) {
-        link.connect(links[i - 9]);
+        link.connect(links[i - 9]!);
       }
       if (i % 9 !== 0 && i > 8) {
-        link.connectDiagonal(links[i - 10]);
+        link.connectDiagonal(links[i - 10]!);
       }
       if (i % 9 !== 8 && i > 8) {
-        link.connectDiagonal(links[i - 8]);
+        link.connectDiagonal(links[i - 8]!);
       }
     });
 
-    links[40].followsMouse = true;
+    links[40]!.followsMouse = true;
   };
 
   p5.draw = () => {

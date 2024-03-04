@@ -36,7 +36,6 @@ export const BadSuns = (p5: P5) => {
 
   p5.draw = () => {
     p5.background(colors.background);
-    const maxDimension = Math.max(p5.windowWidth, p5.windowHeight);
     const minDimension = Math.min(p5.windowWidth, p5.windowHeight);
     buffer.resetMatrix();
     buffer.clear();

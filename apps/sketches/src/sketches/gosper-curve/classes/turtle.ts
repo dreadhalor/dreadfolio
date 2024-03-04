@@ -15,8 +15,8 @@ export class Turtle {
   }
 
   public forward(len: number) {
-    const x1 = this.x;
-    const y1 = this.y;
+    // const x1 = this.x;
+    // const y1 = this.y;
     this.x += len * this.p5.cos(this.p5.radians(this.angle));
     this.y += len * this.p5.sin(this.p5.radians(this.angle));
     // Only push the new point to avoid duplicate points
