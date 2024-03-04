@@ -41,15 +41,15 @@ const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
       >
         <div className='bg-primary absolute inset-0' />
         <SketchPane blur={blur} sketchKey={sketch1} />
-        {step !== 'homepage' ? (
+
+        {step !== 'homepage' && (
           <>
             <Title variant='topBackground' />
             <Title variant='middleBackground' />
             <Title variant='bottomBackground' />
           </>
-        ) : (
-          <Page />
         )}
+        <Page />
       </motion.div>
     </div>
   );
