@@ -34,3 +34,9 @@ body,
   padding: 0;
   overflow: hidden;
 }
+
+@layer components {
+  h3 {
+    @apply text-xs font-bold uppercase tracking-widest;
+  }
+}

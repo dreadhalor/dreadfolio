@@ -5,6 +5,9 @@ type GenerateFlowFieldArgs = {
   rows: number;
   cols: number;
   zoff: number;
+  mouseX?: number;
+  mouseY?: number;
+  scl?: number;
 };
 export const generateFlowField = ({
   p5,
@@ -12,6 +15,9 @@ export const generateFlowField = ({
   rows,
   cols,
   zoff,
+  mouseX,
+  mouseY,
+  scl,
 }: GenerateFlowFieldArgs) => {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
@@ -26,7 +32,25 @@ export const generateFlowField = ({
       const index = x + y * cols;
       const angle = p5.noise(xoff, yoff, zoff) * p5.TWO_PI * 4;
       const vector = p5.createVector(Math.cos(angle), Math.sin(angle));
-      flowfield[index] = vector;
+      flowfield[index] = vector.mult(2);
+    }
+  }
+  // if there is a mouse position, add a force away from it with radius 100
+  if (mouseX && mouseY && scl) {
+    const mouse = p5.createVector(mouseX, mouseY);
+    for (let i = 0; i < flowfield.length; i++) {
+      const pos = p5.createVector(
+        (i % cols) * scl + scl / 2,
+        Math.floor(i / cols) * scl + scl / 2,
+      );
+      const distance = p5.dist(mouse.x, mouse.y, pos.x, pos.y);
+      if (distance < 400 && distance > 0) {
+        const force = p5.createVector(pos.x - mouse.x, pos.y - mouse.y);
+        force.setMag((500 / distance) * 2);
+        const f = flowfield[i];
+        if (!f) continue;
+        f.add(force);
+      }
     }
   }
 };

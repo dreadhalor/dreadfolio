@@ -1,13 +1,13 @@
 import P5 from 'p5';
-import { scl } from './rgb-blobs';
+import { margin, scl } from './rgb-blobs';
 export class Blob {
   layer: P5.Graphics;
   pos: P5.Vector;
   vel: P5.Vector;
   acc: P5.Vector;
   color: P5.Color;
-  radius = 200;
-  mass = 40;
+  radius = 300;
+  mass = 30;
 
   constructor(layer: P5.Graphics, x: number, y: number, color: P5.Color) {
     this.layer = layer;
@@ -19,7 +19,8 @@ export class Blob {
 
   tick() {
     this.vel.add(this.acc.div(this.mass));
-    // this.vel.limit(4);
+    this.vel.mult(0.99);
+    this.vel.limit(2);
     this.pos.add(this.vel);
     this.bounce();
     this.acc.mult(0);
@@ -34,28 +35,22 @@ export class Blob {
   }
 
   bounce() {
-    if (
-      this.pos.x > this.layer.width - this.radius ||
-      this.pos.x < this.radius
-    ) {
-      this.pos.x = this.layer.constrain(
-        this.pos.x,
-        this.radius,
-        this.layer.width - this.radius,
-      );
-      this.vel.x *= -1;
-    }
-    if (
-      this.pos.y > this.layer.height - this.radius ||
-      this.pos.y < this.radius
-    ) {
-      this.pos.y = this.layer.constrain(
-        this.pos.y,
-        this.radius,
-        this.layer.height - this.radius,
-      );
-      this.vel.y *= -1;
-    }
+    if (this.pos.x > this.layer.width - margin)
+      this.vel.x = -Math.abs(this.vel.x);
+    if (this.pos.x < margin) this.vel.x = Math.abs(this.vel.x);
+    if (this.pos.y > this.layer.height - margin)
+      this.vel.y = -Math.abs(this.vel.y);
+    if (this.pos.y < margin) this.vel.y = Math.abs(this.vel.y);
+    this.pos.x = this.layer.constrain(
+      this.pos.x,
+      margin,
+      this.layer.width - margin,
+    );
+    this.pos.y = this.layer.constrain(
+      this.pos.y,
+      margin,
+      this.layer.height - margin,
+    );
   }
 
   applyForce(force: P5.Vector) {
