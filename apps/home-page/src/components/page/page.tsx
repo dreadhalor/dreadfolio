@@ -42,12 +42,21 @@ const Page = () => {
     >
       <div
         ref={containerRef}
-        className='relative mx-auto flex h-full w-full items-start justify-center overflow-auto overscroll-y-contain'
+        className={cn(
+          'relative mx-auto flex h-full w-full flex-col items-start overflow-auto overscroll-y-contain px-6 py-12',
+          'md:px-12 md:py-20',
+          'lg:flex-row lg:justify-center',
+        )}
         onScroll={(e) => {
           setOffset(e.currentTarget.scrollTop);
         }}
       >
-        <div className='sticky left-0 top-0 flex h-full max-w-[640px] flex-1 shrink-0 flex-col justify-between py-24 pl-24 pr-2'>
+        <div
+          className={cn(
+            'relative flex h-full flex-1 shrink-0 flex-col justify-between pr-2',
+            'lg:sticky lg:left-0 lg:top-0 lg:max-w-[640px] lg:py-24 lg:pl-24',
+          )}
+        >
           <div
             className='text-primary-foreground relative flex flex-1 flex-col items-start'
             style={{ textShadow: '0px 0px 20px #000000' }}
@@ -83,7 +92,7 @@ const Page = () => {
               </ul>
             </nav>
           </div>
-          <div className='ml-1 flex w-full items-center justify-start gap-5'>
+          <div className='ml-1 mt-8 flex w-full items-center justify-start gap-5'>
             <FaGithub
               className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white'
               onClick={() =>
@@ -98,13 +107,18 @@ const Page = () => {
             />
           </div>
         </div>
-        <div className='text-primary-foreground relative flex min-h-full max-w-[640px] flex-1 shrink-0 flex-col pb-24 pr-24'>
+        <div
+          className={cn(
+            'text-primary-foreground relative flex min-h-full flex-1 shrink-0 flex-col pb-24',
+            'lg:max-w-[640px] lg:pr-24',
+          )}
+        >
           <Section name='about' className='mb-4'>
-            <Card className='border-0 bg-transparent text-slate-300 shadow-none'>
-              <CardHeader>
+            <Card className='border-0 bg-transparent p-0 text-slate-300 shadow-none'>
+              <CardHeader className='px-0'>
                 <h3>About Me</h3>
               </CardHeader>
-              <CardContent className='flex flex-col gap-4'>
+              <CardContent className='flex flex-col gap-4 px-0'>
                 <p>
                   My web development adventure started in high school,
                   automating Model United Nations conferences with my first
