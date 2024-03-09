@@ -9,8 +9,8 @@ const PageContent = () => {
   return (
     <div
       className={cn(
-        'text-primary-foreground flex min-h-full flex-1 shrink-0 flex-col pb-24',
-        '',
+        'text-primary-foreground flex min-h-full flex-1 shrink-0 flex-col',
+        'lg:pb-24',
       )}
     >
       <Section name='about' className='mb-4'>

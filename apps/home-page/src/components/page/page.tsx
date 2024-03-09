@@ -41,9 +41,9 @@ const Page = () => {
     >
       <div
         className={cn(
-          'relative mx-auto flex w-full max-w-screen-xl flex-col items-start overscroll-y-contain px-6 py-12',
+          'relative mx-auto flex h-max w-full max-w-screen-xl flex-col items-start px-6 py-12',
           'md:px-12 md:py-20',
-          'lg:h-max lg:flex-row lg:justify-center lg:px-24 lg:py-0',
+          'lg:flex-row lg:justify-center lg:px-24 lg:py-0',
         )}
       >
         <PageHeader parent={containerRef} />

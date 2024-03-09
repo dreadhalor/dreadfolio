@@ -49,7 +49,6 @@ const Section = ({ children, name, className }: SectionProps) => {
 
   useEffect(() => {
     const top = ref.current?.getBoundingClientRect().top ?? -1;
-    // const bottom = ref.current?.getBoundingClientRect().bottom;
     // if the top is within 100px of the top of the screen, it's the active section
     if (top < 0) return;
     if (top < 100) {
@@ -60,7 +59,12 @@ const Section = ({ children, name, className }: SectionProps) => {
   return (
     <section
       id={name}
-      className={cn('w-full shrink-0 border-0 pt-24 text-slate-300', className)}
+      className={cn(
+        'w-full shrink-0 border-0 pt-16 text-slate-300',
+        'md:pt-24',
+        'lg:pt-46',
+        className,
+      )}
       ref={ref}
     >
       <Card className='border-0 bg-transparent p-0 text-slate-300 shadow-none'>
