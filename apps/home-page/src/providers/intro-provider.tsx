@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SketchKey } from '../../../sketches/src/sketches';
 
-type HomePageContextValue = {
+type IntroContextValue = {
   count: number;
   setCount: React.Dispatch<React.SetStateAction<number>>;
   animateTitle: boolean;
@@ -46,23 +46,21 @@ export const steps = [
 export type Step = (typeof steps)[number];
 export type StepKey = (typeof steps)[number]['key'];
 
-const HomePageContext = createContext<HomePageContextValue>(
-  {} as HomePageContextValue,
-);
+const IntroContext = createContext<IntroContextValue>({} as IntroContextValue);
 
-export const useHomePage = () => {
-  const context = useContext(HomePageContext);
+export const useIntro = () => {
+  const context = useContext(IntroContext);
   if (!context) {
-    throw new Error('useHomePage must be used within a HomePageProvider');
+    throw new Error('useIntro must be used within a IntroProvider');
   }
   return context;
 };
 
-type HomePageProviderProps = {
+type IntroProviderProps = {
   children: React.ReactNode;
 };
 
-export const HomePageProvider = ({ children }: HomePageProviderProps) => {
+export const IntroProvider = ({ children }: IntroProviderProps) => {
   const [showText, setShowText] = useState(false);
   const [animateTitle, setAnimateTitle] = useState(false);
   const [shrinkBackground, setShrinkBackground] = useState(false);
@@ -160,7 +158,7 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
   }, [step]);
 
   return (
-    <HomePageContext.Provider
+    <IntroContext.Provider
       value={{
         count,
         setCount,
@@ -191,6 +189,6 @@ export const HomePageProvider = ({ children }: HomePageProviderProps) => {
       }}
     >
       {children}
-    </HomePageContext.Provider>
+    </IntroContext.Provider>
   );
 };

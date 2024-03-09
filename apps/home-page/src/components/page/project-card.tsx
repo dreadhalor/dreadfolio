@@ -15,46 +15,19 @@ const ProjectCard = ({
   image,
 }: ProjectCardProps) => {
   return (
-    <div className='group/projects flex min-h-[50px] w-full flex-nowrap gap-2 rounded-lg p-3 transition-colors hover:cursor-pointer hover:bg-slate-800/50'>
+    <ListCard title={title} description={description} badges={technologies}>
       <img
         src={image}
         alt={title}
-        className='h-[100px] w-[100px] rounded-lg border-2'
+        className='col-span-1 w-full rounded-lg border-2'
       />
-      <div className='flex flex-1 flex-col gap-2'>
-        <h3 className='relative flex flex-nowrap'>
-          {title}
-          <MdOutlineArrowOutward
-            className={cn(
-              'ml-1 transition-transform',
-              'group-hover/projects:-translate-y-1 group-hover/projects:translate-x-1',
-              'group-focus-visible/projects:-translate-y-1 group-focus-visible/projects:translate-x-1',
-            )}
-          />
-        </h3>
-        <p className='text-sm leading-normal'>{description}</p>
-        {/* <p className='text-sm leading-normal'>
-          Web app for visualizing personalized Spotify data. View your top
-          artists, top tracks, recently played tracks, and detailed audio
-          information about each track. Create and save new playlists of
-          recommended tracks based on your existing playlists and more.
-        </p> */}
-        <div className='flex w-full flex-wrap gap-2'>
-          {technologies.map((tech) => (
-            <Badge key={tech}>{tech}</Badge>
-          ))}
-          {/* <Badge>React</Badge>
-          <Badge>Sanity.io</Badge>
-          <Badge>Firebase</Badge> */}
-        </div>
-      </div>
-    </div>
+    </ListCard>
   );
 };
 
 const ProjectCardList = ({ projects }: { projects: ProjectCardProps[] }) => {
   return (
-    <ul className='flex flex-col gap-4'>
+    <ul className='group/list flex flex-col gap-4'>
       {projects.map((project, i) => (
         <ProjectCard key={i} {...project} />
       ))}
@@ -62,4 +35,86 @@ const ProjectCardList = ({ projects }: { projects: ProjectCardProps[] }) => {
   );
 };
 
-export { ProjectCardList };
+const ExperienceCard = ({
+  title,
+  company,
+  date,
+  description,
+  technologies = [],
+  link,
+}: {
+  title: string;
+  company: string;
+  date: string;
+  description: string;
+  technologies?: string[];
+  link?: string;
+}) => {
+  return (
+    <ListCard
+      title={`${title} - ${company}`}
+      description={description}
+      badges={technologies}
+      link={link}
+    >
+      {date}
+    </ListCard>
+  );
+};
+
+type ListCardProps = {
+  title: string;
+  description: string;
+  badges?: string[];
+  link?: string;
+  children: React.ReactNode;
+};
+const ListCard = ({
+  title,
+  description,
+  badges = [],
+  link,
+  children,
+}: ListCardProps) => {
+  // so that the title can wrap, but if the arrow wraps by itself, it looks weird
+  const lastWord = title.split(' ').pop();
+  const firstWords = title.split(' ').slice(0, -1).join(' ').concat(' ');
+  return (
+    <div
+      onClick={() => link && window.open(link, '_blank')}
+      className={cn(
+        'group grid min-h-[50px] w-full grid-cols-4 flex-nowrap gap-4 rounded-lg p-4 transition-all',
+        'group-hover/list:opacity-50',
+        'hover:cursor-pointer hover:bg-teal-800/20 hover:!opacity-100',
+      )}
+    >
+      <div className='col-span-1 text-xs font-semibold uppercase tracking-wide text-slate-400'>
+        {children}
+      </div>
+
+      <div className='col-span-3 flex flex-col gap-2'>
+        <h3 className='relative text-sm font-medium leading-tight group-hover:text-teal-300 group-focus-visible:text-teal-300'>
+          {firstWords}
+          <span className='inline-block'>
+            {lastWord}
+            <MdOutlineArrowOutward
+              className={cn(
+                'ml-1 inline-block shrink-0 transition-transform',
+                'group-hover:-translate-y-1 group-hover:translate-x-1',
+                'group-focus-visible:-translate-y-1 group-focus-visible:translate-x-1',
+              )}
+            />
+          </span>
+        </h3>
+        <p className='text-sm leading-normal'>{description}</p>
+        <div className='mt-1 flex w-full flex-wrap gap-2'>
+          {badges.map((badge) => (
+            <Badge key={badge}>{badge}</Badge>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export { ProjectCardList, ExperienceCard, ListCard };

@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react';
-import { useHomePage } from '../providers/home-page-provider';
+import { useRef } from 'react';
+import { useIntro } from '../providers/intro-provider';
 import { SketchPane } from './sketch-pane';
 import { Title } from './title/title';
 import { useClippingPathAnimation } from '../hooks/use-clipping-path-animation';
 import { motion } from 'framer-motion';
 import { Page } from './page/page';
+import { useHomepage } from '../providers/homepage-provider';
 
 type TitleBackLayerProps = {
   index: number;
@@ -13,9 +14,8 @@ type TitleBackLayerProps = {
 const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
   const sizeRef = useRef<HTMLDivElement>(null);
   const { sketch1, shrinkBackground, retractBackground, setSwapLayers, step } =
-    useHomePage();
-  const [offset, setOffset] = useState(0);
-  const [parallaxBaseHeight, setParallaxBaseHeight] = useState(0);
+    useIntro();
+  const { offset, parallaxBaseHeight } = useHomepage();
 
   const { controls, variants } = useClippingPathAnimation({
     sizeRef,
@@ -23,11 +23,6 @@ const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
     retract: retractBackground,
   });
 
-  const sketchHeight =
-    sizeRef?.current && sketch1 === 'rgb-blobs'
-      ? sizeRef.current.offsetHeight * 2
-      : undefined;
-  // console.log('sketchHeight', sketchHeight);
   return (
     <div
       ref={sizeRef}
@@ -62,11 +57,7 @@ const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
             <Title variant='bottomBackground' />
           </>
         )}
-        <Page
-          offset={offset}
-          setOffset={setOffset}
-          setParallaxBaseHeight={setParallaxBaseHeight}
-        />
+        <Page />
       </motion.div>
     </div>
   );

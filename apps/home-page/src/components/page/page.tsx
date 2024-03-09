@@ -1,49 +1,19 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useHomePage } from '../../providers/home-page-provider';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useIntro } from '../../providers/intro-provider';
+import { useHomepage } from '../../providers/homepage-provider';
 import { cn } from '@repo/utils';
-import { Card, CardContent, CardHeader } from 'dread-ui';
+import { Button, Card, CardContent, CardHeader } from 'dread-ui';
 import { SectionLink } from './section-link';
 import { Section } from './section';
-import { ProjectCardList } from './project-card';
-import {
-  MinesweeperScreenshot,
-  PathfinderVisualizerScreenshot,
-  ShareMeScreenshot,
-} from '@repo/assets';
+import { ExperienceCard, ProjectCardList } from './project-card';
+import { experience, projects } from './info';
+import { MdArrowDownward } from 'react-icons/md';
+import { FaGithub, FaInstagram } from 'react-icons/fa';
 
-type PageProps = {
-  offset: number;
-  setOffset: (offset: number) => void;
-  setParallaxBaseHeight: (height: number) => void;
-};
-const Page = ({ offset, setOffset, setParallaxBaseHeight }: PageProps) => {
-  const { step } = useHomePage();
+const Page = () => {
+  const { step } = useIntro();
+  const { setOffset, setParallaxBaseHeight } = useHomepage();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeSection, setActiveSection] = useState('about');
-
-  const projects = [
-    {
-      title: 'ShareMe',
-      description:
-        'Web app for visualizing personalized Spotify data. View your top artists, top tracks, recently played tracks, and detailed audio information about each track. Create and save new playlists of recommended tracks based on your existing playlists and more.',
-      image: ShareMeScreenshot,
-      technologies: ['React', 'Sanity.io', 'Firebase'],
-    },
-    {
-      title: 'Minesweeper',
-      description:
-        'Classic Minesweeper game with customizable grid size and mine count. Built with React, TypeScript, and Tailwind CSS.',
-      image: MinesweeperScreenshot,
-      technologies: ['React', 'TypeScript', 'Tailwind CSS'],
-    },
-    {
-      title: 'Pathfinding Visualizer',
-      description:
-        "Visualize pathfinding algorithms like Dijkstra's, BFS and A* on a grid. Built with React, TypeScript, and Tailwind CSS.",
-      image: PathfinderVisualizerScreenshot,
-      technologies: ['React', 'TypeScript', 'Tailwind CSS'],
-    },
-  ];
 
   const removeLogo = () => {
     const splineViewer = document.getElementsByTagName('spline-viewer')[0];
@@ -77,13 +47,18 @@ const Page = ({ offset, setOffset, setParallaxBaseHeight }: PageProps) => {
           setOffset(e.currentTarget.scrollTop);
         }}
       >
-        <div className='sticky left-0 top-0 flex h-full max-w-[640px] flex-1 shrink-0 py-24 pl-24 pr-2'>
+        <div className='sticky left-0 top-0 flex h-full max-w-[640px] flex-1 shrink-0 flex-col justify-between py-24 pl-24 pr-2'>
           <div
             className='text-primary-foreground relative flex flex-1 flex-col items-start'
             style={{ textShadow: '0px 0px 20px #000000' }}
           >
-            <h1 className='text-4xl font-bold tracking-tight text-slate-200 sm:text-5xl'>
+            <h1 className='flex flex-nowrap text-4xl font-bold tracking-tight text-slate-200 sm:text-5xl'>
               Scott Hetrick
+              <spline-viewer
+                class='ml-2 inline-block h-[50px] w-[50px]'
+                loading-anim-type='spinner-small-dark'
+                url='https://prod.spline.design/8KeIdzt7Hi8smpDE/scene.splinecode'
+              ></spline-viewer>
             </h1>
             <h2 className='mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl'>
               Programming. Pizza. Punchlines.
@@ -91,46 +66,41 @@ const Page = ({ offset, setOffset, setParallaxBaseHeight }: PageProps) => {
             <h2 className='text-md mt-2 font-medium tracking-tight text-slate-400 sm:text-lg'>
               Not necessarily in that order.
             </h2>
-            <spline-viewer
-              class='mx-auto my-4 h-[200px] w-[200px] shrink-0 overflow-hidden'
-              loading-anim-type='spinner-small-dark'
-              url='https://prod.spline.design/8KeIdzt7Hi8smpDE/scene.splinecode'
-            ></spline-viewer>
-            <nav className='hidden lg:block' aria-label='In-page jump links'>
+            <nav
+              className='mt-16 hidden lg:block'
+              aria-label='In-page jump links'
+            >
               <ul className='w-max'>
-                <SectionLink
-                  name='about'
-                  activeSection={activeSection}
-                  parent={containerRef}
-                >
+                <SectionLink name='about' parent={containerRef}>
                   About
                 </SectionLink>
-                <SectionLink
-                  name='tech-stack'
-                  activeSection={activeSection}
-                  parent={containerRef}
-                >
-                  Tech Stack
+                <SectionLink name='experience' parent={containerRef}>
+                  Experience
                 </SectionLink>
-                <SectionLink
-                  name='projects'
-                  activeSection={activeSection}
-                  parent={containerRef}
-                >
+                <SectionLink name='projects' parent={containerRef}>
                   Projects
                 </SectionLink>
               </ul>
             </nav>
           </div>
+          <div className='ml-1 flex w-full items-center justify-start gap-5'>
+            <FaGithub
+              className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white'
+              onClick={() =>
+                window.open('https://www.github.com/dreadhalor', '_blank')
+              }
+            />
+            <FaInstagram
+              className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white'
+              onClick={() =>
+                window.open('https://www.instagram.com/dreadhalor/', '_blank')
+              }
+            />
+          </div>
         </div>
-        <div className='text-primary-foreground relative flex min-h-full max-w-[640px] flex-1 shrink-0 flex-col py-24 pr-24'>
-          <Section
-            offset={offset}
-            setActiveSection={setActiveSection}
-            name='about'
-            className='mb-4'
-          >
-            <Card className='bg-primary/20 border-0 text-slate-300'>
+        <div className='text-primary-foreground relative flex min-h-full max-w-[640px] flex-1 shrink-0 flex-col pb-24 pr-24'>
+          <Section name='about' className='mb-4'>
+            <Card className='border-0 bg-transparent text-slate-300 shadow-none'>
               <CardHeader>
                 <h3>About Me</h3>
               </CardHeader>
@@ -154,126 +124,21 @@ const Page = ({ offset, setOffset, setParallaxBaseHeight }: PageProps) => {
               </CardContent>
             </Card>
           </Section>
-          <Section
-            offset={offset}
-            setActiveSection={setActiveSection}
-            name='tech-stack'
-          >
-            <div className='flex min-h-full min-w-0 shrink-0 flex-col items-center justify-center gap-4 leading-[26px] text-slate-300'>
-              <Card className='bg-primary/30 overflow-hidden border-0 text-slate-300'>
-                <CardHeader>
-                  <h3>Front-End Technologies</h3>
-                </CardHeader>
-                <CardContent className='pl-10'>
-                  <ul className='list-disc'>
-                    <li>
-                      Programming Languages & Libraries: JavaScript, TypeScript,
-                      HTML/CSS, Sass
-                    </li>
-                    <li>
-                      Frameworks: React, Angular, Ruby on Rails (for front-end
-                      aspects), jQuery
-                    </li>
-                    <li>
-                      UI Development & Styling: TailwindCSS, Framer Motion
-                    </li>
-                    <li>Build Tools: Vite, Turborepo</li>
-                    <li>
-                      Design & Prototyping: Figma, Adobe Illustrator, Adobe
-                      Photoshop, Spline, p5.js
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className='bg-primary/30 overflow-hidden border-0 text-slate-300'>
-                <CardHeader>
-                  <h3>Back-End Technologies</h3>
-                </CardHeader>
-                <CardContent className='pl-10'>
-                  <ul className='list-disc'>
-                    <li>Programming Languages: Node.js, Java, Ruby, C/C++</li>
-                    <li>
-                      Frameworks & Runtime Environments: Express, Ruby on Rails
-                      (back-end aspects)
-                    </li>
-                    <li>
-                      API Development & Integration: GraphQL, RESTful Web APIs,
-                      tRPC
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className='bg-primary/30 overflow-hidden border-0 text-slate-300'>
-                <CardHeader>
-                  <h3>Databasing</h3>
-                </CardHeader>
-                <CardContent className='pl-10'>
-                  <ul className='list-disc'>
-                    <li>
-                      Types & Management Systems: RDBMS, PostgreSQL, MySQL,
-                      MongoDB, Firebase, PlanetScale
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className='bg-primary/30 overflow-hidden border-0 text-slate-300'>
-                <CardHeader>
-                  <h3>DevOps & Deployment</h3>
-                </CardHeader>
-                <CardContent className='pl-10'>
-                  <ul className='list-disc'>
-                    <li>Containerization & Orchestration: Docker</li>
-                    <li>
-                      Cloud Platforms & Services: AWS, DigitalOcean, Google
-                      Cloud
-                    </li>
-                    <li>
-                      Continuous Integration & Continuous Deployment (CI/CD):
-                      Github Actions, CircleCI
-                    </li>
-                    <li>Web Server Management: Nginx</li>
-                    <li>Visual Testing & Review: Chromatic</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className='bg-primary/30 overflow-hidden border-0 text-slate-300'>
-                <CardHeader>
-                  <h3>Development Tooling & Collaboration</h3>
-                </CardHeader>
-                <CardContent className='pl-10'>
-                  <ul className='list-disc'>
-                    <li>Editors & IDEs: VSCode</li>
-                    <li>Version Control & Repository Hosting: Git, GitHub</li>
-                    <li>Package Managers: PNPM, NPM</li>
-                    <li>
-                      Testing Frameworks & Libraries: Vitest/Jest, Cypress
-                    </li>
-                    <li>
-                      Project Management & Documentation: Jira, Confluence
-                    </li>
-                    <li>
-                      Code Quality & Maintenance: Storybook, CodeClimate, Zod
-                      (for TypeScript validation)
-                    </li>
-                    <li>Scripting & Configuration: Bash, JSON, YML</li>
-                  </ul>
-                </CardContent>
-              </Card>
+          <Section name='experience'>
+            <div className='group/list flex h-full min-w-0 shrink-0 flex-col items-center justify-center gap-2 text-white'>
+              {experience.map((exp, i) => (
+                <ExperienceCard key={i} {...exp} />
+              ))}
             </div>
           </Section>
-          <Section
-            offset={offset}
-            setActiveSection={setActiveSection}
-            name='projects'
-          >
+          <Section name='projects'>
             <div className='flex h-full min-w-0 shrink-0 flex-col items-center justify-center text-white'>
-              {/* <ProjectCard2 /> */}
               <ProjectCardList projects={projects} />
             </div>
+            <Button variant={'link'} className='group mt-4 text-white'>
+              View All Featured Projects
+              <MdArrowDownward className='ml-2 inline-block transition-transform group-hover:translate-y-1' />
+            </Button>
           </Section>
         </div>
       </div>

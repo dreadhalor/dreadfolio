@@ -1,21 +1,15 @@
 import { cn } from '@repo/utils';
 import { useEffect, useRef } from 'react';
+import { useHomepage } from '../../providers/homepage-provider';
 
 type SectionProps = {
   children: React.ReactNode;
   name: string;
-  offset: number;
-  setActiveSection: (section: string) => void;
   className?: string;
 };
-const Section = ({
-  offset,
-  children,
-  name,
-  setActiveSection,
-  className,
-}: SectionProps) => {
+const Section = ({ children, name, className }: SectionProps) => {
   const ref = useRef<HTMLDivElement>(null);
+  const { setActiveSection, offset } = useHomepage();
 
   useEffect(() => {
     const top = ref.current?.getBoundingClientRect().top ?? -1;
@@ -35,7 +29,7 @@ const Section = ({
     <section
       id={name}
       className={cn(
-        'relative w-full shrink-0 border-0 text-slate-300',
+        'relative w-full shrink-0 border-0 pt-24 text-slate-300',
         className,
       )}
       ref={ref}

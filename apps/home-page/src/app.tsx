@@ -1,11 +1,11 @@
-import { useHomePage } from './providers/home-page-provider';
+import { useIntro } from './providers/intro-provider';
 import { TitleFrontLayer } from './components/title-front-layer';
 import { TitleBackLayer } from './components/title-back-layer';
 import { Controls } from './components/controls';
 import { StartButton } from './components/start-button';
 
 function App() {
-  const { swapLayers, step } = useHomePage();
+  const { swapLayers, step } = useIntro();
 
   return (
     <div className='relative flex h-full w-full border-0 bg-white'>

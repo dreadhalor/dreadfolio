@@ -1,21 +1,13 @@
 import { cn } from '@repo/utils';
+import { useHomepage } from '../../providers/homepage-provider';
 
 type SectionLinkProps = {
   name: string;
   children: string;
-  activeSection: string;
   parent: React.MutableRefObject<HTMLDivElement | null>;
-  offset?: number;
-  setOffset?: (offset: number) => void;
 };
-const SectionLink = ({
-  name,
-  children,
-  activeSection,
-  parent,
-  // offset,
-  // setOffset,
-}: SectionLinkProps) => {
+const SectionLink = ({ name, children, parent }: SectionLinkProps) => {
+  const { activeSection } = useHomepage();
   const isActive = name === activeSection;
   return (
     <li>

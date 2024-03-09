@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from 'dread-ui';
-import { StepKey, steps, useHomePage } from '../providers/home-page-provider';
+import { StepKey, steps, useIntro } from '../providers/intro-provider';
 import { SketchKey, sketches } from '../../../sketches/src/sketches';
 
 const Controls = () => {
@@ -31,7 +31,7 @@ const Controls = () => {
     setStep,
     startAnimating,
     setStartAnimating,
-  } = useHomePage();
+  } = useIntro();
 
   const setStepTypesafe = (value: string) => {
     if (steps.map(({ key }) => key).includes(value as StepKey)) {

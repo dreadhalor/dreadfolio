@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useHomePage } from '../providers/home-page-provider';
+import { useIntro } from '../providers/intro-provider';
 import { Button } from 'dread-ui';
 
 const StartButton = () => {
-  const { step, startAnimating, setStartAnimating } = useHomePage();
+  const { step, startAnimating, setStartAnimating } = useIntro();
   return (
     <AnimatePresence>
       {!startAnimating && step === 'init' && (

@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useHomePage } from '../../providers/home-page-provider';
+import { useIntro } from '../../providers/intro-provider';
 import {
   TitleProps,
   textVariants,
@@ -24,7 +24,7 @@ const Title = ({ variant, text = `Hi, I'm Scott` }: TitleProps) => {
   const [initialLoad, setInitialLoad] = useState(true);
   const shadowId = useId();
 
-  const { animateTitle, font, showText } = useHomePage();
+  const { animateTitle, font, showText } = useIntro();
 
   const dy = Math.min(textHeight * 0.9);
 

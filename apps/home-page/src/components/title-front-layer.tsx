@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import { useHomePage } from '../providers/home-page-provider';
+import { useIntro } from '../providers/intro-provider';
 import { Title } from './title/title';
 import { SketchPane } from './sketch-pane';
 import { useClippingPathAnimation } from '../hooks/use-clipping-path-animation'; // Assuming the hook is in the same directory
@@ -11,7 +11,7 @@ type TitleFrontLayerProps = {
 const TitleFrontLayer = ({ index }: TitleFrontLayerProps) => {
   const sizeRef = useRef<HTMLDivElement>(null);
   const { shrinkForeground, retractForeground, sketch2, setSwapLayers } =
-    useHomePage();
+    useIntro();
 
   const { controls, variants } = useClippingPathAnimation({
     sizeRef,
