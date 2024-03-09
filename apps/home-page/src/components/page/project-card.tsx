@@ -19,7 +19,7 @@ const ProjectCard = ({
       <img
         src={image}
         alt={title}
-        className='col-span-1 w-full rounded-lg border-2'
+        className='border-border/50 group-hover:border-border col-span-1 w-full rounded-lg border-2 brightness-75 transition-colors'
       />
     </ListCard>
   );

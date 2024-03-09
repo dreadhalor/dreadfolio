@@ -62,6 +62,7 @@ export const experience = [
       'Storybook',
       'TypeScript',
       'Tailwind CSS',
+      'Bootstrap',
       'PostgreSQL',
       'GraphQL',
       'Apollo',
