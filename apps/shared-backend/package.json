@@ -1,0 +1,17 @@
+{
+  "name": "fallcrate-backend",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "pnpm start",
+    "start": "firebase emulators:start --import=./firebase-data --export-on-exit",
+    "export-achievements": "node export-achievements-json.js",
+    "import-achievements": "node import-achievements-json.js",
+    "stop": "npx kill-port 4000 4400 8080 9199"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^9.22.0"
+  }
+}
