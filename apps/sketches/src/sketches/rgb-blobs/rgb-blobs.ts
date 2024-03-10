@@ -120,32 +120,32 @@ export const RgbBlobs = (p5: RgbBlobsProps) => {
   };
 
   // draw the flowfield
-  const drawFlowField = () => {
-    p5.stroke(0, 50);
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        const index = x + y * cols;
-        const vector = flowfield[index];
-        if (!vector) continue;
-        p5.push();
-        p5.translate(x * scl, y * scl);
-        p5.rotate(vector.heading());
-        p5.strokeWeight(1);
-        // color the vector based on the magnitude
-        p5.stroke(
-          p5.map(p5.abs(vector.x), 0, 1, 0, 255),
-          p5.map(p5.abs(vector.y), 0, 1, 0, 255),
-          p5.map(p5.abs(vector.x + vector.y), 0, 1, 0, 255),
-        );
-        p5.line(0, 0, scl, 0);
-        // draw an arrowhead
-        p5.beginShape();
-        p5.vertex(scl, 0);
-        p5.vertex(scl - 2, -2);
-        p5.vertex(scl - 2, 2);
-        p5.endShape(p5.CLOSE);
-        p5.pop();
-      }
-    }
-  };
+  //   const drawFlowField = () => {
+  //     p5.stroke(0, 50);
+  //     for (let y = 0; y < rows; y++) {
+  //       for (let x = 0; x < cols; x++) {
+  //         const index = x + y * cols;
+  //         const vector = flowfield[index];
+  //         if (!vector) continue;
+  //         p5.push();
+  //         p5.translate(x * scl, y * scl);
+  //         p5.rotate(vector.heading());
+  //         p5.strokeWeight(1);
+  //         // color the vector based on the magnitude
+  //         p5.stroke(
+  //           p5.map(p5.abs(vector.x), 0, 1, 0, 255),
+  //           p5.map(p5.abs(vector.y), 0, 1, 0, 255),
+  //           p5.map(p5.abs(vector.x + vector.y), 0, 1, 0, 255),
+  //         );
+  //         p5.line(0, 0, scl, 0);
+  //         // draw an arrowhead
+  //         p5.beginShape();
+  //         p5.vertex(scl, 0);
+  //         p5.vertex(scl - 2, -2);
+  //         p5.vertex(scl - 2, 2);
+  //         p5.endShape(p5.CLOSE);
+  //         p5.pop();
+  //       }
+  //     }
+  //   };
 };

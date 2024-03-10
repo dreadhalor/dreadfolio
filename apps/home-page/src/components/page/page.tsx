@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { useIntro } from '../../providers/intro-provider';
 import { useHomepage } from '../../providers/homepage-provider';
 import { cn } from '@repo/utils';
 import { PageHeader } from './page-header';
@@ -7,7 +6,6 @@ import { PageContent } from './page-content';
 import { PageBg } from './page-bg';
 
 const Page = () => {
-  const { step } = useIntro();
   const { setOffset, setParallaxBaseHeight } = useHomepage();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +34,6 @@ const Page = () => {
         ref={containerRef}
         className={cn(
           'bg-primary/60 pointer-events-auto relative flex h-full w-full overflow-auto opacity-100',
-          // step === 'homepage' && 'pointer-events-auto opacity-100',
         )}
         onScroll={(e) => {
           setOffset(e.currentTarget.scrollTop);

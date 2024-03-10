@@ -1,13 +1,6 @@
 import { motion } from 'framer-motion';
 import { cn } from '@repo/utils';
-import {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useIntro } from '../../providers/intro-provider';
 import {
   TitleProps,

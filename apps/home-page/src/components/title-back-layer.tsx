@@ -5,17 +5,14 @@ import { Title } from './title/title';
 import { useClippingPathAnimation } from '../hooks/use-clipping-path-animation';
 import { motion } from 'framer-motion';
 import { Page } from './page/page';
-import { useHomepage } from '../providers/homepage-provider';
 
 type TitleBackLayerProps = {
   index: number;
-  blur?: boolean;
 };
-const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
+const TitleBackLayer = ({ index }: TitleBackLayerProps) => {
   const sizeRef = useRef<HTMLDivElement>(null);
   const { sketch1, shrinkBackground, retractBackground, setSwapLayers, step } =
     useIntro();
-  const { offset, parallaxBaseHeight } = useHomepage();
 
   const { controls, variants } = useClippingPathAnimation({
     sizeRef,
@@ -43,12 +40,7 @@ const TitleBackLayer = ({ index, blur = false }: TitleBackLayerProps) => {
         }}
       >
         <div className='bg-primary absolute inset-0' />
-        <SketchPane
-          blur={blur}
-          sketchKey={sketch1}
-          height={parallaxBaseHeight}
-          top={offset}
-        />
+        <SketchPane sketchKey={sketch1} />
 
         {step !== 'homepage' && (
           <>
