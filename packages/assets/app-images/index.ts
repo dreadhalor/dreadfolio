@@ -7,3 +7,5 @@ export { default as SuDoneKuScreenshot } from './su-done-ku.png';
 export { default as GifsterScreenshot } from './gifster.png';
 export { default as DreadUiScreenshot } from './dread-ui.png';
 export { default as SteeringTextScreenshot } from './steering-text.png';
+export { default as SketchesScreenshot } from './sketches.png';
+export { default as HomepageScreenshot } from './homepage.png';
