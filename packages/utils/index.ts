@@ -13,3 +13,5 @@ export const getBackendBaseUrl = (prod: boolean) => {
   if (prod) return '';
   return `http://localhost:3000`;
 };
+
+export { auth, db } from './firebase-tools';
