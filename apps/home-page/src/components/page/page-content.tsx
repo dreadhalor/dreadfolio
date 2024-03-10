@@ -1,8 +1,8 @@
 import { cn } from '@repo/utils';
-import { Section, SectionContent, SectionHeader } from './section';
-import { Button, Card, CardContent, CardHeader } from 'dread-ui';
+import { Section, SectionContent, SectionHeader } from './section/section';
+import { Button } from 'dread-ui';
 import { experience, projects } from './info';
-import { ExperienceCard, ProjectCardList } from './project-card';
+import { ExperienceCard, ProjectCard } from './list-card';
 import { MdArrowDownward } from 'react-icons/md';
 
 const PageContent = () => {
@@ -44,9 +44,11 @@ const PageContent = () => {
       </Section>
       <Section name='projects'>
         <SectionHeader>Projects</SectionHeader>
-        <div className='flex h-full min-w-0 shrink-0 flex-col items-center justify-center text-white'>
-          <ProjectCardList projects={projects} />
-        </div>
+        <SectionContent className='group/list flex h-full min-w-0 shrink-0 flex-col items-center justify-center gap-2 px-0 text-white'>
+          {projects.map((project, i) => (
+            <ProjectCard key={i} {...project} />
+          ))}
+        </SectionContent>
         <Button variant='link' className='group mt-4 text-white'>
           View All Featured Projects
           <MdArrowDownward className='ml-2 inline-block transition-transform group-hover:translate-y-1' />

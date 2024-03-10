@@ -1,5 +1,5 @@
 import { FaInstagram, FaGithub } from 'react-icons/fa';
-import { SectionLink } from './section-link';
+import { SectionLink } from './section/section-link';
 import { cn } from '@repo/utils';
 import { RefObject } from 'react';
 
@@ -8,7 +8,7 @@ const PageHeader = ({ parent }: { parent: RefObject<HTMLDivElement> }) => {
     <div
       className={cn(
         'relative flex flex-1 shrink-0 flex-col justify-between',
-        'lg:sticky lg:left-0 lg:top-0 lg:py-24',
+        'lg:sticky lg:left-0 lg:top-0 lg:h-screen lg:py-24',
       )}
     >
       <div

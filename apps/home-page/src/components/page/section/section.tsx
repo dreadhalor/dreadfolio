@@ -1,8 +1,8 @@
 import { cn } from '@repo/utils';
 import { useEffect, useRef, useState } from 'react';
-import { useHomepage } from '../../providers/homepage-provider';
+import { useHomepage } from '../../../providers/homepage-provider';
 import { Card, CardContent, CardHeader } from 'dread-ui';
-import { StickyObserver } from './sticky-observer';
+import { StickyObserver } from '../sticky-observer';
 
 const SectionHeader = ({ children }: { children: React.ReactNode }) => {
   const [stuck, setStuck] = useState(false);

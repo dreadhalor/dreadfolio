@@ -1,5 +1,5 @@
 import { cn } from '@repo/utils';
-import { useHomepage } from '../../providers/homepage-provider';
+import { useHomepage } from '../../../providers/homepage-provider';
 
 type SectionLinkProps = {
   name: string;

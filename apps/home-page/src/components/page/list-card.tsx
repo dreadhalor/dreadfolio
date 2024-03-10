@@ -25,16 +25,6 @@ const ProjectCard = ({
   );
 };
 
-const ProjectCardList = ({ projects }: { projects: ProjectCardProps[] }) => {
-  return (
-    <ul className='group/list flex flex-col gap-4'>
-      {projects.map((project, i) => (
-        <ProjectCard key={i} {...project} />
-      ))}
-    </ul>
-  );
-};
-
 const ExperienceCard = ({
   title,
   company,
@@ -106,7 +96,7 @@ const ListCard = ({
             />
           </span>
         </h3>
-        <p className='text-sm leading-normal'>{description}</p>
+        <p className='text-start text-sm leading-normal'>{description}</p>
         <div className='mt-1 flex w-full flex-wrap gap-2'>
           {badges.map((badge) => (
             <Badge key={badge}>{badge}</Badge>
@@ -117,4 +107,4 @@ const ListCard = ({
   );
 };
 
-export { ProjectCardList, ExperienceCard, ListCard };
+export { ExperienceCard, ProjectCard };

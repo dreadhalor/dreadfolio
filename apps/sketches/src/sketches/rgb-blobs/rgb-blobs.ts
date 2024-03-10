@@ -12,12 +12,22 @@ type RgbBlobsProps = P5CanvasInstance<FpsSketchProps> & {
 };
 export const RgbBlobs = (p5: RgbBlobsProps) => {
   let height: number;
-  p5.updateWithProps = ({ height: _height }) => {
-    if (_height && typeof _height === 'number') {
+  let width: number;
+  p5.updateWithProps = ({ height: _height, width: _width }) => {
+    let shouldResize = false;
+    if (_height && typeof _height === 'number' && _height !== height) {
       height = _height;
-      p5.resizeCanvas(p5.width, height);
-      blobLayer.resizeCanvas(p5.width, height);
+      shouldResize = true;
+    }
+    if (_width && typeof _width === 'number' && _width !== width) {
+      width = _width;
+      shouldResize = true;
+    }
+    if (shouldResize) {
+      p5.resizeCanvas(width, height);
       setupFlowField();
+      if (!blobLayer) return;
+      blobLayer.resizeCanvas(width, height);
       resetBlobs();
     }
   };
@@ -63,7 +73,7 @@ export const RgbBlobs = (p5: RgbBlobsProps) => {
   };
 
   p5.setup = () => {
-    p5.createCanvas(p5.windowWidth, height || p5.windowHeight);
+    p5.createCanvas(width || p5.windowWidth, height || p5.windowHeight);
     p5.pixelDensity(2);
     p5.frameRate(60);
 

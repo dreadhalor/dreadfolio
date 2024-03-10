@@ -4,6 +4,7 @@ import { useHomepage } from '../../providers/homepage-provider';
 import { cn } from '@repo/utils';
 import { PageHeader } from './page-header';
 import { PageContent } from './page-content';
+import { PageBg } from './page-bg';
 
 const Page = () => {
   const { step } = useIntro();
@@ -29,25 +30,28 @@ const Page = () => {
   }, [setParallaxBaseHeight, containerRef.current?.scrollHeight]);
 
   return (
-    <div
-      ref={containerRef}
-      className={cn(
-        'bg-primary/60 pointer-events-auto relative flex h-full w-full overflow-auto opacity-0',
-        step === 'homepage' && 'pointer-events-auto opacity-100',
-      )}
-      onScroll={(e) => {
-        setOffset(e.currentTarget.scrollTop);
-      }}
-    >
+    <div className='relative h-full w-full'>
+      <PageBg />
       <div
+        ref={containerRef}
         className={cn(
-          'relative mx-auto flex h-max w-full max-w-screen-xl flex-col items-start px-6 py-12',
-          'md:px-12 md:py-20',
-          'lg:flex-row lg:justify-center lg:px-24 lg:py-0',
+          'bg-primary/60 pointer-events-auto relative flex h-full w-full overflow-auto opacity-100',
+          // step === 'homepage' && 'pointer-events-auto opacity-100',
         )}
+        onScroll={(e) => {
+          setOffset(e.currentTarget.scrollTop);
+        }}
       >
-        <PageHeader parent={containerRef} />
-        <PageContent />
+        <div
+          className={cn(
+            'relative mx-auto flex h-max w-full max-w-screen-xl flex-col items-start px-6 py-12',
+            'md:px-12 md:py-20',
+            'lg:flex-row lg:justify-center lg:px-24 lg:py-0',
+          )}
+        >
+          <PageHeader parent={containerRef} />
+          <PageContent />
+        </div>
       </div>
     </div>
   );
