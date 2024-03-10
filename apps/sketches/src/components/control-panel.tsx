@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectValue,
   Slider,
   Label,
   Checkbox,
@@ -93,7 +94,9 @@ const ControlPanel = ({
                 onOpenChange={setSelectOpen}
               >
                 <SelectTrigger className='px-4'>
-                  <span>Sketch: {sketch}</span>
+                  <span className='truncate'>
+                    <SelectValue>Sketch: {sketch}</SelectValue>
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(sketches).map(([key, { name }]) => (
