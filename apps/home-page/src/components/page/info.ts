@@ -12,6 +12,7 @@ export const projects = [
     description:
       'A Pinterest-inspired social media platform for sharing and discovering images. Built with React, Sanity.io, and Firebase.',
     image: ShareMeScreenshot,
+    link: '/shareme',
     technologies: ['React', 'Sanity.io', 'Firebase'],
   },
   {
@@ -19,6 +20,7 @@ export const projects = [
     description:
       'Classic Minesweeper game with customizable grid size and mine count. Built with React, TypeScript, and Tailwind CSS.',
     image: MinesweeperScreenshot,
+    link: '/minesweeper',
     technologies: ['React', 'TypeScript', 'Tailwind CSS'],
   },
   {
@@ -26,6 +28,7 @@ export const projects = [
     description:
       "Visualize pathfinding algorithms like Dijkstra's, BFS and A* on a grid. Built with React, TypeScript, and Tailwind CSS.",
     image: PathfinderVisualizerScreenshot,
+    link: '/pathfinder-visualizer',
     technologies: ['React', 'TypeScript', 'Tailwind CSS'],
   },
   {
@@ -33,6 +36,7 @@ export const projects = [
     description:
       'A raycasting app that visualizes the path of light rays as they hit obstacles. Built with vanilla Javascript + TypeScript.',
     image: EnlightScreenshot,
+    link: '/enlight',
     technologies: ['JavaScript', 'TypeScript'],
   },
   {
@@ -40,6 +44,7 @@ export const projects = [
     description:
       'A Sudoku solver that can be used to show step-by-step how to logically solve Sudoku puzzles. Built with React, TypeScript, and Tailwind CSS.',
     image: SuDoneKuScreenshot,
+    link: '/su-done-ku',
     technologies: ['React', 'TypeScript', 'Tailwind CSS'],
   },
 ];

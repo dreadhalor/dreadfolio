@@ -16,7 +16,6 @@ const SectionLink = ({ name, children, parent }: SectionLinkProps) => {
           'group flex cursor-pointer items-center py-3',
           isActive && 'active',
         )}
-        // href={`#${name}`}
         onClick={() => {
           const section = document.getElementById(name);
           if (!section) return;

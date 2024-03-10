@@ -44,18 +44,12 @@ const PageHeader = ({ parent }: { parent: RefObject<HTMLDivElement> }) => {
         </nav>
       </div>
       <div className='ml-1 mt-8 flex w-full items-center justify-start gap-5'>
-        <FaGithub
-          className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white'
-          onClick={() =>
-            window.open('https://www.github.com/dreadhalor', '_blank')
-          }
-        />
-        <FaInstagram
-          className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white'
-          onClick={() =>
-            window.open('https://www.instagram.com/dreadhalor/', '_blank')
-          }
-        />
+        <a href='https://www.github.com/dreadhalor' target='_blank'>
+          <FaGithub className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white' />
+        </a>
+        <a href='https://www.instagram.com/dreadhalor/' target='_blank'>
+          <FaInstagram className='h-[24px] w-[24px] shrink-0 cursor-pointer text-slate-400 transition-colors hover:text-white' />
+        </a>
       </div>
     </div>
   );
