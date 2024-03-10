@@ -9,7 +9,7 @@ export const scl = 10;
 export const FlowField = (p5: P5CanvasInstance<FpsSketchProps>) => {
   let cols: number, rows: number;
   let zoff = 0;
-  const zInc = 0.0003;
+  const zInc = 0.002;
   const particles: Particle[] = [];
   let flowfield: P5.Vector[];
   let buffer: P5.Graphics;

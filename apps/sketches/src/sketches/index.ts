@@ -42,10 +42,10 @@ export const sketches = {
     name: 'Metaballs',
     sketch: MarchingSquares,
   },
-  'gosper-curve': {
-    name: 'Gosper Curve',
-    sketch: GosperCurve,
-  },
+  // 'gosper-curve': {
+  //   name: 'Gosper Curve',
+  //   sketch: GosperCurve,
+  // },
   'flow-field': {
     name: 'Flow Field',
     sketch: FlowField,
@@ -75,10 +75,10 @@ export const sketches = {
     name: 'Dot Globe',
     sketch: DotGlobe,
   },
-  'circle-mesh': {
-    name: 'Circle Mesh',
-    sketch: CircleMesh,
-  },
+  // 'circle-mesh': {
+  //   name: 'Circle Mesh',
+  //   sketch: CircleMesh,
+  // },
   honeycombing: {
     name: 'Honeycombing',
     sketch: Honeycombing,

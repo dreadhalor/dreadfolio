@@ -20,7 +20,7 @@ import { useState } from 'react';
 import { sketches } from '../sketches';
 
 type ControlPanelProps = {
-  fps: number;
+  fps?: number;
   sketch: string;
   loadSketch: (sketch: string) => void;
   distanceField: number;
@@ -83,7 +83,7 @@ const ControlPanel = ({
           <AccordionItem value='sketches' className='w-full border-none'>
             <AccordionHeader className='w-full'>
               <AccordionTrigger className='px-2'>
-                <span className='mx-auto'>FPS: {fps.toFixed(2) ?? 'N/A'}</span>
+                <span className='mx-auto'>FPS: {fps?.toFixed(2) ?? 'N/A'}</span>
               </AccordionTrigger>
             </AccordionHeader>
             <AccordionContent className='p-2 pt-0'>

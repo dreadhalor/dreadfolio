@@ -13,11 +13,15 @@ import { ControlPanel } from './components/control-panel';
 const getSketchNames = () => {
   return Object.keys(sketches) as SketchKey[];
 };
-const getLastSketch = () => getSketchNames().at(-1)!;
+// const getLastSketch = () => getSketchNames().at(-1)!;
+const getRandomSketch = () => {
+  const keys = getSketchNames();
+  return keys[Math.floor(Math.random() * keys.length)]!;
+};
 const App = () => {
-  const [fps, setFps] = useState(60);
+  const [fps, setFps] = useState();
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<SketchKey>(getLastSketch());
+  const [sketch, setSketch] = useState<SketchKey>(getRandomSketch());
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);
@@ -29,6 +33,7 @@ const App = () => {
 
   const loadSketch = (sketch: string) => {
     setSketch(sketch as SketchKey);
+    throttledSetFps.current(undefined);
   };
 
   const getSketch = () => {
