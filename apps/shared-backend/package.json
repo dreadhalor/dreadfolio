@@ -11,7 +11,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "firebase": "^9.22.0"
+  "devDependencies": {
+    "firebase": "^10.8.1"
   }
 }
