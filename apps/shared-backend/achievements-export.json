@@ -237,7 +237,7 @@
       "title": "ADHD"
     }
   },
-  "pathfinder": {
+  "pathfinder-visualizer": {
     "clear_walls": {
       "description": "Clear away all walls from a maze",
       "title": "Tabula Rasa"
