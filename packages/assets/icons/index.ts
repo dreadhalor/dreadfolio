@@ -9,3 +9,4 @@ export { default as HomepageIcon } from './homepage-icon.svg';
 export { default as SteeringTextIcon } from './steering-text-icon.svg';
 export { default as GifsterIcon } from './gifster-icon.svg';
 export { default as DreadUiIcon } from './dread-ui-icon.svg';
+export { default as FallcrateIcon } from './fallcrate-icon.svg';

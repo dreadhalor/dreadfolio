@@ -9,3 +9,4 @@ export { default as DreadUiScreenshot } from './dread-ui.png';
 export { default as SteeringTextScreenshot } from './steering-text.png';
 export { default as SketchesScreenshot } from './sketches.png';
 export { default as HomepageScreenshot } from './homepage.png';
+export { default as FallcrateScreenshot } from './fallcrate.png';

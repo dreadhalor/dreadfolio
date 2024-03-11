@@ -30,7 +30,7 @@ const Page = () => {
 
   return (
     <div className='relative h-full w-full'>
-      <UserMenu className='absolute right-4 top-4 z-20 h-[40px] w-[40px]' />
+      <UserMenu className='absolute right-8 top-4 z-20 h-[40px] w-[40px]' />
       <PageBg />
       <div
         ref={containerRef}
