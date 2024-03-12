@@ -1,5 +1,6 @@
 import {
   EnlightScreenshot,
+  FallcrateScreenshot,
   MinesweeperScreenshot,
   PathfinderVisualizerScreenshot,
   ShareMeScreenshot,
@@ -29,6 +30,14 @@ export const projects = [
       "Visualize pathfinding algorithms like Dijkstra's, BFS and A* on a grid. Built with React, TypeScript, and Tailwind CSS.",
     image: PathfinderVisualizerScreenshot,
     link: '/pathfinder-visualizer',
+    technologies: ['React', 'TypeScript', 'Tailwind CSS'],
+  },
+  {
+    title: 'Fallcrate',
+    description:
+      'A Dropbox-inspired cloud storage app. Built with React, TypeScript, and Tailwind CSS.',
+    image: FallcrateScreenshot,
+    link: '/fallcrate',
     technologies: ['React', 'TypeScript', 'Tailwind CSS'],
   },
   {
