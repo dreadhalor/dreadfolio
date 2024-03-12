@@ -105,7 +105,7 @@
     "save_pin": {
       "description": "Save a pin",
       "title": "Life's a Pin & Then You Save",
-      "index": 36
+      "index": 45
     },
     "create_pin": {
       "description": "Create a pin",
@@ -207,7 +207,7 @@
     "preview_video": {
       "description": "Preview a video",
       "title": "Video Killed my Data Plan",
-      "index": 73
+      "index": 44
     },
     "collapse_sidebar": {
       "description": "Collapse the sidebar",
@@ -505,12 +505,12 @@
     "login": {
       "description": "Log in!",
       "title": "We're Not Strangers Anymore",
-      "index": 45
+      "index": 36
     },
     "welcome": {
       "description": "Welcome to your first achievement!",
       "title": "Keep Your Shoes Off the Furniture",
-      "index": 44
+      "index": 73
     }
   }
 }
