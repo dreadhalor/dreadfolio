@@ -4,10 +4,11 @@ import { cn } from '@repo/utils';
 import { PageHeader } from './page-header';
 import { PageContent } from './page-content';
 import { PageBg } from './page-bg';
-import { UserMenu } from 'dread-ui';
+import { UserMenu, useAchievements } from 'dread-ui';
 
 const Page = () => {
   const { setOffset, setParallaxBaseHeight } = useHomepage();
+  const { isUnlockable, unlockAchievementById } = useAchievements();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const removeLogo = () => {
@@ -23,6 +24,11 @@ const Page = () => {
   useEffect(() => {
     removeLogo();
   }, []);
+
+  useEffect(() => {
+    if (isUnlockable('welcome', 'home'))
+      unlockAchievementById('welcome', 'home');
+  }, [isUnlockable, unlockAchievementById]);
 
   useLayoutEffect(() => {
     setParallaxBaseHeight(containerRef.current?.scrollHeight ?? 0);
