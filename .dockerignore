@@ -28,4 +28,4 @@ infra
 **.pem
 
 # Ignore the .env file
-.env
+# .env
