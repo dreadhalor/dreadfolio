@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 // import { getScenario } from './client';
-import { Term, terms as _terms } from './terms';
+import { Term, terms as _terms } from './utils/terms';
 import { TermPane } from './components/term-pane';
 import {
   Button,

@@ -2,13 +2,13 @@ import { MdFavorite } from 'react-icons/md';
 import { Container } from '../components/container';
 import { useParams } from 'react-router-dom';
 import { useApp } from '../providers/app-provider';
+import { ListTerms } from '../components/list-terms';
 
 const List = () => {
-  const params = useParams();
+  const { listId } = useParams();
   const { lists } = useApp();
-  const list = lists.find((_list) => _list.id === params.listId);
+  const list = lists.find((_list) => _list.id === listId);
   const len = list?.terms?.length || 0;
-  // console.log('params', params);
 
   return (
     <Container>
@@ -20,6 +20,7 @@ const List = () => {
             <span className='font-light'>{len} terms</span>
           </div>
         </div>
+        <ListTerms listId={listId ?? ''} />
       </div>
     </Container>
   );

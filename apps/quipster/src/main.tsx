@@ -9,6 +9,7 @@ import { Home } from './routes/home.tsx';
 import { List } from './routes/list.tsx';
 import { DreadUiProvider } from 'dread-ui';
 import { AppProvider } from './providers/app-provider.tsx';
+import { TermComponent } from './routes/term.tsx';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: 'lists/:listId',
         element: <List />,
+      },
+      {
+        path: 'term/:termId',
+        element: <TermComponent />,
       },
     ],
   },

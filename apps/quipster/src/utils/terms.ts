@@ -1,5 +1,5 @@
-export const terms = [
-  {
+export const terms = {
+  'nothing-doing': {
     term: 'Nothing doing',
     definition: `"Nothing doing" is an idiomatic phrase that means "no way" or "not possible." It's used to refuse a request, deny a possibility, or indicate that something cannot or will not be done.
       When someone says "nothing doing," they are expressing a firm denial or refusal. It's a more emphatic way of saying no to a suggestion or request.
@@ -28,7 +28,7 @@ export const terms = [
       },
     ],
   },
-  {
+  'bite-the-bullet': {
     term: 'Bite the bullet',
     definition: `To "bite the bullet" is an idiomatic expression that means to endure a painful or difficult situation with courage and resilience. It's often used to describe facing a challenging or unpleasant task head-on, even when it's difficult or painful to do so.
       The phrase originated from the practice of having soldiers bite on a bullet during surgery to help them endure the pain. It has since evolved to mean facing a difficult situation with bravery and determination.`,
@@ -56,7 +56,7 @@ export const terms = [
       },
     ],
   },
-  {
+  'bite-the-dust': {
     term: 'Bite the dust',
     definition: `The phrase "bite the dust" is an idiomatic expression that means to suffer defeat or failure, often in a dramatic or final way. It's often used to describe the downfall or demise of a person, organization, or idea.
       The phrase has its origins in the imagery of someone falling to the ground and literally biting the dust, as in a battle or conflict. Over time, it has come to represent the idea of someone or something meeting a decisive end or experiencing a significant setback.`,
@@ -84,7 +84,7 @@ export const terms = [
       },
     ],
   },
-  {
+  'bite-off-more-than-you-can-chew': {
     term: 'Bite off more than you can chew',
     definition: `To "bite off more than you can chew" is an idiomatic expression that means to take on more responsibility, work, or commitment than one can handle. It's often used to describe situations where someone has overestimated their capacity or ability to manage a task or obligation.
       The phrase is derived from the idea of trying to eat more food than one can comfortably chew, leading to discomfort or difficulty in swallowing.`,
@@ -112,7 +112,7 @@ export const terms = [
       },
     ],
   },
-  {
+  'bite-your-tongue': {
     term: 'Bite your tongue',
     definition: `To "bite your tongue" is an idiomatic expression that means to refrain from speaking, especially when you have something critical or negative to say. It's often used to describe the act of holding back one's thoughts or opinions in order to avoid causing offense or conflict.
       The phrase is derived from the literal act of biting one's tongue to prevent oneself from speaking.`,
@@ -140,8 +140,8 @@ export const terms = [
       },
     ],
   },
-];
-export type Term = (typeof terms)[0];
+};
+export type Term = (typeof terms)['nothing-doing'] & { id: string };
 
 const terms2 = [
   'As I live & breathe',

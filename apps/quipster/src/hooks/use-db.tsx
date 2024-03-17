@@ -36,9 +36,33 @@ const useDB = (uid: string) => {
   );
 
   const createList = async (name: string) => {
-    console.log('creating list');
-    const listRef = doc(vocabListsCollection);
-    await setDoc(listRef, { id: uuidv4(), name, createdBy: uid });
+    const id = uuidv4();
+    const listRef = doc(vocabListsCollection, id);
+    await setDoc(listRef, { id, name, createdBy: uid });
+  };
+
+  const addTermToList = async (listId: string, term: string) => {
+    const listRef = doc(vocabListsCollection, listId);
+    const listDoc = await getDoc(listRef);
+    if (!listDoc.exists()) {
+      throw new Error('List does not exist');
+    }
+    const listData = listDoc.data();
+    const terms = listData.terms || [];
+    terms.push(term);
+    await updateDoc(listRef, { terms });
+  };
+
+  const removeTermFromList = async (listId: string, term: string) => {
+    const listRef = doc(vocabListsCollection, listId);
+    const listDoc = await getDoc(listRef);
+    if (!listDoc.exists()) {
+      throw new Error('List does not exist');
+    }
+    const listData = listDoc.data();
+    const terms = listData.terms || [];
+    const newTerms = terms.filter((t: string) => t !== term);
+    await updateDoc(listRef, { terms: newTerms });
   };
 
   // const transferFiles = async (localUid: string, remoteUid: string) => {
@@ -174,6 +198,8 @@ const useDB = (uid: string) => {
   return {
     subscribeToVocabLists,
     createList,
+    addTermToList,
+    removeTermFromList,
   };
 };
 

@@ -7,7 +7,12 @@ const Navbar = () => {
       <Link to='/' className='ml-4 text-2xl'>
         Quipster
       </Link>
-      <Link to='/lists' className='ml-auto'>
+      <Link to='/' className='ml-auto'>
+        <Button variant='outline' className='rounded-none'>
+          Home
+        </Button>
+      </Link>
+      <Link to='/lists'>
         <Button variant='outline' className='rounded-none'>
           Lists
         </Button>
