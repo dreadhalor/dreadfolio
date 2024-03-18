@@ -5,7 +5,7 @@ import { Container } from '../components/container';
 import { Link } from 'react-router-dom';
 
 const Words = () => {
-  const { words, setSelectedWord } = useApp();
+  const { words } = useApp();
 
   return (
     <div className='flex flex-nowrap overflow-hidden'>
@@ -17,7 +17,6 @@ const Words = () => {
                 <Button
                   variant='ghost'
                   className='h-auto w-full text-wrap rounded-none'
-                  // onClick={() => setSelectedWord(word)}
                 >
                   {word.word}
                 </Button>
@@ -26,7 +25,7 @@ const Words = () => {
           ))}
         </ul>
       </div>
-      <Container className='border'>
+      <Container className='overflow-auto border'>
         <WordPane />
       </Container>
     </div>
