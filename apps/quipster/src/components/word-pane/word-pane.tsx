@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'react-hook-form';
 import { DefinitionTile } from './definition-tile';
 import { ExamplesSection } from './examples-section';
+import { BlurbTile } from './blurb-tile';
+import { BackgroundTile } from './background-tile';
 
 export type Example = {
   id: string;
@@ -17,6 +19,8 @@ export type Example = {
 
 export type WordFormData = {
   definition: string;
+  blurb: string;
+  background: string;
   examples: Example[];
 };
 
@@ -30,6 +34,8 @@ const WordPane = () => {
   const form = useForm<WordFormData>({
     defaultValues: {
       definition: wordInfo.definition || '',
+      blurb: wordInfo.blurb || '',
+      background: wordInfo.background || '',
       examples: wordInfo.examples || [],
     },
   });
@@ -39,6 +45,8 @@ const WordPane = () => {
     setWordInfo(_word);
     form.reset({
       definition: _word.definition || '',
+      blurb: _word.blurb || '',
+      background: _word.background || '',
       examples: _word.examples || [],
     });
     setTempExamples([]);
@@ -82,6 +90,11 @@ const WordPane = () => {
       <Form {...form}>
         <DefinitionTile
           definition={wordInfo.definition}
+          isEditing={isEditing}
+        />
+        <BlurbTile blurb={wordInfo.blurb} isEditing={isEditing} />
+        <BackgroundTile
+          background={wordInfo.background}
           isEditing={isEditing}
         />
         <ExamplesSection
