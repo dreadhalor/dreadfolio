@@ -1,6 +1,6 @@
 import { Button } from 'dread-ui';
 import { useApp } from '../providers/app-provider';
-import { WordPane } from '../components/word-pane';
+import { WordPane } from '../components/word-pane/word-pane';
 import { Container } from '../components/container';
 import { Link } from 'react-router-dom';
 
