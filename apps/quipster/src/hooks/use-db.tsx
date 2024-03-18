@@ -20,6 +20,10 @@ const useDB = (uid: string) => {
     () => collection(firestore, 'vocabLists'),
     [firestore],
   );
+  const wordsCollection = useMemo(
+    () => collection(firestore, 'words'),
+    [firestore],
+  );
 
   const subscribeToVocabLists = useCallback(
     (callback: (_vocabLists: any) => void) => {
@@ -35,10 +39,26 @@ const useDB = (uid: string) => {
     [uid, vocabListsCollection],
   );
 
+  const subscribeToWords = useCallback(
+    (callback: (_words: any) => void) => {
+      const wordsQuery = query(wordsCollection);
+      return onSnapshot(wordsQuery, (querySnapshot) => {
+        const words = querySnapshot.docs.map((doc) => doc.data());
+        callback(words);
+      });
+    },
+    [wordsCollection],
+  );
+
   const createList = async (name: string) => {
     const id = uuidv4();
     const listRef = doc(vocabListsCollection, id);
     await setDoc(listRef, { id, name, createdBy: uid });
+  };
+
+  const saveWord = async (word: any) => {
+    const wordRef = doc(wordsCollection, word.word);
+    await setDoc(wordRef, word);
   };
 
   const addTermToList = async (listId: string, term: string) => {
@@ -197,9 +217,11 @@ const useDB = (uid: string) => {
 
   return {
     subscribeToVocabLists,
+    subscribeToWords,
     createList,
     addTermToList,
     removeTermFromList,
+    saveWord,
   };
 };
 

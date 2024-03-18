@@ -12,6 +12,11 @@ const Navbar = () => {
           Home
         </Button>
       </Link>
+      <Link to='/words'>
+        <Button variant='outline' className='rounded-none'>
+          Words
+        </Button>
+      </Link>
       <Link to='/lists'>
         <Button variant='outline' className='rounded-none'>
           Lists

@@ -1,4 +1,3 @@
-import { MdFavorite, MdFavoriteBorder } from 'react-icons/md';
 import { Term } from '../utils/terms';
 import {
   Button,

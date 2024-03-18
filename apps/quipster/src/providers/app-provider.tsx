@@ -6,11 +6,15 @@ import { Term, terms as _terms } from '../utils/terms';
 type AppContextType = {
   allTerms: Term[];
   setAllTerms: (terms: Term[]) => void;
+  words: any[];
   lists: any[];
   createList: (name: string) => void;
   addTermToList: (listId: string, term: string) => void;
   removeTermFromList: (listId: string, term: string) => void;
   setFavorite: (favorite: boolean, term: Term) => void;
+  selectedWord: any;
+  setSelectedWord: (word: any) => void;
+  saveWord: (word: any) => void;
 };
 export const AppContext = React.createContext({} as AppContextType);
 export const useApp = () => React.useContext(AppContext);
@@ -22,11 +26,15 @@ export const AppProvider = ({ children }: Props) => {
   const { uid } = useAuth();
   const {
     subscribeToVocabLists,
+    subscribeToWords,
     createList,
     addTermToList,
     removeTermFromList,
+    saveWord,
   } = useDB(uid!);
   const [allTerms, setAllTerms] = useState<Term[]>([]);
+  const [words, setWords] = useState<any[]>([]);
+  const [selectedWord, setSelectedWord] = useState<any>({});
   const [lists, setLists] = useState([]);
 
   const setFavorite = (favorite: boolean, term: Term) => {
@@ -48,7 +56,6 @@ export const AppProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const unsubscribe = subscribeToVocabLists((lists) => {
-      console.log('lists', lists);
       setLists(lists);
     });
 
@@ -56,18 +63,38 @@ export const AppProvider = ({ children }: Props) => {
       unsubscribe();
     };
   }, [subscribeToVocabLists]);
-  // const { files } = useFiles();
+
+  useEffect(() => {
+    const unsubscribe = subscribeToWords((words) => {
+      setWords(words);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [subscribeToWords]);
+
+  useEffect(() => {
+    if (!words) return;
+    if (words.length === 0) return;
+    if (selectedWord?.word) return;
+    setSelectedWord(words[0]);
+  }, [words, selectedWord]);
 
   return (
     <AppContext.Provider
       value={{
         allTerms,
         setAllTerms,
+        words,
         lists,
         createList,
         addTermToList,
         removeTermFromList,
         setFavorite,
+        selectedWord,
+        setSelectedWord,
+        saveWord,
       }}
     >
       {children}
