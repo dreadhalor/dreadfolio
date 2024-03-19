@@ -7,6 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'react-hook-form';
 import { ExamplesSection } from './examples-section';
 import { MarkdownInput } from './markdown-input';
+import { SectionTile } from './section-tile';
+import { FieldInput } from './field-input';
 
 export type Example = {
   id: string;
@@ -88,28 +90,34 @@ const WordPane = () => {
         />
       </h2>
       <Form {...form}>
-        <MarkdownInput
-          value={wordInfo.definition}
-          isEditing={isEditing}
-          fieldName='definition'
-          label='Definition'
-        />
-        <MarkdownInput
-          value={wordInfo.blurb}
-          isEditing={isEditing}
-          fieldName='blurb'
-          label='Blurb'
-          inputComponent={Textarea}
-          inputProps={{ rows: 2 }}
-        />
-        <MarkdownInput
-          value={wordInfo.background}
-          isEditing={isEditing}
-          fieldName='background'
-          label='Background'
-          inputComponent={Textarea}
-          inputProps={{ rows: 4 }}
-        />
+        <SectionTile isEditing={isEditing} label='Definition'>
+          <FieldInput
+            value={wordInfo.definition}
+            isEditing={isEditing}
+            fieldName='definition'
+            label='Definition'
+          />
+        </SectionTile>
+        <SectionTile isEditing={isEditing} label='Blurb'>
+          <MarkdownInput
+            value={wordInfo.blurb}
+            isEditing={isEditing}
+            fieldName='blurb'
+            label='Blurb'
+            inputComponent={Textarea}
+            inputProps={{ rows: 2 }}
+          />
+        </SectionTile>
+        <SectionTile isEditing={isEditing} label='Background'>
+          <MarkdownInput
+            value={wordInfo.background}
+            isEditing={isEditing}
+            fieldName='background'
+            label='Background'
+            inputComponent={Textarea}
+            inputProps={{ rows: 4 }}
+          />
+        </SectionTile>
         <ExamplesSection
           wordInfo={wordInfo}
           tempExamples={tempExamples}

@@ -9,7 +9,6 @@ import {
   Label,
   Textarea,
 } from 'dread-ui';
-import { cn } from '@repo/utils';
 import ReactMarkdown from 'react-markdown';
 import React from 'react';
 
@@ -40,43 +39,35 @@ const MarkdownInput = ({
   });
 
   return (
-    <div className='flex flex-col items-start gap-2'>
-      <Label>{label}</Label>
-      <div
-        className={cn(
-          'flex w-full flex-col gap-2 rounded-lg border p-4 text-start',
-          !isEditing && 'items-center',
-        )}
-      >
-        {isEditing ? (
-          <>
-            <Label>Preview</Label>
-            <ReactMarkdown>
-              {fieldValue || `No ${fieldName} provided`}
-            </ReactMarkdown>
-            <FormField
-              control={control}
-              name={fieldName}
-              defaultValue={value}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{label}</FormLabel>
-                  <FormControl>
-                    {React.createElement(inputComponent, {
-                      ...field,
-                      ...inputProps,
-                    })}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        ) : (
-          <ReactMarkdown>{value || `No ${fieldName} provided`}</ReactMarkdown>
-        )}
-      </div>
-    </div>
+    <>
+      {isEditing ? (
+        <>
+          <Label>Preview</Label>
+          <ReactMarkdown>
+            {fieldValue || `No ${fieldName} provided`}
+          </ReactMarkdown>
+          <FormField
+            control={control}
+            name={fieldName}
+            defaultValue={value}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{label}</FormLabel>
+                <FormControl>
+                  {React.createElement(inputComponent, {
+                    ...field,
+                    ...inputProps,
+                  })}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      ) : (
+        <ReactMarkdown>{value || `No ${fieldName} provided`}</ReactMarkdown>
+      )}
+    </>
   );
 };
 
