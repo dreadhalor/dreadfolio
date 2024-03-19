@@ -1,18 +1,40 @@
+import { useState } from 'react';
 import { Button } from 'dread-ui';
 import { useApp } from '../providers/app-provider';
 import { WordPane } from '../components/word-pane/word-pane';
 import { Container } from '../components/container';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@repo/utils';
+import { WordFilters } from '../components/word-filters';
 
 const Words = () => {
   const { words } = useApp();
+  const [filters, setFilters] = useState({
+    missingDefinition: false,
+    missingBlurb: false,
+    missingBackground: false,
+    missingExamples: false,
+  });
+
+  const handleFilter = (selectedFilters) => {
+    setFilters(selectedFilters);
+  };
+
+  const filteredWords = words.filter((word) => {
+    if (filters.missingDefinition && word.definition) return false;
+    if (filters.missingBlurb && word.blurb) return false;
+    if (filters.missingBackground && word.background) return false;
+    if (filters.missingExamples && word.examples && word.examples.length > 0)
+      return false;
+    return true;
+  });
 
   return (
     <div className='flex flex-nowrap overflow-hidden'>
       <div className='flex h-full w-[200px] flex-col overflow-auto border'>
+        <WordFilters onFilter={handleFilter} />
         <ul className='w-full'>
-          {words.map((word) => (
+          {filteredWords.map((word) => (
             <li key={word.word} className='flex'>
               <NavLink
                 to={`/words/${word.word}`}
