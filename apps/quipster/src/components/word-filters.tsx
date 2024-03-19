@@ -1,5 +1,14 @@
-import { useState } from 'react';
-import { Button, Checkbox, Label } from 'dread-ui';
+import { useEffect, useState } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionItem,
+  AccordionTrigger,
+  Button,
+  Checkbox,
+  Label,
+} from 'dread-ui';
 
 type FilterProps = {
   id: string;
@@ -7,6 +16,7 @@ type FilterProps = {
   onChange: () => void;
   children: React.ReactNode;
 };
+
 const Filter = ({ id, checked, onChange, children }: FilterProps) => {
   return (
     <div className='flex flex-nowrap gap-1'>
@@ -24,6 +34,7 @@ type WordFiltersProps = {
     missingExamples: boolean;
   }) => void;
 };
+
 const WordFilters = ({ onFilter }: WordFiltersProps) => {
   const [filters, setFilters] = useState({
     missingDefinition: false,
@@ -39,47 +50,52 @@ const WordFilters = ({ onFilter }: WordFiltersProps) => {
     }));
   };
 
-  const handleApplyFilters = () => {
+  useEffect(() => {
     onFilter(filters);
-  };
+  }, [filters, onFilter]);
 
   return (
-    <div className='flex flex-col gap-2 p-4'>
-      <h3 className='font-bold'>Filters</h3>
-      <div className='space-y-2'>
-        <Filter
-          id='missingDefinition'
-          checked={filters.missingDefinition}
-          onChange={() => handleFilterChange('missingDefinition')}
-        >
-          No Definition
-        </Filter>
-        <Filter
-          id='missingBlurb'
-          checked={filters.missingBlurb}
-          onChange={() => handleFilterChange('missingBlurb')}
-        >
-          No Blurb
-        </Filter>
-        <Filter
-          id='missingBackground'
-          checked={filters.missingBackground}
-          onChange={() => handleFilterChange('missingBackground')}
-        >
-          No Background
-        </Filter>
-        <Filter
-          id='missingExamples'
-          checked={filters.missingExamples}
-          onChange={() => handleFilterChange('missingExamples')}
-        >
-          No Examples
-        </Filter>
-      </div>
-      <Button size='sm' onClick={handleApplyFilters} className='mt-2'>
-        Apply Filters
-      </Button>
-    </div>
+    <Accordion type='single' collapsible>
+      <AccordionItem value='filters'>
+        <AccordionHeader>
+          <AccordionTrigger className='px-4'>{`Filters${
+            Object.values(filters).some((filter) => filter) ? '*' : ''
+          }`}</AccordionTrigger>
+        </AccordionHeader>
+        <AccordionContent className='flex flex-col px-4'>
+          <div className='space-y-2'>
+            <Filter
+              id='missingDefinition'
+              checked={filters.missingDefinition}
+              onChange={() => handleFilterChange('missingDefinition')}
+            >
+              No Definition
+            </Filter>
+            <Filter
+              id='missingBlurb'
+              checked={filters.missingBlurb}
+              onChange={() => handleFilterChange('missingBlurb')}
+            >
+              No Blurb
+            </Filter>
+            <Filter
+              id='missingBackground'
+              checked={filters.missingBackground}
+              onChange={() => handleFilterChange('missingBackground')}
+            >
+              No Background
+            </Filter>
+            <Filter
+              id='missingExamples'
+              checked={filters.missingExamples}
+              onChange={() => handleFilterChange('missingExamples')}
+            >
+              No Examples
+            </Filter>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };
 

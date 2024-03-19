@@ -16,7 +16,7 @@ const Words = () => {
     missingExamples: false,
   });
 
-  const handleFilter = (selectedFilters) => {
+  const handleFilter = (selectedFilters: typeof filters) => {
     setFilters(selectedFilters);
   };
 
@@ -31,30 +31,34 @@ const Words = () => {
 
   return (
     <div className='flex flex-nowrap overflow-hidden'>
-      <div className='flex h-full w-[200px] flex-col overflow-auto border'>
-        <WordFilters onFilter={handleFilter} />
-        <ul className='w-full'>
-          {filteredWords.map((word) => (
-            <li key={word.word} className='flex'>
-              <NavLink
-                to={`/words/${word.word}`}
-                className={({ isActive }) =>
-                  cn(
-                    'h-full w-full border',
-                    isActive ? 'border-border' : 'border-transparent',
-                  )
-                }
-              >
-                <Button
-                  variant='ghost'
-                  className='h-auto w-full text-wrap rounded-none'
+      <div className='flex h-full w-[200px] flex-col border'>
+        <div className='bg-background'>
+          <WordFilters onFilter={handleFilter} />
+        </div>
+        <div className='flex-grow overflow-auto'>
+          <ul className='w-full'>
+            {filteredWords.map((word) => (
+              <li key={word.word} className='flex'>
+                <NavLink
+                  to={`/words/${word.word}`}
+                  className={({ isActive }) =>
+                    cn(
+                      'h-full w-full border',
+                      isActive ? 'border-border' : 'border-transparent',
+                    )
+                  }
                 >
-                  {word.word}
-                </Button>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+                  <Button
+                    variant='ghost'
+                    className='h-auto w-full text-wrap rounded-none'
+                  >
+                    {word.word}
+                  </Button>
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
       <Container className='overflow-auto border'>
         <WordPane />
