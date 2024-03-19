@@ -19,6 +19,7 @@ export type Example = {
 
 export type WordFormData = {
   definition: string;
+  partOfSpeech: string;
   blurb: string;
   background: string;
   examples: Example[];
@@ -34,6 +35,7 @@ const WordPane = () => {
   const form = useForm<WordFormData>({
     defaultValues: {
       definition: wordInfo.definition || '',
+      partOfSpeech: wordInfo.partOfSpeech || '',
       blurb: wordInfo.blurb || '',
       background: wordInfo.background || '',
       examples: wordInfo.examples || [],
@@ -45,6 +47,7 @@ const WordPane = () => {
     setWordInfo(_word);
     form.reset({
       definition: _word.definition || '',
+      partOfSpeech: _word.partOfSpeech || '',
       blurb: _word.blurb || '',
       background: _word.background || '',
       examples: _word.examples || [],
@@ -67,6 +70,7 @@ const WordPane = () => {
     if (!isEditing) {
       form.reset({
         definition: wordInfo.definition || '',
+        partOfSpeech: wordInfo.partOfSpeech || '',
         blurb: wordInfo.blurb || '',
         background: wordInfo.background || '',
         examples: wordInfo.examples || [],
@@ -96,6 +100,12 @@ const WordPane = () => {
             isEditing={isEditing}
             fieldName='definition'
             label='Definition'
+          />
+          <FieldInput
+            value={wordInfo.partOfSpeech}
+            isEditing={isEditing}
+            fieldName='partOfSpeech'
+            label='Part of Speech'
           />
         </SectionTile>
         <SectionTile isEditing={isEditing} label='Blurb'>

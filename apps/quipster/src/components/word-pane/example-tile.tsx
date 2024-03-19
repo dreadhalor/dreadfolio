@@ -64,8 +64,9 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
           {example.sourceUrl ? (
             <a
               href={example.sourceUrl}
-              className='w-fit hover:underline'
+              className='w-fit underline'
               target='_blank'
+              rel='noopener noreferrer'
             >
               {example.source}
             </a>
