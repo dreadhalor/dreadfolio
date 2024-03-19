@@ -1,4 +1,4 @@
-import { Button } from 'dread-ui';
+import { Button, Label } from 'dread-ui';
 import { ExampleTile } from './example-tile';
 import { Example } from './word-pane';
 
@@ -18,9 +18,10 @@ const ExamplesSection = ({
   const hasExamples = wordInfoExamplesLen > 0;
   const len = wordInfoExamplesLen + tempExamples.length;
   return (
-    <>
+    <div className='flex flex-col items-start gap-2'>
+      <Label>Examples</Label>
       {len > 0 ? (
-        <ul className='max-h-[400px] overflow-auto rounded-lg border'>
+        <ul className='max-h-[400px] w-full overflow-auto rounded-lg border'>
           {hasExamples &&
             wordInfo.examples.map((example: Example, index: number) => (
               <ExampleTile
@@ -40,7 +41,7 @@ const ExamplesSection = ({
           ))}
         </ul>
       ) : (
-        <div className='flex flex-col items-center gap-2 rounded-lg border p-4 text-start'>
+        <div className='flex w-full flex-col items-center gap-2 rounded-lg border p-4 text-start'>
           No examples provided
         </div>
       )}
@@ -53,7 +54,7 @@ const ExamplesSection = ({
           Add Example
         </Button>
       )}
-    </>
+    </div>
   );
 };
 
