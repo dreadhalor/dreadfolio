@@ -1,15 +1,21 @@
 import { Example } from './word-pane';
 import { SingleFormField } from '../form-components/single-form-field';
 import { ComplexFormField } from '../form-components/complex-form-field';
-import { Input } from 'dread-ui';
+import { Button, Input } from 'dread-ui';
 
 type ExampleTileProps = {
   example: Example;
   isEditing: boolean;
   index: number;
+  onRemove: () => void;
 };
 
-const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
+const ExampleTile = ({
+  example,
+  isEditing,
+  index,
+  onRemove,
+}: ExampleTileProps) => {
   const sourceFields = [
     {
       value: example.source,
@@ -52,6 +58,15 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
         isEditing={isEditing}
         complexComponent={sourceComponent}
       />
+      {isEditing && (
+        <Button
+          type='button'
+          onClick={onRemove}
+          className='mt-2 w-[200px] self-center'
+        >
+          Remove
+        </Button>
+      )}
     </div>
   );
 };

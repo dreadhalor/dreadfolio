@@ -13,8 +13,13 @@ const ExamplesSection = ({ isEditing }: ExamplesSectionProps) => {
     <ComplexArrayFormField
       name='examples'
       defaultValues={defaultExampleValues}
-      itemComponent={({ item, index, isEditing }) => (
-        <ExampleTile example={item} index={index} isEditing={isEditing} />
+      itemComponent={({ item, index, isEditing, onRemove }) => (
+        <ExampleTile
+          example={item}
+          index={index}
+          isEditing={isEditing}
+          onRemove={onRemove}
+        />
       )}
       addButtonLabel='Add Example'
       isEditing={isEditing}
