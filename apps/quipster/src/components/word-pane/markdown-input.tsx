@@ -1,16 +1,8 @@
 import { useFormContext, useWatch } from 'react-hook-form';
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-  Label,
-  Textarea,
-} from 'dread-ui';
+import { Input, Label, Textarea } from 'dread-ui';
 import ReactMarkdown from 'react-markdown';
 import React from 'react';
+import { FieldInput } from './field-input';
 
 type MarkdownInputProps = {
   value: string;
@@ -46,22 +38,13 @@ const MarkdownInput = ({
           <ReactMarkdown>
             {fieldValue || `No ${fieldName} provided`}
           </ReactMarkdown>
-          <FormField
-            control={control}
-            name={fieldName}
-            defaultValue={value}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{label}</FormLabel>
-                <FormControl>
-                  {React.createElement(inputComponent, {
-                    ...field,
-                    ...inputProps,
-                  })}
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <FieldInput
+            value={value}
+            isEditing={isEditing}
+            fieldName={fieldName}
+            label={label}
+            inputComponent={inputComponent}
+            inputProps={inputProps}
           />
         </>
       ) : (
