@@ -14,24 +14,28 @@ const ExamplesSection = ({
   isEditing,
   handleAddExample,
 }: ExamplesSectionProps) => {
+  const wordInfoExamplesLen = wordInfo?.examples?.length || 0;
+  const hasExamples = wordInfoExamplesLen > 0;
+  const len = wordInfoExamplesLen + tempExamples.length;
   return (
     <>
-      {wordInfo.examples?.length > 0 ? (
-        <ul>
-          {wordInfo.examples.map((example: Example, index: number) => (
-            <ExampleTile
-              key={example.id}
-              example={example}
-              isEditing={isEditing}
-              index={index}
-            />
-          ))}
+      {len > 0 ? (
+        <ul className='max-h-[400px] overflow-auto rounded-lg border'>
+          {hasExamples &&
+            wordInfo.examples.map((example: Example, index: number) => (
+              <ExampleTile
+                key={example.id}
+                example={example}
+                isEditing={isEditing}
+                index={index}
+              />
+            ))}
           {tempExamples.map((example: Example, index: number) => (
             <ExampleTile
               key={example.id}
               example={example}
               isEditing={isEditing}
-              index={wordInfo.examples.length + index}
+              index={wordInfoExamplesLen + index}
             />
           ))}
         </ul>

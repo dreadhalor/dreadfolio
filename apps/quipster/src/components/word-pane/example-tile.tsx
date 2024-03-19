@@ -19,7 +19,7 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
   const { control } = useFormContext<WordFormData>();
 
   return (
-    <li className='flex flex-col gap-2 rounded-lg border p-4 text-start'>
+    <li className='flex flex-col gap-2 border p-4 text-start'>
       {isEditing ? (
         <>
           <FormField

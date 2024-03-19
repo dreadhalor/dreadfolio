@@ -49,7 +49,9 @@ const MarkdownInput = ({
       {isEditing ? (
         <>
           <Label>Preview</Label>
-          <ReactMarkdown>{fieldValue}</ReactMarkdown>
+          <ReactMarkdown>
+            {fieldValue || `No ${fieldName} provided`}
+          </ReactMarkdown>
           <FormField
             control={control}
             name={fieldName}
@@ -69,7 +71,7 @@ const MarkdownInput = ({
           />
         </>
       ) : (
-        <ReactMarkdown>{value}</ReactMarkdown>
+        <ReactMarkdown>{value || `No ${fieldName} provided`}</ReactMarkdown>
       )}
     </div>
   );
