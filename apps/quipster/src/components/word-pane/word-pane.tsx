@@ -115,12 +115,7 @@ const WordPane = () => {
             inputProps={{ rows: 4 }}
           />
         </SectionTile>
-        <ExamplesSection
-          wordInfo={wordInfo}
-          tempExamples={tempExamples}
-          isEditing={isEditing}
-          handleAddExample={handleAddExample}
-        />
+        <ExamplesSection isEditing={isEditing} />
         {isEditing && (
           <form
             onSubmit={form.handleSubmit(handleSubmit)}

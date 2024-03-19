@@ -39,7 +39,7 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
   );
 
   return (
-    <li className='flex flex-col gap-2 border p-4 text-start'>
+    <div className='flex flex-col gap-2 border p-4 text-start'>
       <SingleFormField
         value={example.example}
         isEditing={isEditing}
@@ -52,7 +52,7 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
         isEditing={isEditing}
         complexComponent={sourceComponent}
       />
-    </li>
+    </div>
   );
 };
 

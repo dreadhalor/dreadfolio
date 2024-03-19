@@ -5,13 +5,13 @@ type DefinitionComponentProps = {
   partOfSpeech?: string;
 };
 const DefinitionComponent = ({
-  definition = 'No definition provided',
-  partOfSpeech = 'N/A',
+  definition,
+  partOfSpeech,
 }: DefinitionComponentProps) => {
   return (
     <div className='flex flex-nowrap gap-2'>
-      <Badge variant='outline'>{partOfSpeech}</Badge>
-      <p>{definition}</p>
+      <Badge variant='outline'>{partOfSpeech || 'N/A'}</Badge>
+      <p>{definition || 'No definition provided'}</p>
     </div>
   );
 };
