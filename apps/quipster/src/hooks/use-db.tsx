@@ -2,7 +2,7 @@ import {
   doc,
   updateDoc,
   collection,
-  getDocs,
+  // getDocs,
   getDoc,
   setDoc,
   getFirestore,

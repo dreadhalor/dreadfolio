@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useApp } from '../../providers/app-provider';
 import { FaEdit } from 'react-icons/fa';
-import { Button, Form } from 'dread-ui';
+import { Button, Form, Textarea } from 'dread-ui';
 import { useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'react-hook-form';
-import { DefinitionTile } from './definition-tile';
 import { ExamplesSection } from './examples-section';
-import { BlurbTile } from './blurb-tile';
-import { BackgroundTile } from './background-tile';
+import { MarkdownInput } from './markdown-input';
 
 export type Example = {
   id: string;
@@ -67,6 +65,8 @@ const WordPane = () => {
     if (!isEditing) {
       form.reset({
         definition: wordInfo.definition || '',
+        blurb: wordInfo.blurb || '',
+        background: wordInfo.background || '',
         examples: wordInfo.examples || [],
       });
       setTempExamples([]);
@@ -88,14 +88,27 @@ const WordPane = () => {
         />
       </h2>
       <Form {...form}>
-        <DefinitionTile
-          definition={wordInfo.definition}
+        <MarkdownInput
+          value={wordInfo.definition}
           isEditing={isEditing}
+          fieldName='definition'
+          label='Definition'
         />
-        <BlurbTile blurb={wordInfo.blurb} isEditing={isEditing} />
-        <BackgroundTile
-          background={wordInfo.background}
+        <MarkdownInput
+          value={wordInfo.blurb}
           isEditing={isEditing}
+          fieldName='blurb'
+          label='Blurb'
+          inputComponent={Textarea}
+          inputProps={{ rows: 2 }}
+        />
+        <MarkdownInput
+          value={wordInfo.background}
+          isEditing={isEditing}
+          fieldName='background'
+          label='Background'
+          inputComponent={Textarea}
+          inputProps={{ rows: 4 }}
         />
         <ExamplesSection
           wordInfo={wordInfo}
