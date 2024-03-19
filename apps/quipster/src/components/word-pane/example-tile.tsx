@@ -1,6 +1,6 @@
 import { Example, WordFormData } from './word-pane';
 import { useFormContext } from 'react-hook-form';
-import { FieldInput } from './field-input';
+import { SingleFormField } from './single-form-field';
 import {
   FormControl,
   FormField,
@@ -21,7 +21,7 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
 
   return (
     <li className='flex flex-col gap-2 border p-4 text-start'>
-      <FieldInput
+      <SingleFormField
         value={example.example}
         isEditing={isEditing}
         fieldName={`examples.${index}.example`}

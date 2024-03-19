@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { ExamplesSection } from './examples-section';
 import { MarkdownInput } from './markdown-input';
 import { SectionTile } from './section-tile';
-import { FieldInput } from './field-input';
+import { SingleFormField } from './single-form-field';
 
 export type Example = {
   id: string;
@@ -25,32 +25,32 @@ export type WordFormData = {
   examples: Example[];
 };
 
+const DEFAULT_FORM_VALUES: WordFormData = {
+  definition: '',
+  partOfSpeech: '',
+  blurb: '',
+  background: '',
+  examples: [],
+};
+
 const WordPane = () => {
   const { words, saveWord } = useApp();
   const { word: wordId } = useParams();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [wordInfo, setWordInfo] = useState<any>({});
   const [isEditing, setIsEditing] = useState(false);
   const [tempExamples, setTempExamples] = useState<Example[]>([]);
 
   const form = useForm<WordFormData>({
-    defaultValues: {
-      definition: wordInfo.definition || '',
-      partOfSpeech: wordInfo.partOfSpeech || '',
-      blurb: wordInfo.blurb || '',
-      background: wordInfo.background || '',
-      examples: wordInfo.examples || [],
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
   });
 
   useEffect(() => {
     const _word = words.find((word) => word.word === wordId) || {};
     setWordInfo(_word);
     form.reset({
-      definition: _word.definition || '',
-      partOfSpeech: _word.partOfSpeech || '',
-      blurb: _word.blurb || '',
-      background: _word.background || '',
-      examples: _word.examples || [],
+      ...DEFAULT_FORM_VALUES,
+      ..._word,
     });
     setTempExamples([]);
   }, [wordId, words, form]);
@@ -69,11 +69,8 @@ const WordPane = () => {
   useEffect(() => {
     if (!isEditing) {
       form.reset({
-        definition: wordInfo.definition || '',
-        partOfSpeech: wordInfo.partOfSpeech || '',
-        blurb: wordInfo.blurb || '',
-        background: wordInfo.background || '',
-        examples: wordInfo.examples || [],
+        ...DEFAULT_FORM_VALUES,
+        ...wordInfo,
       });
       setTempExamples([]);
     }
@@ -95,13 +92,13 @@ const WordPane = () => {
       </h2>
       <Form {...form}>
         <SectionTile isEditing={isEditing} label='Definition'>
-          <FieldInput
+          <SingleFormField
             value={wordInfo.definition}
             isEditing={isEditing}
             fieldName='definition'
             label='Definition'
           />
-          <FieldInput
+          <SingleFormField
             value={wordInfo.partOfSpeech}
             isEditing={isEditing}
             fieldName='partOfSpeech'

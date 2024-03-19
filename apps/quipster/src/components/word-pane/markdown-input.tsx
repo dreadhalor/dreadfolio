@@ -2,7 +2,7 @@ import { useFormContext, useWatch } from 'react-hook-form';
 import { Input, Label, Textarea } from 'dread-ui';
 import ReactMarkdown from 'react-markdown';
 import React from 'react';
-import { FieldInput } from './field-input';
+import { SingleFormField } from './single-form-field';
 
 type MarkdownInputProps = {
   value: string;
@@ -38,7 +38,7 @@ const MarkdownInput = ({
           <ReactMarkdown>
             {fieldValue || `No ${label.toLowerCase()} provided`}
           </ReactMarkdown>
-          <FieldInput
+          <SingleFormField
             value={value}
             isEditing={isEditing}
             fieldName={fieldName}
