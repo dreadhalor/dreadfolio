@@ -9,6 +9,7 @@ import { ExamplesSection } from './examples-section';
 import { MarkdownInput } from './markdown-input';
 import { SectionTile } from './section-tile';
 import { SingleFormField } from './single-form-field';
+import { DefinitionSection } from './definition-section';
 
 export type Example = {
   id: string;
@@ -92,18 +93,7 @@ const WordPane = () => {
       </h2>
       <Form {...form}>
         <SectionTile isEditing={isEditing} label='Definition'>
-          <SingleFormField
-            value={wordInfo.definition}
-            isEditing={isEditing}
-            fieldName='definition'
-            label='Definition'
-          />
-          <SingleFormField
-            value={wordInfo.partOfSpeech}
-            isEditing={isEditing}
-            fieldName='partOfSpeech'
-            label='Part of Speech'
-          />
+          <DefinitionSection wordInfo={wordInfo} isEditing={isEditing} />
         </SectionTile>
         <SectionTile isEditing={isEditing} label='Blurb'>
           <MarkdownInput
