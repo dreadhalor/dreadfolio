@@ -41,7 +41,7 @@ const ExampleTile = ({
       {example.source}
     </a>
   ) : (
-    <span>{example.source}</span>
+    <span>{example.source || 'No source provided'}</span>
   );
 
   return (
