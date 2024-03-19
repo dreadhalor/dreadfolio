@@ -11,6 +11,9 @@ import { DreadUiProvider } from 'dread-ui';
 import { AppProvider } from './providers/app-provider.tsx';
 import { TermComponent } from './routes/term.tsx';
 import { Words } from './routes/words.tsx';
+import { DefinitionToWordQuiz } from './routes/quiz/definition-to-word.tsx';
+import { WordToDefinitionQuiz } from './routes/quiz/word-to-definition.tsx';
+import { Quiz } from './routes/quiz/quiz.tsx';
 
 const router = createBrowserRouter([
   {
@@ -40,6 +43,18 @@ const router = createBrowserRouter([
       {
         path: 'term/:termId',
         element: <TermComponent />,
+      },
+      {
+        path: 'quiz',
+        element: <Quiz />,
+      },
+      {
+        path: 'quiz/definition-to-word',
+        element: <DefinitionToWordQuiz />,
+      },
+      {
+        path: 'quiz/word-to-definition',
+        element: <WordToDefinitionQuiz />,
       },
     ],
   },

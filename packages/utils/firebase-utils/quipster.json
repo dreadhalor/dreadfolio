@@ -1,449 +1,1296 @@
 {
-  "mellifluous": {
-    "word": "mellifluous"
-  },
-  "bazaar": {
-    "word": "bazaar"
-  },
-  "lexicon": {
-    "word": "lexicon"
-  },
-  "curios": {
-    "word": "curios"
-  },
-  "slapdash": {
-    "word": "slapdash"
-  },
-  "jezebel": {
-    "word": "jezebel"
-  },
-  "caterwaul": {
-    "word": "caterwaul"
-  },
-  "elysian": {
-    "word": "elysian"
-  },
-  "gallivant": {
-    "word": "gallivant"
-  },
-  "sundries": {
-    "word": "sundries"
-  },
-  "lamentations": {
-    "word": "lamentations"
-  },
-  "facsimile": {
-    "word": "facsimile"
-  },
-  "wantonly": {
-    "word": "wantonly"
-  },
-  "revulsion": {
-    "word": "revulsion"
-  },
-  "apothecary": {
-    "word": "apothecary"
-  },
-  "halcyon": {
-    "word": "halcyon"
-  },
-  "duplicitous": {
-    "word": "duplicitous"
-  },
-  "adorn": {
-    "word": "adorn"
-  },
-  "eclectic": {
-    "word": "eclectic"
-  },
-  "clandestine": {
-    "word": "clandestine"
-  },
-  "traipse": {
-    "word": "traipse"
-  },
-  "deleterious": {
-    "word": "deleterious"
-  },
-  "striations": {
-    "word": "striations"
-  },
-  "metastasize": {
-    "word": "metastasize"
-  },
-  "apoplectic": {
-    "word": "apoplectic"
-  },
-  "conflagration": {
-    "word": "conflagration"
-  },
-  "bereft": {
-    "word": "bereft"
-  },
-  "curtail": {
-    "word": "curtail"
-  },
-  "extolled": {
-    "word": "extolled"
-  },
-  "relinquish": {
-    "word": "relinquish"
-  },
-  "languish": {
-    "word": "languish"
-  },
-  "tenebrous": {
-    "word": "tenebrous"
-  },
-  "trepidations": {
-    "word": "trepidations"
-  },
-  "felicitous": {
-    "word": "felicitous"
-  },
-  "fiasco": {
-    "word": "fiasco"
-  },
-  "voluptuous": {
-    "word": "voluptuous"
-  },
-  "epicurean": {
-    "word": "epicurean"
-  },
-  "crestfallen": {
-    "word": "crestfallen"
-  },
-  "raucous": {
-    "word": "raucous"
-  },
-  "bamboozle": {
-    "word": "bamboozle"
-  },
-  "sans": {
-    "word": "sans"
-  },
-  "flummoxed": {
-    "word": "flummoxed"
-  },
-  "ilk": {
-    "word": "ilk"
-  },
-  "pontificating": {
-    "word": "pontificating"
-  },
-  "regale": {
-    "word": "regale"
-  },
-  "diminutive": {
-    "word": "diminutive"
-  },
-  "peccadillo": {
-    "word": "peccadillo"
+  "abase": {
+    "word": "abase",
+    "definition": "cause to feel shame; hurt the pride of",
+    "examples": [
+      {
+        "example": "And yet when he says, “I am from outer space,” some of you actually shut your eyes, abase your intellects, and believe!",
+        "source": "The Left Hand of Darkness",
+        "id": "e436689a-57d2-4ec2-a0fe-a1b58a4171b4",
+        "sourceUrl": "https://www.amazon.com/dp/0441478123"
+      },
+      {
+        "example": "“Should I abase myself? Rub ashes in my hair? Tear my clothes?”",
+        "source": "The Name of the Wind",
+        "id": "a6b8ed8d-c1e3-476d-926d-4df5e2f3cfa8",
+        "sourceUrl": ""
+      },
+      {
+        "example": "Rather they are measurements of the amount of time that stick-figure heads bob up and down or left and right to fawn over the person who is president or to abase his flaws.",
+        "source": "Salon - Jun 9, 2018",
+        "id": "2a2befbd-47c9-4427-a1a8-9942f494c156",
+        "sourceUrl": ""
+      },
+      {
+        "example": "Cojocaru especially was a force of nature, the moment where she fell on her knees before Kobborg had a reckless, raw abandon that made the gesture anything but self abasing.",
+        "source": "The Guardian - Jan 6, 2013",
+        "id": "55e4ec4f-9af9-4e20-9b26-1956ac21d006",
+        "sourceUrl": ""
+      },
+      {
+        "example": "Much of the classical music industry has since abased itself at Mäkelä’s feet.",
+        "source": "New York Times - Apr 26, 2023",
+        "id": "2f865af1-536b-4851-8ce9-455b69110f13",
+        "sourceUrl": ""
+      },
+      {
+        "example": "Yet when she isn’t mooning or abasing herself to win the attention of a handsome fellow intern, she shows off a preternatural self-possession, the girl with all the answers.",
+        "source": "New York Times - Oct 5, 2012",
+        "id": "2053d956-d2ee-484c-b935-c726d23b73d2",
+        "sourceUrl": ""
+      },
+      {
+        "example": "Before the company, she reiterated the ballet’s gesture of amorous veneration, making her arms a halo that she drew over his head, shoulders, torso, and legs, abasing herself at his feet.",
+        "source": "New York Times - Jun 24, 2017",
+        "id": "c3f7c7e3-60a7-4198-aa46-5e1062f5df41",
+        "sourceUrl": ""
+      },
+      {
+        "example": "But one German theologian has recently proposed explanatory footnotes to turn the most problematic passages — the black children abasing themselves before Pippi, for example — into educational opportunities.",
+        "source": "New York Times - Jun 15, 2012",
+        "id": "725d53d7-d6cb-48ca-afea-19f463310cf6",
+        "sourceUrl": ""
+      }
+    ],
+    "blurb": "To *abase* something or someone is to humiliate them — no, more than just humiliate them. If you *abase* another person you are bringing them low, humbling them in a mean, *base* manner. Not nice at all.",
+    "background": "*Abase* means to bring someone down, often either in their job or their self-esteem. The early Latin *bassus*, which meant \"thick, low,\" evolved into the Old French *abaissier*, meaning \"to make lower in value or status.\" The important clue to the word is \"base.\" Consider that the base of anything is the bottom, and you get an idea as to the meaning of the word *abase*, which means to make someone feel low.",
+    "partOfSpeech": "verb"
   },
   "abate": {
-    "word": "abate"
-  },
-  "travesty": {
-    "word": "travesty"
-  },
-  "disabuse": {
-    "word": "disabuse"
-  },
-  "bailiwick": {
-    "word": "bailiwick"
-  },
-  "odious": {
-    "word": "odious"
-  },
-  "pablum": {
-    "word": "pablum"
-  },
-  "artifice": {
-    "word": "artifice"
+    "word": "abate",
+    "definition": "become less in amount or intensity",
+    "examples": [
+      {
+        "example": "Already the sudden storm is passing, and its fierceness is abating; crowds are scattering homeward, and the sky is beginning to redden over the Yorkshire wolds.",
+        "source": "Dracula",
+        "sourceUrl": "",
+        "id": "407ab51f-2c09-4a1b-814a-1f547959253a"
+      }
+    ],
+    "partOfSpeech": "verb",
+    "blurb": "Something that *abates* becomes fewer or less intense. Your enthusiasm for skiing might *abate* after falling off a ski lift and getting a mouthful of snow.",
+    "background": "*Abate* comes from the Old French verb *abattre*, \"to beat down,\" and means to reduce or become less intense or numerous. As an intransitive verb, it is often used with something physically, emotionally, or figuratively violent, as in \"the flood of fan mail began to *abate*.\" Using it transitively, if you take measures to abate pollution or noise, you reduce them. Pronounce *abate* with the stress on the second syllable (uh-BATE)."
   },
   "abhorrent": {
-    "word": "abhorrent"
-  },
-  "evince": {
-    "word": "evince"
-  },
-  "maelstrom": {
-    "word": "maelstrom"
-  },
-  "dame": {
-    "word": "dame"
-  },
-  "paramour": {
-    "word": "paramour"
-  },
-  "beau": {
-    "word": "beau"
-  },
-  "vouchsafe": {
-    "word": "vouchsafe"
-  },
-  "gallantry": {
-    "word": "gallantry"
-  },
-  "tommyrot": {
-    "word": "tommyrot"
-  },
-  "abase": {
-    "word": "abase"
-  },
-  "unchivalrous": {
-    "word": "unchivalrous"
-  },
-  "scruples": {
-    "word": "scruples"
-  },
-  "deliriously": {
-    "word": "deliriously"
-  },
-  "quagmire": {
-    "word": "quagmire"
-  },
-  "decried": {
-    "word": "decried"
-  },
-  "slight": {
-    "word": "slight"
-  },
-  "reverence": {
-    "word": "reverence"
-  },
-  "howling": {
-    "word": "howling"
-  },
-  "rattletrap": {
-    "word": "rattletrap"
-  },
-  "austere": {
-    "word": "austere"
-  },
-  "kibitz": {
-    "word": "kibitz"
-  },
-  "cleft": {
-    "word": "cleft"
-  },
-  "recriminations": {
-    "word": "recriminations"
-  },
-  "transitory": {
-    "word": "transitory"
-  },
-  "destitute": {
-    "word": "destitute"
-  },
-  "contagion": {
-    "word": "contagion"
-  },
-  "intimate": {
-    "word": "intimate"
-  },
-  "evasive": {
-    "word": "evasive"
-  },
-  "sacrosanct": {
-    "word": "sacrosanct"
-  },
-  "predilection": {
-    "word": "predilection"
-  },
-  "milieu": {
-    "word": "milieu"
-  },
-  "rooked": {
-    "word": "rooked"
-  },
-  "gambit": {
-    "word": "gambit"
-  },
-  "balderdash": {
-    "word": "balderdash"
-  },
-  "jest": {
-    "word": "jest"
-  },
-  "quarrel": {
-    "word": "quarrel"
-  },
-  "tryst": {
-    "word": "tryst"
-  },
-  "foolhardy": {
-    "word": "foolhardy"
-  },
-  "bombastic": {
-    "word": "bombastic"
-  },
-  "fatuous": {
-    "word": "fatuous"
-  },
-  "ignoble": {
-    "word": "ignoble"
-  },
-  "moxie": {
-    "word": "moxie"
-  },
-  "extant": {
-    "word": "extant"
-  },
-  "quixotic": {
-    "word": "quixotic"
-  },
-  "apparition": {
-    "word": "apparition"
-  },
-  "labyrinthian": {
-    "word": "labyrinthian"
-  },
-  "excursion": {
-    "word": "excursion"
-  },
-  "godspeed": {
-    "word": "godspeed"
-  },
-  "eschew": {
-    "word": "eschew"
-  },
-  "cerebral": {
-    "word": "cerebral"
-  },
-  "benediction": {
-    "word": "benediction"
-  },
-  "equanimity": {
-    "word": "equanimity"
-  },
-  "contravene": {
-    "word": "contravene"
-  },
-  "obsequious": {
-    "word": "obsequious"
-  },
-  "gregarious": {
-    "word": "gregarious"
-  },
-  "judicious": {
-    "word": "judicious"
-  },
-  "debonair": {
-    "word": "debonair"
-  },
-  "throes": {
-    "word": "throes"
-  },
-  "erstwhile": {
-    "word": "erstwhile"
-  },
-  "quotidian": {
-    "word": "quotidian"
-  },
-  "paroxysm": {
-    "word": "paroxysm"
-  },
-  "contrition": {
-    "word": "contrition"
-  },
-  "aspersions": {
-    "word": "aspersions"
-  },
-  "navigable": {
-    "word": "navigable"
-  },
-  "malaise": {
-    "word": "malaise"
-  },
-  "precipice": {
-    "word": "precipice"
-  },
-  "folly": {
-    "word": "folly"
-  },
-  "spendthrift": {
-    "word": "spendthrift"
-  },
-  "erudite": {
-    "word": "erudite"
-  },
-  "talisman": {
-    "word": "talisman"
-  },
-  "vexed": {
-    "word": "vexed"
-  },
-  "harangue": {
-    "word": "harangue"
-  },
-  "taciturn": {
-    "word": "taciturn"
-  },
-  "circumlocution": {
-    "word": "circumlocution"
-  },
-  "razzmatazz": {
-    "word": "razzmatazz"
-  },
-  "bedeviled": {
-    "word": "bedeviled"
-  },
-  "gobsmacked": {
-    "word": "gobsmacked"
-  },
-  "podunk": {
-    "word": "podunk"
-  },
-  "merriment": {
-    "word": "merriment"
-  },
-  "skullduggery": {
-    "word": "skullduggery"
-  },
-  "repose": {
-    "word": "repose"
-  },
-  "cajole": {
-    "word": "cajole"
-  },
-  "foibles": {
-    "word": "foibles"
-  },
-  "jonesing": {
-    "word": "jonesing"
+    "word": "abhorrent",
+    "definition": "offensive to the mind",
+    "blurb": "Many people find cruelty toward animals *abhorrent*, that is, they think it's detestable, obscene, repugnant, repulsive, and offensive to the mind. In other words, they really, really don't like it.",
+    "background": "When you think of *abhorrent*, think of *horror*, as in something so vile and loathsome that you can only react to it in horror. In fact, the word *abhorrent* in Latin means “to recoil (back away) in horror.” Note that the ending is spelled *-ent* with an *e*, not an *a*. Maybe the *a* found *abhorrent* so abhorrent that it didn’t want to appear in it a second time.",
+    "examples": [
+      {
+        "example": "She was one of the few things abhorrent to him that he could touch and therefore hurt.",
+        "source": "The Bluest Eye",
+        "sourceUrl": "",
+        "id": "15b20f26-3f0d-4c3c-8a97-c186e59c804d"
+      }
+    ],
+    "partOfSpeech": "adjective"
+  },
+  "adorn": {
+    "word": "adorn",
+    "definition": "make more attractive by adding ornament, colour, etc.",
+    "partOfSpeech": "verb",
+    "blurb": "To *adorn* is to dress something up by decorating it. You might *adorn* your poncho with fringe or your poodle's dog collar with rhinestones.",
+    "background": "",
+    "examples": []
   },
   "affectation": {
-    "word": "affectation"
+    "word": "affectation",
+    "definition": "a deliberate pretense or exaggerated display",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
-  "denouement": {
-    "word": "denouement"
+  "apoplectic": {
+    "word": "apoplectic",
+    "definition": "marked by extreme anger",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
-  "portends": {
-    "word": "portends"
+  "apothecary": {
+    "word": "apothecary",
+    "definition": "a retail shop where medicine and other articles are sold",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "apparition": {
+    "word": "apparition",
+    "definition": "a ghostly appearing figure",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "artifice": {
+    "word": "artifice",
+    "definition": "a deceptive maneuver (especially to avoid capture)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "aspersions": {
+    "word": "aspersions",
+    "definition": "an abusive attack on a person's character or good name",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "austere": {
+    "word": "austere",
+    "definition": "of a stern or strict bearing or demeanor; forbidding in aspect",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "bailiwick": {
+    "word": "bailiwick",
+    "definition": "a branch of knowledge",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "balderdash": {
+    "word": "balderdash",
+    "definition": "trivial nonsense",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "bamboozle": {
+    "word": "bamboozle",
+    "definition": "to deceive or get the better of (someone) by trickery, flattery, or the like",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "bazaar": {
+    "word": "bazaar",
+    "definition": "a street of small shops, especially in the Middle East",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "beau": {
+    "word": "beau",
+    "definition": "a male lover or sweetheart",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "bedeviled": {
+    "word": "bedeviled",
+    "definition": "be confusing or perplexing to; cause to be unable to think clearly",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
   "bedlam": {
-    "word": "bedlam"
+    "word": "bedlam",
+    "definition": "a state of extreme confusion and disorder",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
-  "tantamount": {
-    "word": "tantamount"
+  "benediction": {
+    "word": "benediction",
+    "definition": "a ceremonial prayer invoking divine protection",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "bereft": {
+    "word": "bereft",
+    "definition": "sorrowful through loss or deprivation",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "bombastic": {
+    "word": "bombastic",
+    "definition": "ostentatiously lofty in style; inflated; pretentious",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
   "boon": {
-    "word": "boon"
+    "word": "boon",
+    "definition": "something to be thankful for; blessing; benefit",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
-  "persnickety": {
-    "word": "persnickety"
+  "cajole": {
+    "word": "cajole",
+    "definition": "influence or urge by gentle urging, caressing, or flattering",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
-  "juxtaposition": {
-    "word": "juxtaposition"
+  "caterwaul": {
+    "word": "caterwaul",
+    "definition": "utter shrieks, as of cats",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
-  "dichotomy": {
-    "word": "dichotomy"
-  },
-  "microcosm": {
-    "word": "microcosm"
+  "cerebral": {
+    "word": "cerebral",
+    "definition": "involving intelligence rather than emotions or instinct",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
   },
   "chicanery": {
-    "word": "chicanery"
+    "word": "chicanery",
+    "definition": "the use of tricks to deceive someone (usually to extract money from them)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "circumlocution": {
+    "word": "circumlocution",
+    "definition": "a roundabout or indirect way of speaking; the use of more words than necessary to express an idea",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "clandestine": {
+    "word": "clandestine",
+    "definition": "conducted with or marked by hidden aims or methods",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "cleft": {
+    "word": "cleft",
+    "definition": "a space or opening made by cleavage; a split",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "conflagration": {
+    "word": "conflagration",
+    "definition": "a very intense and uncontrolled fire",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "contagion": {
+    "word": "contagion",
+    "definition": "any disease easily transmitted by contact",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "contravene": {
+    "word": "contravene",
+    "definition": "go against, as of rules and laws",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "contrition": {
+    "word": "contrition",
+    "definition": "sincere penitence or remorse",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "crestfallen": {
+    "word": "crestfallen",
+    "definition": "dejected; dispirited; discouraged",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "curios": {
+    "word": "curios",
+    "definition": "any unusual article, object of art, etc., valued as a curiosity",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "curtail": {
+    "word": "curtail",
+    "definition": "to cut short; cut off a part of; abridge; reduce; diminish",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "dame": {
+    "word": "dame",
+    "definition": "informal term for a (young) woman",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "debonair": {
+    "word": "debonair",
+    "definition": "having a sophisticated charm",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "decried": {
+    "word": "decried",
+    "definition": "express strong disapproval of",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "deleterious": {
+    "word": "deleterious",
+    "definition": "harmful; injurious",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "deliriously": {
+    "word": "deliriously",
+    "definition": "marked by uncontrolled excitement or emotion",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "denouement": {
+    "word": "denouement",
+    "definition": "the outcome of a complex sequence of events",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "destitute": {
+    "word": "destitute",
+    "definition": "completely wanting or lacking",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "dichotomy": {
+    "word": "dichotomy",
+    "definition": "being twofold; a classification into two opposed parts or subclasses",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "diminutive": {
+    "word": "diminutive",
+    "definition": "very small",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "disabuse": {
+    "word": "disabuse",
+    "definition": "free somebody (from an erroneous belief)",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "duplicitous": {
+    "word": "duplicitous",
+    "definition": "marked by deliberate deceptiveness, especially by pretending one set of feelings and acting under the influence of another",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "eclectic": {
+    "word": "eclectic",
+    "definition": "combining or composed of elements drawn from a variety of sources",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "elysian": {
+    "word": "elysian",
+    "definition": "being of such surpassing excellence as to suggest inspiration by the gods",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "epicurean": {
+    "word": "epicurean",
+    "definition": "displaying luxury and furnishing gratification to the senses",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "equanimity": {
+    "word": "equanimity",
+    "definition": "steadiness of mind under stress",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "erstwhile": {
+    "word": "erstwhile",
+    "definition": "belonging to some prior time; former",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "erudite": {
+    "word": "erudite",
+    "definition": "having or showing profound knowledge",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "eschew": {
+    "word": "eschew",
+    "definition": "avoid and stay away from deliberately; stay clear of",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "evasive": {
+    "word": "evasive",
+    "definition": "deliberately vague or ambiguous",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "evince": {
+    "word": "evince",
+    "definition": "give expression to; express",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "excursion": {
+    "word": "excursion",
+    "definition": "a journey taken for pleasure",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "extant": {
+    "word": "extant",
+    "definition": "still in existence; not extinct or destroyed or lost",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "extolled": {
+    "word": "extolled",
+    "definition": "praise, glorify, or honor",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "facsimile": {
+    "word": "facsimile",
+    "definition": "a copy or reproduction",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "fatuous": {
+    "word": "fatuous",
+    "definition": "devoid of intelligence",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "felicitous": {
+    "word": "felicitous",
+    "definition": "exhibiting an agreeably appropriate manner or style",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "fiasco": {
+    "word": "fiasco",
+    "definition": "a complete failure or collapse",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "flummoxed": {
+    "word": "flummoxed",
+    "definition": "be a mystery or bewildering to",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "foibles": {
+    "word": "foibles",
+    "definition": "a minor weakness or peculiarity in someone's character",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "folly": {
+    "word": "folly",
+    "definition": "a foolish action, practice, idea, etc.; absurdity",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "foolhardy": {
+    "word": "foolhardy",
+    "definition": "marked by defiant disregard for danger or consequences",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "gallantry": {
+    "word": "gallantry",
+    "definition": "chivalry or courtesy towards women",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "gallivant": {
+    "word": "gallivant",
+    "definition": "wander aimlessly in search of pleasure",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "gambit": {
+    "word": "gambit",
+    "definition": "a strategic maneuver",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "gobsmacked": {
+    "word": "gobsmacked",
+    "definition": "utterly astounded",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "godspeed": {
+    "word": "godspeed",
+    "definition": "good fortune; success (used as a wish to a person starting on a journey, a new venture, etc.)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "gregarious": {
+    "word": "gregarious",
+    "definition": "fond of the company of others; sociable",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "halcyon": {
+    "word": "halcyon",
+    "definition": "marked by peace and prosperity",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": [
+      {
+        "example": "Those were the salad days, the halcyon years!",
+        "source": "Water for Elephants",
+        "sourceUrl": ""
+      }
+    ]
+  },
+  "harangue": {
+    "word": "harangue",
+    "definition": "deliver a harangue to; address forcefully",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "howling": {
+    "word": "howling",
+    "definition": "extraordinarily good or great ; used especially as intensifiers",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "ignoble": {
+    "word": "ignoble",
+    "definition": "completely lacking nobility in character or quality or purpose",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "ilk": {
+    "word": "ilk",
+    "definition": "family, class, or kind (of something)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "intimate": {
+    "word": "intimate",
+    "definition": "imply as a possibility",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": [
+      {
+        "example": "The eldest also intimated that the mother was a mild anal retentive personality.",
+        "source": "How the García Girls Lost Their Accents",
+        "sourceUrl": ""
+      },
+      {
+        "example": "I have already intimated that my condition was much worse, during the first six months of my stay at Mr. Covey’s, than in the last six.",
+        "source": "Narrative of the Life of Frederick Douglass",
+        "sourceUrl": ""
+      },
+      {
+        "example": "Diana intimated that this would be a different parting from any they had ever yet known.",
+        "source": "Jane Eyre",
+        "sourceUrl": ""
+      },
+      {
+        "example": "When the cheering had died down, Napoleon, who had remained on his feet, intimated that he too had a few words to say.",
+        "source": "Animal Farm",
+        "sourceUrl": ""
+      },
+      {
+        "example": "But surviving testimony intimates that it was well on its way.",
+        "source": "1491",
+        "sourceUrl": ""
+      }
+    ]
+  },
+  "jest": {
+    "word": "jest",
+    "definition": "tell a joke; speak humorously",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "jezebel": {
+    "word": "jezebel",
+    "definition": "a wicked, shameless woman",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "jonesing": {
+    "word": "jonesing",
+    "definition": "to have a craving for something or someone (sometimes followed by for or out)",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "judicious": {
+    "word": "judicious",
+    "definition": "marked by the exercise of good judgment or common sense in practical matters",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "juxtaposition": {
+    "word": "juxtaposition",
+    "definition": "the act of positioning close together (or side by side)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "kibitz": {
+    "word": "kibitz",
+    "definition": "to give uninvited or unwanted advice",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "labyrinthian": {
+    "word": "labyrinthian",
+    "definition": "resembling a maze in form or complexity",
+    "partOfSpeech": "adjective",
+    "blurb": "*Labyrinthine* is a good word to describe a place that feels like an enormous maze. A new student at a huge, sprawling high school is likely to find the building *labyrinthine* as she wanders the halls looking for her math class.",
+    "background": "",
+    "examples": []
+  },
+  "lamentations": {
+    "word": "lamentations",
+    "definition": "a cry of sorrow and grief",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "languish": {
+    "word": "languish",
+    "definition": "experience prolonged suffering in an unpleasant situation or place",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "lexicon": {
+    "word": "lexicon",
+    "definition": "the vocabulary of a particular language, field, social class, person, etc.",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "maelstrom": {
+    "word": "maelstrom",
+    "definition": "a violent commotion or disturbance",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "malaise": {
+    "word": "malaise",
+    "definition": "a vague sense of unease or dissatisfaction",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "mellifluous": {
+    "word": "mellifluous",
+    "definition": "pleasing to the ear",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "merriment": {
+    "word": "merriment",
+    "definition": "activities that are enjoyable or amusing",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "metastasize": {
+    "word": "metastasize",
+    "definition": "to transform, especially into a dangerous form",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "microcosm": {
+    "word": "microcosm",
+    "definition": "a miniature model of something",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "milieu": {
+    "word": "milieu",
+    "definition": "surroundings, especially of a social or cultural nature",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "moxie": {
+    "word": "moxie",
+    "definition": "fortitude and determination",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "navigable": {
+    "word": "navigable",
+    "definition": "capable of being steered or guided, as a ship, aircraft, or missile",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "obsequious": {
+    "word": "obsequious",
+    "definition": "attentive in an ingratiating or servile manner",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "odious": {
+    "word": "odious",
+    "definition": "unequivocally detestable",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "pablum": {
+    "word": "pablum",
+    "definition": "worthless or oversimplified ideas",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "paramour": {
+    "word": "paramour",
+    "definition": "an illicit lover, especially of a married person",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "paroxysm": {
+    "word": "paroxysm",
+    "definition": "a sudden uncontrollable attack",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "peccadillo": {
+    "word": "peccadillo",
+    "definition": "a petty misdeed or fault",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "persnickety": {
+    "word": "persnickety",
+    "definition": "characterized by excessive precision and attention to trivial details",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "podunk": {
+    "word": "podunk",
+    "definition": "any small and insignificant or inaccessible town or village",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "pontificating": {
+    "word": "pontificating",
+    "definition": "talk in a dogmatic and pompous manner",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "portends": {
+    "word": "portends",
+    "definition": "to indicate in advance; to foreshadow or presage, as an omen does",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "precipice": {
+    "word": "precipice",
+    "definition": "the brink of a dangerous or potentially disastrous situation",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "predilection": {
+    "word": "predilection",
+    "definition": "a predisposition in favor of something",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "quagmire": {
+    "word": "quagmire",
+    "definition": "a situation from which escape is very difficult",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "quarrel": {
+    "word": "quarrel",
+    "definition": "an angry dispute",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "quixotic": {
+    "word": "quixotic",
+    "definition": "not sensible about practical matters; idealistic and unrealistic",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "quotidian": {
+    "word": "quotidian",
+    "definition": "found in the ordinary course of events",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "rattletrap": {
+    "word": "rattletrap",
+    "definition": "a shaky, rattling object, as a rickety vehicle.",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "raucous": {
+    "word": "raucous",
+    "definition": "disturbing the public peace; loud and rough",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "razzmatazz": {
+    "word": "razzmatazz",
+    "definition": "any exciting and complex play intended to confuse (dazzle) the opponent",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "recriminations": {
+    "word": "recriminations",
+    "definition": "mutual accusations",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "regale": {
+    "word": "regale",
+    "definition": "occupy in an agreeable, entertaining or pleasant fashion",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "relinquish": {
+    "word": "relinquish",
+    "definition": "to renounce or surrender (a possession, right, etc.)",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "repose": {
+    "word": "repose",
+    "definition": "freedom from activity (work or strain or responsibility)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "reverence": {
+    "word": "reverence",
+    "definition": "a feeling of profound respect for someone or something",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "revulsion": {
+    "word": "revulsion",
+    "definition": "intense aversion",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "rooked": {
+    "word": "rooked",
+    "definition": "to cheat; fleece; swindle",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "sacrosanct": {
+    "word": "sacrosanct",
+    "definition": "treated as if holy and kept free from violation or criticism",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "sans": {
+    "word": "sans",
+    "definition": "without",
+    "partOfSpeech": "preposition",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "scruples": {
+    "word": "scruples",
+    "definition": "moral or ethical considerations or standards that act as a restraining force or inhibit certain actions",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "skullduggery": {
+    "word": "skullduggery",
+    "definition": "verbal misrepresentation intended to take advantage of you in some way",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "slapdash": {
+    "word": "slapdash",
+    "definition": "marked by great carelessness",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "slight": {
+    "word": "slight",
+    "definition": "to treat (someone) with indifference; ignore, especially pointedly or contemptuously; snub",
+    "blurb": "",
+    "background": "",
+    "examples": [
+      {
+        "example": "The assassin might have bothered to care about the slight if she had any interest in courtiers.",
+        "source": "Throne of Glass",
+        "sourceUrl": "https://www.amazon.com/dp/B007N6JEII",
+        "id": "6a7ed1c5-fb2c-4cc7-a970-dd3724131797"
+      }
+    ],
+    "partOfSpeech": "verb"
+  },
+  "spendthrift": {
+    "word": "spendthrift",
+    "definition": "a person who spends possessions or money extravagantly or wastefully; prodigal",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "striations": {
+    "word": "striations",
+    "definition": "a stripe or stripes of contrasting color",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "sundries": {
+    "word": "sundries",
+    "definition": "miscellaneous objects too numerous or too small to be specified",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "taciturn": {
+    "word": "taciturn",
+    "definition": "habitually reserved and uncommunicative",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "talisman": {
+    "word": "talisman",
+    "definition": "a trinket or piece of jewelry usually hung about the neck and thought to be a magical protection against evil or disease",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "tantamount": {
+    "word": "tantamount",
+    "definition": "being essentially equal to something",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "tenebrous": {
+    "word": "tenebrous",
+    "definition": "dark and gloomy",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "throes": {
+    "word": "throes",
+    "definition": "violent pangs of suffering",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "tommyrot": {
+    "word": "tommyrot",
+    "definition": "pretentious or silly talk or writing",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "traipse": {
+    "word": "traipse",
+    "definition": "walk or tramp about",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "transitory": {
+    "word": "transitory",
+    "definition": "lasting a very short time",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "travesty": {
+    "word": "travesty",
+    "definition": "a distorted, debased, or absurd imitation of something",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "trepidations": {
+    "word": "trepidations",
+    "definition": "a feeling of alarm or dread",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "tryst": {
+    "word": "tryst",
+    "definition": "a secret rendezvous (especially between lovers)",
+    "partOfSpeech": "noun",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "unchivalrous": {
+    "word": "unchivalrous",
+    "definition": "offensively discourteous",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "vexed": {
+    "word": "vexed",
+    "definition": "irritated; annoyed",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "voluptuous": {
+    "word": "voluptuous",
+    "definition": "displaying luxury and furnishing gratification to the senses",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "vouchsafe": {
+    "word": "vouchsafe",
+    "definition": "to grant or give, as by favor, graciousness, or condescension",
+    "partOfSpeech": "verb",
+    "blurb": "",
+    "background": "",
+    "examples": []
+  },
+  "wantonly": {
+    "word": "wantonly",
+    "definition": "occurring without motivation or provocation",
+    "partOfSpeech": "adjective",
+    "blurb": "",
+    "background": "",
+    "examples": []
   }
 }

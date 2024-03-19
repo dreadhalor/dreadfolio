@@ -22,6 +22,11 @@ const Navbar = () => {
           Lists
         </Button>
       </Link>
+      <Link to='/quiz'>
+        <Button variant='outline' className='rounded-none'>
+          Quiz
+        </Button>
+      </Link>
     </div>
   );
 };

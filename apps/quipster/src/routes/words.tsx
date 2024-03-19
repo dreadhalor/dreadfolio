@@ -30,7 +30,7 @@ const Words = () => {
   });
 
   return (
-    <div className='flex flex-nowrap overflow-hidden'>
+    <div className='flex h-full flex-nowrap overflow-hidden'>
       <div className='flex h-full w-[220px] flex-col border'>
         <div className='bg-background'>
           <WordFilters onFilter={handleFilter} />

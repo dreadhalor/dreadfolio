@@ -8,6 +8,7 @@ import {
   FormMessage,
   Input,
   Textarea,
+  Select,
 } from 'dread-ui';
 
 type SingleFormFieldInputProps = {
@@ -15,7 +16,9 @@ type SingleFormFieldInputProps = {
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   inputComponent?: React.ComponentType<any>;
-  inputProps?: React.ComponentProps<typeof Input | typeof Textarea>;
+  inputProps?: React.ComponentProps<
+    typeof Input | typeof Textarea | typeof Select
+  >;
   defaultValue: string;
 };
 

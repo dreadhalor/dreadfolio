@@ -61,12 +61,6 @@ const WordPane = () => {
     setIsEditing(false);
   };
 
-  const handleAddExample = () => {
-    const newExample = { example: '', source: '', sourceUrl: '', id: uuidv4() };
-    setTempExamples((prevExamples) => [...prevExamples, newExample]);
-    form.setValue('examples', [...form.getValues('examples'), newExample]);
-  };
-
   useEffect(() => {
     if (!isEditing) {
       form.reset({

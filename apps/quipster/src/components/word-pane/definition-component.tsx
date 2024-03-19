@@ -9,7 +9,7 @@ const DefinitionComponent = ({
   partOfSpeech,
 }: DefinitionComponentProps) => {
   return (
-    <div className='flex flex-nowrap gap-2'>
+    <div className='flex flex-wrap gap-2'>
       <Badge variant='outline'>{partOfSpeech || 'N/A'}</Badge>
       <p>{definition || 'No definition provided'}</p>
     </div>

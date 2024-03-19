@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, Textarea } from 'dread-ui';
+import { Input, Select, Textarea } from 'dread-ui';
 import { SingleFormFieldInput } from './single-form-field-input';
 
 type ComplexFormFieldProps = {
@@ -9,7 +9,9 @@ type ComplexFormFieldProps = {
     label: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputComponent?: React.ComponentType<any>;
-    inputProps?: React.ComponentProps<typeof Input | typeof Textarea>;
+    inputProps?: React.ComponentProps<
+      typeof Input | typeof Textarea | typeof Select
+    >;
   }[];
   isEditing: boolean;
   complexComponent: React.ReactNode;
