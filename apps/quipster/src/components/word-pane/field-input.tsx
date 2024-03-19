@@ -52,7 +52,7 @@ const FieldInput = ({
           )}
         />
       ) : (
-        <div>{value || `No ${fieldName} provided`}</div>
+        <div>{value || `No ${label.toLowerCase()} provided`}</div>
       )}
     </>
   );

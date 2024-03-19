@@ -36,7 +36,7 @@ const MarkdownInput = ({
         <>
           <Label>Preview</Label>
           <ReactMarkdown>
-            {fieldValue || `No ${fieldName} provided`}
+            {fieldValue || `No ${label.toLowerCase()} provided`}
           </ReactMarkdown>
           <FieldInput
             value={value}
@@ -48,7 +48,9 @@ const MarkdownInput = ({
           />
         </>
       ) : (
-        <ReactMarkdown>{value || `No ${fieldName} provided`}</ReactMarkdown>
+        <ReactMarkdown>
+          {value || `No ${label.toLowerCase()} provided`}
+        </ReactMarkdown>
       )}
     </>
   );

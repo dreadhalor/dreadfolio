@@ -1,3 +1,6 @@
+import { Example, WordFormData } from './word-pane';
+import { useFormContext } from 'react-hook-form';
+import { FieldInput } from './field-input';
 import {
   FormControl,
   FormField,
@@ -6,8 +9,6 @@ import {
   FormMessage,
   Input,
 } from 'dread-ui';
-import { Example, WordFormData } from './word-pane';
-import { useFormContext } from 'react-hook-form';
 
 type ExampleTileProps = {
   example: Example;
@@ -20,22 +21,15 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
 
   return (
     <li className='flex flex-col gap-2 border p-4 text-start'>
+      <FieldInput
+        value={example.example}
+        isEditing={isEditing}
+        fieldName={`examples.${index}.example`}
+        label='Example'
+        inputComponent={Input}
+      />
       {isEditing ? (
         <>
-          <FormField
-            control={control}
-            name={`examples.${index}.example`}
-            defaultValue={example.example}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Example</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={control}
             name={`examples.${index}.source`}
@@ -67,7 +61,6 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
         </>
       ) : (
         <>
-          <span>{example.example}</span>
           {example.sourceUrl ? (
             <a
               href={example.sourceUrl}
