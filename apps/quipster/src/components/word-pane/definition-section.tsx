@@ -1,4 +1,4 @@
-import { ComplexFormField } from './complex-form-field';
+import { ComplexFormField } from '../form-components/complex-form-field';
 import { DefinitionComponent } from './definition-component';
 
 type ExampleTileProps = {

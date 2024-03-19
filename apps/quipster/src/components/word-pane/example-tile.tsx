@@ -1,14 +1,7 @@
-import { Example, WordFormData } from './word-pane';
-import { useFormContext } from 'react-hook-form';
-import { SingleFormField } from './single-form-field';
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Input,
-} from 'dread-ui';
+import { Example } from './word-pane';
+import { SingleFormField } from '../form-components/single-form-field';
+import { ComplexFormField } from '../form-components/complex-form-field';
+import { Input } from 'dread-ui';
 
 type ExampleTileProps = {
   example: Example;
@@ -17,7 +10,33 @@ type ExampleTileProps = {
 };
 
 const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
-  const { control } = useFormContext<WordFormData>();
+  const sourceFields = [
+    {
+      value: example.source,
+      fieldName: `examples.${index}.source`,
+      label: 'Source',
+      inputComponent: Input,
+    },
+    {
+      value: example.sourceUrl || '',
+      fieldName: `examples.${index}.sourceUrl`,
+      label: 'Source URL',
+      inputComponent: Input,
+    },
+  ];
+
+  const sourceComponent = example.sourceUrl ? (
+    <a
+      href={example.sourceUrl}
+      className='w-fit underline'
+      target='_blank'
+      rel='noopener noreferrer'
+    >
+      {example.source}
+    </a>
+  ) : (
+    <span>{example.source}</span>
+  );
 
   return (
     <li className='flex flex-col gap-2 border p-4 text-start'>
@@ -28,53 +47,11 @@ const ExampleTile = ({ example, isEditing, index }: ExampleTileProps) => {
         label='Example'
         inputComponent={Input}
       />
-      {isEditing ? (
-        <>
-          <FormField
-            control={control}
-            name={`examples.${index}.source`}
-            defaultValue={example.source}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Source</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name={`examples.${index}.sourceUrl`}
-            defaultValue={example.sourceUrl || ''}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>SourceUrl</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </>
-      ) : (
-        <>
-          {example.sourceUrl ? (
-            <a
-              href={example.sourceUrl}
-              className='w-fit underline'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              {example.source}
-            </a>
-          ) : (
-            <span>{example.source}</span>
-          )}
-        </>
-      )}
+      <ComplexFormField
+        fields={sourceFields}
+        isEditing={isEditing}
+        complexComponent={sourceComponent}
+      />
     </li>
   );
 };

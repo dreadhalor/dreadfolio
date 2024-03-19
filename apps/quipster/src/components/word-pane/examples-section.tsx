@@ -3,6 +3,7 @@ import { ExampleTile } from './example-tile';
 import { Example } from './word-pane';
 
 type ExamplesSectionProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wordInfo: any;
   tempExamples: Example[];
   isEditing: boolean;

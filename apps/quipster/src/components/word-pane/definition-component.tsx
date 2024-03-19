@@ -1,12 +1,12 @@
 import { Badge } from 'dread-ui';
 
 type DefinitionComponentProps = {
-  definition: string;
-  partOfSpeech: string;
+  definition?: string;
+  partOfSpeech?: string;
 };
 const DefinitionComponent = ({
-  definition,
-  partOfSpeech,
+  definition = 'No definition provided',
+  partOfSpeech = 'N/A',
 }: DefinitionComponentProps) => {
   return (
     <div className='flex flex-nowrap gap-2'>

@@ -6,9 +6,9 @@ import { useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'react-hook-form';
 import { ExamplesSection } from './examples-section';
-import { MarkdownInput } from './markdown-input';
+import { MarkdownInput } from '../form-components/markdown-input';
 import { SectionTile } from './section-tile';
-import { SingleFormField } from './single-form-field';
+import { SingleFormField } from '../form-components/single-form-field';
 import { DefinitionSection } from './definition-section';
 
 export type Example = {
