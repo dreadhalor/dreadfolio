@@ -20,7 +20,6 @@ import { ExamplesSection } from './examples-section';
 import { MarkdownInput } from '../form-components/markdown-input';
 import { SectionTile } from './section-tile';
 import { DefinitionSection } from './definition-section';
-import { cn } from '@repo/utils';
 
 export type Example = {
   id: string;
@@ -48,7 +47,7 @@ const DEFAULT_FORM_VALUES: WordFormData = {
 const WordPane = () => {
   const { words, saveWord, lists, addTermToList, removeTermFromList } =
     useApp();
-  const { word: wordId } = useParams();
+  const { word: wordValue } = useParams();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [wordInfo, setWordInfo] = useState<any>({});
   const [isEditing, setIsEditing] = useState(false);
@@ -59,7 +58,7 @@ const WordPane = () => {
   });
 
   useEffect(() => {
-    const _word = words.find((word) => word.word === wordId) || {};
+    const _word = words.find((word) => word.word === wordValue) || {};
     setWordInfo(_word);
     form.reset({
       ...DEFAULT_FORM_VALUES,
@@ -72,7 +71,7 @@ const WordPane = () => {
       })
       .map((list) => list.id);
     setIncludedLists(foundLists || []);
-  }, [wordId, words, form, lists]);
+  }, [wordValue, words, form, lists]);
 
   const handleSubmit = (data: WordFormData) => {
     saveWord({ ...wordInfo, ...data });
@@ -107,11 +106,7 @@ const WordPane = () => {
 
   return (
     <div className='flex h-fit w-full max-w-screen-lg flex-col gap-4 p-8 pt-4 text-center'>
-      <Combobox
-        value={includedLists}
-        onChange={handleValueChange}
-        className={cn(true && 'hidden')}
-      >
+      <Combobox value={includedLists} onChange={handleValueChange}>
         <ComboboxValue
           disabled={wordInfo?.word === undefined}
           className='w-[200px]'
