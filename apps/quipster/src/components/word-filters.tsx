@@ -31,15 +31,18 @@ type WordFiltersProps = {
     missingBlurb: boolean;
     missingBackground: boolean;
     missingExamples: boolean;
+    missingFillInTheBlank: boolean;
   }) => void;
+  count: number;
 };
 
-const WordFilters = ({ onFilter }: WordFiltersProps) => {
+const WordFilters = ({ onFilter, count }: WordFiltersProps) => {
   const [filters, setFilters] = useState({
     missingDefinition: false,
     missingBlurb: false,
     missingBackground: false,
     missingExamples: false,
+    missingFillInTheBlank: false,
   });
 
   const handleFilterChange = (field: string) => {
@@ -59,7 +62,7 @@ const WordFilters = ({ onFilter }: WordFiltersProps) => {
         <AccordionHeader>
           <AccordionTrigger className='px-4'>{`Filters${
             Object.values(filters).some((filter) => filter) ? '*' : ''
-          }`}</AccordionTrigger>
+          } (${count})`}</AccordionTrigger>
         </AccordionHeader>
         <AccordionContent className='flex flex-col px-4'>
           <div className='space-y-2'>
@@ -90,6 +93,13 @@ const WordFilters = ({ onFilter }: WordFiltersProps) => {
               onChange={() => handleFilterChange('missingExamples')}
             >
               No Examples
+            </Filter>
+            <Filter
+              id='missingFillInTheBlank'
+              checked={filters.missingFillInTheBlank}
+              onChange={() => handleFilterChange('missingFillInTheBlank')}
+            >
+              No Fill-in-the-Blanks
             </Filter>
           </div>
         </AccordionContent>

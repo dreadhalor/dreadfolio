@@ -14,6 +14,7 @@ const Words = () => {
     missingBlurb: false,
     missingBackground: false,
     missingExamples: false,
+    missingFillInTheBlank: false,
   });
 
   const handleFilter = (selectedFilters: typeof filters) => {
@@ -26,6 +27,12 @@ const Words = () => {
     if (filters.missingBackground && word.background) return false;
     if (filters.missingExamples && word.examples && word.examples.length > 0)
       return false;
+    if (
+      filters.missingFillInTheBlank &&
+      word.fillInTheBlankQuestions &&
+      word.fillInTheBlankQuestions.length > 0
+    )
+      return false;
     return true;
   });
 
@@ -33,7 +40,7 @@ const Words = () => {
     <div className='flex h-full flex-nowrap overflow-hidden'>
       <div className='flex h-full w-[220px] flex-col border'>
         <div className='bg-background'>
-          <WordFilters onFilter={handleFilter} />
+          <WordFilters onFilter={handleFilter} count={filteredWords.length} />
         </div>
         <div className='flex-grow overflow-auto'>
           <ul className='w-full'>

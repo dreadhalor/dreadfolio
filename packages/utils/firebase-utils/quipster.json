@@ -6,7 +6,62 @@
     "definition": "a copy or reproduction",
     "id": "03c45df0-041a-49f0-a4a7-c2988780df50",
     "blurb": "",
-    "word": "facsimile"
+    "word": "facsimile",
+    "fillInTheBlankQuestions": [],
+    "fill-in-the-blank-questions": [
+      {
+        "question": "In an effort to preserve historical documents, the museum created a _________ of the ancient manuscript, allowing visitors to handle a replica without risking damage to the original.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The art student's final project was a remarkable _________ of Van Gogh's \"Starry Night,\" meticulously replicating the original's brushwork and color palette.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The rare book collector was thrilled to add a _________ of the 15th-century manuscript to his collection, as the original was far beyond his reach, both financially and geographically.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "During the restoration of the medieval castle, architects used _________ materials to replace the damaged stonework, ensuring the new sections were indistinguishable from the old.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The science fiction novel featured a technology that could produce a _________ of any object, down to the atomic level, leading to profound questions about identity and originality.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "To ensure the authenticity of the reproduced artwork, the curator included a certificate stating that the piece is a _________, not the original.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The detective novel's plot thickened when a _________ of the missing will surfaced, throwing into question the legitimacy of the document that had been found earlier.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "With the rise of digital archives, libraries began offering _________ versions of rare books, allowing scholars to access texts that were previously unavailable to them.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "In an effort to combat counterfeiting, the government introduced new currency features that made creating a convincing _________ nearly impossible.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "As part of the exhibit on ancient civilizations, the museum displayed a _________ of the Rosetta Stone, allowing visitors to touch and feel the inscriptions that led to the deciphering of Egyptian hieroglyphs.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "In the courtroom, the evidence presented included a _________ of the original handwritten note, ensuring the jury could examine its contents without handling the fragile original.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The author's biography included several _________ of her personal letters, giving readers insight into her thoughts and feelings in a way that paraphrasing could not.",
+        "answer": "facsimiles"
+      },
+      {
+        "question": "For the movie's production, the prop department created a _________ of the legendary sword, so detailed that it was nearly impossible for the audience to tell it wasn't the authentic artifact.",
+        "answer": "facsimile"
+      }
+    ]
   },
   "05836763-c44b-4913-b9fd-cea87652e7ce": {
     "examples": [],
@@ -109,7 +164,7 @@
     "definition": "verbal misrepresentation intended to take advantage of you in some way",
     "id": "0f454227-79d4-4974-8452-f6a4a5b167e7",
     "blurb": "",
-    "word": "skullduggery"
+    "word": "skulduggery"
   },
   "101d7e9d-23b4-4804-96e1-d3d006ce116d": {
     "examples": [],
@@ -136,7 +191,7 @@
     "definition": "talk in a dogmatic and pompous manner",
     "id": "11ed9219-d143-4577-b871-8a9514b3595c",
     "blurb": "",
-    "word": "pontificating"
+    "word": "pontificate"
   },
   "14014c39-71db-4d8e-b4eb-226a97ef5d72": {
     "examples": [],
@@ -181,7 +236,7 @@
     "definition": "to cheat; fleece; swindle",
     "id": "1d49994e-5ecd-4359-b4fc-98cd6c1affd2",
     "blurb": "",
-    "word": "rooked"
+    "word": "rook"
   },
   "1e952f67-0381-4fc4-8ac3-beb748220666": {
     "examples": [],
@@ -226,7 +281,7 @@
     "definition": "a stripe or stripes of contrasting color",
     "id": "22386318-8ed8-4b92-ae4f-a187a137158d",
     "blurb": "",
-    "word": "striations"
+    "word": "striation"
   },
   "22e7706a-a722-442f-b401-4d899e67b521": {
     "examples": [],
@@ -253,7 +308,7 @@
     "definition": "an abusive attack on a person's character or good name",
     "id": "23649f31-8e1d-450a-a9e1-60e10a49eff3",
     "blurb": "",
-    "word": "aspersions"
+    "word": "aspersion"
   },
   "25ef3673-39d3-468d-9cfb-308c95fdd02b": {
     "examples": [],
@@ -307,7 +362,9 @@
     "definition": "a ghostly appearing figure",
     "id": "2f174190-9197-4267-b627-a98f73acb248",
     "blurb": "",
-    "word": "apparition"
+    "word": "apparition",
+    "fillInTheBlankQuestions": [],
+    "fill-in-the-blank-questions": []
   },
   "2fdb0a01-3fe4-4654-8a93-01ccc405bb9b": {
     "examples": [],
@@ -325,7 +382,7 @@
     "definition": "be a mystery or bewildering to",
     "id": "30061b76-7336-4056-9751-24f116b21138",
     "blurb": "",
-    "word": "flummoxed"
+    "word": "flummox"
   },
   "31308000-b942-422d-9eda-0e67342c80cd": {
     "examples": [],
@@ -388,7 +445,7 @@
     "definition": "a feeling of alarm or dread",
     "id": "3d875d2d-5de0-4520-9dd8-fa5662a34ec4",
     "blurb": "",
-    "word": "trepidations"
+    "word": "trepidation"
   },
   "4233bed7-8355-4b7f-9f00-d6439781439e": {
     "examples": [],
@@ -415,7 +472,7 @@
     "definition": "to indicate in advance; to foreshadow or presage, as an omen does",
     "id": "4274e207-12a6-40b1-b921-c98a53624fe4",
     "blurb": "",
-    "word": "portends"
+    "word": "portend"
   },
   "432b89e4-153e-4651-a27f-1d7bdaf7d779": {
     "examples": [],
@@ -595,7 +652,7 @@
     "definition": "occurring without motivation or provocation",
     "id": "5e564f10-49b4-411c-811a-331dedb988a0",
     "blurb": "",
-    "word": "wantonly"
+    "word": "wanton"
   },
   "60dc80c7-a505-4be1-96f6-70fab237fbf9": {
     "examples": [
@@ -736,7 +793,7 @@
     "definition": "a minor weakness or peculiarity in someone's character",
     "id": "7124f879-7814-43aa-aa3f-9b6f1b922ac4",
     "blurb": "",
-    "word": "foibles"
+    "word": "foible"
   },
   "720b32e7-586f-4f90-b08b-c7db23256176": {
     "examples": [],
@@ -826,7 +883,7 @@
     "definition": "mutual accusations",
     "id": "82ef001d-d4d0-43fb-9207-a39a859e9ec3",
     "blurb": "",
-    "word": "recriminations"
+    "word": "recrimination"
   },
   "83616991-184e-4998-8740-3ff8794cf323": {
     "examples": [],
@@ -1202,7 +1259,7 @@
     "definition": "a cry of sorrow and grief",
     "id": "ce74e8e3-7635-4899-afac-93ce3a3ebab1",
     "blurb": "",
-    "word": "lamentations"
+    "word": "lamentation"
   },
   "d3fc9f64-5fb1-45fe-965f-e95b05960249": {
     "examples": [],
@@ -1422,7 +1479,7 @@
     "definition": "be confusing or perplexing to; cause to be unable to think clearly",
     "id": "fd25b061-f2e6-4b4e-9ce0-b4ee86b93920",
     "blurb": "",
-    "word": "bedeviled"
+    "word": "bedevil"
   },
   "fec2342c-e8d4-45c2-9210-016c1c4dda56": {
     "examples": [],

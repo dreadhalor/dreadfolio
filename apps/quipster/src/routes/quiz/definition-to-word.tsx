@@ -45,7 +45,7 @@ const DefinitionToWordQuiz = () => {
 
   return (
     <div className='flex flex-col items-center p-8'>
-      <h2 className='mb-4 text-2xl font-bold'>Quiz</h2>
+      <h2 className='mb-4 text-2xl font-bold'>Definition-to-Word Quiz</h2>
       {questionWord && (
         <>
           <p className='mb-4'>{questionWord?.definition || ''}</p>

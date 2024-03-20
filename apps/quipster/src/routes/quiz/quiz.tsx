@@ -6,6 +6,7 @@ const Quiz = () => {
     { name: 'Word to Definition', route: '/quiz/word-to-definition' },
     { name: 'Definition to Word', route: '/quiz/definition-to-word' },
     { name: 'Word Matching', route: '/quiz/word-matching' },
+    { name: 'Fill in the Blank', route: '/quiz/fill-in-the-blank' },
   ];
 
   return (

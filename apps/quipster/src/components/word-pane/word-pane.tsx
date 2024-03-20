@@ -21,12 +21,19 @@ import { MarkdownInput } from '../form-components/markdown-input';
 import { SectionTile } from './section-tile';
 import { DefinitionSection } from './definition-section';
 import { SingleFormField } from '../form-components/single-form-field';
+import { FillInTheBlankQuestionsSection } from './fill-in-the-blank-questions-section';
 
 export type Example = {
   id: string;
   example: string;
   source: string;
   sourceUrl: string;
+};
+
+export type FillInTheBlankQuestion = {
+  id: string;
+  question: string;
+  answer: string;
 };
 
 export type WordFormData = {
@@ -36,6 +43,7 @@ export type WordFormData = {
   blurb: string;
   background: string;
   examples: Example[];
+  fillInTheBlankQuestions: FillInTheBlankQuestion[];
 };
 
 const DEFAULT_FORM_VALUES: WordFormData = {
@@ -45,6 +53,7 @@ const DEFAULT_FORM_VALUES: WordFormData = {
   blurb: '',
   background: '',
   examples: [],
+  fillInTheBlankQuestions: [],
 };
 
 const WordPane = () => {
@@ -169,6 +178,17 @@ const WordPane = () => {
             inputComponent={Textarea}
             inputProps={{ rows: 4 }}
           />
+        </SectionTile>
+        <SectionTile
+          isEditing={isEditing}
+          label={`Fill-in-the-Blank Questions${
+            (wordInfo.fillInTheBlankQuestions &&
+              ` (${wordInfo.fillInTheBlankQuestions.length})`) ||
+            ''
+          }`}
+          className='max-h-[400px] overflow-auto p-0'
+        >
+          <FillInTheBlankQuestionsSection isEditing={isEditing} />
         </SectionTile>
         <SectionTile
           isEditing={isEditing}
