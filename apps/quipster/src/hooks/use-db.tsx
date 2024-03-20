@@ -56,7 +56,7 @@ const useDB = (uid: string) => {
   };
 
   const saveWord = async (word: any) => {
-    const wordRef = doc(wordsCollection, word.word);
+    const wordRef = doc(wordsCollection, word.id);
     await setDoc(wordRef, word);
   };
 

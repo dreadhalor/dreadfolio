@@ -36,19 +36,7 @@ const importCollection = async (data, collectionName, parentDocRef = null) => {
       const docData = data[docId];
       const docRef = doc(collectionRef, docId);
 
-      const subCollectionPromises = Object.keys(docData)
-        .filter((field) => typeof docData[field] === 'object')
-        .map((field) => importCollection(docData[field], field, docRef));
-
-      await Promise.all(subCollectionPromises);
-
-      const fieldsToWrite = Object.fromEntries(
-        Object.entries(docData).filter(
-          ([field]) => typeof docData[field] !== 'object',
-        ),
-      );
-
-      return setDoc(docRef, fieldsToWrite);
+      return setDoc(docRef, docData);
     });
 
     await Promise.all(promises).then(() => {
@@ -73,7 +61,6 @@ const { file: jsonFile, collection: collectionName, prod } = program.opts();
 if (!jsonFile || !collectionName) {
   console.error('Error: JSON file path and collection name are required.');
   program.help();
-  process.exit(1);
 }
 
 if (!prod) {

@@ -33,7 +33,9 @@ export const AppProvider = ({ children }: Props) => {
     saveWord,
   } = useDB(uid!);
   const [allTerms, setAllTerms] = useState<Term[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [words, setWords] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedWord, setSelectedWord] = useState<any>({});
   const [lists, setLists] = useState([]);
 
@@ -65,9 +67,7 @@ export const AppProvider = ({ children }: Props) => {
   }, [subscribeToVocabLists]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToWords((words) => {
-      setWords(words);
-    });
+    const unsubscribe = subscribeToWords((words) => setWords(words));
 
     return () => {
       unsubscribe();
