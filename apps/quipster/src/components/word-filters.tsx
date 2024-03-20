@@ -5,7 +5,6 @@ import {
   AccordionHeader,
   AccordionItem,
   AccordionTrigger,
-  Button,
   Checkbox,
   Label,
 } from 'dread-ui';

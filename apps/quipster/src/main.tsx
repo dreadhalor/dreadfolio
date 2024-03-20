@@ -14,6 +14,7 @@ import { Words } from './routes/words.tsx';
 import { DefinitionToWordQuiz } from './routes/quiz/definition-to-word.tsx';
 import { WordToDefinitionQuiz } from './routes/quiz/word-to-definition.tsx';
 import { Quiz } from './routes/quiz/quiz.tsx';
+import { WordMatchingQuiz } from './routes/quiz/word-matching.tsx';
 
 const router = createBrowserRouter([
   {
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: 'quiz/word-to-definition',
         element: <WordToDefinitionQuiz />,
+      },
+      {
+        path: 'quiz/word-matching',
+        element: <WordMatchingQuiz />,
       },
     ],
   },

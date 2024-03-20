@@ -64,7 +64,7 @@ const WordToDefinitionQuiz = () => {
   };
 
   return (
-    <div className='flex flex-col items-center'>
+    <div className='flex flex-col items-center p-8'>
       <h2 className='mb-4 text-2xl font-bold'>Multiple Choice Quiz</h2>
       {questionWord && (
         <>

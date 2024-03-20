@@ -3,12 +3,10 @@ import { useApp } from '../../providers/app-provider';
 import { FaEdit } from 'react-icons/fa';
 import { Button, Form, Textarea } from 'dread-ui';
 import { useParams } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'react-hook-form';
 import { ExamplesSection } from './examples-section';
 import { MarkdownInput } from '../form-components/markdown-input';
 import { SectionTile } from './section-tile';
-import { SingleFormField } from '../form-components/single-form-field';
 import { DefinitionSection } from './definition-section';
 
 export type Example = {
@@ -40,7 +38,6 @@ const WordPane = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [wordInfo, setWordInfo] = useState<any>({});
   const [isEditing, setIsEditing] = useState(false);
-  const [tempExamples, setTempExamples] = useState<Example[]>([]);
 
   const form = useForm<WordFormData>({
     defaultValues: DEFAULT_FORM_VALUES,
@@ -53,7 +50,6 @@ const WordPane = () => {
       ...DEFAULT_FORM_VALUES,
       ..._word,
     });
-    setTempExamples([]);
   }, [wordId, words, form]);
 
   const handleSubmit = (data: WordFormData) => {
@@ -67,23 +63,23 @@ const WordPane = () => {
         ...DEFAULT_FORM_VALUES,
         ...wordInfo,
       });
-      setTempExamples([]);
     }
   }, [isEditing, wordInfo, form]);
 
   const handleCancel = () => {
     setIsEditing(false);
-    setTempExamples([]);
   };
 
   return (
     <div className='flex h-fit w-full max-w-screen-lg flex-col gap-4 p-8 pt-4 text-center'>
       <h2 className='flex w-full flex-nowrap items-center justify-center gap-2 text-xl font-bold capitalize'>
         {wordInfo.word}
-        <FaEdit
-          className='cursor-pointer text-gray-500 hover:text-white'
-          onClick={() => setIsEditing(!isEditing)}
-        />
+        {wordInfo?.word && (
+          <FaEdit
+            className='cursor-pointer text-gray-500 hover:text-white'
+            onClick={() => setIsEditing(!isEditing)}
+          />
+        )}
       </h2>
       <Form {...form}>
         <SectionTile isEditing={isEditing} label='Definition'>
