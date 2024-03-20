@@ -1,3 +1,4 @@
+import { cn } from '@repo/utils';
 import { Button } from 'dread-ui';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
@@ -34,11 +35,18 @@ const ComplexArrayFormField = ({
   };
 
   return (
-    <div className='flex flex-col items-start gap-2'>
+    <div className='flex w-full flex-col items-start gap-2'>
       {fields.length > 0 ? (
-        <ul className='max-h-[400px] w-full overflow-auto rounded-lg border'>
+        <ul className='w-full'>
           {fields.map((field, index) => (
-            <li key={field.id}>
+            <li
+              key={field.id}
+              className={cn(
+                'group',
+                index === 0 && 'first-item',
+                index === fields.length - 1 && 'last-item',
+              )}
+            >
               <ItemComponent
                 item={field}
                 index={index}
@@ -49,7 +57,7 @@ const ComplexArrayFormField = ({
           ))}
         </ul>
       ) : (
-        <div className='flex w-full flex-col items-center gap-2 rounded-lg border p-4 text-start'>
+        <div className='flex w-full flex-col items-center gap-2 p-4 text-start'>
           {`No ${name.toLowerCase()} provided`}
         </div>
       )}

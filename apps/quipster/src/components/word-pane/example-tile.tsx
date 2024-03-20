@@ -45,7 +45,7 @@ const ExampleTile = ({
   );
 
   return (
-    <div className='flex flex-col gap-2 border p-4 text-start'>
+    <div className='flex flex-col gap-2 border-b p-4 text-start group-[.last-item]:border-b-0'>
       <SingleFormField
         value={example.example}
         isEditing={isEditing}

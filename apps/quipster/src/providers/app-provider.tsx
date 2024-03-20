@@ -67,7 +67,10 @@ export const AppProvider = ({ children }: Props) => {
   }, [subscribeToVocabLists]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToWords((words) => setWords(words));
+    const unsubscribe = subscribeToWords((words) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setWords(words.sort((a: any, b: any) => a.word.localeCompare(b.word))),
+    );
 
     return () => {
       unsubscribe();

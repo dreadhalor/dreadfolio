@@ -20,6 +20,7 @@ import { ExamplesSection } from './examples-section';
 import { MarkdownInput } from '../form-components/markdown-input';
 import { SectionTile } from './section-tile';
 import { DefinitionSection } from './definition-section';
+import { SingleFormField } from '../form-components/single-form-field';
 
 export type Example = {
   id: string;
@@ -29,6 +30,7 @@ export type Example = {
 };
 
 export type WordFormData = {
+  word: string;
   definition: string;
   partOfSpeech: string;
   blurb: string;
@@ -37,6 +39,7 @@ export type WordFormData = {
 };
 
 const DEFAULT_FORM_VALUES: WordFormData = {
+  word: '',
   definition: '',
   partOfSpeech: '',
   blurb: '',
@@ -127,16 +130,23 @@ const WordPane = () => {
         </ComboboxContent>
       </Combobox>
 
-      <h2 className='flex w-full flex-nowrap items-center justify-center gap-2 text-xl font-bold capitalize'>
-        {wordInfo.word}
-        {wordInfo?.word && (
-          <FaEdit
-            className='cursor-pointer text-gray-500 hover:text-white'
-            onClick={() => setIsEditing(!isEditing)}
-          />
-        )}
-      </h2>
       <Form {...form}>
+        <h2 className='flex w-full flex-nowrap items-center justify-center gap-2 text-xl font-bold capitalize'>
+          <SingleFormField
+            value={wordInfo.word}
+            isEditing={isEditing}
+            fieldName='word'
+            label='Word'
+          />
+
+          {wordInfo?.word && (
+            <FaEdit
+              className='cursor-pointer text-gray-500 hover:text-white'
+              onClick={() => setIsEditing(!isEditing)}
+            />
+          )}
+        </h2>
+
         <SectionTile isEditing={isEditing} label='Definition'>
           <DefinitionSection wordInfo={wordInfo} isEditing={isEditing} />
         </SectionTile>
@@ -160,7 +170,13 @@ const WordPane = () => {
             inputProps={{ rows: 4 }}
           />
         </SectionTile>
-        <ExamplesSection isEditing={isEditing} />
+        <SectionTile
+          isEditing={isEditing}
+          label='Examples'
+          className='max-h-[400px] overflow-auto p-0'
+        >
+          <ExamplesSection isEditing={isEditing} />
+        </SectionTile>
         {isEditing && (
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
