@@ -31,9 +31,10 @@ const FillInTheBlankQuiz = () => {
         Math.floor(Math.random() * randomWord.fillInTheBlankQuestions.length)
       ];
 
-    const incorrectOptions = words
+    const incorrectOptions = wordsWithQuestions
       .filter((word) => word.word !== randomWord.word)
       .map((word) => word.word)
+      .sort(() => 0.5 - Math.random())
       .slice(0, 3);
 
     const allOptions = [randomQuestion.answer, ...incorrectOptions];
