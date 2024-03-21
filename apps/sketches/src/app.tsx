@@ -21,7 +21,7 @@ const getRandomSketch = () => {
 const App = () => {
   const [fps, setFps] = useState();
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<SketchKey>(getRandomSketch());
+  const [sketch, setSketch] = useState<SketchKey>('3d-engine');
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);

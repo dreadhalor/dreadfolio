@@ -79,4 +79,70 @@ export class Matrix {
 
     return result;
   }
+
+  setRotationX(angle: number): void {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    this.elements = [
+      [1, 0, 0, 0],
+      [0, cos, -sin, 0],
+      [0, sin, cos, 0],
+      [0, 0, 0, 1],
+    ];
+  }
+
+  setRotationY(angle: number): void {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    this.elements = [
+      [cos, 0, sin, 0],
+      [0, 1, 0, 0],
+      [-sin, 0, cos, 0],
+      [0, 0, 0, 1],
+    ];
+  }
+
+  setRotationAroundAxis(axis: Vector, angle: number): void {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const oneMinusCos = 1 - cos;
+
+    const x = axis.x;
+    const y = axis.y;
+    const z = axis.z;
+
+    this.elements = [
+      [
+        cos + x * x * oneMinusCos,
+        x * y * oneMinusCos - z * sin,
+        x * z * oneMinusCos + y * sin,
+        0,
+      ],
+      [
+        y * x * oneMinusCos + z * sin,
+        cos + y * y * oneMinusCos,
+        y * z * oneMinusCos - x * sin,
+        0,
+      ],
+      [
+        z * x * oneMinusCos - y * sin,
+        z * y * oneMinusCos + x * sin,
+        cos + z * z * oneMinusCos,
+        0,
+      ],
+      [0, 0, 0, 1],
+    ];
+  }
+
+  setTranslation(x: number, y: number, z: number): Matrix {
+    this.elements = [
+      [1, 0, 0, x],
+      [0, 1, 0, y],
+      [0, 0, 1, z],
+      [0, 0, 0, 1],
+    ];
+    return this;
+  }
 }
