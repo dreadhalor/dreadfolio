@@ -1,9 +1,13 @@
 import { Vector } from './vector';
 import { Matrix } from './matrix';
+import P5 from 'p5';
 
 export class Camera {
   private position: Vector;
   private velocity: Vector;
+  private acceleration: Vector;
+  private mass: number;
+  private damping: number;
   private target: Vector;
   private up: Vector;
   private fov: number;
@@ -12,8 +16,11 @@ export class Camera {
   private far: number;
   private viewMatrix: Matrix;
   private projectionMatrix: Matrix;
+  private p5: P5;
+  private isJumping: boolean;
 
   constructor(
+    p5: P5,
     position: Vector,
     target: Vector,
     up: Vector,
@@ -21,9 +28,15 @@ export class Camera {
     aspectRatio: number,
     near: number,
     far: number,
+    mass: number = 1,
+    damping: number = 1,
   ) {
+    this.p5 = p5;
     this.position = position;
     this.velocity = new Vector(0, 0, 0);
+    this.acceleration = new Vector(0, 0, 0);
+    this.mass = mass;
+    this.damping = damping;
     this.target = target;
     this.up = up;
     this.fov = fov;
@@ -32,6 +45,7 @@ export class Camera {
     this.far = far;
     this.viewMatrix = new Matrix();
     this.projectionMatrix = new Matrix();
+    this.isJumping = false;
     this.updateViewMatrix();
     this.updateProjectionMatrix();
   }
@@ -51,6 +65,10 @@ export class Camera {
 
   setVelocity(velocity: Vector): void {
     this.velocity = velocity;
+  }
+
+  getMass(): number {
+    return this.mass;
   }
 
   getTarget(): Vector {
@@ -154,68 +172,46 @@ export class Camera {
     this.projectionMatrix = projection;
   }
 
-  moveForward(distance: number): void {
+  moveForward(force: number): void {
     // Move in the direction of the target, but ignore the y-axis
     const direction = this.target.subtract(this.position).normalize();
     direction.y = 0;
-    this.position = this.position.add(direction.scale(distance));
-    this.target = this.target.add(direction.scale(distance));
-    this.updateViewMatrix();
+    this.applyForce(direction.scale(force));
   }
 
-  moveBackward(distance: number): void {
-    this.moveForward(-distance);
+  moveBackward(force: number): void {
+    this.moveForward(-force);
   }
 
-  moveLeft(distance: number): void {
+  moveLeft(force: number): void {
     // Move in the direction of the target's right vector
     const direction = this.target.subtract(this.position).normalize();
     const right = direction.cross(this.up).normalize();
-    this.position = this.position.subtract(right.scale(distance));
-    this.target = this.target.subtract(right.scale(distance));
-    this.updateViewMatrix();
+    this.applyForce(right.scale(-force));
   }
 
-  moveRight(distance: number): void {
-    this.moveLeft(-distance);
+  moveRight(force: number): void {
+    this.moveLeft(-force);
   }
 
-  moveUp(distance: number): void {
-    // Move in the direction of the up vector only
-    this.position = this.position.add(this.up.scale(distance));
-    this.target = this.target.add(this.up.scale(distance));
-    this.updateViewMatrix();
+  moveUp(force: number): void {
+    this.applyForce(this.up.scale(force));
+  }
+  jump() {
+    const jumpHeight = 2; // Desired jump height in units
+    const jumpDuration = 0.8; // Desired jump duration in seconds
+
+    // Calculate the initial jump velocity based on the desired jump height and duration
+    const jumpVelocity = (2 * jumpHeight) / jumpDuration;
+
+    this.acceleration.y = 0;
+    this.velocity.y = jumpVelocity;
+    this.isJumping = true;
   }
 
-  moveDown(distance: number): void {
-    // Move in the direction of the up vector only
-    this.position = this.position.add(this.up.scale(-distance));
-    this.target = this.target.add(this.up.scale(-distance));
-    // prevent the camera from going below the ground
-    if (this.position.y < 0) {
-      const diff = 0 - this.position.y;
-      this.position = this.position.add(this.up.scale(diff));
-      this.target = this.target.add(this.up.scale(diff));
-    }
-    this.updateViewMatrix();
-  }
-
-  rotateX(angle: number): void {
-    const direction = this.target.subtract(this.position);
-    const rotation = new Matrix();
-    rotation.setRotationX(angle);
-    const newDirection = rotation.multiplyVector(direction);
-    this.target = this.position.add(newDirection);
-    this.updateViewMatrix();
-  }
-
-  rotateY(angle: number): void {
-    const direction = this.target.subtract(this.position);
-    const rotation = new Matrix();
-    rotation.setRotationY(angle);
-    const newDirection = rotation.multiplyVector(direction);
-    this.target = this.position.add(newDirection);
-    this.updateViewMatrix();
+  moveDown(force: number): void {
+    // // Move in the direction of the up vector only
+    this.applyForce(this.up.scale(-force));
   }
 
   rotateAroundAxis(axis: Vector, angle: number): void {
@@ -230,5 +226,66 @@ export class Camera {
   getRightVector(): Vector {
     const direction = this.target.subtract(this.position).normalize();
     return this.up.cross(direction).normalize();
+  }
+
+  applyForce(force: Vector): void {
+    const acceleration = force.scale(1 / this.mass);
+    this.acceleration = this.acceleration.add(acceleration);
+  }
+
+  update(deltaTime: number): void {
+    const groundFriction = 0.9;
+    const airFriction = 0.92;
+    const moveForce = 30;
+
+    if (this.p5.keyIsDown(87)) {
+      // W key
+      this.moveForward(moveForce);
+    }
+    if (this.p5.keyIsDown(83)) {
+      // S key
+      this.moveBackward(moveForce);
+    }
+    if (this.p5.keyIsDown(65)) {
+      // A key
+      this.moveLeft(moveForce);
+    }
+    if (this.p5.keyIsDown(68)) {
+      // D key
+      this.moveRight(moveForce);
+    }
+    if (this.p5.keyIsDown(32) && !this.isJumping && this.position.y === 0) {
+      // Space key
+      this.jump();
+    }
+    if (this.p5.keyIsDown(16)) {
+      // Shift key
+      this.moveDown(moveForce);
+    }
+
+    this.velocity = this.velocity.add(this.acceleration.scale(deltaTime));
+    this.position = this.position.add(this.velocity.scale(deltaTime));
+    this.target = this.target.add(this.velocity.scale(deltaTime));
+    if (this.position.y < 0) {
+      const diff = 0 - this.position.y;
+      this.position.y = 0;
+      this.target.y += diff;
+      this.isJumping = false;
+    }
+
+    this.velocity = this.velocity.scale(this.damping);
+    // apply friction if the camera is on the ground
+    if (this.position.y === 0) {
+      this.velocity.x *= groundFriction;
+      this.velocity.z *= groundFriction;
+      this.velocity.y = 0;
+      this.acceleration.y = 0;
+    } else {
+      this.velocity.x *= airFriction;
+      this.velocity.z *= airFriction;
+    }
+    this.acceleration = new Vector(0, 0, 0);
+
+    this.updateViewMatrix();
   }
 }

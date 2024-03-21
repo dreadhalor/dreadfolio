@@ -2,14 +2,16 @@ import { Camera } from './camera';
 import { Mesh } from './mesh';
 import { Renderer } from './renderer';
 import { Vector } from './vector';
+import P5 from 'p5';
 
 export class Scene {
   private meshes: Mesh[];
   private camera: Camera;
 
-  constructor() {
+  constructor(p5: P5) {
     this.meshes = [];
     this.camera = new Camera(
+      p5,
       new Vector(0, 0, 0),
       new Vector(0, 0, -1),
       new Vector(0, 1, 0),
@@ -44,21 +46,10 @@ export class Scene {
   }
 
   update(deltaTime: number): void {
-    // give the camera gravity physics
-    const position = this.camera.getPosition();
-    const velocity = this.camera.getVelocity();
     const gravity = new Vector(0, -9.8, 0);
-    const newVelocity = velocity.add(gravity.scale(deltaTime));
-    const newPosition = position.add(newVelocity.scale(deltaTime));
-    if (newPosition.y < 0) {
-      newPosition.y = 0;
-      newVelocity.y = 0;
-    }
-    const target = this.camera.getTarget();
-    const newTarget = target.add(newPosition.subtract(position));
-    this.camera.setTarget(newTarget);
-    this.camera.setPosition(newPosition);
-    this.camera.setVelocity(newVelocity);
+    this.camera.applyForce(gravity);
+
+    this.camera.update(deltaTime);
   }
 
   render(renderer: Renderer): void {

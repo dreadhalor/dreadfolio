@@ -12,12 +12,14 @@ export const ThreeDEngine = (p5: P5) => {
   let camera: Camera;
 
   p5.setup = () => {
+    p5.frameRate(60);
     const canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight);
-    scene = new Scene();
+    scene = new Scene(p5);
     renderer = new Renderer(canvas.elt as HTMLCanvasElement);
 
     // Create a camera
     camera = new Camera(
+      p5,
       new Vector(0, 0, 10),
       new Vector(0, 0, 0),
       new Vector(0, 1, 0),
@@ -58,7 +60,7 @@ export const ThreeDEngine = (p5: P5) => {
     // Update the scene
     const deltaTime = p5.deltaTime / 1000; // Convert milliseconds to seconds
     scene.update(deltaTime);
-    handleKeyboardInput(deltaTime);
+    // handleKeyboardInput(deltaTime);
 
     // Render the scene
     scene.render(renderer);
