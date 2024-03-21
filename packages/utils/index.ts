@@ -29,5 +29,3 @@ export const generateUntypeableId = (length: number) => {
 
   return id;
 };
-
-export { auth, db } from './firebase-tools';

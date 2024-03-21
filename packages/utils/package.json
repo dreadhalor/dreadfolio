@@ -9,5 +9,13 @@
   },
   "dependencies": {
     "commander": "^12.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.ts"
+    },
+    "./firebase": {
+      "import": "./firebase-tools.ts"
+    }
   }
 }
