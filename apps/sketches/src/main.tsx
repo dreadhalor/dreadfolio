@@ -2,7 +2,7 @@ import './index.scss';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app';
-import 'dread-ui/style.scss';
+import 'dread-ui/built-style.css';
 
 const root = document.getElementById('root')!;
 
