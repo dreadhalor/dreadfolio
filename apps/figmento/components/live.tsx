@@ -58,7 +58,7 @@ export const Live = () => {
           previousMessage: null,
           message: null,
         });
-      } else if (event.key === 'e') {
+      } else if (event.key === 'e' && cursorState.mode !== CursorMode.Chat) {
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
     };
