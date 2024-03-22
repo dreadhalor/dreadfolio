@@ -1,12 +1,11 @@
 import { useMyPresence } from '@figmento/liveblocks.config';
+import { useCursorState } from '@figmento/providers/cursor-state-provider';
 import CursorSVG from '@figmento/public/assets/CursorSVG';
 import { CursorChatProps, CursorMode, CursorState } from '@figmento/types/type';
 import React from 'react';
 
-export const CursorChat = ({
-  cursorState,
-  setCursorState,
-}: CursorChatProps) => {
+export const CursorChat = () => {
+  const { cursorState, setCursorState } = useCursorState();
   const [{ cursor, message }, updateMyPresence] = useMyPresence();
   if (!cursor) return null;
 

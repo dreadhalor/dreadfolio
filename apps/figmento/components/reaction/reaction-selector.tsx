@@ -1,3 +1,4 @@
+import { useCursorState } from '@figmento/providers/cursor-state-provider';
 import React from 'react';
 
 type ReactionButtonProps = {
@@ -13,21 +14,22 @@ const ReactionButton = ({ reaction, onSelect }: ReactionButtonProps) => (
   </button>
 );
 
-type Props = {
-  setReaction: (reaction: string) => void;
+const ReactionSelector = () => {
+  const { setReaction } = useCursorState();
+
+  return (
+    <div
+      className='absolute bottom-20 left-0 right-0 mx-auto w-fit transform rounded-full bg-white px-2'
+      onPointerMove={(e) => e.stopPropagation()}
+    >
+      <ReactionButton reaction='👍' onSelect={setReaction} />
+      <ReactionButton reaction='🔥' onSelect={setReaction} />
+      <ReactionButton reaction='😍' onSelect={setReaction} />
+      <ReactionButton reaction='👀' onSelect={setReaction} />
+      <ReactionButton reaction='😱' onSelect={setReaction} />
+      <ReactionButton reaction='🙁' onSelect={setReaction} />
+    </div>
+  );
 };
-const ReactionSelector = ({ setReaction }: Props) => (
-  <div
-    className='absolute bottom-20 left-0 right-0 mx-auto w-fit transform rounded-full bg-white px-2'
-    onPointerMove={(e) => e.stopPropagation()}
-  >
-    <ReactionButton reaction='👍' onSelect={setReaction} />
-    <ReactionButton reaction='🔥' onSelect={setReaction} />
-    <ReactionButton reaction='😍' onSelect={setReaction} />
-    <ReactionButton reaction='👀' onSelect={setReaction} />
-    <ReactionButton reaction='😱' onSelect={setReaction} />
-    <ReactionButton reaction='🙁' onSelect={setReaction} />
-  </div>
-);
 
 export { ReactionSelector };

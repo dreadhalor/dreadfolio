@@ -3,6 +3,8 @@ import { Work_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@repo/utils';
 import { Room } from './room';
+import { CursorStateProvider } from '@figmento/providers/cursor-state-provider';
+import { ReactionsProvider } from '@figmento/providers/reactions-provider';
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -23,7 +25,11 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={cn(workSans.className, 'bg-primary-grey-200')}>
-        <Room>{children}</Room>
+        <Room>
+          <CursorStateProvider>
+            <ReactionsProvider>{children}</ReactionsProvider>
+          </CursorStateProvider>
+        </Room>
       </body>
     </html>
   );
