@@ -76,7 +76,7 @@ export const Live = () => {
       onPointerDown={handlePointerDown}
       onPointerLeave={handlePointerLeave}
       onPointerUp={handlePointerUp}
-      className='relative flex h-full w-full items-center justify-center overflow-hidden bg-black'
+      className='relative flex w-full flex-1 items-center justify-center overflow-hidden bg-black'
     >
       <LiveCursors />
       <h1 className='text-5xl text-white'>Figmento</h1>
