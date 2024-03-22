@@ -1,13 +1,16 @@
+import { Reaction } from '@figmento/types/type';
 import styles from './flying-reaction.module.css';
 
 type Props = {
-  x: number;
-  y: number;
-  timestamp: number;
-  value: string;
+  reaction: Reaction;
 };
 
-export function FlyingReaction({ x, y, timestamp, value }: Props) {
+export function FlyingReaction({ reaction }: Props) {
+  const {
+    origin: { x, y },
+    timestamp,
+    value,
+  } = reaction;
   return (
     <div
       className={`pointer-events-none absolute select-none ${

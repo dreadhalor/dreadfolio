@@ -1,13 +1,16 @@
+import { Presence } from '@figmento/liveblocks.config';
 import CursorSVG from '@figmento/public/assets/CursorSVG';
 import React from 'react';
+import { CursorChatBubble } from './cursor-chat-bubble';
 
 type CursorProps = {
   color: string;
-  x: number;
-  y: number;
-  message: string | null;
+  presence: Presence;
 };
-const Cursor = ({ color, x, y, message }: CursorProps) => {
+const Cursor = ({ color, presence: { cursor, message } }: CursorProps) => {
+  if (!cursor) return null;
+
+  const { x, y } = cursor;
   return (
     <div
       className='pointer-events-none absolute'
@@ -18,14 +21,12 @@ const Cursor = ({ color, x, y, message }: CursorProps) => {
     >
       <CursorSVG color={color} />
       {message && (
-        <div
-          className='absolute left-2 top-5 rounded-full px-4 py-2 text-sm leading-relaxed text-white'
-          style={{
-            backgroundColor: color,
-          }}
+        <CursorChatBubble
+          className='left-2 top-5 max-w-[200px]'
+          backgroundColor={color}
         >
           {message}
-        </div>
+        </CursorChatBubble>
       )}
     </div>
   );

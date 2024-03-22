@@ -3,6 +3,7 @@ import { useCursorState } from '@figmento/providers/cursor-state-provider';
 import CursorSVG from '@figmento/public/assets/CursorSVG';
 import { CursorChatProps, CursorMode, CursorState } from '@figmento/types/type';
 import React from 'react';
+import { CursorChatBubble } from './cursor-chat-bubble';
 
 export const CursorChat = () => {
   const { cursorState, setCursorState } = useCursorState();
@@ -41,12 +42,12 @@ export const CursorChat = () => {
       {cursorState.mode === CursorMode.Chat && (
         <>
           <CursorSVG color='#000' />
-          <div className='absolute left-2 top-5 rounded-full bg-blue-500 px-4 py-2 text-sm leading-relaxed'>
-            {cursorState.previousMessage && (
-              <div>{cursorState.previousMessage}</div>
-            )}
+          {cursorState.previousMessage && (
+            <div>{cursorState.previousMessage}</div>
+          )}
+          <CursorChatBubble className='left-2 top-5 bg-blue-500'>
             <input
-              className='z-10 w-60 border-none	bg-transparent text-white placeholder-blue-300 outline-none'
+              className='z-10 w-60 border-none bg-transparent text-white placeholder-blue-300 outline-none'
               autoFocus
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -54,9 +55,9 @@ export const CursorChat = () => {
                 cursorState.previousMessage ? '' : 'Type a message...'
               }
               value={cursorState.message || ''}
-              maxLength={20}
+              maxLength={50}
             />
-          </div>
+          </CursorChatBubble>
         </>
       )}
     </div>

@@ -1,43 +1,40 @@
-// Live.tsx
 'use client';
 
-import React, { useCallback, useEffect, useContext } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { LiveCursors } from './cursor/live-cursors';
-import {
-  useBroadcastEvent,
-  useEventListener,
-  useMyPresence,
-} from '@figmento/liveblocks.config';
-import { CursorMode, ReactionEvent } from '@figmento/types/type';
+import { CursorMode } from '@figmento/types/type';
 import { CursorChat } from './cursor/cursor-chat';
 import { ReactionSelector } from './reaction/reaction-selector';
 import { FlyingReaction } from './reaction/flying-reaction';
-import useInterval from '@figmento/hooks/useInterval';
 import { useCursorState } from '@figmento/providers/cursor-state-provider';
 import { useReactions } from '@figmento/providers/reactions-provider';
+import { usePresence } from '@figmento/providers/presence-provider';
 
 export const Live = () => {
-  const [{ cursor }, updateMyPresence] = useMyPresence();
-  const broadcast = useBroadcastEvent();
-  const { cursorState, setCursorState, setReaction, hideCursor } =
-    useCursorState();
-  const { reactions, addReaction, filterReactions } = useReactions();
+  const { cursorState, setCursorState, hideCursor } = useCursorState();
+  const { reactions } = useReactions();
+  const {
+    presence: { cursor },
+    updateCursorPosition,
+  } = usePresence();
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent) => {
       event.preventDefault();
       updateCursorPosition(event);
     },
-    [updateMyPresence],
+    [updateCursorPosition],
   );
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent) => {
       event.preventDefault();
       updateCursorPosition(event);
-      handleReactionPress();
+      if (cursorState.mode === CursorMode.Reaction) {
+        setCursorState((state) => ({ ...state, isPressed: true }));
+      }
     },
-    [cursorState.mode, setCursorState],
+    [cursorState.mode, setCursorState, updateCursorPosition],
   );
 
   const handlePointerLeave = useCallback(() => {
@@ -45,29 +42,10 @@ export const Live = () => {
   }, [hideCursor]);
 
   const handlePointerUp = useCallback(() => {
-    handleReactionRelease();
-  }, [cursorState.mode, setCursorState]);
-
-  const updateCursorPosition = (event: React.PointerEvent) => {
-    updateMyPresence({
-      cursor: {
-        x: event.clientX - event.currentTarget.getBoundingClientRect().x,
-        y: event.clientY - event.currentTarget.getBoundingClientRect().y,
-      },
-    });
-  };
-
-  const handleReactionPress = () => {
-    if (cursorState.mode === CursorMode.Reaction) {
-      setCursorState((state) => ({ ...state, isPressed: true }));
-    }
-  };
-
-  const handleReactionRelease = () => {
     if (cursorState.mode === CursorMode.Reaction) {
       setCursorState((state) => ({ ...state, isPressed: false }));
     }
-  };
+  }, [cursorState.mode, setCursorState]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -81,7 +59,6 @@ export const Live = () => {
           message: null,
         });
       } else if (event.key === 'e') {
-        console.log('e');
         setCursorState({ mode: CursorMode.ReactionSelector });
       }
     };
@@ -91,38 +68,7 @@ export const Live = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [setCursorState, hideCursor]);
-
-  useInterval(() => {
-    filterReactions();
-  }, 1000);
-
-  useInterval(() => {
-    if (
-      cursorState.mode === CursorMode.Reaction &&
-      cursorState.isPressed &&
-      cursor
-    ) {
-      const { x, y } = cursor;
-      const newReaction = {
-        origin: { x, y },
-        value: cursorState.reaction,
-        timestamp: Date.now(),
-      };
-      const reactionToBroadcast = { x, y, value: newReaction.value };
-      addReaction(newReaction);
-      broadcast(reactionToBroadcast);
-    }
-  }, 100);
-
-  useEventListener((eventData) => {
-    const { x, y, value } = eventData.event as ReactionEvent;
-    addReaction({
-      origin: { x, y },
-      value,
-      timestamp: Date.now(),
-    });
-  });
+  }, [hideCursor, setCursorState]);
 
   return (
     <div
@@ -137,10 +83,7 @@ export const Live = () => {
       {reactions.map((reaction) => (
         <FlyingReaction
           key={reaction.timestamp.toString()}
-          x={reaction.origin.x}
-          y={reaction.origin.y}
-          timestamp={reaction.timestamp}
-          value={reaction.value}
+          reaction={reaction}
         />
       ))}
       {cursor && <CursorChat />}

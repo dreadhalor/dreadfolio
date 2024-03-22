@@ -5,6 +5,7 @@ import { cn } from '@repo/utils';
 import { Room } from './room';
 import { CursorStateProvider } from '@figmento/providers/cursor-state-provider';
 import { ReactionsProvider } from '@figmento/providers/reactions-provider';
+import { PresenceProvider } from '@figmento/providers/presence-provider';
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -26,9 +27,11 @@ export default function RootLayout({
     <html lang='en'>
       <body className={cn(workSans.className, 'bg-primary-grey-200')}>
         <Room>
-          <CursorStateProvider>
-            <ReactionsProvider>{children}</ReactionsProvider>
-          </CursorStateProvider>
+          <PresenceProvider>
+            <CursorStateProvider>
+              <ReactionsProvider>{children}</ReactionsProvider>
+            </CursorStateProvider>
+          </PresenceProvider>
         </Room>
       </body>
     </html>
