@@ -1,5 +1,9 @@
-import { Room } from './room';
+import { Live } from '@figmento/components/live';
 
 export default function Page() {
-  return <h1 className='text-5xl text-white'>Figmento</h1>;
+  return (
+    <div className='h-full w-full'>
+      <Live />
+    </div>
+  );
 }
