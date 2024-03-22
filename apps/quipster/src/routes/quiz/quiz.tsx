@@ -7,6 +7,7 @@ const Quiz = () => {
     { name: 'Definition to Word', route: '/quiz/definition-to-word' },
     { name: 'Word Matching', route: '/quiz/word-matching' },
     { name: 'Fill in the Blank', route: '/quiz/fill-in-the-blank' },
+    { name: 'Prompt Quiz', route: '/quiz/prompt' },
   ];
 
   return (

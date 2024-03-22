@@ -16,6 +16,7 @@ import { WordToDefinitionQuiz } from './routes/quiz/word-to-definition.tsx';
 import { Quiz } from './routes/quiz/quiz.tsx';
 import { WordMatchingQuiz } from './routes/quiz/word-matching.tsx';
 import { FillInTheBlankQuiz } from './routes/quiz/fill-in-the-blank.tsx';
+import { PromptQuiz } from './routes/quiz/prompt.tsx';
 
 const router = createBrowserRouter([
   {
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
       {
         path: 'quiz/fill-in-the-blank',
         element: <FillInTheBlankQuiz />,
+      },
+      {
+        path: 'quiz/prompt',
+        element: <PromptQuiz />,
       },
     ],
   },
