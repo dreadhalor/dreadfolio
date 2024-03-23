@@ -1,0 +1,11 @@
+export { default as RectangleIcon } from './rectangle.svg';
+export { default as CircleIcon } from './circle.svg';
+export { default as TriangleIcon } from './triangle.svg';
+export { default as LineIcon } from './line.svg';
+export { default as ImageIcon } from './image.svg';
+export { default as FreeformIcon } from './freeform.svg';
+export { default as SelectIcon } from './select.svg';
+export { default as TextIcon } from './text.svg';
+export { default as DeleteIcon } from './delete.svg';
+export { default as ResetIcon } from './reset.svg';
+export { default as CommentsIcon } from './comments.svg';

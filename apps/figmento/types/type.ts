@@ -1,3 +1,4 @@
+import { NavElement } from '@figmento/constants';
 import { BaseUserMeta, User } from '@liveblocks/client';
 import { Gradient, Pattern } from 'fabric/fabric-impl';
 
@@ -101,17 +102,14 @@ export type RightSidebarProps = {
 
 export type NavbarProps = {
   activeElement: ActiveElement;
+  setActiveElement: React.Dispatch<React.SetStateAction<ActiveElement>>;
   imageInputRef: React.MutableRefObject<HTMLInputElement | null>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleActiveElement: (element: ActiveElement) => void;
 };
 
 export type ShapesMenuProps = {
-  item: {
-    name: string;
-    icon: string;
-    value: Array<ActiveElement>;
-  };
+  item: NavElement;
   activeElement: any;
   handleActiveElement: any;
   handleImageUpload: any;

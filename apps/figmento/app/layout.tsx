@@ -6,6 +6,7 @@ import { Room } from './room';
 import { CursorStateProvider } from '@figmento/providers/cursor-state-provider';
 import { ReactionsProvider } from '@figmento/providers/reactions-provider';
 import { PresenceProvider } from '@figmento/providers/presence-provider';
+import { NavbarProvider } from '@figmento/providers/navbar-provider';
 
 const workSans = Work_Sans({
   subsets: ['latin'],
@@ -29,7 +30,9 @@ export default function RootLayout({
         <Room>
           <PresenceProvider>
             <CursorStateProvider>
-              <ReactionsProvider>{children}</ReactionsProvider>
+              <ReactionsProvider>
+                <NavbarProvider>{children}</NavbarProvider>
+              </ReactionsProvider>
             </CursorStateProvider>
           </PresenceProvider>
         </Room>

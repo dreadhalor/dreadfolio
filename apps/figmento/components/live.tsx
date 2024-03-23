@@ -9,6 +9,7 @@ import { FlyingReaction } from './reaction/flying-reaction';
 import { useCursorState } from '@figmento/providers/cursor-state-provider';
 import { useReactions } from '@figmento/providers/reactions-provider';
 import { usePresence } from '@figmento/providers/presence-provider';
+import { useNavbar } from '@figmento/providers/navbar-provider';
 
 export const Live = () => {
   const { cursorState, setCursorState, hideCursor } = useCursorState();
@@ -17,6 +18,7 @@ export const Live = () => {
     presence: { cursor },
     updateCursorPosition,
   } = usePresence();
+  const { canvasRef } = useNavbar();
 
   const handlePointerMove = useCallback(
     (event: React.PointerEvent) => {
@@ -28,7 +30,6 @@ export const Live = () => {
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent) => {
-      event.preventDefault();
       updateCursorPosition(event);
       if (cursorState.mode === CursorMode.Reaction) {
         setCursorState((state) => ({ ...state, isPressed: true }));
@@ -72,14 +73,15 @@ export const Live = () => {
 
   return (
     <div
+      id='canvas'
       onPointerMove={handlePointerMove}
       onPointerDown={handlePointerDown}
       onPointerLeave={handlePointerLeave}
       onPointerUp={handlePointerUp}
-      className='relative flex w-full flex-1 items-center justify-center overflow-hidden bg-black'
+      className='relative flex w-full flex-1 items-center justify-center overflow-hidden'
     >
+      <canvas ref={canvasRef} />
       <LiveCursors />
-      <h1 className='text-5xl text-white'>Figmento</h1>
       {reactions.map((reaction) => (
         <FlyingReaction
           key={reaction.timestamp.toString()}

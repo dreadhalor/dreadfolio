@@ -1,4 +1,3 @@
-// ReactionsProvider.tsx
 'use client';
 
 import { CursorMode, Reaction, ReactionEvent } from '@figmento/types/type';
