@@ -1,5 +1,3 @@
-'use client';
-
 import { LeftSidebar } from '@figmento/components/left-sidebar';
 import { Live } from '@figmento/components/live';
 import { Navbar } from '@figmento/components/navbar/navbar';
