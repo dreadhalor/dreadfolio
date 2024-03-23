@@ -7,16 +7,7 @@ import {
   shapeElements,
 } from '@figmento/constants';
 import { handleDelete } from '@figmento/lib/key-events';
-import {
-  handleCanvasMouseDown,
-  handleCanvasMouseUp,
-  handleCanvasMouseMove,
-  handleResize,
-  initializeFabric,
-  renderCanvas,
-  handleCanvasObjectMoving,
-  handleCanvasObjectModified,
-} from '@figmento/lib/canvas';
+import { renderCanvas } from '@figmento/lib/canvas';
 import { useMutation, useStorage } from '@figmento/liveblocks.config';
 import { useCanvasListeners } from '@figmento/hooks/useCanvasListeners';
 
@@ -68,7 +59,6 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const deleteAllShapes = useMutation(({ storage }) => {
-    console.log('deleteAllShapes');
     // get the canvasObjects store
     const canvasObjects = storage.get('canvasObjects');
 
@@ -90,7 +80,6 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
       setLastActiveShape(activeShape);
     }
     setActiveElement(elemId);
-    console.log('elemId', elemId);
 
     switch (elemId) {
       // delete all the shapes from the canvas

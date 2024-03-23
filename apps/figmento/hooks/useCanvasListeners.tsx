@@ -137,6 +137,7 @@ export const useCanvasListeners = ({
 
     return () => {
       window.removeEventListener('resize', resizeListener);
+      canvas.dispose();
     };
   }, [canvasRef]);
 };
