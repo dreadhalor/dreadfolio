@@ -1,22 +1,31 @@
 'use client';
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { NavElementKey, defaultNavElement } from '@figmento/constants';
+import {
+  NavElementKey,
+  defaultNavElement,
+  shapeElements,
+} from '@figmento/constants';
 import { handleDelete } from '@figmento/lib/key-events';
 import {
   handleCanvasMouseDown,
   handleCanvasMouseUp,
+  handleCanvasMouseMove,
   handleResize,
   initializeFabric,
   renderCanvas,
+  handleCanvasObjectMoving,
+  handleCanvasObjectModified,
 } from '@figmento/lib/canvas';
 import { useMutation, useStorage } from '@figmento/liveblocks.config';
+import { useCanvasListeners } from '@figmento/hooks/useCanvasListeners';
 
 type NavbarContextType = {
   activeElement: NavElementKey;
   handleActiveElement: (elemId: NavElementKey) => void;
   selectedShapeRef: React.MutableRefObject<string | null>;
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  lastActiveShape: any;
 };
 
 const NavbarContext = createContext({} as NavbarContextType);
@@ -27,59 +36,21 @@ export const useNavbar = () => {
 
 export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeElement, setActiveElement] = useState<NavElementKey>('select');
+  const [lastActiveShape, setLastActiveShape] = useState<any>(null);
   const selectedShapeRef = useRef<NavElementKey | null>('select');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
-  const isDrawing = useRef(false);
-  const shapeRef = useRef<fabric.Object | null>(null);
   const activeObjectRef = useRef<fabric.Object | null>(null);
 
   const canvasObjects = useStorage((root) => root.canvasObjects);
 
-  const syncShapeInStorage = useMutation(({ storage }, object) => {
-    if (!object) return;
-    if (!storage) return;
-    const { objectId } = object;
-    const shapeData = object.toJSON();
-    shapeData.objectId = objectId;
-    const canvasObjects = storage.get('canvasObjects');
-    canvasObjects.set(objectId, shapeData);
-  }, []);
-
-  useEffect(() => {
-    const canvas = initializeFabric({ fabricRef, canvasRef });
-
-    canvas.on('mouse:down', (options) => {
-      return handleCanvasMouseDown({
-        options,
-        canvas,
-        selectedShapeRef,
-        isDrawing,
-        shapeRef,
-      });
-    });
-
-    canvas.on('mouse:up', () => {
-      handleCanvasMouseUp({
-        canvas,
-        isDrawing,
-        shapeRef,
-        activeObjectRef,
-        selectedShapeRef,
-        syncShapeInStorage,
-        setActiveElement,
-      });
-    });
-
-    const resizeListener = () => {
-      handleResize({ canvas: fabricRef.current });
-    };
-    window.addEventListener('resize', resizeListener);
-
-    return () => {
-      window.removeEventListener('resize', resizeListener);
-    };
-  }, [canvasRef]);
+  useCanvasListeners({
+    fabricRef,
+    canvasRef,
+    selectedShapeRef,
+    setActiveElement,
+    activeObjectRef,
+  });
 
   // render the canvas when the canvasObjects from live storage changes
   useEffect(() => {
@@ -96,12 +67,40 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
     objs.delete(shapeId);
   }, []);
 
+  const deleteAllShapes = useMutation(({ storage }) => {
+    console.log('deleteAllShapes');
+    // get the canvasObjects store
+    const canvasObjects = storage.get('canvasObjects');
+
+    // if the store doesn't exist or is empty, return
+    if (!canvasObjects || canvasObjects.size === 0) return true;
+
+    // delete all the shapes from the store
+    Array.from(canvasObjects.keys()).forEach((key) => {
+      canvasObjects.delete(key);
+    });
+
+    // return true if the store is empty
+    return canvasObjects.size === 0;
+  }, []);
+
   const handleActiveElement = (elemId: NavElementKey) => {
+    const activeShape = shapeElements.find((elem) => elem.id === elemId);
+    if (activeShape) {
+      setLastActiveShape(activeShape);
+    }
     setActiveElement(elemId);
+    console.log('elemId', elemId);
 
     switch (elemId) {
       // delete all the shapes from the canvas
       case 'reset':
+        // clear the storage
+        deleteAllShapes();
+        // clear the canvas
+        fabricRef.current?.clear();
+        // set "select" as the active element
+        setActiveElement(defaultNavElement);
         break;
 
       // delete the selected shape from the canvas
@@ -134,6 +133,7 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
         handleActiveElement,
         selectedShapeRef,
         canvasRef,
+        lastActiveShape,
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { RoomProvider } from '../liveblocks.config';
 import { ClientSideSuspense } from '@liveblocks/react';
 import { LiveMap } from '@liveblocks/client';
+import { Loader } from '@figmento/components/loader';
 
 export function Room({ children }: { children: ReactNode }) {
   return (
@@ -14,7 +15,7 @@ export function Room({ children }: { children: ReactNode }) {
         canvasObjects: new LiveMap(),
       }}
     >
-      <ClientSideSuspense fallback={<div>Loading…</div>}>
+      <ClientSideSuspense fallback={<Loader />}>
         {() => children}
       </ClientSideSuspense>
     </RoomProvider>

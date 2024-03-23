@@ -63,6 +63,7 @@ export const handleDelete = (
   deleteShapeFromStorage: (id: string) => void,
 ) => {
   const activeObjects = canvas.getActiveObjects();
+  console.log('activeObjects', activeObjects);
   if (!activeObjects || activeObjects.length === 0) return;
 
   if (activeObjects.length > 0) {

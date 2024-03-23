@@ -11,12 +11,16 @@ type Props = {
   children?: React.ReactNode;
 };
 export const NavbarButton = forwardRef<HTMLLIElement, Props>(
-  ({ item: { id, icon: Icon }, className, children, ...props }: Props, ref) => {
-    const { activeElement, handleActiveElement } = useNavbar();
+  ({ item: { id, icon }, className, children, ...props }: Props, ref) => {
+    const { activeElement, handleActiveElement, lastActiveShape } = useNavbar();
     const isActive =
       activeElement === id ||
       (id === ShapesMenuElement.id &&
         shapeElements.some((elem) => elem.id === activeElement));
+    const Icon =
+      id === ShapesMenuElement.id && lastActiveShape
+        ? lastActiveShape.icon
+        : icon;
     return (
       <li className='list-none' {...props} ref={ref}>
         <Button
