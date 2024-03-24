@@ -235,8 +235,10 @@ export const handlePathCreated = ({
 // check how object is moving on canvas and restrict it to canvas boundaries
 export const handleCanvasObjectMoving = ({
   options,
+  syncShapeInStorage,
 }: {
   options: fabric.IEvent;
+  syncShapeInStorage: (shape: fabric.Object) => void;
 }) => {
   // get target object which is moving
   const target = options.target as fabric.Object;
@@ -268,6 +270,9 @@ export const handleCanvasObjectMoving = ({
       ),
     );
   }
+
+  // sync shape in storage
+  if (target.type !== 'activeSelection') syncShapeInStorage(target);
 };
 
 // set element attributes when element is selected
@@ -275,6 +280,7 @@ export const handleCanvasSelectionCreated = ({
   options,
   isEditingRef,
   setElementAttributes,
+  fabricRef,
 }: CanvasSelectionCreated) => {
   // if user is editing manually, return
   if (isEditingRef.current) return;
@@ -283,7 +289,41 @@ export const handleCanvasSelectionCreated = ({
   if (!options?.selected) return;
 
   // get the selected element
-  const selectedElement = options?.selected[0] as fabric.Object;
+  let selectedElement = options?.selected[0] as fabric.Object | undefined;
+
+  // if multiple elements are selected, set active object to the closest element to the pointer
+  // but if the pointer is inside an element, set active object to that element
+  if (options.selected.length > 1) {
+    const pointer = fabricRef.current?.getPointer(options.e);
+    if (!pointer) return;
+    selectedElement = fabricRef.current?.findTarget(options.e, true);
+    if (!selectedElement) {
+      // find the closest element to the pointer
+      selectedElement = options.selected.reduce(
+        (acc: any, obj) => {
+          if (!obj.oCoords) return acc;
+          const { tl, tr, br, bl } = obj.oCoords;
+          // find the closest point to the pointer
+          const closest = [tl, tr, br, bl].reduce(
+            (acc: any, point) => {
+              const dist = Math.hypot(point.x - pointer.x, point.y - pointer.y);
+              return dist < acc.dist ? { dist, point } : acc;
+            },
+            { dist: Infinity, point: null },
+          ).point;
+          // calculate the distance between the closest point and the pointer
+          const dist = Math.hypot(closest.x - pointer.x, closest.y - pointer.y);
+          // return the object with the smallest distance
+          return dist < acc.dist ? { dist, obj } : acc;
+        },
+        { dist: Infinity, obj: null },
+      ).obj;
+    }
+
+    // set active object to the closest element
+    if (!selectedElement) return;
+    fabricRef.current?.setActiveObject(selectedElement);
+  }
 
   // if only one element is selected, set element attributes
   if (selectedElement && options.selected.length === 1) {
@@ -315,8 +355,16 @@ export const handleCanvasSelectionCreated = ({
 export const handleCanvasObjectScaling = ({
   options,
   setElementAttributes,
+  syncShapeInStorage,
 }: CanvasObjectScaling) => {
   const selectedElement = options.target;
+  // console.log('target.type', selectedElement?.type);
+  // console.log('target.objects', selectedElement?._objects);
+  // console.log('options', options);
+  console.log('selectedElement', selectedElement);
+  // console.log('objects', selectedElement?.getObjects?.());
+  // console.log('selected', options.selected);
+  if (!selectedElement) return;
 
   // calculate scaled dimensions of the object
   const scaledWidth = selectedElement?.scaleX
@@ -332,50 +380,64 @@ export const handleCanvasObjectScaling = ({
     width: scaledWidth?.toFixed(0).toString() || '',
     height: scaledHeight?.toFixed(0).toString() || '',
   }));
+  syncShapeInStorage(selectedElement);
 };
 
 // render canvas objects coming from storage on canvas
 export const renderCanvas = ({
   fabricRef,
-  canvasObjects,
-  activeObjectRef,
+  canvasObjects: remoteObjects,
 }: RenderCanvas) => {
-  // clear canvas
-  fabricRef.current?.clear();
+  const canvas = fabricRef.current;
+  if (!canvas) return;
 
-  // render all objects on canvas
-  Array.from(canvasObjects, ([objectId, objectData]) => {
-    /**
-     * enlivenObjects() is used to render objects on canvas.
-     * It takes two arguments:
-     * 1. objectData: object data to render on canvas
-     * 2. callback: callback function to execute after rendering objects
-     * on canvas
-     *
-     * enlivenObjects: http://fabricjs.com/docs/fabric.util.html#.enlivenObjectEnlivables
-     */
+  const remoteObjIds = Array.from(remoteObjects.keys());
+
+  const localObjs = canvas.getObjects();
+  const localObjIds = localObjs?.map((obj) => (obj as any).objectId);
+
+  const objectsToRemove = localObjIds.filter(
+    (objectId) => !remoteObjIds.includes(objectId),
+  );
+  const objectsToAdd = remoteObjIds.filter(
+    (objectId) => !localObjIds.includes(objectId),
+  );
+  const objectsToUpdate = remoteObjIds.filter((objectId) =>
+    localObjIds.includes(objectId),
+  );
+
+  objectsToRemove.forEach((objectId) => {
+    const objectToRemove = canvas
+      .getObjects()
+      .find((obj: any) => obj.objectId === objectId);
+    if (objectToRemove) {
+      canvas.remove(objectToRemove);
+    }
+  });
+
+  objectsToAdd.forEach((objectId) => {
+    const objectData = remoteObjects.get(objectId);
     fabric.util.enlivenObjects(
       [objectData],
       (enlivenedObjects: fabric.Object[]) => {
         enlivenedObjects.forEach((enlivenedObj) => {
-          // if element is active, keep it in active state so that it can be edited further
-          if (activeObjectRef.current?.objectId === objectId) {
-            fabricRef.current?.setActiveObject(enlivenedObj);
-          }
-
-          // add object to canvas
-          fabricRef.current?.add(enlivenedObj);
+          canvas.add(enlivenedObj);
         });
       },
-      /**
-       * specify namespace of the object for fabric to render it on canvas
-       * A namespace is a string that is used to identify the type of
-       * object.
-       *
-       * Fabric Namespace: http://fabricjs.com/docs/fabric.html
-       */
       'fabric',
     );
+  });
+
+  objectsToUpdate.forEach((objectId) => {
+    const objectData = remoteObjects.get(objectId);
+    const existingObj = canvas
+      .getObjects()
+      .find((obj: any) => obj.objectId === objectId);
+
+    if (existingObj) {
+      existingObj.set(objectData);
+      existingObj.setCoords();
+    }
   });
 
   fabricRef.current?.renderAll();

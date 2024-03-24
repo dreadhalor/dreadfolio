@@ -10,6 +10,7 @@ import { handleDelete } from '@figmento/lib/key-events';
 import { renderCanvas } from '@figmento/lib/canvas';
 import { useMutation, useStorage } from '@figmento/liveblocks.config';
 import { useCanvasListeners } from '@figmento/hooks/useCanvasListeners';
+import { handleImageUpload } from '@figmento/lib/shapes';
 
 type NavbarContextType = {
   activeElement: NavElementKey;
@@ -17,6 +18,7 @@ type NavbarContextType = {
   selectedShapeRef: React.MutableRefObject<string | null>;
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   lastActiveShape: any;
+  canvasObjects: any;
 };
 
 const NavbarContext = createContext({} as NavbarContextType);
@@ -28,20 +30,22 @@ export const useNavbar = () => {
 export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeElement, setActiveElement] = useState<NavElementKey>('select');
   const [lastActiveShape, setLastActiveShape] = useState<any>(null);
-  const selectedShapeRef = useRef<NavElementKey | null>('select');
+  const selectedShapeRef = useRef<NavElementKey | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fabricRef = useRef<fabric.Canvas | null>(null);
   const activeObjectRef = useRef<fabric.Object | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const canvasObjects = useStorage((root) => root.canvasObjects);
 
-  useCanvasListeners({
-    fabricRef,
-    canvasRef,
-    selectedShapeRef,
-    setActiveElement,
-    activeObjectRef,
-  });
+  const { deleteShapeFromStorage, isDrawing, shapeRef, syncShapeInStorage } =
+    useCanvasListeners({
+      fabricRef,
+      canvasRef,
+      selectedShapeRef,
+      setActiveElement,
+      activeObjectRef,
+    });
 
   // render the canvas when the canvasObjects from live storage changes
   useEffect(() => {
@@ -49,14 +53,8 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
     renderCanvas({
       fabricRef,
       canvasObjects,
-      activeObjectRef,
     });
   }, [canvasObjects]);
-
-  const deleteShapeFromStorage = useMutation(({ storage }, shapeId) => {
-    const objs = storage.get('canvasObjects');
-    objs.delete(shapeId);
-  }, []);
 
   const deleteAllShapes = useMutation(({ storage }) => {
     // get the canvasObjects store
@@ -102,6 +100,14 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
 
       // upload an image to the canvas
       case 'image':
+        // trigger the click event on the input element which opens the file dialog
+        imageInputRef.current?.click();
+        isDrawing.current = false;
+
+        if (fabricRef.current) {
+          // disable the drawing mode of canvas
+          fabricRef.current.isDrawingMode = false;
+        }
         break;
 
       // for comments, do nothing
@@ -123,9 +129,27 @@ export const NavbarProvider = ({ children }: { children: React.ReactNode }) => {
         selectedShapeRef,
         canvasRef,
         lastActiveShape,
+        canvasObjects,
       }}
     >
       {children}
+      <input
+        type='file'
+        className='hidden'
+        ref={imageInputRef}
+        accept='image/*'
+        onChange={(e: any) => {
+          // prevent the default behavior of the input element
+          e.stopPropagation();
+
+          handleImageUpload({
+            file: e.target.files[0],
+            canvas: fabricRef as any,
+            shapeRef,
+            syncShapeInStorage,
+          });
+        }}
+      />
     </NavbarContext.Provider>
   );
 };

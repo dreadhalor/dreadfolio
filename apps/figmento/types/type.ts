@@ -161,17 +161,18 @@ export type CanvasSelectionCreated = {
   options: fabric.IEvent;
   isEditingRef: React.MutableRefObject<boolean>;
   setElementAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
+  fabricRef: React.RefObject<fabric.Canvas | null>;
 };
 
 export type CanvasObjectScaling = {
   options: fabric.IEvent;
   setElementAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
+  syncShapeInStorage: (shapes: fabric.Object) => void;
 };
 
 export type RenderCanvas = {
   fabricRef: React.MutableRefObject<fabric.Canvas | null>;
   canvasObjects: any;
-  activeObjectRef: any;
 };
 
 export type CursorChatProps = {

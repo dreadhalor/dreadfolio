@@ -1,6 +1,15 @@
 // import jsPDF from "jspdf";
 import { twMerge } from 'tailwind-merge';
 import { type ClassValue, clsx } from 'clsx';
+import {
+  CircleIcon,
+  FreeformIcon,
+  ImageIcon,
+  LineIcon,
+  RectangleIcon,
+  TextIcon,
+  TriangleIcon,
+} from '@figmento/public/assets';
 
 const adjectives = [
   'Happy',
@@ -50,49 +59,49 @@ export const getShapeInfo = (shapeType: string) => {
   switch (shapeType) {
     case 'rect':
       return {
-        icon: '/assets/rectangle.svg',
+        icon: RectangleIcon,
         name: 'Rectangle',
       };
 
     case 'circle':
       return {
-        icon: '/assets/circle.svg',
+        icon: CircleIcon,
         name: 'Circle',
       };
 
     case 'triangle':
       return {
-        icon: '/assets/triangle.svg',
+        icon: TriangleIcon,
         name: 'Triangle',
       };
 
     case 'line':
       return {
-        icon: '/assets/line.svg',
+        icon: LineIcon,
         name: 'Line',
       };
 
     case 'i-text':
       return {
-        icon: '/assets/text.svg',
+        icon: TextIcon,
         name: 'Text',
       };
 
     case 'image':
       return {
-        icon: '/assets/image.svg',
+        icon: ImageIcon,
         name: 'Image',
       };
 
-    case 'freeform':
+    case 'path':
       return {
-        icon: '/assets/freeform.svg',
-        name: 'Free Drawing',
+        icon: FreeformIcon,
+        name: 'Path',
       };
 
     default:
       return {
-        icon: '/assets/rectangle.svg',
+        icon: RectangleIcon,
         name: shapeType,
       };
   }

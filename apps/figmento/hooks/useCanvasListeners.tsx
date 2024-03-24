@@ -1,3 +1,5 @@
+'use client';
+
 import { NavElementKey } from '@figmento/constants';
 import {
   handleCanvasMouseDown,
@@ -12,9 +14,11 @@ import {
   handleResize,
   initializeFabric,
 } from '@figmento/lib/canvas';
-import { useMutation } from '@figmento/liveblocks.config';
+import { handleKeyDown } from '@figmento/lib/key-events';
+import { useMutation, useRedo, useUndo } from '@figmento/liveblocks.config';
 import { Attributes } from '@figmento/types/type';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { fabric } from 'fabric';
 
 type Props = {
   fabricRef: MutableRefObject<fabric.Canvas | null>;
@@ -43,6 +47,9 @@ export const useCanvasListeners = ({
     stroke: '#aabbcc',
   });
 
+  const undo = useUndo();
+  const redo = useRedo();
+
   const syncShapeInStorage = useMutation(({ storage }, object) => {
     if (!object) return;
     const { objectId } = object;
@@ -50,6 +57,11 @@ export const useCanvasListeners = ({
     shapeData.objectId = objectId;
     const canvasObjects = storage.get('canvasObjects');
     canvasObjects.set(objectId, shapeData);
+  }, []);
+
+  const deleteShapeFromStorage = useMutation(({ storage }, shapeId) => {
+    const objs = storage.get('canvasObjects');
+    objs.delete(shapeId);
   }, []);
 
   useEffect(() => {
@@ -96,6 +108,7 @@ export const useCanvasListeners = ({
     });
 
     canvas.on('object:modified', (options) => {
+      console.log('object:modified');
       handleCanvasObjectModified({
         options,
         syncShapeInStorage,
@@ -103,8 +116,10 @@ export const useCanvasListeners = ({
     });
 
     canvas?.on('object:moving', (options) => {
+      // console.log('object:moving');
       handleCanvasObjectMoving({
         options,
+        syncShapeInStorage,
       });
     });
 
@@ -113,6 +128,7 @@ export const useCanvasListeners = ({
         options,
         isEditingRef,
         setElementAttributes,
+        fabricRef,
       });
     });
 
@@ -120,6 +136,7 @@ export const useCanvasListeners = ({
       handleCanvasObjectScaling({
         options,
         setElementAttributes,
+        syncShapeInStorage,
       });
     });
 
@@ -135,9 +152,28 @@ export const useCanvasListeners = ({
     };
     window.addEventListener('resize', resizeListener);
 
+    const keyListener = (e: KeyboardEvent) =>
+      handleKeyDown({
+        e,
+        canvas: fabricRef.current,
+        undo,
+        redo,
+        syncShapeInStorage,
+        deleteShapeFromStorage,
+      });
+    window.addEventListener('keydown', keyListener);
+
     return () => {
       window.removeEventListener('resize', resizeListener);
+      window.removeEventListener('keydown', keyListener);
       canvas.dispose();
     };
   }, [canvasRef]);
+
+  return {
+    deleteShapeFromStorage,
+    isDrawing,
+    shapeRef,
+    syncShapeInStorage,
+  };
 };
