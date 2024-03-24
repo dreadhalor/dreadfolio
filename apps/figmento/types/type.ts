@@ -149,7 +149,7 @@ export type CanvasMouseUp = {
 
 export type CanvasObjectModified = {
   options: fabric.IEvent;
-  syncShapeInStorage: (shape: fabric.Object) => void;
+  syncShapeInStorage: (shape: fabric.Object, addToHistory?: boolean) => void;
 };
 
 export type CanvasPathCreated = {
@@ -167,7 +167,7 @@ export type CanvasSelectionCreated = {
 export type CanvasObjectScaling = {
   options: fabric.IEvent;
   setElementAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
-  syncShapeInStorage: (shapes: fabric.Object) => void;
+  syncShapeInStorage: (shapes: fabric.Object, addToHistory?: boolean) => void;
 };
 
 export type RenderCanvas = {

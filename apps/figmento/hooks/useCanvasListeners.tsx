@@ -15,7 +15,12 @@ import {
   initializeFabric,
 } from '@figmento/lib/canvas';
 import { handleKeyDown } from '@figmento/lib/key-events';
-import { useMutation, useRedo, useUndo } from '@figmento/liveblocks.config';
+import {
+  useHistory,
+  useMutation,
+  useRedo,
+  useUndo,
+} from '@figmento/liveblocks.config';
 import { Attributes } from '@figmento/types/type';
 import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
@@ -47,17 +52,27 @@ export const useCanvasListeners = ({
     stroke: '#aabbcc',
   });
 
+  const history = useHistory();
   const undo = useUndo();
   const redo = useRedo();
 
-  const syncShapeInStorage = useMutation(({ storage }, object) => {
-    if (!object) return;
-    const { objectId } = object;
-    const shapeData = object.toJSON();
-    shapeData.objectId = objectId;
-    const canvasObjects = storage.get('canvasObjects');
-    canvasObjects.set(objectId, shapeData);
-  }, []);
+  const syncShapeInStorage = useMutation(
+    ({ storage }, object, addToHistory = false) => {
+      console.log('add to history', addToHistory);
+      history.pause();
+      if (addToHistory) history.resume();
+
+      if (!object) return;
+      const { objectId } = object;
+      const shapeData = object.toJSON();
+      shapeData.objectId = objectId;
+      const canvasObjects = storage.get('canvasObjects');
+      canvasObjects.set(objectId, shapeData);
+
+      if (addToHistory) history.pause();
+    },
+    [],
+  );
 
   const deleteShapeFromStorage = useMutation(({ storage }, shapeId) => {
     const objs = storage.get('canvasObjects');
@@ -108,7 +123,6 @@ export const useCanvasListeners = ({
     });
 
     canvas.on('object:modified', (options) => {
-      console.log('object:modified');
       handleCanvasObjectModified({
         options,
         syncShapeInStorage,
@@ -116,7 +130,6 @@ export const useCanvasListeners = ({
     });
 
     canvas?.on('object:moving', (options) => {
-      // console.log('object:moving');
       handleCanvasObjectMoving({
         options,
         syncShapeInStorage,

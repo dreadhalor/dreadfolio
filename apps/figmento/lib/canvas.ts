@@ -207,10 +207,11 @@ export const handleCanvasObjectModified = ({
   const target = options.target;
   if (!target) return;
 
-  if (target?.type == 'activeSelection') {
+  if (target?.type === 'activeSelection') {
     // fix this
+    // jk fabric.js is awful
   } else {
-    syncShapeInStorage(target);
+    syncShapeInStorage(target, true);
   }
 };
 
@@ -238,7 +239,7 @@ export const handleCanvasObjectMoving = ({
   syncShapeInStorage,
 }: {
   options: fabric.IEvent;
-  syncShapeInStorage: (shape: fabric.Object) => void;
+  syncShapeInStorage: (shape: fabric.Object, addToHistory?: boolean) => void;
 }) => {
   // get target object which is moving
   const target = options.target as fabric.Object;
@@ -358,12 +359,6 @@ export const handleCanvasObjectScaling = ({
   syncShapeInStorage,
 }: CanvasObjectScaling) => {
   const selectedElement = options.target;
-  // console.log('target.type', selectedElement?.type);
-  // console.log('target.objects', selectedElement?._objects);
-  // console.log('options', options);
-  console.log('selectedElement', selectedElement);
-  // console.log('objects', selectedElement?.getObjects?.());
-  // console.log('selected', options.selected);
   if (!selectedElement) return;
 
   // calculate scaled dimensions of the object
@@ -380,6 +375,7 @@ export const handleCanvasObjectScaling = ({
     width: scaledWidth?.toFixed(0).toString() || '',
     height: scaledHeight?.toFixed(0).toString() || '',
   }));
+
   syncShapeInStorage(selectedElement);
 };
 
@@ -399,6 +395,7 @@ export const renderCanvas = ({
   const objectsToRemove = localObjIds.filter(
     (objectId) => !remoteObjIds.includes(objectId),
   );
+
   const objectsToAdd = remoteObjIds.filter(
     (objectId) => !localObjIds.includes(objectId),
   );
@@ -417,6 +414,7 @@ export const renderCanvas = ({
 
   objectsToAdd.forEach((objectId) => {
     const objectData = remoteObjects.get(objectId);
+    if (!objectData) return;
     fabric.util.enlivenObjects(
       [objectData],
       (enlivenedObjects: fabric.Object[]) => {
@@ -430,6 +428,7 @@ export const renderCanvas = ({
 
   objectsToUpdate.forEach((objectId) => {
     const objectData = remoteObjects.get(objectId);
+    if (!objectData) return;
     const existingObj = canvas
       .getObjects()
       .find((obj: any) => obj.objectId === objectId);
