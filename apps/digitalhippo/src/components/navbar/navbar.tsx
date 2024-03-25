@@ -51,7 +51,7 @@ export const Navbar = () => {
                   )}
                   {user ? null : (
                     <Link
-                      href='/signup'
+                      href='/sign-up'
                       className={buttonVariants({ variant: 'ghost' })}
                     >
                       Create account
