@@ -56,7 +56,7 @@ export const NavItem = ({
         >
           <div
             className='absolute inset-0 top-1/2 bg-white shadow'
-            aria-hidden='true'
+            aria-hidden
           />
           <div className='relative bg-white'>
             <div className='mx-auto max-w-7xl px-8'>
@@ -81,7 +81,7 @@ export const NavItem = ({
                       >
                         {name}
                       </Link>
-                      <p className='mt-1' aria-hidden='true'>
+                      <p className='mt-1' aria-hidden>
                         Shop now
                       </p>
                     </div>
