@@ -1,5 +1,5 @@
 import React from 'react';
-import { MaxWidthWrapper } from './max-width-wrapper';
+import { MaxWidthWrapper } from '../max-width-wrapper';
 import Link from 'next/link';
 import Logo from '@digitalhippo/assets/logo.svg';
 import { cn } from '@digitalhippo/lib/utils';

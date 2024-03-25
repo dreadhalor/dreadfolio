@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { Category } from '@digitalhippo/config';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@digitalhippo/lib/utils';
@@ -22,10 +22,10 @@ export const NavItem = ({
 
   const handleOpen = () => {
     if (activeItem === id) {
-      setShouldAnimate(() => false);
+      setShouldAnimate(false);
       setActiveItem(null);
     } else {
-      setShouldAnimate(() => activeItem === null);
+      setShouldAnimate(activeItem === null);
       setActiveItem(id);
     }
   };

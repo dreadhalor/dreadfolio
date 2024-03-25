@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@digitalhippo/lib/utils';
-import { Navbar } from '@digitalhippo/components/navbar';
+import { Navbar } from '@digitalhippo/components/navbar/navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 
