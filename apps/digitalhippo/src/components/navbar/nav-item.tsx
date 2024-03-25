@@ -71,7 +71,7 @@ export const NavItem = ({
                         <Image
                           src={imageSrc}
                           alt={name}
-                          layout='fill'
+                          fill
                           className='object-cover object-center'
                         />
                       </div>
