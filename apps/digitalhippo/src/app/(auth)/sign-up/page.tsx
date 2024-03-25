@@ -19,14 +19,18 @@ import {
   AuthCredentials,
   AuthCredentialsValidator,
 } from '@digitalhippo/lib/validators/account-credentials-validator';
+import { trpc } from '@digitalhippo/trpc/client';
 
 const Page = () => {
   const form = useForm<AuthCredentials>({
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  function onSubmit(data: AuthCredentials) {
-    console.log(data);
+  const { data } = trpc.anyApiRoute.useQuery();
+  console.log('trpc data', data);
+
+  function onSubmit(formData: AuthCredentials) {
+    console.log('form data', formData);
   }
 
   return (

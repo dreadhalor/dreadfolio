@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@digitalhippo/lib/utils';
 import { Navbar } from '@digitalhippo/components/navbar/navbar';
+import { Providers } from '@digitalhippo/components/providers';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,8 +26,10 @@ export default function RootLayout({
         )}
       >
         <main className='relative flex min-h-full flex-col'>
-          <Navbar />
-          <div className='flex-1 flex-grow'>{children}</div>
+          <Providers>
+            <Navbar />
+            <div className='flex-1 flex-grow'>{children}</div>
+          </Providers>
         </main>
       </body>
     </html>
