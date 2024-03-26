@@ -7,9 +7,13 @@ import { NavItems } from './nav-items';
 import { buttonVariants } from '../ui/button';
 import { Cart } from './cart';
 import { Separator } from '../ui/separator';
+import { getServerSideUser } from '@digitalhippo/lib/payload-utils';
+import { cookies } from 'next/headers';
+import { UserAccountNav } from './user-account-nav';
 
-export const Navbar = () => {
-  const user = null;
+export const Navbar = async () => {
+  const nextCookies = cookies();
+  const { user } = await getServerSideUser(nextCookies);
 
   return (
     <div className='sticky inset-x-0 top-0 z-50 h-16 bg-white'>
@@ -49,7 +53,9 @@ export const Navbar = () => {
                   {user ? null : (
                     <Separator className='h-6' orientation='vertical' />
                   )}
-                  {user ? null : (
+                  {user ? (
+                    <UserAccountNav user={user} />
+                  ) : (
                     <Link
                       href='/sign-up'
                       className={buttonVariants({ variant: 'ghost' })}

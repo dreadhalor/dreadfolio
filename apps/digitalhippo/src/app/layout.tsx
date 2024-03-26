@@ -4,6 +4,7 @@ import './globals.css';
 import { cn } from '@digitalhippo/lib/utils';
 import { Navbar } from '@digitalhippo/components/navbar/navbar';
 import { Providers } from '@digitalhippo/components/providers';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
             <div className='flex-1 flex-grow'>{children}</div>
           </Providers>
         </main>
+        <Toaster position='top-center' richColors />
       </body>
     </html>
   );

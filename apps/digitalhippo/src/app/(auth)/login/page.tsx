@@ -21,10 +21,21 @@ import {
 } from '@digitalhippo/lib/validators/account-credentials-validator';
 import { trpc } from '@digitalhippo/trpc/client';
 import { toast } from 'sonner';
-import { ZodError } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const Page = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isSeller = searchParams.get('as') === 'seller';
+  const origin = searchParams.get('origin');
+
+  const continueAsSeller = () => {
+    router.push('?as=seller');
+  };
+  const continueAsCustomer = () => {
+    router.replace('/login', undefined);
+  };
+
   const form = useForm<AuthCredentials>({
     resolver: zodResolver(AuthCredentialsValidator),
     defaultValues: {
@@ -33,24 +44,31 @@ const Page = () => {
     },
   });
 
-  const router = useRouter();
+  const { mutate, isLoading } = trpc.auth.signIn.useMutation({
+    onSuccess() {
+      toast.success('Signed in successfully!');
+      router.refresh();
 
-  const { mutate, isLoading } = trpc.auth.createPayloadUser.useMutation({
-    onError: (error) => {
-      if (error.data?.code === 'CONFLICT') {
-        toast.error('This email is already in use. Sign in instead!');
+      if (origin) {
+        router.push(`/${origin}`);
         return;
       }
-      if (error instanceof ZodError) {
-        toast.error(error.errors[0].message);
+
+      if (isSeller) {
+        router.push('/sell');
         return;
       }
-      toast.error('Something went wrong. Please try again later.');
-      return;
+
+      router.push('/');
+      router.refresh();
     },
-    onSuccess: ({ sentToEmail }) => {
-      toast.success(`Sent verification email to ${sentToEmail}`);
-      router.push(`/verify-email?to=${sentToEmail}`);
+    onError(error) {
+      if (error.data?.code === 'UNAUTHORIZED') {
+        toast.error('Invalid email or password');
+        return;
+      }
+      // generic error
+      toast.error(`Something went wrong: ${error.message}`);
     },
   });
 
@@ -64,15 +82,17 @@ const Page = () => {
         <div className='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]'>
           <div className='flex flex-col items-center space-y-2 text-center'>
             <Logo className='h-20 w-20' />
-            <h1 className='text-2xl font-bold'>Create an account</h1>
+            <h1 className='text-2xl font-bold'>
+              Sign into your {isSeller ? 'seller ' : ''}account
+            </h1>
             <Link
-              href='/login '
+              href='/sign-up '
               className={buttonVariants({
                 variant: 'link',
                 className: 'gap-1.5',
               })}
             >
-              Already have an account? Log in!
+              Don't have an account? Sign up!
               <ArrowRight className='h-4 w-4' />
             </Link>
           </div>
@@ -123,11 +143,38 @@ const Page = () => {
                     )}
                   />
                   <Button className='mt-4' type='submit'>
-                    Sign up
+                    Log in
                   </Button>
                 </div>
               </form>
             </Form>
+            <div className='relative'>
+              <div className='absolute inset-0 flex items-center' aria-hidden>
+                <span className='w-full border-t' />
+              </div>
+              <div className='relative flex justify-center text-xs uppercase'>
+                <span className='bg-background text-muted-foreground px-2'>
+                  or
+                </span>
+              </div>
+            </div>
+            {isSeller ? (
+              <Button
+                variant='secondary'
+                disabled={isLoading}
+                onClick={continueAsCustomer}
+              >
+                Continue as customer
+              </Button>
+            ) : (
+              <Button
+                variant='secondary'
+                disabled={isLoading}
+                onClick={continueAsSeller}
+              >
+                Continue as seller
+              </Button>
+            )}
           </div>
         </div>
       </div>
