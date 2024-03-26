@@ -24,13 +24,16 @@ import { trpc } from '@digitalhippo/trpc/client';
 const Page = () => {
   const form = useForm<AuthCredentials>({
     resolver: zodResolver(AuthCredentialsValidator),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
-  const { data } = trpc.anyApiRoute.useQuery();
-  console.log('trpc data', data);
+  const { mutate, isLoading } = trpc.auth.createPayloadUser.useMutation({});
 
   function onSubmit(formData: AuthCredentials) {
-    console.log('form data', formData);
+    mutate(formData);
   }
 
   return (

@@ -1,22 +1,29 @@
 import { buildConfig } from 'payload/config';
 import { mongooseAdapter } from '@payloadcms/db-mongodb';
 import { slateEditor } from '@payloadcms/richtext-slate';
-import { webpackBundler } from '@payloadcms/bundler-webpack';
 import path from 'path';
+import { Users } from './collections/users';
+import { webpackBundler } from '@payloadcms/bundler-webpack';
+import dotenv from 'dotenv';
+
+dotenv.config({
+  path: path.resolve(__dirname, '../.env'),
+});
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  collections: [],
+  collections: [Users],
   routes: {
     admin: '/sell',
   },
   admin: {
-    bundler: webpackBundler(),
+    user: 'users',
     meta: {
       titleSuffix: '- Digital Hippo',
       favicon: '/favicon.ico',
       ogImage: '/thumbnail.jpg',
     },
+    bundler: webpackBundler(),
   },
   editor: slateEditor({}),
   db: mongooseAdapter({

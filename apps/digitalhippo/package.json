@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "dotenv -e .env nodemon",
+    "generate:types": "dotenv -e .env payload generate:types",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
