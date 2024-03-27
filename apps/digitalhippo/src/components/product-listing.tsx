@@ -1,9 +1,10 @@
 import { Product } from '@digitalhippo/payload-types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
 import { PRODUCT_CATEGORIES } from '../config/index';
+import { ImageCarousel } from './image-carousel';
 
 type Props = {
   product: Product | null;
@@ -11,6 +12,12 @@ type Props = {
 };
 export const ProductListing = ({ product, index }: Props) => {
   const [isVisible, setIsVisible] = useState(false);
+  const imageUrls =
+    product?.images.map((image) => {
+      // @ts-ignore
+      return image.image?.url as string;
+    }) || [];
+  console.log('images', product?.images);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -30,14 +37,15 @@ export const ProductListing = ({ product, index }: Props) => {
 
   if (isVisible && product) {
     return (
-      <Link
-        href={`/products/${product.id}`}
+      <div
+        // href={`/products/${product.id}`}
         className={cn(
           'group/main invisible h-full w-full cursor-pointer',
           isVisible && 'animate-in fade-in-5 visible',
         )}
       >
         <div className='flex w-full flex-col'>
+          <ImageCarousel urls={imageUrls} />
           <h3 className='mt-4 text-sm font-medium text-gray-700'>
             {product.name}
           </h3>
@@ -46,7 +54,7 @@ export const ProductListing = ({ product, index }: Props) => {
             {formatPrice(product.price)}
           </p>
         </div>
-      </Link>
+      </div>
     );
   }
 };
