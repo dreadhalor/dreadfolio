@@ -1,7 +1,7 @@
 import { Product } from '@digitalhippo/payload-types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
-// import Link from 'next/link';
+import Link from 'next/link';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
 import { PRODUCT_CATEGORIES } from '../config/index';
 import { ImageCarousel } from './image-carousel';
@@ -17,7 +17,6 @@ export const ProductListing = ({ product, index }: Props) => {
       // @ts-ignore
       return image.image?.url as string;
     }) || [];
-  console.log('images', product?.images);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -37,8 +36,8 @@ export const ProductListing = ({ product, index }: Props) => {
 
   if (isVisible && product) {
     return (
-      <div
-        // href={`/products/${product.id}`}
+      <Link
+        href={`/product/${product.id}`}
         className={cn(
           'group/main invisible h-full w-full cursor-pointer',
           isVisible && 'animate-in fade-in-5 visible',
@@ -54,7 +53,7 @@ export const ProductListing = ({ product, index }: Props) => {
             {formatPrice(product.price)}
           </p>
         </div>
-      </div>
+      </Link>
     );
   }
 };

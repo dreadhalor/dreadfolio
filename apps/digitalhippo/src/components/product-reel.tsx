@@ -41,7 +41,7 @@ export const ProductReel = ({ title, subtitle, href, query }: Props) => {
             </h1>
           )}
           {subtitle && (
-            <p className='text-muted-foreground mt-2 text-sm'>{title}</p>
+            <p className='text-muted-foreground mt-2 text-sm'>{subtitle}</p>
           )}
         </div>
 
