@@ -18,7 +18,7 @@ const yourOwnAndPurchased: Access = async ({ req }) => {
   });
 
   const ownProductFileIds = products
-    .map((product) => product.product_files)
+    .map((product) => product.productFiles)
     .flat();
 
   const { docs: orders } = await req.payload.find({
@@ -38,9 +38,9 @@ const yourOwnAndPurchased: Access = async ({ req }) => {
           return req.payload.logger.error(
             'Search depth not sufficient to find purchased file IDs.',
           );
-        return typeof product.product_files === 'string'
-          ? product.product_files
-          : product.product_files.id;
+        return typeof product.productFiles === 'string'
+          ? product.productFiles
+          : product.productFiles.id;
       })
       .filter(Boolean)
       .flat();
@@ -54,7 +54,7 @@ const yourOwnAndPurchased: Access = async ({ req }) => {
 };
 
 export const ProductFiles: CollectionConfig = {
-  slug: 'product_files',
+  slug: 'productFiles',
   labels: {
     singular: 'Product File',
     plural: 'Product Files',
@@ -72,7 +72,7 @@ export const ProductFiles: CollectionConfig = {
   },
   upload: {
     staticURL: '/product-files',
-    staticDir: 'product-files',
+    staticDir: 'uploads/product-files',
     mimeTypes: ['image/*', 'font/*', 'application/postscript'],
   },
   fields: [

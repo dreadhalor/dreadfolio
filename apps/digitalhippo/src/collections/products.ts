@@ -51,15 +51,15 @@ export const Products: CollectionConfig = {
       required: true,
     },
     {
-      name: 'product_files',
+      name: 'productFiles',
       label: 'Product Files',
       type: 'relationship',
-      relationTo: 'product_files',
+      relationTo: 'productFiles',
       hasMany: false,
       required: true,
     },
     {
-      name: 'approved_for_sale',
+      name: 'approvedForSale',
       label: 'Product Status',
       access: {
         create: ({ req }) => req.user.role === 'admin',
@@ -84,7 +84,7 @@ export const Products: CollectionConfig = {
       defaultValue: 'pending',
     },
     {
-      name: 'price_id',
+      name: 'priceId',
       access: {
         create: () => false,
         read: () => false,
@@ -96,7 +96,7 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      name: 'stripe_id',
+      name: 'stripeId',
       access: {
         create: () => false,
         read: () => false,

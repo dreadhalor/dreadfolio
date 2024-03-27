@@ -1,4 +1,5 @@
 import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
+import { ProductReel } from '@digitalhippo/components/product-reel';
 import { Button, buttonVariants } from '@digitalhippo/components/ui/button';
 import { cn } from '@digitalhippo/lib/utils';
 import { ArrowDownToLine, CheckCircle, Leaf } from 'lucide-react';
@@ -45,7 +46,11 @@ export default function Home() {
             <Button variant='ghost'>Our quality promise &rarr;</Button>
           </div>
         </div>
-        {/* TODO: List products */}
+        <ProductReel
+          title='Brand new'
+          href='/products'
+          query={{ sort: 'desc', limit: 4 }}
+        />
       </MaxWidthWrapper>
       <section className='border-t border-gray-200 bg-gray-50'>
         <MaxWidthWrapper className='py-20'>

@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  AuthCredentials,
+  TAuthCredentialsValidator,
   AuthCredentialsValidator,
 } from '@digitalhippo/lib/validators/account-credentials-validator';
 import { trpc } from '@digitalhippo/trpc/client';
@@ -25,7 +25,7 @@ import { ZodError } from 'zod';
 import { useRouter } from 'next/navigation';
 
 const Page = () => {
-  const form = useForm<AuthCredentials>({
+  const form = useForm<TAuthCredentialsValidator>({
     resolver: zodResolver(AuthCredentialsValidator),
     defaultValues: {
       email: '',
@@ -54,7 +54,7 @@ const Page = () => {
     },
   });
 
-  function onSubmit(formData: AuthCredentials) {
+  function onSubmit(formData: TAuthCredentialsValidator) {
     mutate(formData);
   }
 
