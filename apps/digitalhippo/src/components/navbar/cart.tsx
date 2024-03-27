@@ -14,9 +14,18 @@ import { formatPrice } from '@digitalhippo/lib/utils';
 import Link from 'next/link';
 import { buttonVariants } from '../ui/button';
 import Image from 'next/image';
+import { useCart } from '@digitalhippo/hooks/use-cart';
+import { CartItem } from './cart-item';
+import { ScrollArea } from '../ui/scroll-area';
 
 export const Cart = () => {
-  const itemCount = 0;
+  const { items } = useCart();
+  const itemCount = items.length;
+
+  const cartTotal = items.reduce((acc, { product: { price } }) => {
+    return acc + price;
+  }, 0);
+
   const fee = 1;
 
   return (
@@ -37,8 +46,11 @@ export const Cart = () => {
         {itemCount > 0 ? (
           <>
             <div className='flex w-full flex-col pr-6'>
-              {/* TODO: cart logic */}
-              Cart items
+              <ScrollArea>
+                {items.map(({ product }) => (
+                  <CartItem key={product.id} product={product} />
+                ))}
+              </ScrollArea>
             </div>
             <div className='space-y-4 pr-6'>
               <Separator />
@@ -53,7 +65,7 @@ export const Cart = () => {
                 </div>
                 <div className='flex'>
                   <span className='flex-1'>Total</span>
-                  <span>{formatPrice(fee)}</span>
+                  <span>{formatPrice(cartTotal)}</span>
                 </div>
               </div>
 
