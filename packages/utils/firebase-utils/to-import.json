@@ -1,72 +1,70 @@
 {
-  "82c3bb46-0488-44db-8edc-3664b3b991dc": {
-    "examples": [],
-    "background": "",
-    "partOfSpeech": "adjective",
-    "definition": "completely lacking nobility in character or quality or purpose",
-    "id": "82c3bb46-0488-44db-8edc-3664b3b991dc",
-    "blurb": "",
-    "word": "ignoble",
+  "03c45df0-041a-49f0-a4a7-c2988780df50": {
     "fillInTheBlankQuestions": [
       {
-        "question": "Despite his rise to fame, his actions off-stage were far from admirable, revealing an _________ side that disappointed fans.",
-        "answer": "ignoble"
+        "question": "In an effort to preserve historical documents, the museum created a _________ of the ancient manuscript, allowing visitors to handle a replica without risking damage to the original.",
+        "answer": "facsimile"
       },
       {
-        "question": "The historian's book shed light on the _________ motives behind the revered leader's most controversial decision.",
-        "answer": "ignoble"
+        "question": "The art student's final project was a remarkable _________ of Van Gogh's \"Starry Night,\" meticulously replicating the original's brushwork and color palette.",
+        "answer": "facsimile"
       },
       {
-        "question": "In a surprising twist of fate, the nobleman's _________ origins were revealed, causing a scandal among the high society.",
-        "answer": "ignoble"
+        "question": "The rare book collector was thrilled to add a _________ of the 15th-century manuscript to his collection, as the original was far beyond his reach, both financially and geographically.",
+        "answer": "facsimile"
       },
       {
-        "question": "The charity was accused of _________ practices, prioritizing profits over the well-being of those it claimed to help.",
-        "answer": "ignoble"
+        "question": "During the restoration of the medieval castle, architects used _________ materials to replace the damaged stonework, ensuring the new sections were indistinguishable from the old.",
+        "answer": "facsimile"
       },
       {
-        "question": "Her refusal to partake in the _________ gossip of her colleagues earned her a reputation for integrity.",
-        "answer": "ignoble"
+        "question": "The science fiction novel featured a technology that could produce a _________ of any object, down to the atomic level, leading to profound questions about identity and originality.",
+        "answer": "facsimile"
       },
       {
-        "question": "The film's villain, though charming, was driven by _________ ambition, stopping at nothing to achieve his goals.",
-        "answer": "ignoble"
+        "question": "To ensure the authenticity of the reproduced artwork, the curator included a certificate stating that the piece is a _________, not the original.",
+        "answer": "facsimile"
       },
       {
-        "question": "The memoir detailed his journey from an _________ background to becoming a respected leader in the community.",
-        "answer": "ignoble"
+        "question": "The detective novel's plot thickened when a _________ of the missing will surfaced, throwing into question the legitimacy of the document that had been found earlier.",
+        "answer": "facsimile"
       },
       {
-        "question": "The agreement, while lucrative, forced them to engage in _________ activities that went against their principles.",
-        "answer": "ignoble"
+        "question": "With the rise of digital archives, libraries began offering _________ versions of rare books, allowing scholars to access texts that were previously unavailable to them.",
+        "answer": "facsimile"
       },
       {
-        "question": "Despite the company's success, the means by which it was achieved were often criticized as _________.",
-        "answer": "ignoble"
+        "question": "In an effort to combat counterfeiting, the government introduced new currency features that made creating a convincing _________ nearly impossible.",
+        "answer": "facsimile"
       },
       {
-        "question": "The protagonist's _________ act of betrayal was a turning point in the story, challenging the reader's sympathy for him.",
-        "answer": "ignoble"
+        "question": "As part of the exhibit on ancient civilizations, the museum displayed a _________ of the Rosetta Stone, allowing visitors to touch and feel the inscriptions that led to the deciphering of Egyptian hieroglyphs.",
+        "answer": "facsimile"
       },
       {
-        "question": "The athlete's _________ behavior off the field tarnished his legacy, overshadowing his achievements.",
-        "answer": "ignoble"
+        "question": "In the courtroom, the evidence presented included a _________ of the original handwritten note, ensuring the jury could examine its contents without handling the fragile original.",
+        "answer": "facsimile"
       },
       {
-        "question": "The _________ conditions in which the workers were forced to labor sparked outrage and led to demands for reform.",
-        "answer": "ignoble"
+        "question": "The author's biography included several _________ of her personal letters, giving readers insight into her thoughts and feelings in a way that paraphrasing could not.",
+        "answer": "facsimiles"
       },
       {
-        "question": "His _________ attempt to undermine his rival backfired, resulting in his own downfall.",
-        "answer": "ignoble"
-      },
+        "question": "For the movie's production, the prop department created a _________ of the legendary sword, so detailed that it was nearly impossible for the audience to tell it wasn't the authentic artifact.",
+        "answer": "facsimile"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a copy or reproduction",
+    "id": "03c45df0-041a-49f0-a4a7-c2988780df50",
+    "blurb": "",
+    "word": "facsimile",
+    "prompts": [
       {
-        "question": "The novel's critique of society highlighted the _________ pursuit of wealth at the expense of moral values.",
-        "answer": "ignoble"
-      },
-      {
-        "question": "Finding humor in the situation, she joked that her _________ task of unclogging the drain was her most heroic deed of the day.",
-        "answer": "ignoble"
+        "setup": "A museum decides to create a detailed replica of a famous painting to allow visitors to touch and feel the texture, which isn't possible with the original artwork.",
+        "prompt": "How would you describe the museum's decision?"
       }
     ]
   }

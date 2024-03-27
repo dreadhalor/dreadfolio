@@ -5,28 +5,13 @@ export const anthropic = new Anthropic({
   apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
 });
 
-export const getScenario = (term: string) => {
-  return anthropic.messages.create({
-    max_tokens: 1024,
-    system:
-      'Your task is to take a setup, a prompt, a term, & a response, & determine if the response properly uses the term to answer the prompt in way that makes sense given the setup. Try to keep your response as simple as possible.',
-    messages: [],
-    model: 'claude-3-sonnet-20240229',
-  });
-};
-
 type Query = {
   setup: string;
   prompt: string;
   expression: string;
   response: string;
 };
-export const getScenario2 = ({
-  setup,
-  prompt,
-  expression,
-  response,
-}: Query) => {
+export const getScenario = ({ setup, prompt, expression, response }: Query) => {
   return anthropic.messages.create({
     max_tokens: 1024,
     system: `Your task is to take an setup, a prompt, an expression, & a response, & judge whether or not the response properly:

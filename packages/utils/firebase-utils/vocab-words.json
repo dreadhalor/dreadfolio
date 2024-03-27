@@ -1,154 +1,2084 @@
 {
-  "words": [
-    "mellifluous",
-    "bazaar",
-    "lexicon",
-    "curios",
-    "slapdash",
-    "jezebel",
-    "caterwaul",
-    "elysian",
-    "gallivant",
-    "sundries",
-    "lamentations",
-    "facsimile",
-    "wantonly",
-    "revulsion",
-    "apothecary",
-    "halcyon",
-    "duplicitous",
-    "adorn",
-    "eclectic",
-    "clandestine",
-    "traipse",
-    "deleterious",
-    "striations",
-    "metastasize",
-    "apoplectic",
-    "conflagration",
-    "bereft",
-    "curtail",
-    "extolled",
-    "relinquish",
-    "languish",
-    "tenebrous",
-    "trepidations",
-    "felicitous",
-    "fiasco",
-    "voluptuous",
-    "epicurean",
-    "crestfallen",
-    "raucous",
-    "bamboozle",
-    "sans",
-    "flummoxed",
-    "ilk",
-    "pontificating",
-    "regale",
-    "diminutive",
-    "peccadillo",
-    "abate",
-    "travesty",
-    "disabuse",
-    "bailiwick",
-    "odious",
-    "pablum",
-    "artifice",
-    "abhorrent",
-    "evince",
-    "maelstrom",
-    "dame",
-    "paramour",
-    "beau",
-    "vouchsafe",
-    "gallantry",
-    "tommyrot",
-    "abased",
-    "unchivalrous",
-    "scruples",
-    "deliriously",
-    "quagmire",
-    "decried",
-    "slight",
-    "reverence",
-    "howling",
-    "rattletrap",
-    "austere",
-    "kibitz",
-    "cleft",
-    "recriminations",
-    "transitory",
-    "destitute",
-    "contagion",
-    "intimate",
-    "evasive",
-    "sacrosanct",
-    "predilection",
-    "milieu",
-    "rooked",
-    "gambit",
-    "balderdash",
-    "jest",
-    "quarrel",
-    "tryst",
-    "foolhardy",
-    "bombastic",
-    "fatuous",
-    "ignoble",
-    "moxie",
-    "extant",
-    "quixotic",
-    "apparition",
-    "labyrinthian",
-    "excursion",
-    "godspeed",
-    "eschew",
-    "cerebral",
-    "benediction",
-    "equanimity",
-    "contravene",
-    "obsequious",
-    "gregarious",
-    "judicious",
-    "debonair",
-    "throes",
-    "erstwhile",
-    "quotidian",
-    "paroxysm",
-    "contrition",
-    "aspersions",
-    "navigable",
-    "malaise",
-    "precipice",
-    "folly",
-    "spendthrift",
-    "erudite",
-    "talisman",
-    "vexed",
-    "harangue",
-    "taciturn",
-    "circumlocution",
-    "razzmatazz",
-    "bedeviled",
-    "gobsmacked",
-    "podunk",
-    "merriment",
-    "skullduggery",
-    "repose",
-    "cajole",
-    "foibles",
-    "jonesing",
-    "affectation",
-    "denouement",
-    "portends",
-    "bedlam",
-    "tantamount",
-    "boon",
-    "persnickety",
-    "juxtaposition",
-    "dichotomy",
-    "microcosm",
-    "paroxysm",
-    "chicanery"
-  ]
+  "03c45df0-041a-49f0-a4a7-c2988780df50": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "In an effort to preserve historical documents, the museum created a _________ of the ancient manuscript, allowing visitors to handle a replica without risking damage to the original.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The art student's final project was a remarkable _________ of Van Gogh's \"Starry Night,\" meticulously replicating the original's brushwork and color palette.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The rare book collector was thrilled to add a _________ of the 15th-century manuscript to his collection, as the original was far beyond his reach, both financially and geographically.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "During the restoration of the medieval castle, architects used _________ materials to replace the damaged stonework, ensuring the new sections were indistinguishable from the old.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The science fiction novel featured a technology that could produce a _________ of any object, down to the atomic level, leading to profound questions about identity and originality.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "To ensure the authenticity of the reproduced artwork, the curator included a certificate stating that the piece is a _________, not the original.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The detective novel's plot thickened when a _________ of the missing will surfaced, throwing into question the legitimacy of the document that had been found earlier.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "With the rise of digital archives, libraries began offering _________ versions of rare books, allowing scholars to access texts that were previously unavailable to them.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "In an effort to combat counterfeiting, the government introduced new currency features that made creating a convincing _________ nearly impossible.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "As part of the exhibit on ancient civilizations, the museum displayed a _________ of the Rosetta Stone, allowing visitors to touch and feel the inscriptions that led to the deciphering of Egyptian hieroglyphs.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "In the courtroom, the evidence presented included a _________ of the original handwritten note, ensuring the jury could examine its contents without handling the fragile original.",
+        "answer": "facsimile"
+      },
+      {
+        "question": "The author's biography included several _________ of her personal letters, giving readers insight into her thoughts and feelings in a way that paraphrasing could not.",
+        "answer": "facsimiles"
+      },
+      {
+        "question": "For the movie's production, the prop department created a _________ of the legendary sword, so detailed that it was nearly impossible for the audience to tell it wasn't the authentic artifact.",
+        "answer": "facsimile"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a copy or reproduction",
+    "id": "03c45df0-041a-49f0-a4a7-c2988780df50",
+    "blurb": "",
+    "word": "facsimile"
+  },
+  "05836763-c44b-4913-b9fd-cea87652e7ce": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "any exciting and complex play intended to confuse (dazzle) the opponent",
+    "id": "05836763-c44b-4913-b9fd-cea87652e7ce",
+    "blurb": "",
+    "word": "razzmatazz"
+  },
+  "07a6f55c-becf-4647-b498-5d7b93c21fbc": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "His British accent, an obvious _________ since he'd never left the Midwest, was amusing at parties.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The novelist's _________ of using archaic language seemed more pretentious than authentic to the modern reader.",
+        "answer": "affectation"
+      },
+      {
+        "question": "Wearing glasses without needing them, purely as a fashion statement, is an _________ that has gained popularity in recent years.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The critic accused the singer of _________, claiming her onstage persona was vastly different from her real self.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The new CEO's humble persona was seen by some as an _________, a strategic move to win over employees and the public.",
+        "answer": "affectation"
+      },
+      {
+        "question": "Her use of overly complex vocabulary was criticized as an _________ that detracted from the clarity of her arguments.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The film's dialogue suffered from _________, with characters speaking in a manner no real person ever would.",
+        "answer": "affectation"
+      },
+      {
+        "question": "At the costume party, his cowboy outfit, complete with a southern drawl, was an entertaining _________.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The restaurant's _________ of exclusivity backfired when customers found the unmarked entrance pretentious rather than intriguing.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The debate team coach warned against _________ in speech, advising that authenticity resonates more with audiences.",
+        "answer": "affectation"
+      },
+      {
+        "question": "Her sudden interest in classical music was seen as an _________ aimed at impressing her new, cultured friends.",
+        "answer": "affectation"
+      },
+      {
+        "question": "Calling his small apartment a 'studio' was an _________ he hoped would make his living situation seem more artistic.",
+        "answer": "affectation"
+      },
+      {
+        "question": "The memoir was criticized for its _________, as the author's attempts to appear relatable felt forced and insincere.",
+        "answer": "affectation"
+      },
+      {
+        "question": "His _________ of indifference at the party was quickly abandoned once he saw his friends having a good time.",
+        "answer": "affectation"
+      },
+      {
+        "question": "Despite the _________ of being a gourmet chef at home, his cooking often ended up being simple pasta dishes.",
+        "answer": "affectation"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a deliberate pretense or exaggerated display",
+    "id": "07a6f55c-becf-4647-b498-5d7b93c21fbc",
+    "blurb": "",
+    "word": "affectation"
+  },
+  "09b124e8-0b7b-48f0-9d50-c499c8ccbb80": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "As the storm finally began to _________, residents emerged from their homes to assess the damage.",
+        "answer": "abate"
+      },
+      {
+        "question": "The mayor hoped that the new traffic calming measures would _________ the city's chronic congestion problems.",
+        "answer": "abate"
+      },
+      {
+        "question": "After the fever _________, the patient began to feel strong enough to sit up and eat.",
+        "answer": "abated"
+      },
+      {
+        "question": "The teacher waited for the excitement in the classroom to _________ before beginning the lesson.",
+        "answer": "abate"
+      },
+      {
+        "question": "Despite initial enthusiasm, interest in the project _________ as challenges became apparent.",
+        "answer": "abated"
+      },
+      {
+        "question": "Officials were relieved when the predicted flooding _________ overnight, sparing the town from disaster.",
+        "answer": "abated"
+      },
+      {
+        "question": "The company announced that once the supply issues _________, production would return to normal levels.",
+        "answer": "abated"
+      },
+      {
+        "question": "To help _________ her anxiety, he offered reassuring words and a calm presence.",
+        "answer": "abate"
+      },
+      {
+        "question": "Hikers were advised to wait until the wind _________ before attempting the more exposed sections of the trail.",
+        "answer": "abated"
+      },
+      {
+        "question": "The government's intervention helped to _________ the economic downturn, leading to a gradual recovery.",
+        "answer": "abate"
+      },
+      {
+        "question": "As the applause _________, the speaker took a deep breath and began their address.",
+        "answer": "abated"
+      },
+      {
+        "question": "Once the children's laughter _________, the room fell silent in anticipation of the surprise guest.",
+        "answer": "abated"
+      },
+      {
+        "question": "The medication helped to _________ the symptoms, providing much-needed relief.",
+        "answer": "abate"
+      },
+      {
+        "question": "They waited for the market volatility to _________ before making any further investments.",
+        "answer": "abate"
+      },
+      {
+        "question": "As public interest in the scandal _________, the celebrity hoped to rebuild their career.",
+        "answer": "abated"
+      }
+    ],
+    "examples": [
+      {
+        "sourceUrl": "",
+        "source": "Dracula",
+        "id": "407ab51f-2c09-4a1b-814a-1f547959253a",
+        "example": "Already the sudden storm is passing, and its fierceness is abating; crowds are scattering homeward, and the sky is beginning to redden over the Yorkshire wolds."
+      }
+    ],
+    "background": "*Abate* comes from the Old French verb *abattre*, \"to beat down,\" and means to reduce or become less intense or numerous. As an intransitive verb, it is often used with something physically, emotionally, or figuratively violent, as in \"the flood of fan mail began to *abate*.\" Using it transitively, if you take measures to abate pollution or noise, you reduce them. Pronounce *abate* with the stress on the second syllable (uh-BATE).",
+    "partOfSpeech": "verb",
+    "definition": "become less in amount or intensity",
+    "id": "09b124e8-0b7b-48f0-9d50-c499c8ccbb80",
+    "blurb": "Something that *abates* becomes fewer or less intense. Your enthusiasm for skiing might *abate* after falling off a ski lift and getting a mouthful of snow.",
+    "word": "abate"
+  },
+  "0a17d9e1-307e-45df-8923-850ce146611d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "the outcome of a complex sequence of events",
+    "id": "0a17d9e1-307e-45df-8923-850ce146611d",
+    "blurb": "",
+    "word": "denouement"
+  },
+  "0bb9ed52-15da-4f5e-82e2-f731031375c5": {
+    "examples": [
+      {
+        "sourceUrl": "",
+        "source": "Water for Elephants",
+        "example": "Those were the salad days, the halcyon years!"
+      }
+    ],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by peace and prosperity",
+    "id": "0bb9ed52-15da-4f5e-82e2-f731031375c5",
+    "blurb": "",
+    "word": "halcyon"
+  },
+  "0d178663-be80-4a97-9c65-ca183468f3b7": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a very intense and uncontrolled fire",
+    "id": "0d178663-be80-4a97-9c65-ca183468f3b7",
+    "blurb": "",
+    "word": "conflagration"
+  },
+  "0d38f129-fa11-40c4-a189-6d582c1f256c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "influence or urge by gentle urging, caressing, or flattering",
+    "id": "0d38f129-fa11-40c4-a189-6d582c1f256c",
+    "blurb": "",
+    "word": "cajole"
+  },
+  "0eb46846-fdbc-424f-9807-1358989a4e4e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "unequivocally detestable",
+    "id": "0eb46846-fdbc-424f-9807-1358989a4e4e",
+    "blurb": "",
+    "word": "odious"
+  },
+  "0f38c910-400b-4eb8-9e28-f7f47e4d94cf": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "of a stern or strict bearing or demeanor; forbidding in aspect",
+    "id": "0f38c910-400b-4eb8-9e28-f7f47e4d94cf",
+    "blurb": "",
+    "word": "austere"
+  },
+  "0f454227-79d4-4974-8452-f6a4a5b167e7": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "The investigation revealed a web of _________, involving bribery, blackmail, and betrayal at the highest levels of the corporation.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "Rumors of _________ in the election process led to widespread protests demanding transparency and accountability.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The novel's hero, a cunning detective, unraveled the _________ that lay at the heart of the town's most respected family.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "In a light-hearted twist, the so-called ancient curse was nothing more than _________ by the castle's caretaker to scare away tourists.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The board game, designed for ages 12 and up, encouraged players to engage in _________ to amass fortunes and defeat their rivals.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "Behind the charming facade of the seaside resort, a tale of _________ unfolded, involving the disappearance of a famous actress.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "Critics accused the filmmaker of _________, alleging that parts of the documentary were fabricated for dramatic effect.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The auction was halted amid accusations of _________, with claims that the winning bid had been secretly predetermined.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The startup's rapid fall was attributed not just to market forces but to internal _________, eroding trust and leading to its demise.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The fantasy novel's protagonist faced challenges not only from dragons and beasts but also from the _________ of court politics.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "Allegations of _________ in the bidding process for the new city project led to calls for an independent investigation.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The discovery of _________ in the peaceful village shook the residents, revealing a hidden world of intrigue and deception.",
+        "answer": "skulduggery"
+      },
+      {
+        "question": "The secret society's meetings were rife with _________, as members plotted to outmaneuver one another for power and influence.",
+        "answer": "skulduggery"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "verbal misrepresentation intended to take advantage of you in some way",
+    "id": "0f454227-79d4-4974-8452-f6a4a5b167e7",
+    "blurb": "",
+    "word": "skulduggery"
+  },
+  "101d7e9d-23b4-4804-96e1-d3d006ce116d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "violent pangs of suffering",
+    "id": "101d7e9d-23b4-4804-96e1-d3d006ce116d",
+    "blurb": "",
+    "word": "throes"
+  },
+  "10243210-56f8-4f59-8a83-4e2c0c6c486e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "any unusual article, object of art, etc., valued as a curiosity",
+    "id": "10243210-56f8-4f59-8a83-4e2c0c6c486e",
+    "blurb": "",
+    "word": "curios"
+  },
+  "11ed9219-d143-4577-b871-8a9514b3595c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "talk in a dogmatic and pompous manner",
+    "id": "11ed9219-d143-4577-b871-8a9514b3595c",
+    "blurb": "",
+    "word": "pontificate"
+  },
+  "14014c39-71db-4d8e-b4eb-226a97ef5d72": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to transform, especially into a dangerous form",
+    "id": "14014c39-71db-4d8e-b4eb-226a97ef5d72",
+    "blurb": "",
+    "word": "metastasize"
+  },
+  "170fd7a1-52ec-4cd2-88b0-6605daf9de69": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "fortitude and determination",
+    "id": "170fd7a1-52ec-4cd2-88b0-6605daf9de69",
+    "blurb": "",
+    "word": "moxie"
+  },
+  "17a3e602-07af-41ee-8d9a-382394f5e517": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "having a sophisticated charm",
+    "id": "17a3e602-07af-41ee-8d9a-382394f5e517",
+    "blurb": "",
+    "word": "debonair"
+  },
+  "1b34a928-c594-46aa-91bb-ae0c4ce55b6d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "dejected; dispirited; discouraged",
+    "id": "1b34a928-c594-46aa-91bb-ae0c4ce55b6d",
+    "blurb": "",
+    "word": "crestfallen"
+  },
+  "1d49994e-5ecd-4359-b4fc-98cd6c1affd2": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to cheat; fleece; swindle",
+    "id": "1d49994e-5ecd-4359-b4fc-98cd6c1affd2",
+    "blurb": "",
+    "word": "rook"
+  },
+  "1e952f67-0381-4fc4-8ac3-beb748220666": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "habitually reserved and uncommunicative",
+    "id": "1e952f67-0381-4fc4-8ac3-beb748220666",
+    "blurb": "",
+    "word": "taciturn"
+  },
+  "1ecc83ea-7a41-4fb7-a6d8-46d6b7730141": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "involving intelligence rather than emotions or instinct",
+    "id": "1ecc83ea-7a41-4fb7-a6d8-46d6b7730141",
+    "blurb": "",
+    "word": "cerebral"
+  },
+  "1edbe1d5-81e7-4b17-81aa-241a9724f841": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "displaying luxury and furnishing gratification to the senses",
+    "id": "1edbe1d5-81e7-4b17-81aa-241a9724f841",
+    "blurb": "",
+    "word": "epicurean"
+  },
+  "2175aeb3-9826-4874-a045-e30683252c47": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "worthless or oversimplified ideas",
+    "id": "2175aeb3-9826-4874-a045-e30683252c47",
+    "blurb": "",
+    "word": "pablum"
+  },
+  "22386318-8ed8-4b92-ae4f-a187a137158d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a stripe or stripes of contrasting color",
+    "id": "22386318-8ed8-4b92-ae4f-a187a137158d",
+    "blurb": "",
+    "word": "striation"
+  },
+  "22e7706a-a722-442f-b401-4d899e67b521": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "dark and gloomy",
+    "id": "22e7706a-a722-442f-b401-4d899e67b521",
+    "blurb": "",
+    "word": "tenebrous"
+  },
+  "23323a44-7ca9-4cf4-8f57-77b366e44f6b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "found in the ordinary course of events",
+    "id": "23323a44-7ca9-4cf4-8f57-77b366e44f6b",
+    "blurb": "",
+    "word": "quotidian"
+  },
+  "23649f31-8e1d-450a-a9e1-60e10a49eff3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "an abusive attack on a person's character or good name",
+    "id": "23649f31-8e1d-450a-a9e1-60e10a49eff3",
+    "blurb": "",
+    "word": "aspersion"
+  },
+  "25ef3673-39d3-468d-9cfb-308c95fdd02b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a distorted, debased, or absurd imitation of something",
+    "id": "25ef3673-39d3-468d-9cfb-308c95fdd02b",
+    "blurb": "",
+    "word": "travesty"
+  },
+  "28f5637c-741b-47f2-82ca-f92da5394a4c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to grant or give, as by favor, graciousness, or condescension",
+    "id": "28f5637c-741b-47f2-82ca-f92da5394a4c",
+    "blurb": "",
+    "word": "vouchsafe"
+  },
+  "2a4d8136-187d-484f-a886-a448cb2a2dc4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "being twofold; a classification into two opposed parts or subclasses",
+    "id": "2a4d8136-187d-484f-a886-a448cb2a2dc4",
+    "blurb": "",
+    "word": "dichotomy"
+  },
+  "2e0aec78-389f-4092-a4b6-a0213cca797b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "attentive in an ingratiating or servile manner",
+    "id": "2e0aec78-389f-4092-a4b6-a0213cca797b",
+    "blurb": "",
+    "word": "obsequious"
+  },
+  "2e86c620-9ddf-434f-90c0-d21d29e3bdc8": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a sudden uncontrollable attack",
+    "id": "2e86c620-9ddf-434f-90c0-d21d29e3bdc8",
+    "blurb": "",
+    "word": "paroxysm"
+  },
+  "2f174190-9197-4267-b627-a98f73acb248": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "The haunted mansion was known for the _________ of a lady in white, said to roam its halls every full moon.",
+        "answer": "apparition"
+      },
+      {
+        "question": "As he wandered the ancient battlefield at dusk, an eerie _________ appeared, whispering the names of those who had fallen.",
+        "answer": "apparition"
+      },
+      {
+        "question": "The sudden _________ of her late grandmother in dreams provided her with comfort during difficult times.",
+        "answer": "apparition"
+      },
+      {
+        "question": "The children screamed in delight when the magician made an _________ of a dragon appear in the middle of the stage.",
+        "answer": "apparition"
+      },
+      {
+        "question": "Fog on the highway was so thick that other vehicles appeared as ghostly _________, barely visible through the mist.",
+        "answer": "apparitions"
+      },
+      {
+        "question": "The novel's protagonist is haunted by the _________ of his missed opportunities, visualizing them as specters that follow him.",
+        "answer": "apparition"
+      },
+      {
+        "question": "In the dim light of the cave, the stalactites cast shadows that looked like _________, making the explorers' hearts race.",
+        "answer": "apparitions"
+      },
+      {
+        "question": "The medium claimed she could summon _________ of ancient spirits, offering guidance from beyond.",
+        "answer": "apparitions"
+      },
+      {
+        "question": "During the séance, a faint _________ materialized above the table, causing a gasp to ripple through the attendees.",
+        "answer": "apparition"
+      },
+      {
+        "question": "The _________ of a long-lost pirate ship appeared on the horizon, vanishing as quickly as it had come, leaving the sailors in awe.",
+        "answer": "apparition"
+      },
+      {
+        "question": "The photographer was stunned to find that what he thought was a speck of dust on his lens captured an _________ in the old mansion.",
+        "answer": "apparition"
+      },
+      {
+        "question": "Legend has it that the castle is guarded by an _________ of a knight who fell in battle, its loyalty undimmed by death.",
+        "answer": "apparition"
+      },
+      {
+        "question": "At the stroke of midnight, the _________ of the town's founder is said to appear by the ancient oak tree, watching silently.",
+        "answer": "apparition"
+      },
+      {
+        "question": "The _________ of a mysterious figure in historical clothing has been reported wandering the museum's halls, puzzling staff and visitors alike.",
+        "answer": "apparition"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a ghostly appearing figure",
+    "id": "2f174190-9197-4267-b627-a98f73acb248",
+    "blurb": "",
+    "word": "apparition"
+  },
+  "2fdb0a01-3fe4-4654-8a93-01ccc405bb9b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a trinket or piece of jewelry usually hung about the neck and thought to be a magical protection against evil or disease",
+    "id": "2fdb0a01-3fe4-4654-8a93-01ccc405bb9b",
+    "blurb": "",
+    "word": "talisman"
+  },
+  "30061b76-7336-4056-9751-24f116b21138": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "be a mystery or bewildering to",
+    "id": "30061b76-7336-4056-9751-24f116b21138",
+    "blurb": "",
+    "word": "flummox"
+  },
+  "31308000-b942-422d-9eda-0e67342c80cd": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "extraordinarily good or great; used especially as intensifiers",
+    "id": "31308000-b942-422d-9eda-0e67342c80cd",
+    "blurb": "",
+    "word": "howling"
+  },
+  "315141e9-8ebd-41c1-abf9-49a7ccadc15a": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "an illicit lover, especially of a married person",
+    "id": "315141e9-8ebd-41c1-abf9-49a7ccadc15a",
+    "blurb": "",
+    "word": "paramour"
+  },
+  "326f4d64-158f-4393-b30b-e7fa76a56dae": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "characterized by excessive precision and attention to trivial details",
+    "id": "326f4d64-158f-4393-b30b-e7fa76a56dae",
+    "blurb": "",
+    "word": "persnickety"
+  },
+  "33820405-f7e7-4775-92ee-8254214742d4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "the use of tricks to deceive someone (usually to extract money from them)",
+    "id": "33820405-f7e7-4775-92ee-8254214742d4",
+    "blurb": "",
+    "word": "chicanery"
+  },
+  "3832b648-1756-4631-89a5-1323e48ce70f": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "displaying luxury and furnishing gratification to the senses",
+    "id": "3832b648-1756-4631-89a5-1323e48ce70f",
+    "blurb": "",
+    "word": "voluptuous"
+  },
+  "3a7aa773-f0eb-493b-a883-011e5ea3a5cb": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "the act of positioning close together (or side by side)",
+    "id": "3a7aa773-f0eb-493b-a883-011e5ea3a5cb",
+    "blurb": "",
+    "word": "juxtaposition"
+  },
+  "3d875d2d-5de0-4520-9dd8-fa5662a34ec4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a feeling of alarm or dread",
+    "id": "3d875d2d-5de0-4520-9dd8-fa5662a34ec4",
+    "blurb": "",
+    "word": "trepidation"
+  },
+  "4233bed7-8355-4b7f-9f00-d6439781439e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "give expression to; express",
+    "id": "4233bed7-8355-4b7f-9f00-d6439781439e",
+    "blurb": "",
+    "word": "evince"
+  },
+  "42365e4d-1305-48ad-b2f1-52ee6812fb0d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "preposition",
+    "definition": "without",
+    "id": "42365e4d-1305-48ad-b2f1-52ee6812fb0d",
+    "blurb": "",
+    "word": "sans"
+  },
+  "4274e207-12a6-40b1-b921-c98a53624fe4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to indicate in advance; to foreshadow or presage, as an omen does",
+    "id": "4274e207-12a6-40b1-b921-c98a53624fe4",
+    "blurb": "",
+    "word": "portend"
+  },
+  "432b89e4-153e-4651-a27f-1d7bdaf7d779": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a person who spends possessions or money extravagantly or wastefully; prodigal",
+    "id": "432b89e4-153e-4651-a27f-1d7bdaf7d779",
+    "blurb": "",
+    "word": "spendthrift"
+  },
+  "45201ea4-216e-46be-aa5d-ff2f4603f5c8": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a space or opening made by cleavage; a split",
+    "id": "45201ea4-216e-46be-aa5d-ff2f4603f5c8",
+    "blurb": "",
+    "word": "cleft"
+  },
+  "4627c1d3-8cbe-454e-b086-3044ca0b0ae7": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "utter shrieks, as of cats",
+    "id": "4627c1d3-8cbe-454e-b086-3044ca0b0ae7",
+    "blurb": "",
+    "word": "caterwaul"
+  },
+  "49671274-da5c-44a1-b51d-fbc4f0547b79": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by deliberate deceptiveness, especially by pretending one set of feelings and acting under the influence of another",
+    "id": "49671274-da5c-44a1-b51d-fbc4f0547b79",
+    "blurb": "",
+    "word": "duplicitous"
+  },
+  "49bae9e5-22c4-4c99-98d6-ecb22a1777d4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a wicked, shameless woman",
+    "id": "49bae9e5-22c4-4c99-98d6-ecb22a1777d4",
+    "blurb": "",
+    "word": "jezebel"
+  },
+  "4a165ecf-f8ae-4f2b-996d-430bbb28860b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to give uninvited or unwanted advice",
+    "id": "4a165ecf-f8ae-4f2b-996d-430bbb28860b",
+    "blurb": "",
+    "word": "kibitz"
+  },
+  "4d1cfd95-faa2-4f8c-9f37-97d9c4756505": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "steadiness of mind under stress",
+    "id": "4d1cfd95-faa2-4f8c-9f37-97d9c4756505",
+    "blurb": "",
+    "word": "equanimity"
+  },
+  "5036ba97-4ab9-4de6-a6d7-4afb2eb18df1": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "free somebody (from an erroneous belief)",
+    "id": "5036ba97-4ab9-4de6-a6d7-4afb2eb18df1",
+    "blurb": "",
+    "word": "disabuse"
+  },
+  "50ea219d-b568-4bb2-91e0-798238236745": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "surroundings, especially of a social or cultural nature",
+    "id": "50ea219d-b568-4bb2-91e0-798238236745",
+    "blurb": "",
+    "word": "milieu"
+  },
+  "5260d215-4a81-4ecf-9384-d87cd55821c2": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "go against, as of rules and laws",
+    "id": "5260d215-4a81-4ecf-9384-d87cd55821c2",
+    "blurb": "",
+    "word": "contravene"
+  },
+  "554503e1-92cc-462f-8fb1-3ec336a7aff5": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a male lover or sweetheart",
+    "id": "554503e1-92cc-462f-8fb1-3ec336a7aff5",
+    "blurb": "",
+    "word": "beau"
+  },
+  "562322c4-1c7a-43ed-998f-f2b2daab54aa": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "intense aversion",
+    "id": "562322c4-1c7a-43ed-998f-f2b2daab54aa",
+    "blurb": "",
+    "word": "revulsion"
+  },
+  "58485788-ab2f-456e-941c-ed8233360de3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "family, class, or kind (of something)",
+    "id": "58485788-ab2f-456e-941c-ed8233360de3",
+    "blurb": "",
+    "word": "ilk"
+  },
+  "5873c98c-8f5e-4f2f-8b90-a1e8088f6631": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "The detective saw through the suspect's _________, recognizing the alibi for the fabrication it was.",
+        "answer": "artifice"
+      },
+      {
+        "question": "In the world of high fashion, _________ is often celebrated as much as simplicity, with elaborate designs capturing the imagination.",
+        "answer": "artifice"
+      },
+      {
+        "question": "His charm was not just an _________; it was a genuine reflection of his amiable personality.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The magician's skill lay not just in his tricks but in his mastery of _________, convincing the audience of the impossible.",
+        "answer": "artifice"
+      },
+      {
+        "question": "Critics argue that the novel relies too heavily on _________, sacrificing emotional depth for clever plot twists.",
+        "answer": "artifice"
+      },
+      {
+        "question": "In a move seen as pure _________, the politician's sudden interest in environmental issues coincided with the rise in public concern.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The _________ of the online scam was sophisticated, tricking even the wary into parting with their money.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The film's use of special effects was so subtle that viewers were unaware of the _________ behind the scenes.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The garden was an enchanting example of _________, with natural elements arranged to create a scene from a fairy tale.",
+        "answer": "artifice"
+      },
+      {
+        "question": "They admired the _________ of the escape room's design, which cleverly concealed clues in plain sight.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The _________ involved in creating the illusion of a seamless performance is often invisible to the audience.",
+        "answer": "artifice"
+      },
+      {
+        "question": "Her _________ in navigating office politics allowed her to advance her career without alienating her colleagues.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The documentary revealed the _________ behind the reality TV show, showing how much of the drama was manufactured.",
+        "answer": "artifice"
+      },
+      {
+        "question": "The startup's success was not just due to innovation but also to the _________ in its marketing strategy, which created a buzz.",
+        "answer": "artifice"
+      },
+      {
+        "question": "Despite the _________ of the theme park's attractions, they provided a welcome escape from the mundanity of everyday life.",
+        "answer": "artifice"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a deceptive maneuver (especially to avoid capture)",
+    "id": "5873c98c-8f5e-4f2f-8b90-a1e8088f6631",
+    "blurb": "",
+    "word": "artifice"
+  },
+  "59b2de6d-d746-4d4f-8f7e-dad47a52eba1": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a street of small shops, especially in the Middle East",
+    "id": "59b2de6d-d746-4d4f-8f7e-dad47a52eba1",
+    "blurb": "",
+    "word": "bazaar"
+  },
+  "59f93aaf-455b-452a-852a-adf4ea630d1a": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a strategic maneuver",
+    "id": "59f93aaf-455b-452a-852a-adf4ea630d1a",
+    "blurb": "",
+    "word": "gambit"
+  },
+  "5b9737bf-e45e-4da0-8063-3be60954f147": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "deliver a harangue to; address forcefully",
+    "id": "5b9737bf-e45e-4da0-8063-3be60954f147",
+    "blurb": "",
+    "word": "harangue"
+  },
+  "5ce285b1-0a8e-427a-aaf5-f26ca4a00b2f": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "express strong disapproval of",
+    "id": "5ce285b1-0a8e-427a-aaf5-f26ca4a00b2f",
+    "blurb": "",
+    "word": "decried"
+  },
+  "5e3a8efd-9e35-4d9c-8fc1-6063137b1eb1": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "any small and insignificant or inaccessible town or village",
+    "id": "5e3a8efd-9e35-4d9c-8fc1-6063137b1eb1",
+    "blurb": "",
+    "word": "podunk"
+  },
+  "5e564f10-49b4-411c-811a-331dedb988a0": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "occurring without motivation or provocation",
+    "id": "5e564f10-49b4-411c-811a-331dedb988a0",
+    "blurb": "",
+    "word": "wanton"
+  },
+  "60dc80c7-a505-4be1-96f6-70fab237fbf9": {
+    "examples": [
+      {
+        "sourceUrl": "",
+        "source": "How the García Girls Lost Their Accents",
+        "example": "The eldest also intimated that the mother was a mild anal retentive personality."
+      },
+      {
+        "sourceUrl": "",
+        "source": "Narrative of the Life of Frederick Douglass",
+        "example": "I have already intimated that my condition was much worse, during the first six months of my stay at Mr. Covey’s, than in the last six."
+      },
+      {
+        "sourceUrl": "",
+        "source": "Jane Eyre",
+        "example": "Diana intimated that this would be a different parting from any they had ever yet known."
+      },
+      {
+        "sourceUrl": "",
+        "source": "Animal Farm",
+        "example": "When the cheering had died down, Napoleon, who had remained on his feet, intimated that he too had a few words to say."
+      },
+      {
+        "sourceUrl": "",
+        "source": "1491",
+        "example": "But surviving testimony intimates that it was well on its way."
+      }
+    ],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "imply as a possibility",
+    "id": "60dc80c7-a505-4be1-96f6-70fab237fbf9",
+    "blurb": "",
+    "word": "intimate"
+  },
+  "644c55cb-d5a4-4552-981a-0f116b8415b4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "something to be thankful for; blessing; benefit",
+    "id": "644c55cb-d5a4-4552-981a-0f116b8415b4",
+    "blurb": "",
+    "word": "boon"
+  },
+  "6482d133-40d2-41f2-b884-63af07c11b31": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "harmful; injurious",
+    "id": "6482d133-40d2-41f2-b884-63af07c11b31",
+    "blurb": "",
+    "word": "deleterious"
+  },
+  "64ee8558-78b5-4a99-b809-0347af5a85c0": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "utterly astounded",
+    "id": "64ee8558-78b5-4a99-b809-0347af5a85c0",
+    "blurb": "",
+    "word": "gobsmacked"
+  },
+  "66b1d070-d05c-47a2-9b50-83ab41eed751": {
+    "examples": [
+      {
+        "sourceUrl": "https://www.amazon.com/dp/B007N6JEII",
+        "source": "Throne of Glass",
+        "id": "6a7ed1c5-fb2c-4cc7-a970-dd3724131797",
+        "example": "The assassin might have bothered to care about the slight if she had any interest in courtiers."
+      }
+    ],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to treat (someone) with indifference; ignore, especially pointedly or contemptuously; snub",
+    "id": "66b1d070-d05c-47a2-9b50-83ab41eed751",
+    "blurb": "",
+    "word": "slight"
+  },
+  "6852bf75-576a-4136-8345-9eb35ba8e568": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "occupy in an agreeable, entertaining or pleasant fashion",
+    "id": "6852bf75-576a-4136-8345-9eb35ba8e568",
+    "blurb": "",
+    "word": "regale"
+  },
+  "69e5af34-dcbf-45be-ac1d-25a3a2ae0e18": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "tell a joke; speak humorously",
+    "id": "69e5af34-dcbf-45be-ac1d-25a3a2ae0e18",
+    "blurb": "",
+    "word": "jest"
+  },
+  "6a069bfd-4aa8-49a0-925b-886af97084dc": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a predisposition in favor of something",
+    "id": "6a069bfd-4aa8-49a0-925b-886af97084dc",
+    "blurb": "",
+    "word": "predilection"
+  },
+  "6c21ce81-e8b0-4eba-babd-3a893b6232da": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "miscellaneous objects too numerous or too small to be specified",
+    "id": "6c21ce81-e8b0-4eba-babd-3a893b6232da",
+    "blurb": "",
+    "word": "sundries"
+  },
+  "6e98bc47-1c7f-4ab4-811f-2614fa8c393e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by the exercise of good judgment or common sense in practical matters",
+    "id": "6e98bc47-1c7f-4ab4-811f-2614fa8c393e",
+    "blurb": "",
+    "word": "judicious"
+  },
+  "711a8dcd-3501-4a8a-8ec8-2342c862cba1": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a foolish action, practice, idea, etc.; absurdity",
+    "id": "711a8dcd-3501-4a8a-8ec8-2342c862cba1",
+    "blurb": "",
+    "word": "folly"
+  },
+  "7124f879-7814-43aa-aa3f-9b6f1b922ac4": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a minor weakness or peculiarity in someone's character",
+    "id": "7124f879-7814-43aa-aa3f-9b6f1b922ac4",
+    "blurb": "",
+    "word": "foible"
+  },
+  "720b32e7-586f-4f90-b08b-c7db23256176": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "being essentially equal to something",
+    "id": "720b32e7-586f-4f90-b08b-c7db23256176",
+    "blurb": "",
+    "word": "tantamount"
+  },
+  "74290437-2840-4111-8101-71293c65e433": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "good fortune; success (used as a wish to a person starting on a journey, a new venture, etc.)",
+    "id": "74290437-2840-4111-8101-71293c65e433",
+    "blurb": "",
+    "word": "godspeed"
+  },
+  "748cba65-1c5f-4071-80e8-6768740f1494": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "sincere penitence or remorse",
+    "id": "748cba65-1c5f-4071-80e8-6768740f1494",
+    "blurb": "",
+    "word": "contrition"
+  },
+  "74e3640f-ec8d-47d4-83e2-3e48d96a8803": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "having or showing profound knowledge",
+    "id": "74e3640f-ec8d-47d4-83e2-3e48d96a8803",
+    "blurb": "",
+    "word": "erudite"
+  },
+  "771d9c8d-a952-4d3e-b66c-28dda36cd72b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "capable of being steered or guided, as a ship, aircraft, or missile",
+    "id": "771d9c8d-a952-4d3e-b66c-28dda36cd72b",
+    "blurb": "",
+    "word": "navigable"
+  },
+  "7d4d7bf3-96f5-45eb-ae98-c4df961dd20b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to have a craving for something or someone (sometimes followed by for or out)",
+    "id": "7d4d7bf3-96f5-45eb-ae98-c4df961dd20b",
+    "blurb": "",
+    "word": "jonesing"
+  },
+  "80710bf9-63f3-4216-b4c3-42cf0baf3939": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a miniature model of something",
+    "id": "80710bf9-63f3-4216-b4c3-42cf0baf3939",
+    "blurb": "",
+    "word": "microcosm"
+  },
+  "81b329fd-cc13-4ca0-a815-e37a8ea8d54d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "the vocabulary of a particular language, field, social class, person, etc.",
+    "id": "81b329fd-cc13-4ca0-a815-e37a8ea8d54d",
+    "blurb": "",
+    "word": "lexicon"
+  },
+  "82c3bb46-0488-44db-8edc-3664b3b991dc": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "Despite his rise to fame, his actions off-stage were far from admirable, revealing an _________ side that disappointed fans.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The historian's book shed light on the _________ motives behind the revered leader's most controversial decision.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "In a surprising twist of fate, the nobleman's _________ origins were revealed, causing a scandal among the high society.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The charity was accused of _________ practices, prioritizing profits over the well-being of those it claimed to help.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "Her refusal to partake in the _________ gossip of her colleagues earned her a reputation for integrity.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The film's villain, though charming, was driven by _________ ambition, stopping at nothing to achieve his goals.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The memoir detailed his journey from an _________ background to becoming a respected leader in the community.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The agreement, while lucrative, forced them to engage in _________ activities that went against their principles.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "Despite the company's success, the means by which it was achieved were often criticized as _________.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The protagonist's _________ act of betrayal was a turning point in the story, challenging the reader's sympathy for him.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The athlete's _________ behavior off the field tarnished his legacy, overshadowing his achievements.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The _________ conditions in which the workers were forced to labor sparked outrage and led to demands for reform.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "His _________ attempt to undermine his rival backfired, resulting in his own downfall.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "The novel's critique of society highlighted the _________ pursuit of wealth at the expense of moral values.",
+        "answer": "ignoble"
+      },
+      {
+        "question": "Finding humor in the situation, she joked that her _________ task of unclogging the drain was her most heroic deed of the day.",
+        "answer": "ignoble"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "completely lacking nobility in character or quality or purpose",
+    "id": "82c3bb46-0488-44db-8edc-3664b3b991dc",
+    "blurb": "",
+    "word": "ignoble"
+  },
+  "82ef001d-d4d0-43fb-9207-a39a859e9ec3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "mutual accusations",
+    "id": "82ef001d-d4d0-43fb-9207-a39a859e9ec3",
+    "blurb": "",
+    "word": "recrimination"
+  },
+  "83616991-184e-4998-8740-3ff8794cf323": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a violent commotion or disturbance",
+    "id": "83616991-184e-4998-8740-3ff8794cf323",
+    "blurb": "",
+    "word": "maelstrom"
+  },
+  "879a5be6-0bdf-44c0-b1ac-fa895d205765": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "disturbing the public peace; loud and rough",
+    "id": "879a5be6-0bdf-44c0-b1ac-fa895d205765",
+    "blurb": "",
+    "word": "raucous"
+  },
+  "888c3745-d074-4775-ba99-8ec3b27af9b3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "chivalry or courtesy towards women",
+    "id": "888c3745-d074-4775-ba99-8ec3b27af9b3",
+    "blurb": "",
+    "word": "gallantry"
+  },
+  "8ad1ea01-e785-4ae0-8747-4e208ff6613a": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "an angry dispute",
+    "id": "8ad1ea01-e785-4ae0-8747-4e208ff6613a",
+    "blurb": "",
+    "word": "quarrel"
+  },
+  "8fbdad5e-9514-4a69-a2c1-8f8481ca9ab6": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to renounce or surrender (a possession, right, etc.)",
+    "id": "8fbdad5e-9514-4a69-a2c1-8f8481ca9ab6",
+    "blurb": "",
+    "word": "relinquish"
+  },
+  "919a404d-d33b-409d-a1b9-c5a64d646273": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "irritated; annoyed",
+    "id": "919a404d-d33b-409d-a1b9-c5a64d646273",
+    "blurb": "",
+    "word": "vexed"
+  },
+  "91a7f1ac-6574-461f-a2ad-762762647413": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by great carelessness",
+    "id": "91a7f1ac-6574-461f-a2ad-762762647413",
+    "blurb": "",
+    "word": "slapdash"
+  },
+  "92626358-b247-4e08-b689-8c70039392f3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "exhibiting an agreeably appropriate manner or style",
+    "id": "92626358-b247-4e08-b689-8c70039392f3",
+    "blurb": "",
+    "word": "felicitous"
+  },
+  "92709304-899d-476a-b7eb-8b085b40f519": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "sorrowful through loss or deprivation",
+    "id": "92709304-899d-476a-b7eb-8b085b40f519",
+    "blurb": "",
+    "word": "bereft"
+  },
+  "942311e7-84ac-49f2-a96d-2d0de65b7bee": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "avoid and stay away from deliberately; stay clear of",
+    "id": "942311e7-84ac-49f2-a96d-2d0de65b7bee",
+    "blurb": "",
+    "word": "eschew"
+  },
+  "95372be2-91c7-4f44-968d-d4af668a76ee": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "pretentious or silly talk or writing",
+    "id": "95372be2-91c7-4f44-968d-d4af668a76ee",
+    "blurb": "",
+    "word": "tommyrot"
+  },
+  "98d8a2b1-9281-4e34-b2af-ea16a97ea7d7": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "walk or tramp about",
+    "id": "98d8a2b1-9281-4e34-b2af-ea16a97ea7d7",
+    "blurb": "",
+    "word": "traipse"
+  },
+  "9a3ba271-6e3e-426d-9bf3-292a690c5766": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a feeling of profound respect for someone or something",
+    "id": "9a3ba271-6e3e-426d-9bf3-292a690c5766",
+    "blurb": "",
+    "word": "reverence"
+  },
+  "9aa89bdb-678d-4a2b-bfcb-0bb5b2744d6e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "combining or composed of elements drawn from a variety of sources",
+    "id": "9aa89bdb-678d-4a2b-bfcb-0bb5b2744d6e",
+    "blurb": "",
+    "word": "eclectic"
+  },
+  "9dc76c6d-0481-4d41-af77-bcedf67d57f6": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "informal term for a (young) woman",
+    "id": "9dc76c6d-0481-4d41-af77-bcedf67d57f6",
+    "blurb": "",
+    "word": "dame"
+  },
+  "a3b5ccc8-2cf0-4249-a506-2decb81b3c20": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "When he saw the mess the dog had made, he was absolutely _________, speechless with rage.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "The coach became _________ after the referee's controversial call, shouting and gesturing wildly on the sidelines.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "Her father's _________ reaction to her coming home past curfew was, in her opinion, a bit of an overreaction.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "The critic was _________ in his review, tearing into the movie with such vehemence that it became comical.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "Upon finding his car had been towed, his reaction was so _________ that bystanders started to gather, wondering if they should intervene.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "Seeing the bill for the car repair, she was _________; the amount was far beyond what she had expected.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "The principal was _________ when he discovered the senior prank had flooded the school's basement.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "Her _________ response to the spoiled surprise party was ironic, considering she always said she hated surprises.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "When the new policy was announced, the employees were _________, fearing for their jobs and futures at the company.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "The artist was _________ upon seeing his work mistakenly attributed to another in the exhibition catalog.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "His _________ rant over the lost luggage was so over the top that his family couldn't help but laugh, diffusing the tension.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "The fans were _________ after the last-minute cancellation of the concert, having waited for hours in the rain.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "After reading the unfair critique of her book, she was _________, tempted to pen a fiery rebuttal.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "Discovering the antique vase broken was enough to render her _________, as it had been in her family for generations.",
+        "answer": "apoplectic"
+      },
+      {
+        "question": "The investor was _________ when the startup he backed went under, his dreams and finances dashed.",
+        "answer": "apoplectic"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by extreme anger",
+    "id": "a3b5ccc8-2cf0-4249-a506-2decb81b3c20",
+    "blurb": "",
+    "word": "apoplectic"
+  },
+  "a6e2fec5-f06e-4517-9930-4dad284cd8c3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by defiant disregard for danger or consequences",
+    "id": "a6e2fec5-f06e-4517-9930-4dad284cd8c3",
+    "blurb": "",
+    "word": "foolhardy"
+  },
+  "a6f0af9c-b09e-441b-bfe9-854af609d89c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a vague sense of unease or dissatisfaction",
+    "id": "a6f0af9c-b09e-441b-bfe9-854af609d89c",
+    "blurb": "",
+    "word": "malaise"
+  },
+  "a719cca6-c8ed-4f4e-aec6-743d23dcd2ab": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "trivial nonsense",
+    "id": "a719cca6-c8ed-4f4e-aec6-743d23dcd2ab",
+    "blurb": "",
+    "word": "balderdash"
+  },
+  "a80ef0d1-5958-44d0-9b2f-67ba7a71dc5a": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "activities that are enjoyable or amusing",
+    "id": "a80ef0d1-5958-44d0-9b2f-67ba7a71dc5a",
+    "blurb": "",
+    "word": "merriment"
+  },
+  "a905047c-d936-457e-a766-dec674e932ba": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "The documentary exposed the _________ conditions in the prison system, sparking public outrage and calls for reform.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "She found the idea of cheating on exams _________, believing in hard work and integrity.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "The community rallied against the developer's plans, finding the destruction of the local park for profit _________.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "To many, the concept of child labor is _________, representing a gross violation of human rights.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "He considered lying to be an _________ act, incompatible with his personal ethics.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "The politician's _________ remarks on social media were widely condemned, leading to a swift apology.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "In the novel, the antagonist's _________ behavior towards the less fortunate made him a perfect villain.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "The law was changed to reflect society's view that discrimination of any kind is _________.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "Environmentalists labeled the company's disregard for pollution controls as _________, demanding immediate action.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "The jury found the evidence of cruelty in the case _________, leading to a unanimous guilty verdict.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "Their _________ exploitation of the loophole in the tax law eventually led to legislative changes.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "Finding the taste of the medicine _________, she struggled to swallow it despite its health benefits.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "The movement aimed to combat the _________ attitudes towards mental health that still persist in many communities.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "As an advocate for animal rights, she found the idea of hunting for sport absolutely _________.",
+        "answer": "abhorrent"
+      },
+      {
+        "question": "The historian described the _________ treatment of prisoners during the war, highlighting the need for remembrance and education.",
+        "answer": "abhorrent"
+      }
+    ],
+    "examples": [
+      {
+        "sourceUrl": "",
+        "source": "The Bluest Eye",
+        "id": "15b20f26-3f0d-4c3c-8a97-c186e59c804d",
+        "example": "She was one of the few things abhorrent to him that he could touch and therefore hurt."
+      }
+    ],
+    "background": "When you think of *abhorrent*, think of *horror*, as in something so vile and loathsome that you can only react to it in horror. In fact, the word *abhorrent* in Latin means “to recoil (back away) in horror.” Note that the ending is spelled *-ent* with an *e*, not an *a*. Maybe the *a* found *abhorrent* so abhorrent that it didn’t want to appear in it a second time.",
+    "partOfSpeech": "adjective",
+    "definition": "offensive to the mind",
+    "id": "a905047c-d936-457e-a766-dec674e932ba",
+    "blurb": "Many people find cruelty toward animals *abhorrent*, that is, they think it's detestable, obscene, repugnant, repulsive, and offensive to the mind. In other words, they really, really don't like it.",
+    "word": "abhorrent"
+  },
+  "ab38c823-badc-4267-9666-2d2a55dc922c": {
+    "fillInTheBlankQuestions": [],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "resembling a maze in form or complexity",
+    "id": "ab38c823-badc-4267-9666-2d2a55dc922c",
+    "blurb": "*Labyrinthine* is a good word to describe a place that feels like an enormous maze. A new student at a huge, sprawling high school is likely to find the building *labyrinthine* as she wanders the halls looking for her math class.",
+    "word": "labyrinthine"
+  },
+  "ac32df91-24a1-4133-8c7f-9452e0a841ac": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "marked by uncontrolled excitement or emotion",
+    "id": "ac32df91-24a1-4133-8c7f-9452e0a841ac",
+    "blurb": "",
+    "word": "deliriously"
+  },
+  "ad562351-7684-4de3-bdf9-1274238b3a80": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a retail shop where medicine and other articles are sold",
+    "id": "ad562351-7684-4de3-bdf9-1274238b3a80",
+    "blurb": "",
+    "word": "apothecary"
+  },
+  "ad674348-da0e-48ef-ae06-bfad06b658d0": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "being of such surpassing excellence as to suggest inspiration by the gods",
+    "id": "ad674348-da0e-48ef-ae06-bfad06b658d0",
+    "blurb": "",
+    "word": "elysian"
+  },
+  "af7d8548-1fb4-4c82-bee9-adf38f718704": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "deliberately vague or ambiguous",
+    "id": "af7d8548-1fb4-4c82-bee9-adf38f718704",
+    "blurb": "",
+    "word": "evasive"
+  },
+  "b0c3f6ad-6c01-4702-a006-39fcafd3dfde": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "ostentatiously lofty in style; inflated; pretentious",
+    "id": "b0c3f6ad-6c01-4702-a006-39fcafd3dfde",
+    "blurb": "",
+    "word": "bombastic"
+  },
+  "b3154034-81b4-4aa8-8d10-8324f43c2d67": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "conducted with or marked by hidden aims or methods",
+    "id": "b3154034-81b4-4aa8-8d10-8324f43c2d67",
+    "blurb": "",
+    "word": "clandestine"
+  },
+  "b7a0e2b4-8cd6-4a9c-9409-f3400b3af27e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "still in existence; not extinct or destroyed or lost",
+    "id": "b7a0e2b4-8cd6-4a9c-9409-f3400b3af27e",
+    "blurb": "",
+    "word": "extant"
+  },
+  "b9a68611-ca04-4670-b064-2c2e18279750": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a shaky, rattling object, as a rickety vehicle.",
+    "id": "b9a68611-ca04-4670-b064-2c2e18279750",
+    "blurb": "",
+    "word": "rattletrap"
+  },
+  "bf0b087d-baa9-477c-a74c-1a54d9f5a422": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "lasting a very short time",
+    "id": "bf0b087d-baa9-477c-a74c-1a54d9f5a422",
+    "blurb": "",
+    "word": "transitory"
+  },
+  "bf0b9652-8401-49e4-8200-27c3ee8f0b9c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "completely wanting or lacking",
+    "id": "bf0b9652-8401-49e4-8200-27c3ee8f0b9c",
+    "blurb": "",
+    "word": "destitute"
+  },
+  "c3c06fb4-2ed6-4e17-956d-4d54ef79f565": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "experience prolonged suffering in an unpleasant situation or place",
+    "id": "c3c06fb4-2ed6-4e17-956d-4d54ef79f565",
+    "blurb": "",
+    "word": "languish"
+  },
+  "c408852d-a8c2-4ada-bdde-1a511eb2776a": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a ceremonial prayer invoking divine protection",
+    "id": "c408852d-a8c2-4ada-bdde-1a511eb2776a",
+    "blurb": "",
+    "word": "benediction"
+  },
+  "c8388c5f-e1bd-4fe7-ba7b-7e3bfd646b52": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a branch of knowledge",
+    "id": "c8388c5f-e1bd-4fe7-ba7b-7e3bfd646b52",
+    "blurb": "",
+    "word": "bailiwick"
+  },
+  "c8641aa2-a0dd-45b9-a7b7-399ea1e097bf": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "moral or ethical considerations or standards that act as a restraining force or inhibit certain actions",
+    "id": "c8641aa2-a0dd-45b9-a7b7-399ea1e097bf",
+    "blurb": "",
+    "word": "scruples"
+  },
+  "ca2ce725-4046-4f77-833d-0bdef7f72bc3": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a situation from which escape is very difficult",
+    "id": "ca2ce725-4046-4f77-833d-0bdef7f72bc3",
+    "blurb": "",
+    "word": "quagmire"
+  },
+  "cbb335ef-e6ee-4ad4-8010-8b1040db584e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "treated as if holy and kept free from violation or criticism",
+    "id": "cbb335ef-e6ee-4ad4-8010-8b1040db584e",
+    "blurb": "",
+    "word": "sacrosanct"
+  },
+  "ccaa1790-2616-49ec-bb39-5703a6eb2cb6": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "very small",
+    "id": "ccaa1790-2616-49ec-bb39-5703a6eb2cb6",
+    "blurb": "",
+    "word": "diminutive"
+  },
+  "ce4b3b4a-0bc5-4ff1-ac04-e4c48f61f79e": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "praise, glorify, or honor",
+    "id": "ce4b3b4a-0bc5-4ff1-ac04-e4c48f61f79e",
+    "blurb": "",
+    "word": "extolled"
+  },
+  "ce74e8e3-7635-4899-afac-93ce3a3ebab1": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a cry of sorrow and grief",
+    "id": "ce74e8e3-7635-4899-afac-93ce3a3ebab1",
+    "blurb": "",
+    "word": "lamentation"
+  },
+  "d3fc9f64-5fb1-45fe-965f-e95b05960249": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to deceive or get the better of (someone) by trickery, flattery, or the like",
+    "id": "d3fc9f64-5fb1-45fe-965f-e95b05960249",
+    "blurb": "",
+    "word": "bamboozle"
+  },
+  "d4b0472e-e16a-4664-bcd6-c1fd1644c100": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a secret rendezvous (especially between lovers)",
+    "id": "d4b0472e-e16a-4664-bcd6-c1fd1644c100",
+    "blurb": "",
+    "word": "tryst"
+  },
+  "d823eb62-6ec1-4bf3-968f-37ef528b7e4d": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "the brink of a dangerous or potentially disastrous situation",
+    "id": "d823eb62-6ec1-4bf3-968f-37ef528b7e4d",
+    "blurb": "",
+    "word": "precipice"
+  },
+  "de67ecb2-6ac0-4ccd-8d47-353ddf82692f": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "belonging to some prior time; former",
+    "id": "de67ecb2-6ac0-4ccd-8d47-353ddf82692f",
+    "blurb": "",
+    "word": "erstwhile"
+  },
+  "dedc9609-1995-4d52-be3d-4c41b2ab5b71": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "to cut short; cut off a part of; abridge; reduce; diminish",
+    "id": "dedc9609-1995-4d52-be3d-4c41b2ab5b71",
+    "blurb": "",
+    "word": "curtail"
+  },
+  "e25ba77a-56e8-4b3c-a8bd-74187a77862b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "any disease easily transmitted by contact",
+    "id": "e25ba77a-56e8-4b3c-a8bd-74187a77862b",
+    "blurb": "",
+    "word": "contagion"
+  },
+  "e418753f-741d-43f9-9f4c-22ba7c4745ef": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "wander aimlessly in search of pleasure",
+    "id": "e418753f-741d-43f9-9f4c-22ba7c4745ef",
+    "blurb": "",
+    "word": "gallivant"
+  },
+  "e6202f32-e8c3-40ec-aaa6-bc1540268797": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a complete failure or collapse",
+    "id": "e6202f32-e8c3-40ec-aaa6-bc1540268797",
+    "blurb": "",
+    "word": "fiasco"
+  },
+  "e640bfc6-f71b-4183-a08d-ad37a8607102": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "freedom from activity (work or strain or responsibility)",
+    "id": "e640bfc6-f71b-4183-a08d-ad37a8607102",
+    "blurb": "",
+    "word": "repose"
+  },
+  "e6ae8816-a584-4cee-90c8-64adfe7f849c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "fond of the company of others; sociable",
+    "id": "e6ae8816-a584-4cee-90c8-64adfe7f849c",
+    "blurb": "",
+    "word": "gregarious"
+  },
+  "e8a9ca36-5e94-45e8-a511-e75b5a8f1729": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a petty misdeed or fault",
+    "id": "e8a9ca36-5e94-45e8-a511-e75b5a8f1729",
+    "blurb": "",
+    "word": "peccadillo"
+  },
+  "ed250f4d-c049-4404-9729-7d16ed4f562a": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "The once proud leader, now having _________ himself in the eyes of both allies and foes, sought a path to redemption and respect.",
+        "answer": "abased"
+      },
+      {
+        "question": "In a bid to teach the young prince about humility, the wise mentor explained that true leaders do not _________ others to prove their strength.",
+        "answer": "abase"
+      },
+      {
+        "question": "The harsh critique from the judges seemed not only to assess her work but to _________ her very efforts, making her question her path.",
+        "answer": "abase"
+      },
+      {
+        "question": "After years of conflict, the peace treaty included clauses that ensured no party would seek to _________ the other, fostering a spirit of mutual respect and cooperation.",
+        "answer": "abase"
+      },
+      {
+        "question": "The leader's decision to publicly criticize team members not only hurt morale but also served to _________ them in front of their peers.",
+        "answer": "abase"
+      },
+      {
+        "question": "Realizing the error of his ways, the character in the novel sought redemption for his past actions that _________ others to elevate his own status.",
+        "answer": "abased"
+      },
+      {
+        "question": "In a surprising turn of events, the politician's speech did more to _________ herself in the eyes of the public than to discredit her opponent.",
+        "answer": "abase"
+      },
+      {
+        "question": "The ancient ruler believed that to maintain power, it was necessary to _________ his enemies, stripping them of their dignity and status.",
+        "answer": "abase"
+      },
+      {
+        "question": "The teacher emphasized the importance of constructive criticism, cautioning that harsh words could unintentionally _________ students, affecting their confidence and self-esteem.",
+        "answer": "abase"
+      }
+    ],
+    "examples": [
+      {
+        "sourceUrl": "https://www.amazon.com/dp/0441478123",
+        "source": "The Left Hand of Darkness",
+        "id": "e436689a-57d2-4ec2-a0fe-a1b58a4171b4",
+        "example": "And yet when he says, “I am from outer space,” some of you actually shut your eyes, abase your intellects, and believe!"
+      },
+      {
+        "sourceUrl": "",
+        "source": "The Name of the Wind",
+        "id": "a6b8ed8d-c1e3-476d-926d-4df5e2f3cfa8",
+        "example": "“Should I abase myself? Rub ashes in my hair? Tear my clothes?”"
+      },
+      {
+        "sourceUrl": "",
+        "source": "Salon - Jun 9, 2018",
+        "id": "2a2befbd-47c9-4427-a1a8-9942f494c156",
+        "example": "Rather they are measurements of the amount of time that stick-figure heads bob up and down or left and right to fawn over the person who is president or to abase his flaws."
+      },
+      {
+        "sourceUrl": "",
+        "source": "The Guardian - Jan 6, 2013",
+        "id": "55e4ec4f-9af9-4e20-9b26-1956ac21d006",
+        "example": "Cojocaru especially was a force of nature, the moment where she fell on her knees before Kobborg had a reckless, raw abandon that made the gesture anything but self abasing."
+      },
+      {
+        "sourceUrl": "",
+        "source": "New York Times - Apr 26, 2023",
+        "id": "2f865af1-536b-4851-8ce9-455b69110f13",
+        "example": "Much of the classical music industry has since abased itself at Mäkelä’s feet."
+      },
+      {
+        "sourceUrl": "",
+        "source": "New York Times - Oct 5, 2012",
+        "id": "2053d956-d2ee-484c-b935-c726d23b73d2",
+        "example": "Yet when she isn’t mooning or abasing herself to win the attention of a handsome fellow intern, she shows off a preternatural self-possession, the girl with all the answers."
+      },
+      {
+        "sourceUrl": "",
+        "source": "New York Times - Jun 24, 2017",
+        "id": "c3f7c7e3-60a7-4198-aa46-5e1062f5df41",
+        "example": "Before the company, she reiterated the ballet’s gesture of amorous veneration, making her arms a halo that she drew over his head, shoulders, torso, and legs, abasing herself at his feet."
+      },
+      {
+        "sourceUrl": "",
+        "source": "New York Times - Jun 15, 2012",
+        "id": "725d53d7-d6cb-48ca-afea-19f463310cf6",
+        "example": "But one German theologian has recently proposed explanatory footnotes to turn the most problematic passages — the black children abasing themselves before Pippi, for example — into educational opportunities."
+      }
+    ],
+    "background": "*Abase* means to bring someone down, often either in their job or their self-esteem. The early Latin *bassus*, which meant \"thick, low,\" evolved into the Old French *abaissier*, meaning \"to make lower in value or status.\" The important clue to the word is \"base.\" Consider that the base of anything is the bottom, and you get an idea as to the meaning of the word *abase*, which means to make someone feel low.",
+    "partOfSpeech": "verb",
+    "definition": "cause to feel shame; hurt the pride of",
+    "id": "ed250f4d-c049-4404-9729-7d16ed4f562a",
+    "blurb": "To *abase* something or someone is to humiliate them — no, more than just humiliate them. If you *abase* another person you are bringing them low, humbling them in a mean, *base* manner. Not nice at all.",
+    "word": "abase"
+  },
+  "ee1a1bab-4813-488c-a663-90d544105b8b": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "pleasing to the ear",
+    "id": "ee1a1bab-4813-488c-a663-90d544105b8b",
+    "blurb": "",
+    "word": "mellifluous"
+  },
+  "ef470a0e-abd3-46e1-8752-c7f934e7dff8": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "devoid of intelligence",
+    "id": "ef470a0e-abd3-46e1-8752-c7f934e7dff8",
+    "blurb": "",
+    "word": "fatuous"
+  },
+  "f0c9ab66-31f6-4a6e-afa0-651f207a3014": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "not sensible about practical matters; idealistic and unrealistic",
+    "id": "f0c9ab66-31f6-4a6e-afa0-651f207a3014",
+    "blurb": "",
+    "word": "quixotic"
+  },
+  "f55ac0b4-1607-498a-b34f-f7704162833c": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a state of extreme confusion and disorder",
+    "id": "f55ac0b4-1607-498a-b34f-f7704162833c",
+    "blurb": "",
+    "word": "bedlam"
+  },
+  "f5d64c05-19c1-4706-a7aa-925dc179d1a2": {
+    "fillInTheBlankQuestions": [
+      {
+        "question": "For the gala, the hall was _________ with flowers and lights, transforming it into a magical space.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The ancient statue _________ the temple for centuries, becoming a symbol of the city's heritage.",
+        "answer": "adorned"
+      },
+      {
+        "question": "She plans to _________ the living room with paintings and sculptures she collected from her travels.",
+        "answer": "adorn"
+      },
+      {
+        "question": "His stories, which _________ the pages of the community newsletter, brought local history to life.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The crown, _________ with jewels from around the world, was the centerpiece of the exhibition.",
+        "answer": "adorned"
+      },
+      {
+        "question": "Each year, the family _________ the Christmas tree with ornaments passed down through generations.",
+        "answer": "adorns"
+      },
+      {
+        "question": "The simple dress was _________ with a single, elegant brooch, adding a touch of sophistication.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The poet's verses _________ the walls of the café, creating an inspiring atmosphere for its patrons.",
+        "answer": "adorn"
+      },
+      {
+        "question": "Upon her arrival, she was _________ with flowers and gifts, a gesture of welcome from the local community.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The soldier's uniform was _________ with medals, each telling a story of bravery and service.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The celebratory cake will be _________ with fruits and edible flowers to match the theme of the party.",
+        "answer": "adorned"
+      },
+      {
+        "question": "With pride, he _________ the mantlepiece with trophies and awards his children had won.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The quaint cottage was _________ with hanging baskets and window boxes, making it a picturesque sight.",
+        "answer": "adorned"
+      },
+      {
+        "question": "The ceremony will _________ the heroes with medals of valor, recognizing their extraordinary courage.",
+        "answer": "adorn"
+      },
+      {
+        "question": "The night sky was _________ with stars, a spectacular backdrop for the outdoor concert.",
+        "answer": "adorned"
+      }
+    ],
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "make more attractive by adding ornament, colour, etc.",
+    "id": "f5d64c05-19c1-4706-a7aa-925dc179d1a2",
+    "blurb": "To *adorn* is to dress something up by decorating it. You might *adorn* your poncho with fringe or your poodle's dog collar with rhinestones.",
+    "word": "adorn"
+  },
+  "fa3b6b23-50d4-4084-9a3e-2b5c562db196": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a roundabout or indirect way of speaking; the use of more words than necessary to express an idea",
+    "id": "fa3b6b23-50d4-4084-9a3e-2b5c562db196",
+    "blurb": "",
+    "word": "circumlocution"
+  },
+  "fd25b061-f2e6-4b4e-9ce0-b4ee86b93920": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "verb",
+    "definition": "be confusing or perplexing to; cause to be unable to think clearly",
+    "id": "fd25b061-f2e6-4b4e-9ce0-b4ee86b93920",
+    "blurb": "",
+    "word": "bedevil"
+  },
+  "fec2342c-e8d4-45c2-9210-016c1c4dda56": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "noun",
+    "definition": "a journey taken for pleasure",
+    "id": "fec2342c-e8d4-45c2-9210-016c1c4dda56",
+    "blurb": "",
+    "word": "excursion"
+  },
+  "fec27824-369a-4c8e-b4f5-46e66f0b3a99": {
+    "examples": [],
+    "background": "",
+    "partOfSpeech": "adjective",
+    "definition": "offensively discourteous",
+    "id": "fec27824-369a-4c8e-b4f5-46e66f0b3a99",
+    "blurb": "",
+    "word": "unchivalrous"
+  }
 }
