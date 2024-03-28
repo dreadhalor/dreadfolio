@@ -199,6 +199,9 @@ importers:
       sonner:
         specifier: ^1.4.3
         version: 1.4.41(react-dom@18.2.0)(react@18.2.0)
+      stripe:
+        specifier: ^14.22.0
+        version: 14.22.0
       tailwind-merge:
         specifier: ^2.2.1
         version: 2.2.2
@@ -22803,6 +22806,14 @@ packages:
     dependencies:
       escape-string-regexp: 1.0.5
     dev: true
+
+  /stripe@14.22.0:
+    resolution: {integrity: sha512-Pj8SAdTNjMq42UnWzBTTy8KMQ8qbQoVemPHbw3x+rHvwq1Psg9UFPT58j54F5os/SCgUAOZSEMcUedvzIDuqvw==}
+    engines: {node: '>=12.*'}
+    dependencies:
+      '@types/node': 20.11.30
+      qs: 6.12.0
+    dev: false
 
   /strnum@1.0.5:
     resolution: {integrity: sha512-J8bbNyKKXl5qYcR36TIO8W3mVGVHrmmxsd5PAItGkmyzwJvybiw2IVq5nqd0i4LSNSkB/sx9VHllbfFdr9k1JA==}

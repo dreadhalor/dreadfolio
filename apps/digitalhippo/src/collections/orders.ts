@@ -48,7 +48,7 @@ export const Orders: CollectionConfig = {
       },
     },
     {
-      name: 'product',
+      name: 'products',
       type: 'relationship',
       relationTo: 'products',
       required: true,

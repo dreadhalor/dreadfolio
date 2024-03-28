@@ -32,7 +32,7 @@ const yourOwnAndPurchased: Access = async ({ req }) => {
   });
 
   const purchasedProductFileIds = orders.map((order) => {
-    return order.product
+    return order.products
       .map((product) => {
         if (typeof product === 'string')
           return req.payload.logger.error(
