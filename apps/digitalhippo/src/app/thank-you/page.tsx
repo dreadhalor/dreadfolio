@@ -1,5 +1,5 @@
 import { PaymentStatus } from '@digitalhippo/components/payment-status';
-import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
+import { PRODUCT_CATEGORIES, TRANSACTION_FEE } from '@digitalhippo/config';
 import { getPayloadClient } from '@digitalhippo/get-payload';
 import { getServerSideUser } from '@digitalhippo/lib/payload-utils';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
@@ -8,6 +8,9 @@ import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { OrderItem } from './order-item';
+import { PriceTotalFooter } from './price-total-footer';
+import { ThankYouHeader } from './thank-you-header';
 
 type Props = {
   searchParams: {
@@ -17,7 +20,6 @@ type Props = {
 const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
   const nextCookies = cookies();
   const { user } = await getServerSideUser(nextCookies);
-  const TRANSACTION_FEE = 1;
 
   const payload = await getPayloadClient();
   if (!payload) return null;
@@ -40,11 +42,6 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
     typeof order.user === 'string' ? order.user : order.user.id;
   if (orderUserId !== user?.id)
     return redirect(`/login?origin=thank-you?orderId=${orderId}`);
-
-  const orderSubTotal = (order.products as Product[]).reduce(
-    (acc, product) => acc + product.price,
-    0,
-  );
 
   const orderEmail =
     typeof order.user === 'string' ? order.user : order.user.email;
@@ -70,94 +67,19 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
           )}
         >
           <div className='lg:col-start-2'>
-            <p className='text-sm font-medium text-blue-600'>
-              Order successful
-            </p>
-            <h1 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl'>
-              Thanks for ordering!
-            </h1>
-            {order._isPaid ? (
-              <p className='text-muted-foreground mt-2 text-base'>
-                Your order was processed & your assets are available to download
-                below. We&apos;ve sent your receipt & order details to{' '}
-                <span className='font-medium text-gray-900'>{orderEmail}</span>.
-              </p>
-            ) : (
-              <p className='text-muted-foreground mt-2 text-base'>
-                We appreciate your order, & we&apos;re currently processing it.
-                Hang tight & we&apos;ll send you confirmation very soon!
-              </p>
-            )}
+            <ThankYouHeader order={order} />
 
             <div className='mt-16 text-sm font-medium'>
               <div className='text-muted-foreground'>Order number:</div>
               <div className='mt-2 text-gray-900'>{order.id}</div>
 
               <ul className='text-muted-foreground mt-6 divide-y divide-gray-200 border-t border-gray-200 text-sm font-medium'>
-                {(order.products as Product[]).map((product) => {
-                  const label =
-                    PRODUCT_CATEGORIES.find(
-                      (category) => category.id === product.category,
-                    )?.label || '';
-
-                  const downloadUrl = (product.productFiles as ProductFile)
-                    .url as string;
-
-                  const image = product.images[0].image as Media;
-
-                  return (
-                    <li key={product.id} className='flex space-x-6 py-6'>
-                      <div className='relative h-24 w-24'>
-                        <Image
-                          src={image.url || ''}
-                          fill
-                          alt={`${product.name} image`}
-                          className='flex-none rounded-md bg-gray-100 object-cover object-center'
-                        />
-                      </div>
-
-                      <div className='flex flex-auto flex-col justify-between'>
-                        <div className='space-y-1'>
-                          <h3 className='text-gray-900'>{product.name}</h3>
-                          <p className='my-1'>Category: {label}</p>
-                        </div>
-
-                        {order._isPaid && (
-                          <a
-                            href={downloadUrl}
-                            download={product.name}
-                            className='w-fit text-blue-600 underline-offset-2 hover:underline'
-                          >
-                            Download Assets
-                          </a>
-                        )}
-                      </div>
-
-                      <p className='flex-none font-medium text-gray-900'>
-                        {formatPrice(product.price)}
-                      </p>
-                    </li>
-                  );
-                })}
+                {(order.products as Product[]).map((product) => (
+                  <OrderItem key={product.id} order={order} product={product} />
+                ))}
               </ul>
 
-              <div className='text-muted-foreground space-y-6 border-t border-gray-200 pt-6 text-sm font-medium'>
-                <div className='flex justify-between'>
-                  <p>Subtotal</p>
-                  <p>{formatPrice(orderSubTotal)}</p>
-                </div>
-                <div className='flex justify-between'>
-                  <p>Transaction Fee</p>
-                  <p>{formatPrice(TRANSACTION_FEE)}</p>
-                </div>
-
-                <div className='flex items-center justify-between border-t border-gray-200 pt-6 text-gray-900'>
-                  <p className='text-base'>Total</p>
-                  <p className='text-base'>
-                    {formatPrice(orderSubTotal + TRANSACTION_FEE)}
-                  </p>
-                </div>
-              </div>
+              <PriceTotalFooter order={order} />
 
               <PaymentStatus
                 orderEmail={orderEmail}
