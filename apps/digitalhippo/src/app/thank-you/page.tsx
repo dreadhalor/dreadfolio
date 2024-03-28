@@ -1,3 +1,4 @@
+import { PaymentStatus } from '@digitalhippo/components/payment-status';
 import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
 import { getPayloadClient } from '@digitalhippo/get-payload';
 import { getServerSideUser } from '@digitalhippo/lib/payload-utils';
@@ -45,6 +46,9 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
     0,
   );
 
+  const orderEmail =
+    typeof order.user === 'string' ? order.user : order.user.email;
+
   return (
     <main className='relative lg:min-h-full'>
       <div className='hidden h-80 overflow-hidden lg:absolute lg:block lg:h-full lg:w-1/2 lg:pr-4 xl:pr-12'>
@@ -72,22 +76,18 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
             <h1 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl'>
               Thanks for ordering!
             </h1>
-            {order._isPaid && (
+            {order._isPaid ? (
               <p className='text-muted-foreground mt-2 text-base'>
                 Your order was processed & your assets are available to download
                 below. We&apos;ve sent your receipt & order details to{' '}
-                {typeof order.user !== 'string' && (
-                  <span className='font-medium text-gray-900'>
-                    {order.user.email}
-                  </span>
-                )}
-                .
+                <span className='font-medium text-gray-900'>{orderEmail}</span>.
+              </p>
+            ) : (
+              <p className='text-muted-foreground mt-2 text-base'>
+                We appreciate your order, & we&apos;re currently processing it.
+                Hang tight & we&apos;ll send you confirmation very soon!
               </p>
             )}
-            <p className='text-muted-foreground mt-2 text-base'>
-              We appreciate your order, & we&apos;re currently processing it.
-              Hang tight & we&apos;ll send you confirmation very soon!
-            </p>
 
             <div className='mt-16 text-sm font-medium'>
               <div className='text-muted-foreground'>Order number:</div>
@@ -158,6 +158,12 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
                   </p>
                 </div>
               </div>
+
+              <PaymentStatus
+                orderEmail={orderEmail}
+                orderId={order.id}
+                isPaid={order._isPaid}
+              />
 
               <div className='mt-16 border-t border-gray-200 py-6 text-right'>
                 <Link

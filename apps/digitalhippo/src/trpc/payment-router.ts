@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { privateProcedure, router } from './trpc';
+import { privateProcedure, publicProcedure, router } from './trpc';
 import { TRPCError } from '@trpc/server';
 import { getPayloadClient } from '../get-payload';
 import { stripe } from '../lib/stripe';
@@ -89,5 +89,37 @@ export const paymentRouter = router({
 
         return { url: null };
       }
+    }),
+
+  pollOrderStatus: publicProcedure
+    .input(z.object({ orderId: z.string() }))
+    .query(async ({ input: { orderId } }) => {
+      const payload = await getPayloadClient();
+      if (!payload) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Payload not found',
+        });
+      }
+
+      const { docs: orders } = await payload.find({
+        collection: 'orders',
+        where: {
+          id: {
+            equals: orderId,
+          },
+        },
+      });
+
+      const [order] = orders;
+
+      if (!order) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Order not found',
+        });
+      }
+
+      return { isPaid: order._isPaid };
     }),
 });
