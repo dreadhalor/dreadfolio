@@ -17,6 +17,7 @@ import Image from 'next/image';
 import { useCart } from '@digitalhippo/hooks/use-cart';
 import { CartItem } from './cart-item';
 import { ScrollArea } from '../ui/scroll-area';
+import { TRANSACTION_FEE } from '@digitalhippo/config';
 
 export const Cart = () => {
   const { items } = useCart();
@@ -25,8 +26,6 @@ export const Cart = () => {
   const cartTotal = items.reduce((acc, { product: { price } }) => {
     return acc + price;
   }, 0);
-
-  const fee = 1;
 
   return (
     <Sheet>
@@ -61,7 +60,7 @@ export const Cart = () => {
                 </div>
                 <div className='flex'>
                   <span className='flex-1'>Transaction Fee</span>
-                  <span>{formatPrice(fee)}</span>
+                  <span>{formatPrice(TRANSACTION_FEE)}</span>
                 </div>
                 <div className='flex'>
                   <span className='flex-1'>Total</span>

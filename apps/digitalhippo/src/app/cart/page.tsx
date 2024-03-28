@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@digitalhippo/components/ui/button';
-import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
+import { PRODUCT_CATEGORIES, TRANSACTION_FEE } from '@digitalhippo/config';
 import { useCart } from '@digitalhippo/hooks/use-cart';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
 import { trpc } from '@digitalhippo/trpc/client';
@@ -26,7 +26,6 @@ const Page = () => {
     (acc, { product: { price } }) => acc + price,
     0,
   );
-  const fee = 1;
 
   return (
     <div className='bg-white'>
@@ -178,7 +177,7 @@ const Page = () => {
                   <span>Flat Transaction Fee</span>
                 </div>
                 <div className='text-sm font-medium text-gray-900'>
-                  {formatPrice(fee)}
+                  {formatPrice(TRANSACTION_FEE)}
                 </div>
               </div>
 
@@ -187,7 +186,7 @@ const Page = () => {
                   Order Total
                 </div>
                 <div className='text-base font-medium text-gray-900'>
-                  {formatPrice(cartTotal + fee)}
+                  {formatPrice(cartTotal + TRANSACTION_FEE)}
                 </div>
               </div>
             </div>

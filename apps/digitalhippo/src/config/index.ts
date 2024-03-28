@@ -43,3 +43,5 @@ export const PRODUCT_CATEGORIES = [
   },
 ] as const;
 export type Category = (typeof PRODUCT_CATEGORIES)[number];
+
+export const TRANSACTION_FEE = 1;

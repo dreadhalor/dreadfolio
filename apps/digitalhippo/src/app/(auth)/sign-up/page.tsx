@@ -35,7 +35,7 @@ const Page = () => {
 
   const router = useRouter();
 
-  const { mutate, isLoading } = trpc.auth.createPayloadUser.useMutation({
+  const { mutate } = trpc.auth.createPayloadUser.useMutation({
     onError: (error) => {
       if (error.data?.code === 'CONFLICT') {
         toast.error('This email is already in use. Sign in instead!');
