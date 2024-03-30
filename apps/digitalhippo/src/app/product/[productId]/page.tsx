@@ -111,16 +111,6 @@ const Page = async ({ params: { productId } }: Props) => {
                   {product.description}
                 </p>
               </div>
-
-              <div className='mt-6 flex items-center'>
-                <Check
-                  aria-hidden='true'
-                  className='h-5 w-5 flex-shrink-0 text-green-500'
-                />
-                <p className='text-muted-foreground ml-2 text-sm'>
-                  Eligible for instant delivery
-                </p>
-              </div>
             </section>
           </div>
 

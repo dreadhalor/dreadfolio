@@ -19,7 +19,7 @@ const Page = ({ searchParams }: Props) => {
   return (
     <MaxWidthWrapper>
       <ProductReel
-        title={label ?? 'Browse high-quality assets'}
+        title={label ?? 'The Latest Styles'}
         query={{
           category,
           sort: sort === 'desc' || sort === 'asc' ? sort : undefined,

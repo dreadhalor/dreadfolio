@@ -1,12 +1,13 @@
 'use client';
 
-import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
 import { useEffect, useRef, useState } from 'react';
 import { NavItem } from './nav-item';
 import { useOnClickOutside } from '@digitalhippo/hooks/use-on-click-outside';
+import { trpc } from '@digitalhippo/trpc/client';
 
 export const NavItems = () => {
   const [activeItem, setActiveItem] = useState<string | null>(null);
+  const categoryNamesToDisplay = ['Dresses', 'Tops', 'Bottoms'];
 
   const navRef = useRef<HTMLDivElement>(null);
 
@@ -31,10 +32,10 @@ export const NavItems = () => {
 
   return (
     <div className='flex h-full gap-4' ref={navRef}>
-      {PRODUCT_CATEGORIES.map((category) => (
+      {categoryNamesToDisplay.map((categoryLabel) => (
         <NavItem
-          key={category.id}
-          category={category}
+          key={categoryLabel}
+          categoryLabel={categoryLabel}
           activeItem={activeItem}
           setActiveItem={setActiveItem}
         />

@@ -27,6 +27,15 @@ const nextConfig = {
 
     return config;
   },
+  // so that images don't break the app, I dunno why Next.js needs this but whatever
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

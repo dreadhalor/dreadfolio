@@ -90,15 +90,25 @@ export const Products: CollectionConfig = {
       max: 1000,
       required: true,
     },
+    // {
+    //   name: 'category',
+    //   label: 'Category',
+    //   type: 'select',
+    //   options: PRODUCT_CATEGORIES.map(({ id, label }) => ({
+    //     label,
+    //     value: id,
+    //   })),
+    //   required: true,
+    // },
     {
       name: 'category',
       label: 'Category',
-      type: 'select',
-      options: PRODUCT_CATEGORIES.map(({ id, label }) => ({
-        label,
-        value: id,
-      })),
+      // let the user select category by 'label' field instead of id
+
+      type: 'relationship',
+      relationTo: 'categories',
       required: true,
+      hasMany: false,
     },
     {
       name: 'productFiles',
@@ -135,27 +145,11 @@ export const Products: CollectionConfig = {
     },
     {
       name: 'priceId',
-      access: {
-        create: () => false,
-        read: () => false,
-        update: () => false,
-      },
       type: 'text',
-      admin: {
-        hidden: true,
-      },
     },
     {
       name: 'stripeId',
-      access: {
-        create: () => false,
-        read: () => false,
-        update: () => false,
-      },
       type: 'text',
-      admin: {
-        hidden: true,
-      },
     },
     {
       name: 'images',

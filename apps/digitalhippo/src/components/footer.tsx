@@ -7,13 +7,8 @@ import Link from 'next/link';
 
 export const Footer = () => {
   const pathname = usePathname();
-  console.log('pathname', pathname);
   const pathsToMinimize = ['/verify-email', '/sign-up', '/login'];
-  console.log('pathsToMinimize', pathsToMinimize);
-  console.log(
-    'pathsToMinimize.includes(pathname)',
-    pathsToMinimize.includes(pathname),
-  );
+
   return (
     <footer className='flex-grow-0 bg-white'>
       <div className='border-t border-gray-200'>

@@ -41,6 +41,11 @@ export const PRODUCT_CATEGORIES = [
       },
     ],
   },
+  {
+    id: 'dresses',
+    label: 'Dresses',
+    featured: [],
+  },
 ] as const;
 export type Category = (typeof PRODUCT_CATEGORIES)[number];
 

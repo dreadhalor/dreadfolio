@@ -13,6 +13,7 @@ export interface Config {
     media: Media;
     productFiles: ProductFile;
     orders: Order;
+    categories: Category;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -48,7 +49,7 @@ export interface Product {
   name: string;
   description?: string | null;
   price: number;
-  category: 'ui-kits' | 'icons';
+  category: string | Category;
   productFiles: string | ProductFile;
   approvedForSale?: ('pending' | 'approved' | 'rejected') | null;
   priceId?: string | null;
@@ -57,6 +58,17 @@ export interface Product {
     image: string | Media;
     id?: string | null;
   }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  value: string;
+  label: string;
   updatedAt: string;
   createdAt: string;
 }

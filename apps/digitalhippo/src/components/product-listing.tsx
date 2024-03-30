@@ -1,16 +1,16 @@
-import { Product } from '@digitalhippo/payload-types';
+import { Category, Product } from '@digitalhippo/payload-types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
 import Link from 'next/link';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
-import { PRODUCT_CATEGORIES } from '../config/index';
 import { ImageCarousel } from './image-carousel';
 
 type Props = {
   product: Product | null;
   index: number;
+  className?: string;
 };
-export const ProductListing = ({ product, index }: Props) => {
+export const ProductListing = ({ product, index, className }: Props) => {
   const [isVisible, setIsVisible] = useState(false);
   const imageUrls =
     product?.images.map((image) => {
@@ -30,28 +30,29 @@ export const ProductListing = ({ product, index }: Props) => {
 
   if (!product || !isVisible) return <ProductPlaceholder />;
 
-  const label = PRODUCT_CATEGORIES.find(
-    (category) => category.id === product.category,
-  )?.label;
+  const label = (product.category as Category).label;
 
   if (isVisible && product) {
     return (
       <Link
         href={`/product/${product.id}`}
         className={cn(
-          'group/main invisible h-full w-full cursor-pointer',
+          'group/main invisible h-full w-full cursor-pointer overflow-hidden rounded-xl shadow-md',
           isVisible && 'animate-in fade-in-5 visible',
+          className,
         )}
       >
-        <div className='flex w-full flex-col'>
+        <div className='flex h-full w-full flex-col'>
           <ImageCarousel urls={imageUrls} />
-          <h3 className='mt-4 text-sm font-medium text-gray-700'>
-            {product.name}
-          </h3>
-          <p className='mt-1 text-sm text-gray-500'>{label}</p>
-          <p className='mt-1 text-sm font-medium text-gray-900'>
-            {formatPrice(product.price)}
-          </p>
+          <div className='flex w-full flex-1 flex-col bg-white px-4 py-3'>
+            <h3 className='text-sm font-medium text-gray-700'>
+              {product.name}
+            </h3>
+            <p className='mt-1 text-sm text-gray-500'>{label}</p>
+            <p className='mt-1 text-sm font-medium text-gray-900'>
+              {formatPrice(product.price)}
+            </p>{' '}
+          </div>
         </div>
       </Link>
     );

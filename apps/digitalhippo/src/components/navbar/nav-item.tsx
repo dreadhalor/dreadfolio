@@ -1,32 +1,43 @@
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { Category } from '@digitalhippo/config';
+import { Category as PayloadCategory } from '@digitalhippo/payload-types';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@digitalhippo/lib/utils';
-import Image from 'next/image';
-import Link from 'next/link';
+import { NavItemDropdown } from './nav-item-dropdown';
+import { trpc } from '@digitalhippo/trpc/client';
 
 type Props = {
-  category: Category;
+  categoryLabel: PayloadCategory['label'];
   activeItem: string | null;
-  setActiveItem: (id: string | null) => void;
+  setActiveItem: (categoryLabel: string | null) => void;
 };
 export const NavItem = ({
-  category: { id, label, featured },
+  categoryLabel,
   activeItem,
   setActiveItem,
 }: Props) => {
   const [shouldAnimate, setShouldAnimate] = useState(false);
 
-  const isOpen = activeItem === id;
+  const query = {
+    categoryLabel,
+    sort: 'desc' as 'asc' | 'desc' | undefined,
+    limit: 4,
+  };
+
+  const { data } = trpc.getInfiniteProducts.useQuery(
+    { limit: query.limit, query },
+    { getNextPageParam: (lastPage) => lastPage.nextPage },
+  );
+
+  const isOpen = activeItem === categoryLabel;
 
   const handleOpen = () => {
-    if (activeItem === id) {
+    if (activeItem === categoryLabel) {
       setShouldAnimate(false);
       setActiveItem(null);
     } else {
       setShouldAnimate(activeItem === null);
-      setActiveItem(id);
+      setActiveItem(categoryLabel);
     }
   };
 
@@ -38,7 +49,7 @@ export const NavItem = ({
           onClick={handleOpen}
           variant={isOpen ? 'secondary' : 'ghost'}
         >
-          {label}
+          {categoryLabel}
           <ChevronDown
             className={cn(
               'text-muted-foreground h-4 w-4 transition-all',
@@ -47,51 +58,12 @@ export const NavItem = ({
           />
         </Button>
       </div>
-      {isOpen ? (
-        <div
-          className={cn(
-            'text-muted-foreground absolute inset-x-0 top-full text-sm',
-            shouldAnimate && 'animate-in fade-in-10 slide-in-from-top-5',
-          )}
-        >
-          <div
-            className='absolute inset-0 top-1/2 bg-white shadow'
-            aria-hidden
-          />
-          <div className='relative bg-white'>
-            <div className='mx-auto max-w-7xl px-8'>
-              <div className='grid grid-cols-4 gap-x-8 gap-y-10 py-16'>
-                <div className='col-span-4 col-start-1 grid grid-cols-3 gap-x-8'>
-                  {featured.map(({ name, imageSrc, href }) => (
-                    <div
-                      key={name}
-                      className='group relative text-base sm:text-sm'
-                    >
-                      <div className='relative aspect-video overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75'>
-                        <Image
-                          src={imageSrc}
-                          alt={name}
-                          fill
-                          className='object-cover object-center'
-                        />
-                      </div>
-                      <Link
-                        href={href}
-                        className='mt-6 block font-medium text-gray-900'
-                      >
-                        {name}
-                      </Link>
-                      <p className='mt-1' aria-hidden>
-                        Shop now
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <NavItemDropdown
+        isOpen={isOpen}
+        shouldAnimate={shouldAnimate}
+        category={categoryLabel}
+        products={data?.items}
+      />
     </div>
   );
 };

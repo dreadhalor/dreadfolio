@@ -8,7 +8,6 @@ import { paymentRouter } from './payment-router';
 export const appRouter = router({
   auth: authRouter,
   payment: paymentRouter,
-
   getInfiniteProducts: publicProcedure
     .input(
       z.object({
@@ -19,29 +18,34 @@ export const appRouter = router({
     )
     .query(async ({ input }) => {
       const { query, cursor } = input;
-      const { sort, limit, ...queryOpts } = query;
+      const { sort, limit, categoryLabel, ...queryOpts } = query;
       const parsedQueryOptions: Record<string, { equals: string }> = {};
       Object.entries(queryOpts).forEach(([key, value]) => {
         parsedQueryOptions[key] = { equals: value };
       });
-      const page = cursor || 1;
 
+      const page = cursor || 1;
       const payload = await getPayloadClient();
       if (!payload) {
         throw new Error('Payload not found');
       }
+
+      const where: any = {
+        approvedForSale: { equals: 'approved' },
+        ...parsedQueryOptions,
+      };
+
+      if (categoryLabel) {
+        where['category.label'] = { equals: categoryLabel };
+      }
+
       const {
         docs: items,
         hasNextPage,
         nextPage,
       } = await payload.find({
         collection: 'products',
-        where: {
-          approvedForSale: {
-            equals: 'approved',
-          },
-          ...parsedQueryOptions,
-        },
+        where,
         sort,
         depth: 1,
         limit,
