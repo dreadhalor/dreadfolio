@@ -21,7 +21,7 @@ export const NavItem = ({
   const query = {
     categoryLabel,
     sort: 'desc' as 'asc' | 'desc' | undefined,
-    limit: 4,
+    limit: 6,
   };
 
   const { data } = trpc.getInfiniteProducts.useQuery(

@@ -9,8 +9,14 @@ type Props = {
   product: Product | null;
   index: number;
   className?: string;
+  disableDrag?: boolean;
 };
-export const ProductListing = ({ product, index, className }: Props) => {
+export const ProductListing = ({
+  product,
+  index,
+  className,
+  disableDrag = false,
+}: Props) => {
   const [isVisible, setIsVisible] = useState(false);
   const imageUrls =
     product?.images.map((image) => {
@@ -37,13 +43,13 @@ export const ProductListing = ({ product, index, className }: Props) => {
       <Link
         href={`/product/${product.id}`}
         className={cn(
-          'group/main invisible h-full w-full cursor-pointer overflow-hidden rounded-xl shadow-md',
+          'group/main invisible flex h-full w-full cursor-pointer overflow-hidden rounded-xl shadow-md',
           isVisible && 'animate-in fade-in-5 visible',
           className,
         )}
       >
         <div className='flex h-full w-full flex-col'>
-          <ImageCarousel urls={imageUrls} />
+          <ImageCarousel urls={imageUrls} disableDrag={disableDrag} />
           <div className='flex w-full flex-1 flex-col bg-white px-4 py-3'>
             <h3 className='text-sm font-medium text-gray-700'>
               {product.name}

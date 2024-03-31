@@ -1,11 +1,17 @@
 'use client';
 
-import { cn } from '@digitalhippo/lib/utils';
 import { TQueryValidator } from '@digitalhippo/lib/validators/query-validator';
 import { trpc } from '@digitalhippo/trpc/client';
 import Link from 'next/link';
 import { Product } from '@digitalhippo/payload-types';
 import { ProductListing } from './product-listing';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from './ui/carousel';
 
 type Props = {
   title: string;
@@ -16,7 +22,7 @@ type Props = {
 
 const FALLBACK_LIMIT = 4;
 
-export const ProductReel = ({ title, subtitle, href, query }: Props) => {
+export const ProductsCarousel = ({ title, subtitle, href, query }: Props) => {
   const { data, isLoading } = trpc.getInfiniteProducts.useQuery(
     { limit: query?.limit || FALLBACK_LIMIT, query },
     { getNextPageParam: (lastPage) => lastPage.nextPage },
@@ -57,18 +63,29 @@ export const ProductReel = ({ title, subtitle, href, query }: Props) => {
 
       <div className='relative'>
         <div className='mt-6 flex w-full items-center'>
-          <div
-            className={cn(
-              'grid w-full grid-cols-2 gap-x-4 gap-y-10',
-              'sm:gap-x-6',
-              'md:grid-cols-4 md:gap-y-10',
-              'lg:gap-x-8',
-            )}
+          <Carousel
+            className='w-full'
+            opts={{
+              align: 'start',
+              skipSnaps: true,
+              slidesToScroll: 4,
+            }}
           >
-            {map.map((product, index) => (
-              <ProductListing key={index} product={product} index={index} />
-            ))}
-          </div>
+            <CarouselContent>
+              {map.map((product, index) => (
+                <CarouselItem key={index} className='basis-1/4'>
+                  <ProductListing
+                    key={index}
+                    product={product}
+                    index={index}
+                    disableDrag
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
         </div>
       </div>
     </section>

@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import {
   Carousel,
@@ -10,6 +12,7 @@ import { cn } from '@digitalhippo/lib/utils';
 
 type Props = {
   urls: string[];
+  disableDrag?: boolean;
 };
 const ImageCarouselItem = ({ url }: { url: string }) => {
   return (
@@ -26,9 +29,12 @@ const ImageCarouselItem = ({ url }: { url: string }) => {
     </CarouselItem>
   );
 };
-export const ImageCarousel = ({ urls }: Props) => {
+export const ImageCarousel = ({ urls, disableDrag = false }: Props) => {
   return (
-    <Carousel className='group relative overflow-hidden'>
+    <Carousel
+      className='group relative overflow-hidden'
+      opts={{ watchDrag: () => !disableDrag }}
+    >
       <CarouselContent className='ml-0'>
         {urls.map((url) => (
           <ImageCarouselItem key={url} url={url} />
