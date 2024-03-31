@@ -11,7 +11,6 @@ export interface Config {
     users: User;
     products: Product;
     media: Media;
-    productFiles: ProductFile;
     orders: Order;
     categories: Category;
     'payload-preferences': PayloadPreference;
@@ -50,7 +49,6 @@ export interface Product {
   description?: string | null;
   price: number;
   category: string | Category;
-  productFiles: string | ProductFile;
   approvedForSale?: ('pending' | 'approved' | 'rejected') | null;
   priceId?: string | null;
   stripeId?: string | null;
@@ -71,22 +69,6 @@ export interface Category {
   label: string;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "productFiles".
- */
-export interface ProductFile {
-  id: string;
-  user: string | User;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

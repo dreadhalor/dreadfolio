@@ -90,33 +90,13 @@ export const Products: CollectionConfig = {
       max: 1000,
       required: true,
     },
-    // {
-    //   name: 'category',
-    //   label: 'Category',
-    //   type: 'select',
-    //   options: PRODUCT_CATEGORIES.map(({ id, label }) => ({
-    //     label,
-    //     value: id,
-    //   })),
-    //   required: true,
-    // },
     {
       name: 'category',
       label: 'Category',
-      // let the user select category by 'label' field instead of id
-
       type: 'relationship',
       relationTo: 'categories',
       required: true,
       hasMany: false,
-    },
-    {
-      name: 'productFiles',
-      label: 'Product Files',
-      type: 'relationship',
-      relationTo: 'productFiles',
-      hasMany: false,
-      required: true,
     },
     {
       name: 'approvedForSale',
