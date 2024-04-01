@@ -1,5 +1,4 @@
 import { BeforeChangeHook } from 'payload/dist/collections/config/types';
-import { PRODUCT_CATEGORIES } from '../config';
 import { CollectionConfig } from 'payload/types';
 import { Product } from '../payload-types';
 import { stripe } from '../lib/stripe';

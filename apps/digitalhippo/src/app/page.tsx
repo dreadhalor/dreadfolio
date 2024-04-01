@@ -1,95 +1,135 @@
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
+import { FaShoppingBag, FaSearch, FaUser } from 'react-icons/fa';
+import { HeroCarousel } from '../components/home/hero-carousel';
+import { HeroSection } from '../components/home/hero-section';
+import { FeaturedCategories } from '../components/home/featured-categories';
 import { ProductReel } from '@digitalhippo/components/product-reel';
-import { Button, buttonVariants } from '@digitalhippo/components/ui/button';
-import { cn } from '@digitalhippo/lib/utils';
-import { ArrowDownToLine, CheckCircle, Leaf } from 'lucide-react';
-import Link from 'next/link';
+import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
+import { NewArrivals } from '../components/home/new-arrivals';
 
-const perks = [
-  {
-    name: 'Instant Delivery',
-    Icon: ArrowDownToLine,
-    description:
-      'Get your assets delivered to your email in seconds & download them right away.',
-  },
-  {
-    name: 'Guaranteed Quality',
-    Icon: CheckCircle,
-    description:
-      'Every asset on our platform is verified by our team to ensure the highest standards of quality. Not happy? We offer a 30-day money-back guarantee.',
-  },
-  {
-    name: 'For the Planet',
-    Icon: Leaf,
-    description:
-      "We've pledged 1% of sales to the preservation & restoration of the environment.",
-  },
-];
-
-export default function Home() {
+const App = () => {
   return (
-    <>
-      <MaxWidthWrapper>
-        <div className='mx-auto flex max-w-3xl flex-col items-center py-20 text-center'>
-          <h1 className='text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl'>
-            Your marketplace for high-quality{' '}
-            <span className='text-blue-600'>digital assets.</span>
-          </h1>
-          <p className='text-muted-foreground mt-6 max-w-prose text-lg'>
-            Welcome to DigitalHippo, yo. Every asset on our platform is verified
-            by our team to ensure the highest standards of quality.
-          </p>
-          <div className='mt-6 flex flex-col gap-4 sm:flex-row'>
-            <Link href='/products' className={buttonVariants()}>
-              Browse Trending
-            </Link>
-            <Button variant='ghost'>Our quality promise &rarr;</Button>
+    <div className='bg-primary min-h-screen'>
+      {/* Header */}
+      {/* <header className='bg-primary shadow'>
+        <div className='container mx-auto flex items-center justify-between px-4 py-6'>
+          <a href='/' className='text-2xl font-bold text-gray-800'>
+            FlowerChild
+          </a>
+          <nav>
+            <ul className='flex space-x-4'>
+              <li>
+                <a href='/women' className='text-gray-600 hover:text-gray-800'>
+                  Women
+                </a>
+              </li>
+              <li>
+                <a href='/men' className='text-gray-600 hover:text-gray-800'>
+                  Men
+                </a>
+              </li>
+              <li>
+                <a
+                  href='/accessories'
+                  className='text-gray-600 hover:text-gray-800'
+                >
+                  Accessories
+                </a>
+              </li>
+              <li>
+                <a href='/sale' className='text-gray-600 hover:text-gray-800'>
+                  Sale
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <div className='flex items-center space-x-4'>
+            <a href='/search' className='text-gray-600 hover:text-gray-800'>
+              <FaSearch size={20} />
+            </a>
+            <a href='/account' className='text-gray-600 hover:text-gray-800'>
+              <FaUser size={20} />
+            </a>
+            <a href='/cart' className='text-gray-600 hover:text-gray-800'>
+              <FaShoppingBag size={20} />
+            </a>
           </div>
         </div>
-        <ProductReel
-          title='Brand new'
-          href='/products'
-          query={{ sort: 'desc', limit: 4 }}
-        />
-      </MaxWidthWrapper>
-      <section className='border-t border-gray-200 bg-gray-50'>
-        <MaxWidthWrapper className='py-20'>
-          <div
-            className={cn(
-              'grid grid-cols-1 gap-y-12',
-              'sm:grid-cols-2 sm:gap-x-6',
-              'lg:grid-cols-3 lg:gap-x-8 lg:gap-y-0',
-            )}
-          >
-            {perks.map(({ name, Icon, description }) => (
-              <div
-                key={name}
-                className={cn(
-                  'text-center',
-                  'md:flex md:items-start md:text-left',
-                  'lg:block lg:text-center',
-                )}
-              >
-                <div className='flex justify-center md:flex-shrink-0'>
-                  <div className='flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-900'>
-                    <Icon className='h-1/3 w-1/3' />
-                  </div>
-                </div>
-                <div
-                  className={cn('mt-6', 'md:ml-4 md:mt-0', 'lg:ml-0 lg:mt-6')}
-                >
-                  <h3 className='text-base font-medium text-gray-900'>
-                    {name}
-                  </h3>
-                  <p className='text-muted-foreground mt-3 text-sm'>
-                    {description}
-                  </p>
-                </div>
-              </div>
-            ))}
+      </header> */}
+
+      <HeroSection />
+
+      <NewArrivals />
+
+      <FeaturedCategories />
+
+      {/* Footer */}
+      <footer className='bg-slate-800 py-8 text-white'>
+        <div className='container mx-auto flex flex-col justify-between px-4 md:flex-row'>
+          <div className='mb-4 md:mb-0'>
+            <h4 className='mb-2 text-lg font-semibold'>About Us</h4>
+            <p className='text-gray-400'>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+            </p>
           </div>
-        </MaxWidthWrapper>
-      </section>
-    </>
+          <div className='mb-4 md:mb-0'>
+            <h4 className='mb-2 text-lg font-semibold'>Customer Service</h4>
+            <ul className='text-gray-400'>
+              <li>
+                <a href='/contact' className='hover:text-white'>
+                  Contact Us
+                </a>
+              </li>
+              <li>
+                <a href='/faq' className='hover:text-white'>
+                  FAQ
+                </a>
+              </li>
+              <li>
+                <a href='/shipping' className='hover:text-white'>
+                  Shipping &amp; Returns
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className='mb-2 text-lg font-semibold'>Connect with Us</h4>
+            <ul className='text-gray-400'>
+              <li>
+                <a
+                  href='https://facebook.com/flowerchild'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='hover:text-white'
+                >
+                  Facebook
+                </a>
+              </li>
+              <li>
+                <a
+                  href='https://instagram.com/flowerchild'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='hover:text-white'
+                >
+                  Instagram
+                </a>
+              </li>
+              <li>
+                <a
+                  href='https://twitter.com/flowerchild'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='hover:text-white'
+                >
+                  Twitter
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
-}
+};
+
+export default App;
