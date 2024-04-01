@@ -26,7 +26,7 @@ export const NavItem = ({ categoryLabel }: Props) => {
   return (
     <>
       <NavigationMenuTrigger asChild>
-        <Button className='h-full rounded-none border-b border-transparent bg-transparent text-gray-600 hover:border-red-500 hover:bg-transparent data-[state=open]:bg-transparent'>
+        <Button className='h-full rounded-none border-b-2 border-transparent bg-transparent text-gray-600 hover:border-red-400 hover:bg-transparent data-[state=open]:bg-transparent'>
           {categoryLabel}
         </Button>
       </NavigationMenuTrigger>
