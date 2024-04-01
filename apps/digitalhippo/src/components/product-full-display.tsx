@@ -36,19 +36,19 @@ export const ProductFullDisplay = ({ product }: Props) => {
       const y = ((event.clientY - rect.top) / rect.height) * 100;
 
       // Calculate the margin as a percentage of the image dimensions
-      const margin = 15; // Adjust this value to control the margin size
+      const marginPercent = 15;
 
       // Calculate the scaled-down dimensions of the image
-      const scaledWidth = 100 - margin * 2;
-      const scaledHeight = 100 - margin * 2;
+      const scaledWidth = 100 - marginPercent * 2;
+      const scaledHeight = 100 - marginPercent * 2;
 
       // Calculate the center position of the scaled-down image
-      const centerX = margin + scaledWidth / 2;
-      const centerY = margin + scaledHeight / 2;
+      const centerX = marginPercent + scaledWidth / 2;
+      const centerY = marginPercent + scaledHeight / 2;
 
       // Calculate the relative position within the scaled-down image
-      const relativeX = ((x - margin) / scaledWidth) * 100;
-      const relativeY = ((y - margin) / scaledHeight) * 100;
+      const relativeX = ((x - marginPercent) / scaledWidth) * 100;
+      const relativeY = ((y - marginPercent) / scaledHeight) * 100;
 
       // Calculate the zoom position based on the relative position
       const zoomX = Math.max(0, Math.min(relativeX, 100));
