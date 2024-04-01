@@ -11,26 +11,38 @@ import { getServerSideUser } from '@digitalhippo/lib/payload-utils';
 import { cookies } from 'next/headers';
 import { UserAccountNav } from './user-account-nav';
 import MobileNav from './mobile-nav';
+import { NavigationMenu, NavigationMenuList } from '../ui/navigation-menu';
 
 export const Navbar = async () => {
   const nextCookies = cookies();
   const { user } = await getServerSideUser(nextCookies);
 
   return (
-    <div className='bg-primary sticky inset-x-0 top-0 z-50 h-16 shadow-md'>
-      <header className='relative border-b border-gray-200'>
+    <NavigationMenu
+      // value='Dresses'
+      className='bg-primary sticky inset-x-0 top-0 z-50 h-16 max-w-none border-b border-gray-200 shadow-md'
+      viewportClassnames='mt-0 border-0 bg-primary rounded-none'
+    >
+      <header className='relative w-full'>
         <MaxWidthWrapper>
           <div className='flex h-16 items-center'>
             <MobileNav />
-            <div className='ml-4 flex lg:ml-0'>
+            <div className='ml-4 mr-auto flex lg:ml-0'>
               <Link href='/'>
                 <Logo className='h-10 w-10' />
               </Link>
             </div>
             <div
-              className={cn('z-50 hidden', 'lg:ml-8 lg:block lg:self-stretch')}
+              className={cn(
+                'flex flex-nowrap',
+                'z-50',
+                'lg:ml-8 lg:self-stretch',
+              )}
             >
-              <NavItems />
+              <NavigationMenuList className='h-full'>
+                <NavItems />
+              </NavigationMenuList>
+              {/* <NavItems2 /> */}
             </div>
             <div className='ml-auto flex items-center'>
               <div
@@ -62,6 +74,6 @@ export const Navbar = async () => {
           </div>
         </MaxWidthWrapper>
       </header>
-    </div>
+    </NavigationMenu>
   );
 };

@@ -6,6 +6,7 @@ import {
   CarouselContent,
   CarouselItem,
   CarouselNext,
+  CarouselOptions,
   CarouselPrevious,
 } from './ui/carousel';
 import { cn } from '@digitalhippo/lib/utils';
@@ -13,6 +14,7 @@ import { cn } from '@digitalhippo/lib/utils';
 type Props = {
   urls: string[];
   disableDrag?: boolean;
+  opts?: Partial<CarouselOptions>;
 };
 const ImageCarouselItem = ({ url }: { url: string }) => {
   return (
@@ -29,11 +31,11 @@ const ImageCarouselItem = ({ url }: { url: string }) => {
     </CarouselItem>
   );
 };
-export const ImageCarousel = ({ urls, disableDrag = false }: Props) => {
+export const ImageCarousel = ({ urls, disableDrag = false, opts }: Props) => {
   return (
     <Carousel
       className='group relative overflow-hidden'
-      opts={{ watchDrag: () => !disableDrag }}
+      opts={{ watchDrag: () => !disableDrag, ...opts }}
     >
       <CarouselContent className='ml-0'>
         {urls.map((url) => (

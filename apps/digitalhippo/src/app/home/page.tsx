@@ -10,7 +10,7 @@ const App = () => {
   return (
     <div className='bg-primary min-h-screen'>
       {/* Header */}
-      <header className='bg-primary shadow'>
+      {/* <header className='bg-primary shadow'>
         <div className='container mx-auto flex items-center justify-between px-4 py-6'>
           <a href='/' className='text-2xl font-bold text-gray-800'>
             FlowerChild
@@ -54,7 +54,7 @@ const App = () => {
             </a>
           </div>
         </div>
-      </header>
+      </header> */}
 
       <HeroSection />
 

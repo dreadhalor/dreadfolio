@@ -4,18 +4,21 @@ import { Skeleton } from './ui/skeleton';
 import Link from 'next/link';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
 import { ImageCarousel } from './image-carousel';
+import { CarouselOptions } from './ui/carousel';
 
 type Props = {
   product: Product | null;
   index: number;
   className?: string;
   disableDrag?: boolean;
+  opts?: Partial<CarouselOptions>;
 };
 export const ProductListing = ({
   product,
   index,
   className,
   disableDrag = false,
+  opts,
 }: Props) => {
   const [isVisible, setIsVisible] = useState(false);
   const imageUrls =
@@ -49,7 +52,11 @@ export const ProductListing = ({
         )}
       >
         <div className='flex h-full w-full flex-col'>
-          <ImageCarousel urls={imageUrls} disableDrag={disableDrag} />
+          <ImageCarousel
+            urls={imageUrls}
+            disableDrag={disableDrag}
+            opts={opts}
+          />
           <div className='flex w-full flex-1 flex-col bg-white px-4 py-3'>
             <h3 className='text-sm font-medium text-gray-700'>
               {product.name}
@@ -67,7 +74,7 @@ export const ProductListing = ({
 
 const ProductPlaceholder = () => {
   return (
-    <div className='flex w-full flex-col'>
+    <div className='flex min-h-0 w-full flex-col'>
       <div className='relative aspect-square w-full overflow-hidden rounded-xl bg-zinc-100'>
         <Skeleton className='h-full w-full' />
       </div>

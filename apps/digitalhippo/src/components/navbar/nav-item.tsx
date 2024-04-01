@@ -1,23 +1,17 @@
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Category as PayloadCategory } from '@digitalhippo/payload-types';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '@digitalhippo/lib/utils';
-import { NavItemDropdown } from './nav-item-dropdown';
 import { trpc } from '@digitalhippo/trpc/client';
+import {
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+} from '@digitalhippo/components/ui/navigation-menu';
+import { NavItemDropdown } from './nav-item-dropdown';
+import { Button } from '../ui/button';
+import { Product } from '@digitalhippo/payload-types';
 
 type Props = {
-  categoryLabel: PayloadCategory['label'];
-  activeItem: string | null;
-  setActiveItem: (categoryLabel: string | null) => void;
+  categoryLabel: string;
 };
-export const NavItem = ({
-  categoryLabel,
-  activeItem,
-  setActiveItem,
-}: Props) => {
-  const [shouldAnimate, setShouldAnimate] = useState(false);
 
+export const NavItem = ({ categoryLabel }: Props) => {
   const query = {
     categoryLabel,
     sort: 'desc' as 'asc' | 'desc' | undefined,
@@ -29,41 +23,19 @@ export const NavItem = ({
     { getNextPageParam: (lastPage) => lastPage.nextPage },
   );
 
-  const isOpen = activeItem === categoryLabel;
-
-  const handleOpen = () => {
-    if (activeItem === categoryLabel) {
-      setShouldAnimate(false);
-      setActiveItem(null);
-    } else {
-      setShouldAnimate(activeItem === null);
-      setActiveItem(categoryLabel);
-    }
-  };
-
   return (
-    <div className='flex'>
-      <div className='relative flex items-center'>
-        <Button
-          className='gap-1.5'
-          onClick={handleOpen}
-          variant={isOpen ? 'secondary' : 'ghost'}
-        >
+    <>
+      <NavigationMenuTrigger asChild>
+        <Button className='h-full rounded-none border-b border-transparent bg-transparent text-gray-600 hover:border-red-500 hover:bg-transparent data-[state=open]:bg-transparent'>
           {categoryLabel}
-          <ChevronDown
-            className={cn(
-              'text-muted-foreground h-4 w-4 transition-all',
-              isOpen && '-rotate-180',
-            )}
-          />
         </Button>
-      </div>
-      <NavItemDropdown
-        isOpen={isOpen}
-        shouldAnimate={shouldAnimate}
-        category={categoryLabel}
-        products={data?.items}
-      />
-    </div>
+      </NavigationMenuTrigger>
+      <NavigationMenuContent className='animate-in fade-in-10 slide-in-from-top-5'>
+        <NavItemDropdown
+          category={categoryLabel}
+          products={data?.items as Product[]}
+        />
+      </NavigationMenuContent>
+    </>
   );
 };
