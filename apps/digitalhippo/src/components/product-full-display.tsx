@@ -34,7 +34,27 @@ export const ProductFullDisplay = ({ product }: Props) => {
       const rect = heroImageRef.current.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 100;
       const y = ((event.clientY - rect.top) / rect.height) * 100;
-      setZoomPosition({ x, y });
+
+      // Calculate the margin as a percentage of the image dimensions
+      const margin = 15; // Adjust this value to control the margin size
+
+      // Calculate the scaled-down dimensions of the image
+      const scaledWidth = 100 - margin * 2;
+      const scaledHeight = 100 - margin * 2;
+
+      // Calculate the center position of the scaled-down image
+      const centerX = margin + scaledWidth / 2;
+      const centerY = margin + scaledHeight / 2;
+
+      // Calculate the relative position within the scaled-down image
+      const relativeX = ((x - margin) / scaledWidth) * 100;
+      const relativeY = ((y - margin) / scaledHeight) * 100;
+
+      // Calculate the zoom position based on the relative position
+      const zoomX = Math.max(0, Math.min(relativeX, 100));
+      const zoomY = Math.max(0, Math.min(relativeY, 100));
+
+      setZoomPosition({ x: zoomX, y: zoomY });
     }
   };
 
