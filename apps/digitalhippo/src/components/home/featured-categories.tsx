@@ -1,5 +1,4 @@
 import { Dresses, Tops, Bottoms } from '@digitalhippo/assets/categories';
-import Image from 'next/image';
 import { CategoryCard } from './category-card';
 import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
 
@@ -11,9 +10,9 @@ export const FeaturedCategories = () => {
           Featured Categories
         </h2>
         <div className='grid grid-cols-1 gap-8 md:grid-cols-3'>
-          <CategoryCard src={Dresses} label='Dresses' />
-          <CategoryCard src={Tops} label='Tops' />
-          <CategoryCard src={Bottoms} label='Bottoms' />
+          <CategoryCard src={Dresses} label='Dresses' value='dresses' />
+          <CategoryCard src={Tops} label='Tops' value='tops' />
+          <CategoryCard src={Bottoms} label='Bottoms' value='bottoms' />
         </div>
       </MaxWidthWrapper>
     </section>

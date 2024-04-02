@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { HeroCarousel } from './hero-carousel';
 
 export const HeroSection = () => {
@@ -11,12 +12,12 @@ export const HeroSection = () => {
         <p className='mb-8 text-xl text-gray-100'>
           Shop the latest fashion trends and styles at FlowerChild.
         </p>
-        <a
-          href='/shop'
-          className='rounded-full bg-gray-800 px-8 py-3 font-semibold text-white hover:bg-gray-700'
+        <Link
+          href='/products'
+          className='pointer-events-auto rounded-full bg-gray-800 px-8 py-3 font-semibold text-white hover:bg-gray-700'
         >
           Shop Now
-        </a>
+        </Link>
       </div>
     </section>
   );

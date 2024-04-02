@@ -43,14 +43,14 @@ const Page = async ({ searchParams }: Props) => {
 
   const payload = await getPayloadClient();
   if (!payload) return null;
-  let category = null;
+  let category: Category | null = null;
 
   const { docs: categories } = await payload.find({
     collection: 'categories',
   });
 
   if (categoryValue) {
-    category = categories.find((c) => c.value === categoryValue);
+    category = categories.find((c) => c.value === categoryValue) || null;
   }
 
   if (categoryValue && !category) return notFound();

@@ -1,12 +1,17 @@
 import Image, { type StaticImageData } from 'next/image';
+import Link from 'next/link';
 
 type Props = {
   src: StaticImageData;
-  label?: string;
+  label: string;
+  value: string;
 };
-export const CategoryCard = ({ src, label = 'Category' }: Props) => {
+export const CategoryCard = ({ src, label, value }: Props) => {
   return (
-    <div className='relative overflow-hidden rounded-lg bg-white shadow'>
+    <Link
+      href={`/products?category=${value}`}
+      className='relative overflow-hidden rounded-lg bg-white shadow'
+    >
       <div className='relative h-64 w-full'>
         <Image
           src={src}
@@ -18,10 +23,8 @@ export const CategoryCard = ({ src, label = 'Category' }: Props) => {
 
       <div className='relative bg-white p-4'>
         <h3 className='text-xl font-semibold text-gray-800'>{label}</h3>
-        <a href='/category1' className='text-blue-500 hover:text-blue-600'>
-          Shop Now
-        </a>
+        <span className='text-blue-500 hover:text-blue-600'>Shop Now</span>
       </div>
-    </div>
+    </Link>
   );
 };

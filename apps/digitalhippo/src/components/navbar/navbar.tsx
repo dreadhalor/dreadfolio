@@ -20,10 +20,10 @@ export const Navbar = async () => {
   return (
     <NavigationMenu
       // value='Dresses'
-      className='bg-primary sticky inset-x-0 top-0 z-50 h-16 max-w-none border-b border-gray-200 shadow-md'
+      className='bg-primary sticky inset-x-0 top-0 z-50 h-16 max-h-16 max-w-none border-b border-gray-200 shadow-md'
       viewportClassnames='mt-0 border-0 bg-primary rounded-none'
     >
-      <header className='relative w-full'>
+      <header className='relative h-full w-full'>
         <MaxWidthWrapper>
           <div className='flex h-16 items-center'>
             <MobileNav />
@@ -44,20 +44,27 @@ export const Navbar = async () => {
               </NavigationMenuList>
               {/* <NavItems2 /> */}
             </div>
-            <div className='ml-auto flex items-center'>
+            <div className='ml-auto flex h-full items-center'>
               <div
                 className={cn(
-                  'hidden',
+                  'hidden h-full',
                   'lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6',
                 )}
               >
-                <Link
-                  href='/login'
-                  className={buttonVariants({ variant: 'ghost' })}
-                >
-                  Log in / Register
-                </Link>
-                <Separator className='h-6' orientation='vertical' />
+                {!user && (
+                  <>
+                    <Link
+                      href='/login'
+                      className={cn(
+                        buttonVariants(),
+                        'h-full rounded-none border-b-2 border-transparent bg-transparent text-gray-600 hover:border-red-400 hover:bg-transparent data-[state=open]:border-red-400 data-[state=open]:bg-transparent',
+                      )}
+                    >
+                      Log in / Register
+                    </Link>
+                    <Separator className='h-6' orientation='vertical' />
+                  </>
+                )}
 
                 {user && (
                   <>

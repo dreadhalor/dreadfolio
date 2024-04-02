@@ -21,7 +21,7 @@ export const UserAccountNav = ({ user: { email } }: Props) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className='overflow-visible'>
-        <Button variant='ghost' size='sm' className='relative'>
+        <Button className='relative h-full rounded-none border-b-2 border-transparent bg-transparent text-gray-600 hover:border-red-400 hover:bg-transparent data-[state=open]:border-red-400 data-[state=open]:bg-transparent'>
           My account
         </Button>
       </DropdownMenuTrigger>
