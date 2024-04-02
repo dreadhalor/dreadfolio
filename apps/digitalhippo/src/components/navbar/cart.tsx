@@ -13,19 +13,19 @@ import { Separator } from '../ui/separator';
 import { cn, formatPrice } from '@digitalhippo/lib/utils';
 import Link from 'next/link';
 import { buttonVariants } from '../ui/button';
-import Image from 'next/image';
 import { useCart } from '@digitalhippo/hooks/use-cart';
 import { CartItem } from './cart-item';
 import { ScrollArea } from '../ui/scroll-area';
 import { TRANSACTION_FEE } from '@digitalhippo/config';
+import { EmptyBag } from './empty-bag';
 
 export const Cart = () => {
   const { items } = useCart();
-  const itemCount = items.length;
-
-  const cartTotal = items.reduce((acc, { product: { price } }) => {
-    return acc + price;
-  }, 0);
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const cartTotal = items.reduce(
+    (acc, { product: { price }, quantity }) => acc + price * quantity,
+    TRANSACTION_FEE,
+  );
 
   return (
     <Sheet>
@@ -43,8 +43,8 @@ export const Cart = () => {
           <>
             <div className='flex w-full flex-col pr-6'>
               <ScrollArea>
-                {items.map(({ product }) => (
-                  <CartItem key={product.id} product={product} />
+                {items.map((item) => (
+                  <CartItem key={item.product.id} item={item} />
                 ))}
               </ScrollArea>
             </div>
@@ -78,33 +78,7 @@ export const Cart = () => {
             </div>
           </>
         ) : (
-          <div className='flex h-full flex-col items-center justify-center space-y-1'>
-            <div
-              className='text-muted-foreground relative mb-4 h-80 w-80'
-              aria-hidden
-            >
-              <Image
-                src='/empty-shopping-bag.png'
-                fill
-                alt='empty shopping cart'
-              />
-            </div>
-            <div className='text-cl font-semibold'>Your bag is empty</div>
-            <SheetTrigger asChild>
-              <Link
-                href='/products'
-                className={cn(
-                  buttonVariants({
-                    variant: 'link',
-                    size: 'sm',
-                  }),
-                  'text-sm text-gray-500',
-                )}
-              >
-                But don't fret, great fashion is just a click away!
-              </Link>
-            </SheetTrigger>
-          </div>
+          <EmptyBag />
         )}
       </SheetContent>
     </Sheet>

@@ -33,7 +33,7 @@ export const NavItem = ({ categoryLabel }: Props) => {
       <NavigationMenuContent className='animate-in fade-in-10 slide-in-from-top-5'>
         <NavItemDropdown
           category={categoryLabel}
-          products={data?.items as Product[]}
+          products={data?.items as any as Product[]}
         />
       </NavigationMenuContent>
     </>

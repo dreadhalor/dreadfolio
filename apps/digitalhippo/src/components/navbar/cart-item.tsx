@@ -1,21 +1,32 @@
-import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
 import { formatPrice } from '@digitalhippo/lib/utils';
-import { Product } from '@digitalhippo/payload-types';
-import { ImageIcon, X } from 'lucide-react';
+import { Category, Product } from '@digitalhippo/payload-types';
+import { ImageIcon, Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { useCart } from '@digitalhippo/hooks/use-cart';
 
 type Props = {
-  product: Product;
+  item: {
+    product: Product;
+    quantity: number;
+  };
 };
-export const CartItem = ({ product }: Props) => {
-  const { removeItem } = useCart();
-  const { image } = product.images[0];
-  const label = PRODUCT_CATEGORIES.find(
-    (category) => category.id === product.category,
-  )?.label;
+
+export const CartItem = ({ item }: Props) => {
+  const { updateItemQuantity } = useCart();
+  const [quantity, setQuantity] = useState(item.quantity);
+  const { image } = item.product.images[0];
+  const label = (item.product.category as Category)?.label;
+
+  useEffect(() => {
+    setQuantity(item.quantity);
+  }, [item.quantity]);
+
+  const handleQuantityChange = (newQuantity: number) => {
+    setQuantity(newQuantity);
+    updateItemQuantity(item.product.id, newQuantity);
+  };
 
   return (
     <div className='space-y-3 py-2'>
@@ -25,7 +36,7 @@ export const CartItem = ({ product }: Props) => {
             {typeof image !== 'string' && image.url ? (
               <Image
                 src={image.url}
-                alt={product.name}
+                alt={item.product.name}
                 fill
                 className='absolute object-cover'
               />
@@ -40,28 +51,33 @@ export const CartItem = ({ product }: Props) => {
           </div>
           <div className='flex flex-col self-start'>
             <span className='text-small mb-1 line-clamp-1 font-medium'>
-              {product.name}
+              {item.product.name}
             </span>
             <span className='text-muted-foreground line-clamp-1 text-xs capitalize'>
               {label}
             </span>
-
-            <div className='text-muted-foreground mt-2 text-xs'>
+            <div className='text-muted-foreground mt-2 flex items-center text-xs'>
               <Button
                 className='h-auto w-auto gap-0.5 p-1'
                 variant='ghost'
-                onClick={() => removeItem(product.id)}
+                onClick={() => handleQuantityChange(quantity - 1)}
               >
-                <X className='h-4 w-3' />
-                Remove
+                <Minus className='h-4 w-3' />
+              </Button>
+              <span className='mx-2'>{quantity}</span>
+              <Button
+                className='h-auto w-auto gap-0.5 p-1'
+                variant='ghost'
+                onClick={() => handleQuantityChange(quantity + 1)}
+              >
+                <Plus className='h-4 w-3' />
               </Button>
             </div>
           </div>
         </div>
-
         <div className='flex flex-col space-y-1 font-medium'>
           <span className='lime-clamp-1 ml-auto text-sm'>
-            {formatPrice(product.price)}
+            {formatPrice(item.product.price * quantity)}
           </span>
         </div>
       </div>

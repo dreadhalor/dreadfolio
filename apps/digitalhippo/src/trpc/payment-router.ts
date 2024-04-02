@@ -7,12 +7,22 @@ import type Stripe from 'stripe';
 
 export const paymentRouter = router({
   createSession: privateProcedure
-    .input(z.object({ productIds: z.array(z.string()) }))
+    .input(
+      z.object({
+        products: z.array(
+          z.object({
+            productId: z.string(),
+            quantity: z.number().min(1),
+          }),
+        ),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const { user } = ctx;
-      let { productIds } = input;
+      let { products } = input;
+      const productIds = products.map(({ productId }) => productId);
 
-      if (productIds.length === 0) {
+      if (products.length === 0) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: 'No products to purchase',
@@ -27,7 +37,7 @@ export const paymentRouter = router({
         });
       }
 
-      const { docs: products } = await payload.find({
+      const { docs: databaseProducts } = await payload.find({
         collection: 'products',
         where: {
           id: {
@@ -37,7 +47,7 @@ export const paymentRouter = router({
         depth: 1,
       });
 
-      const filteredProducts = products.filter(({ priceId }) =>
+      const filteredProducts = databaseProducts.filter(({ priceId }) =>
         Boolean(priceId),
       );
 
@@ -52,15 +62,18 @@ export const paymentRouter = router({
 
       const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
-      filteredProducts.forEach((product) => {
-        line_items.push({
-          price: product.priceId!,
-          quantity: 1,
-          adjustable_quantity: {
-            enabled: false,
-          },
-        });
-      });
+      for (const { productId, quantity } of products) {
+        const product = filteredProducts.find((p) => p.id === productId);
+        if (product) {
+          line_items.push({
+            price: product.priceId!,
+            quantity,
+            adjustable_quantity: {
+              enabled: false,
+            },
+          });
+        }
+      }
 
       line_items.push({
         price: 'price_1Oz8z007WpqPgCkfm5iHOqqg',
