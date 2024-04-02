@@ -35,9 +35,9 @@ export const Cart = () => {
         <ShoppingCart aria-hidden className='h-6 w-6 flex-shrink-0' />
         <span className='ml-2 text-sm font-medium'>{itemCount}</span>
       </SheetTrigger>
-      <SheetContent className='flex w-full flex-col pr-0 sm:max-w-lg'>
+      <SheetContent className='bg-primary flex w-full flex-col pr-0 sm:max-w-lg'>
         <SheetHeader className='space-y-2.5 pr-6'>
-          <SheetTitle>Cart ({itemCount})</SheetTitle>
+          <SheetTitle>Bag ({itemCount})</SheetTitle>
         </SheetHeader>
         {itemCount > 0 ? (
           <>
@@ -80,26 +80,28 @@ export const Cart = () => {
         ) : (
           <div className='flex h-full flex-col items-center justify-center space-y-1'>
             <div
-              className='text-muted-foreground relative mb-4 h-60 w-60'
+              className='text-muted-foreground relative mb-4 h-80 w-80'
               aria-hidden
             >
               <Image
-                src='/hippo-empty-cart.png'
+                src='/empty-shopping-bag.png'
                 fill
                 alt='empty shopping cart'
               />
             </div>
-            <div className='text-cl font-semibold'>Your cart is empty!</div>
+            <div className='text-cl font-semibold'>Your bag is empty</div>
             <SheetTrigger asChild>
               <Link
                 href='/products'
-                className={buttonVariants({
-                  variant: 'link',
-                  size: 'sm',
-                  className: 'text-muted-foreground text-sm',
-                })}
+                className={cn(
+                  buttonVariants({
+                    variant: 'link',
+                    size: 'sm',
+                  }),
+                  'text-sm text-gray-500',
+                )}
               >
-                Add items to your cart to checkout
+                But don't fret, great fashion is just a click away!
               </Link>
             </SheetTrigger>
           </div>

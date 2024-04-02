@@ -9,9 +9,22 @@ import { Products } from './collections/products';
 import { Media } from './collections/media';
 import { Orders } from './collections/orders';
 import { Categories } from './collections/categories';
+import { cloudStorage } from '@payloadcms/plugin-cloud-storage';
+import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
 
 dotenv.config({
   path: path.resolve(__dirname, '../.env'),
+});
+
+const adapter = s3Adapter({
+  config: {
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+    },
+    region: process.env.S3_REGION || '',
+  },
+  bucket: process.env.S3_BUCKET || '',
 });
 
 export default buildConfig({
@@ -39,4 +52,13 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(__dirname, 'payload-types.ts'),
   },
+  plugins: [
+    cloudStorage({
+      collections: {
+        media: {
+          adapter,
+        },
+      },
+    }),
+  ],
 });

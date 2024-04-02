@@ -50,7 +50,8 @@ const Page = async ({ searchParams }: Props) => {
   });
 
   if (categoryValue) {
-    category = categories.find((c) => c.value === categoryValue) || null;
+    category =
+      (categories as Category[]).find((c) => c.value === categoryValue) || null;
   }
 
   if (categoryValue && !category) return notFound();
