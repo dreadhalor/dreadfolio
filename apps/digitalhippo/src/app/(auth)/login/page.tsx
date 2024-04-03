@@ -6,7 +6,7 @@ import { LoginSidebar } from '@flowerchild/components/login/login-sidebar';
 const Page = () => {
   return (
     <>
-      <div className='grid h-full w-full grid-cols-3'>
+      <div className='bg-background grid h-full w-full grid-cols-3'>
         <div>
           <LoginSidebar />
         </div>

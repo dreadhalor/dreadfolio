@@ -6,9 +6,10 @@ import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { OrderItem } from './order-item';
 import { PriceTotalFooter } from './price-total-footer';
 import { ThankYouHeader } from './thank-you-header';
+import { Order, OrderItem as OrderItemType } from '@flowerchild/payload-types';
+import { OrderItem } from './order-item';
 
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -31,7 +32,7 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
     },
   });
 
-  const [order] = orders;
+  const [order] = orders as any as Order[];
   if (!order) return notFound();
 
   const orderUserId =
@@ -81,7 +82,7 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
               <div className='mt-2 text-gray-900'>{order.id}</div>
 
               <ul className='text-muted-foreground mt-6 divide-y divide-gray-200 border-t border-gray-200 text-sm font-medium'>
-                {orderItems.map((orderItem) => (
+                {(orderItems as any as OrderItemType[]).map((orderItem) => (
                   <OrderItem key={orderItem.id} orderItem={orderItem} />
                 ))}
               </ul>

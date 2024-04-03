@@ -1,6 +1,5 @@
 'use client';
 
-import { ShoppingCart } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -18,7 +17,7 @@ import { CartItem } from './cart-item';
 import { ScrollArea } from '../ui/scroll-area';
 import { TRANSACTION_FEE } from '@flowerchild/config';
 import { EmptyBag } from './empty-bag';
-import { FaShoppingBag } from 'react-icons/fa';
+import { HiOutlineShoppingBag } from 'react-icons/hi2';
 
 export const Cart = () => {
   const { items } = useCart();
@@ -33,7 +32,7 @@ export const Cart = () => {
       <SheetTrigger
         className={cn('group', buttonVariants({ variant: 'ghost' }))}
       >
-        <FaShoppingBag aria-hidden className='h-6 w-6 flex-shrink-0' />
+        <HiOutlineShoppingBag aria-hidden className='h-6 w-6 flex-shrink-0' />
         <span className='ml-2 text-sm font-medium'>{itemCount}</span>
       </SheetTrigger>
       <SheetContent className='bg-primary flex w-full flex-col pr-0 sm:max-w-lg'>

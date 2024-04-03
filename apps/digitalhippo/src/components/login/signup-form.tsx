@@ -27,15 +27,6 @@ import { ZodError } from 'zod';
 export const SignupForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isSeller = searchParams.get('as') === 'seller';
-  const origin = searchParams.get('origin');
-
-  const continueAsSeller = () => {
-    router.push('?as=seller');
-  };
-  const continueAsCustomer = () => {
-    router.replace('/login', undefined);
-  };
 
   const form = useForm<TAuthCredentialsValidator>({
     resolver: zodResolver(AuthCredentialsValidator),

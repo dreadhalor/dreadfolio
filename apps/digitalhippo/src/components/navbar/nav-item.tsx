@@ -26,9 +26,7 @@ export const NavItem = ({ categoryLabel }: Props) => {
   return (
     <>
       <NavigationMenuTrigger asChild>
-        <Button className='h-full rounded-none border-b-2 border-transparent bg-transparent text-gray-600 hover:border-red-400 hover:bg-transparent data-[state=open]:border-red-400 data-[state=open]:bg-transparent'>
-          {categoryLabel}
-        </Button>
+        <Button variant='navbar'>{categoryLabel}</Button>
       </NavigationMenuTrigger>
       <NavigationMenuContent className='animate-in fade-in-10 slide-in-from-top-5'>
         <NavItemDropdown

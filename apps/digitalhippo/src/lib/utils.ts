@@ -28,7 +28,7 @@ export function constructMetadata({
   title = 'FLOWERCHILD - an online marketplace for fashion finds',
   description = 'FLOWERCHILD is an open-source marketplace for high-quality fashion finds.',
   image = '/thumbnail.jpg',
-  icons = '/favicon.svg',
+  icons = '/logo.svg',
   noIndex = false,
 }: {
   title?: string;
@@ -57,7 +57,6 @@ export function constructMetadata({
       creator: '@dreadhalor',
     },
     icons,
-    // metadataBase: new URL('https://digitalhippo.up.railway.app'),
     ...(noIndex && {
       robots: {
         index: false,

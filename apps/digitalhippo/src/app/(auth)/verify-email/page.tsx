@@ -19,7 +19,7 @@ const VerifyEmailPage = ({ searchParams }: Props) => {
           <div className='flex h-full flex-col items-center justify-center space-y-1'>
             <div className='text-muted-foreground relative mb-4 h-60 w-60'>
               <Image
-                alt='hippo email sent image'
+                alt='FLOWERCHILD email sent image'
                 src='/hippo-email-sent.png'
                 fill
               />

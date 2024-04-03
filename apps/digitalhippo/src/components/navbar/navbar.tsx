@@ -19,7 +19,6 @@ export const Navbar = async () => {
 
   return (
     <NavigationMenu
-      // value='Dresses'
       className='bg-primary sticky inset-x-0 top-0 z-50 h-16 max-h-16 max-w-none border-b border-gray-200 shadow-md'
       viewportClassnames='mt-0 border-0 bg-primary rounded-none'
     >
