@@ -1,8 +1,8 @@
-import { Button } from '@digitalhippo/components/ui/button';
-import { TRANSACTION_FEE } from '@digitalhippo/config';
-import { useCart } from '@digitalhippo/hooks/use-cart';
-import { cn, formatPrice } from '@digitalhippo/lib/utils';
-import { trpc } from '@digitalhippo/trpc/client';
+import { Button } from '@flowerchild/components/ui/button';
+import { TRANSACTION_FEE } from '@flowerchild/config';
+import { useCart } from '@flowerchild/hooks/use-cart';
+import { cn, formatPrice } from '@flowerchild/lib/utils';
+import { trpc } from '@flowerchild/trpc/client';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 

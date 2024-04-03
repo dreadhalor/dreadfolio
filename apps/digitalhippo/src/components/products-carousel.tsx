@@ -1,9 +1,9 @@
 'use client';
 
-import { TQueryValidator } from '@digitalhippo/lib/validators/query-validator';
-import { trpc } from '@digitalhippo/trpc/client';
+import { TQueryValidator } from '@flowerchild/lib/validators/query-validator';
+import { trpc } from '@flowerchild/trpc/client';
 import Link from 'next/link';
-import { Product } from '@digitalhippo/payload-types';
+import { Product } from '@flowerchild/payload-types';
 import { ProductListing } from './product-listing';
 import {
   Carousel,

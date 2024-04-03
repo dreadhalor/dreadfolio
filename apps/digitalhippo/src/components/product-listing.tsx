@@ -1,8 +1,8 @@
-import { Category, Product } from '@digitalhippo/payload-types';
+import { Category, Product } from '@flowerchild/payload-types';
 import { useEffect, useState } from 'react';
 import { Skeleton } from './ui/skeleton';
 import Link from 'next/link';
-import { cn, formatPrice } from '@digitalhippo/lib/utils';
+import { cn, formatPrice } from '@flowerchild/lib/utils';
 import { ImageCarousel } from './image-carousel';
 import { CarouselOptions } from './ui/carousel';
 

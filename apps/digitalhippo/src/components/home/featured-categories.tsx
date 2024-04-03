@@ -1,6 +1,6 @@
-import { Dresses, Tops, Bottoms } from '@digitalhippo/assets/categories';
+import { Dresses, Tops, Bottoms } from '@flowerchild/assets/categories';
 import { CategoryCard } from './category-card';
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
+import { MaxWidthWrapper } from '@flowerchild/components/max-width-wrapper';
 
 export const FeaturedCategories = () => {
   return (

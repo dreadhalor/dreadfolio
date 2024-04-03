@@ -5,7 +5,7 @@ import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 
-import { cn } from '@digitalhippo/lib/utils';
+import { cn } from '@flowerchild/lib/utils';
 
 type NavigationMenuProps = React.ComponentPropsWithoutRef<
   typeof NavigationMenuPrimitive.Root

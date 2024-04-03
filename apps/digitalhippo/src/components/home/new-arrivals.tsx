@@ -1,6 +1,6 @@
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
-import { ProductReel } from '@digitalhippo/components/product-reel';
-import { ProductsCarousel } from '@digitalhippo/components/products-carousel';
+import { MaxWidthWrapper } from '@flowerchild/components/max-width-wrapper';
+import { ProductReel } from '@flowerchild/components/product-reel';
+import { ProductsCarousel } from '@flowerchild/components/products-carousel';
 import React from 'react';
 
 export const NewArrivals = () => {

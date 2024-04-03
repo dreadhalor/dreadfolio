@@ -1,6 +1,6 @@
 'use client';
 
-import { trpc } from '@digitalhippo/trpc/client';
+import { trpc } from '@flowerchild/trpc/client';
 import { Loader2, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

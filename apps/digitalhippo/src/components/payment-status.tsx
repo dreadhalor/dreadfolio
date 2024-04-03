@@ -1,6 +1,6 @@
 'use client';
 
-import { trpc } from '@digitalhippo/trpc/client';
+import { trpc } from '@flowerchild/trpc/client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
-import { useCart } from '@digitalhippo/hooks/use-cart';
-import { Product } from '@digitalhippo/payload-types';
+import { useCart } from '@flowerchild/hooks/use-cart';
+import { Product } from '@flowerchild/payload-types';
 
 type Props = {
   product: Product;

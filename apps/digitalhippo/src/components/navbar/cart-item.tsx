@@ -1,31 +1,22 @@
-import { formatPrice } from '@digitalhippo/lib/utils';
-import { Category, Product } from '@digitalhippo/payload-types';
+import { formatPrice } from '@flowerchild/lib/utils';
+import { Category, Product } from '@flowerchild/payload-types';
 import { ImageIcon, Plus, Minus } from 'lucide-react';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { useCart } from '@digitalhippo/hooks/use-cart';
+import { CartItem as CartItemType, useCart } from '@flowerchild/hooks/use-cart';
 
 type Props = {
-  item: {
-    product: Product;
-    quantity: number;
-  };
+  item: CartItemType;
 };
 
 export const CartItem = ({ item }: Props) => {
   const { updateItemQuantity } = useCart();
-  const [quantity, setQuantity] = useState(item.quantity);
   const { image } = item.product.images[0];
   const label = (item.product.category as Category)?.label;
 
-  useEffect(() => {
-    setQuantity(item.quantity);
-  }, [item.quantity]);
-
-  const handleQuantityChange = (newQuantity: number) => {
-    setQuantity(newQuantity);
-    updateItemQuantity(item.product.id, newQuantity);
+  const handleQuantityChange = (change: number) => {
+    updateItemQuantity(item.product.id, item.quantity + change);
   };
 
   return (
@@ -60,15 +51,15 @@ export const CartItem = ({ item }: Props) => {
               <Button
                 className='h-auto w-auto gap-0.5 p-1'
                 variant='ghost'
-                onClick={() => handleQuantityChange(quantity - 1)}
+                onClick={() => handleQuantityChange(-1)}
               >
                 <Minus className='h-4 w-3' />
               </Button>
-              <span className='mx-2'>{quantity}</span>
+              <span className='mx-2'>{item.quantity}</span>
               <Button
                 className='h-auto w-auto gap-0.5 p-1'
                 variant='ghost'
-                onClick={() => handleQuantityChange(quantity + 1)}
+                onClick={() => handleQuantityChange(1)}
               >
                 <Plus className='h-4 w-3' />
               </Button>
@@ -77,7 +68,7 @@ export const CartItem = ({ item }: Props) => {
         </div>
         <div className='flex flex-col space-y-1 font-medium'>
           <span className='lime-clamp-1 ml-auto text-sm'>
-            {formatPrice(item.product.price * quantity)}
+            {formatPrice(item.product.price * item.quantity)}
           </span>
         </div>
       </div>

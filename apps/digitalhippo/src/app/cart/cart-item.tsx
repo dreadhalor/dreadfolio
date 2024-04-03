@@ -1,20 +1,17 @@
-import { Button } from '@digitalhippo/components/ui/button';
-import { formatPrice } from '@digitalhippo/lib/utils';
-import { Category } from '@digitalhippo/payload-types';
+import { Button } from '@flowerchild/components/ui/button';
+import { formatPrice } from '@flowerchild/lib/utils';
+import { Category } from '@flowerchild/payload-types';
 import { Check, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  CartItem as CartItemType,
-  useCart,
-} from '@digitalhippo/hooks/use-cart';
+import { CartItem as CartItemType, useCart } from '@flowerchild/hooks/use-cart';
 
 type Props = {
   item: CartItemType;
 };
 
 export const CartItem = ({ item }: Props) => {
-  const { removeItem, updateItemQuantity } = useCart();
+  const { updateItemQuantity } = useCart();
   const { id, category, images, name, price } = item.product;
   const { quantity } = item;
   const categoryLabel = (category as Category)?.label || 'N/A';

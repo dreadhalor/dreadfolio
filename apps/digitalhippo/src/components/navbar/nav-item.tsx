@@ -1,11 +1,11 @@
-import { trpc } from '@digitalhippo/trpc/client';
+import { trpc } from '@flowerchild/trpc/client';
 import {
   NavigationMenuTrigger,
   NavigationMenuContent,
-} from '@digitalhippo/components/ui/navigation-menu';
+} from '@flowerchild/components/ui/navigation-menu';
 import { NavItemDropdown } from './nav-item-dropdown';
 import { Button } from '../ui/button';
-import { Product } from '@digitalhippo/payload-types';
+import { Product } from '@flowerchild/payload-types';
 
 type Props = {
   categoryLabel: string;

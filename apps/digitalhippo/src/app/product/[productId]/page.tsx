@@ -1,14 +1,14 @@
-import { AddToCartButton } from '@digitalhippo/components/add-to-cart-button';
-import { ImageCarousel } from '@digitalhippo/components/image-carousel';
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
-import { ProductReel } from '@digitalhippo/components/product-reel';
-import { getPayloadClient } from '@digitalhippo/get-payload';
-import { formatPrice } from '@digitalhippo/lib/utils';
+import { AddToCartButton } from '@flowerchild/components/add-to-cart-button';
+import { ImageCarousel } from '@flowerchild/components/image-carousel';
+import { MaxWidthWrapper } from '@flowerchild/components/max-width-wrapper';
+import { ProductReel } from '@flowerchild/components/product-reel';
+import { getPayloadClient } from '@flowerchild/get-payload';
+import { formatPrice } from '@flowerchild/lib/utils';
 import { Shield } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { Breadcrumbs } from './breadcrumbs';
-import { Category } from '@digitalhippo/payload-types';
-import { ProductFullDisplay } from '@digitalhippo/components/product-full-display';
+import { Category } from '@flowerchild/payload-types';
+import { ProductFullDisplay } from '@flowerchild/components/product-full-display';
 
 type Props = {
   params: {
@@ -78,7 +78,6 @@ const Page = async ({ params: { productId } }: Props) => {
           </div>
 
           <div className='mt-10 lg:col-start-2 lg:row-span-2 lg:mt-0 lg:self-center'>
-            {/* <ImageCarousel urls={imageUrls} /> */}
             <ProductFullDisplay product={product} />
           </div>
 

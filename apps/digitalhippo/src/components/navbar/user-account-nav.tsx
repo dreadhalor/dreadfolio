@@ -1,6 +1,6 @@
 'use client';
 
-import { User } from '@digitalhippo/payload-types';
+import { User } from '@flowerchild/payload-types';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import Link from 'next/link';
-import { useAuth } from '@digitalhippo/hooks/use-auth';
+import { useAuth } from '@flowerchild/hooks/use-auth';
 
 type Props = {
   user: User;

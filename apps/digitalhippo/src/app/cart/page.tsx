@@ -1,7 +1,7 @@
 'use client';
 
-import { useCart } from '@digitalhippo/hooks/use-cart';
-import { cn } from '@digitalhippo/lib/utils';
+import { useCart } from '@flowerchild/hooks/use-cart';
+import { cn } from '@flowerchild/lib/utils';
 import { EmptyBag } from './empty-bag';
 import { CartItem } from './cart-item';
 import { OrderSummary } from './order-summary';

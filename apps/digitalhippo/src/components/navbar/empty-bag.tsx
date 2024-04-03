@@ -2,7 +2,7 @@ import Image from 'next/image';
 import React from 'react';
 import { SheetTrigger } from '../ui/sheet';
 import Link from 'next/link';
-import { cn } from '@digitalhippo/lib/utils';
+import { cn } from '@flowerchild/lib/utils';
 import { buttonVariants } from '../ui/button';
 
 export const EmptyBag = () => {

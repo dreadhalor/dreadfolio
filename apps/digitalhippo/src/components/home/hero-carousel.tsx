@@ -6,8 +6,8 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@digitalhippo/components/ui/carousel';
-import { cn } from '@digitalhippo/lib/utils';
+} from '@flowerchild/components/ui/carousel';
+import { cn } from '@flowerchild/lib/utils';
 import {
   Hero1,
   Hero2,
@@ -15,7 +15,7 @@ import {
   Hero4,
   Hero5,
   Hero6,
-} from '@digitalhippo/assets/hero';
+} from '@flowerchild/assets/hero';
 import Image, { StaticImageData } from 'next/image';
 
 type Props = {

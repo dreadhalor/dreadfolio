@@ -1,6 +1,6 @@
 'use client';
-import { cn } from '@digitalhippo/lib/utils';
-import { Media, Product } from '@digitalhippo/payload-types';
+import { cn } from '@flowerchild/lib/utils';
+import { Media, Product } from '@flowerchild/payload-types';
 import Image from 'next/image';
 import React, { useState, useRef } from 'react';
 

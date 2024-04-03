@@ -1,4 +1,4 @@
-import { cn } from '@digitalhippo/lib/utils';
+import { cn } from '@flowerchild/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';

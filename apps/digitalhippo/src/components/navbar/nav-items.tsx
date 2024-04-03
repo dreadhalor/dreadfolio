@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import { useOnClickOutside } from '@digitalhippo/hooks/use-on-click-outside';
-import { trpc } from '@digitalhippo/trpc/client';
+import { useOnClickOutside } from '@flowerchild/hooks/use-on-click-outside';
+import { trpc } from '@flowerchild/trpc/client';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,7 +9,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@digitalhippo/components/ui/navigation-menu';
+} from '@flowerchild/components/ui/navigation-menu';
 import { NavItem } from './nav-item';
 
 export const NavItems = () => {

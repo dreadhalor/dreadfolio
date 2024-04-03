@@ -15,7 +15,7 @@ export const Orders: CollectionConfig = {
   slug: 'orders',
   admin: {
     useAsTitle: 'Your Orders',
-    description: 'A summary of all your orders on DigitalHippo.',
+    description: 'A summary of all your orders on FLOWERCHILD.',
   },
   access: {
     create: ({ req }) => req.user.role === 'admin',
@@ -48,14 +48,10 @@ export const Orders: CollectionConfig = {
       },
     },
     {
-      name: 'products',
+      name: 'items',
       type: 'relationship',
-      relationTo: 'products',
-      required: true,
+      relationTo: 'order-items',
       hasMany: true,
-      admin: {
-        hidden: true,
-      },
     },
   ],
 };

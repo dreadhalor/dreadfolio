@@ -9,7 +9,7 @@ import {
   CarouselOptions,
   CarouselPrevious,
 } from './ui/carousel';
-import { cn } from '@digitalhippo/lib/utils';
+import { cn } from '@flowerchild/lib/utils';
 
 type Props = {
   urls: string[];

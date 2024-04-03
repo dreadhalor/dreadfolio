@@ -1,4 +1,4 @@
-import { cn } from '@digitalhippo/lib/utils';
+import { cn } from '@flowerchild/lib/utils';
 import React from 'react';
 
 type Props = {

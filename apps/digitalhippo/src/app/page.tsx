@@ -2,8 +2,8 @@ import { FaShoppingBag, FaSearch, FaUser } from 'react-icons/fa';
 import { HeroCarousel } from '../components/home/hero-carousel';
 import { HeroSection } from '../components/home/hero-section';
 import { FeaturedCategories } from '../components/home/featured-categories';
-import { ProductReel } from '@digitalhippo/components/product-reel';
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
+import { ProductReel } from '@flowerchild/components/product-reel';
+import { MaxWidthWrapper } from '@flowerchild/components/max-width-wrapper';
 import { NewArrivals } from '../components/home/new-arrivals';
 
 const App = () => {
@@ -61,73 +61,6 @@ const App = () => {
       <NewArrivals />
 
       <FeaturedCategories />
-
-      {/* Footer */}
-      <footer className='bg-slate-800 py-8 text-white'>
-        <div className='container mx-auto flex flex-col justify-between px-4 md:flex-row'>
-          <div className='mb-4 md:mb-0'>
-            <h4 className='mb-2 text-lg font-semibold'>About Us</h4>
-            <p className='text-gray-400'>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            </p>
-          </div>
-          <div className='mb-4 md:mb-0'>
-            <h4 className='mb-2 text-lg font-semibold'>Customer Service</h4>
-            <ul className='text-gray-400'>
-              <li>
-                <a href='/contact' className='hover:text-white'>
-                  Contact Us
-                </a>
-              </li>
-              <li>
-                <a href='/faq' className='hover:text-white'>
-                  FAQ
-                </a>
-              </li>
-              <li>
-                <a href='/shipping' className='hover:text-white'>
-                  Shipping &amp; Returns
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h4 className='mb-2 text-lg font-semibold'>Connect with Us</h4>
-            <ul className='text-gray-400'>
-              <li>
-                <a
-                  href='https://facebook.com/flowerchild'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='hover:text-white'
-                >
-                  Facebook
-                </a>
-              </li>
-              <li>
-                <a
-                  href='https://instagram.com/flowerchild'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='hover:text-white'
-                >
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a
-                  href='https://twitter.com/flowerchild'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='hover:text-white'
-                >
-                  Twitter
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

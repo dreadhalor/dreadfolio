@@ -1,9 +1,7 @@
-import { PaymentStatus } from '@digitalhippo/components/payment-status';
-import { PRODUCT_CATEGORIES, TRANSACTION_FEE } from '@digitalhippo/config';
-import { getPayloadClient } from '@digitalhippo/get-payload';
-import { getServerSideUser } from '@digitalhippo/lib/payload-utils';
-import { cn, formatPrice } from '@digitalhippo/lib/utils';
-import { Media, Product, ProductFile } from '@digitalhippo/payload-types';
+import { PaymentStatus } from '@flowerchild/components/payment-status';
+import { getPayloadClient } from '@flowerchild/get-payload';
+import { getServerSideUser } from '@flowerchild/lib/payload-utils';
+import { cn } from '@flowerchild/lib/utils';
 import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,10 +11,9 @@ import { PriceTotalFooter } from './price-total-footer';
 import { ThankYouHeader } from './thank-you-header';
 
 type Props = {
-  searchParams: {
-    [key: string]: string | string[] | undefined;
-  };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
+
 const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
   const nextCookies = cookies();
   const { user } = await getServerSideUser(nextCookies);
@@ -35,7 +32,6 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
   });
 
   const [order] = orders;
-
   if (!order) return notFound();
 
   const orderUserId =
@@ -46,12 +42,23 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
   const orderEmail =
     typeof order.user === 'string' ? order.user : order.user.email;
 
+  // Fetch the order items and their associated products
+  const { docs: orderItems } = await payload.find({
+    collection: 'order-items',
+    depth: 2,
+    where: {
+      order: {
+        equals: order.id,
+      },
+    },
+  });
+
   return (
     <main className='relative lg:min-h-full'>
       <div className='hidden h-80 overflow-hidden lg:absolute lg:block lg:h-full lg:w-1/2 lg:pr-4 xl:pr-12'>
         <Image
           fill
-          src='/checkout-thank-you.jpg'
+          src='/checkout-thank-you.webp'
           className='h-full w-full object-cover object-center'
           alt='Thank you for your purchase!'
         />
@@ -74,8 +81,8 @@ const ThankYouPage = async ({ searchParams: { orderId } }: Props) => {
               <div className='mt-2 text-gray-900'>{order.id}</div>
 
               <ul className='text-muted-foreground mt-6 divide-y divide-gray-200 border-t border-gray-200 text-sm font-medium'>
-                {(order.products as Product[]).map((product) => (
-                  <OrderItem key={product.id} order={order} product={product} />
+                {orderItems.map((orderItem) => (
+                  <OrderItem key={orderItem.id} orderItem={orderItem} />
                 ))}
               </ul>
 

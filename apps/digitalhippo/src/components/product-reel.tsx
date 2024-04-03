@@ -1,10 +1,10 @@
 'use client';
 
-import { cn } from '@digitalhippo/lib/utils';
-import { TQueryValidator } from '@digitalhippo/lib/validators/query-validator';
-import { trpc } from '@digitalhippo/trpc/client';
+import { cn } from '@flowerchild/lib/utils';
+import { TQueryValidator } from '@flowerchild/lib/validators/query-validator';
+import { trpc } from '@flowerchild/trpc/client';
 import Link from 'next/link';
-import { Product } from '@digitalhippo/payload-types';
+import { Product } from '@flowerchild/payload-types';
 import { ProductListing } from './product-listing';
 
 type Props = {

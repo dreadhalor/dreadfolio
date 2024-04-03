@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { trpc } from '@digitalhippo/trpc/client';
+import { trpc } from '@flowerchild/trpc/client';
 import { httpBatchLink } from '@trpc/client';
 
 type Props = {

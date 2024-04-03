@@ -1,7 +1,7 @@
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
-import { ProductReel } from '@digitalhippo/components/product-reel';
-import { Button, buttonVariants } from '@digitalhippo/components/ui/button';
-import { cn } from '@digitalhippo/lib/utils';
+import { MaxWidthWrapper } from '@flowerchild/components/max-width-wrapper';
+import { ProductReel } from '@flowerchild/components/product-reel';
+import { Button, buttonVariants } from '@flowerchild/components/ui/button';
+import { cn } from '@flowerchild/lib/utils';
 import { ArrowDownToLine, CheckCircle, Leaf } from 'lucide-react';
 import Link from 'next/link';
 

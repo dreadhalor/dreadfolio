@@ -1,24 +1,20 @@
-import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
-import { formatPrice } from '@digitalhippo/lib/utils';
+import { formatPrice } from '@flowerchild/lib/utils';
 import {
+  Category,
   Media,
-  Order,
+  OrderItem as OrderItemType,
   Product,
-  ProductFile,
-} from '@digitalhippo/payload-types';
+} from '@flowerchild/payload-types';
 import Image from 'next/image';
 
 type Props = {
-  product: Product;
-  order: Order;
+  orderItem: OrderItemType;
 };
-export const OrderItem = ({ order, product }: Props) => {
-  const label =
-    PRODUCT_CATEGORIES.find((category) => category.id === product.category)
-      ?.label || '';
 
-  const downloadUrl = (product.productFiles as ProductFile).url as string;
-
+export const OrderItem = ({ orderItem }: Props) => {
+  const product = orderItem.product as Product;
+  const quantity = orderItem.quantity;
+  const label = (product.category as Category)?.label || 'N/A';
   const image = product.images[0].image as Media;
 
   return (
@@ -31,27 +27,21 @@ export const OrderItem = ({ order, product }: Props) => {
           className='flex-none rounded-md bg-gray-100 object-cover object-center'
         />
       </div>
-
       <div className='flex flex-auto flex-col justify-between'>
         <div className='space-y-1'>
           <h3 className='text-gray-900'>{product.name}</h3>
           <p className='my-1'>Category: {label}</p>
+          <p className='my-1'>Quantity: {quantity}</p>
         </div>
-
-        {order._isPaid && (
-          <a
-            href={downloadUrl}
-            download={product.name}
-            className='w-fit text-blue-600 underline-offset-2 hover:underline'
-          >
-            Download Assets
-          </a>
-        )}
       </div>
-
-      <p className='flex-none font-medium text-gray-900'>
-        {formatPrice(product.price)}
-      </p>
+      <div className='flex flex-col items-end'>
+        <p className='font-medium text-gray-900'>
+          {formatPrice(product.price)}
+        </p>
+        <p className='text-sm text-gray-500'>
+          Subtotal: {formatPrice(product.price * quantity)}
+        </p>
+      </div>
     </li>
   );
 };

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button, buttonVariants } from '../ui/button';
-import Logo from '@digitalhippo/assets/flowerchild-logo.svg';
+import Logo from '@flowerchild/assets/logo.svg';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { cn } from '@digitalhippo/lib/utils';
+import { cn } from '@flowerchild/lib/utils';
 import { ArrowRight } from 'lucide-react';
 import {
   Form,
@@ -14,12 +14,12 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { trpc } from '@digitalhippo/trpc/client';
+import { trpc } from '@flowerchild/trpc/client';
 import { toast } from 'sonner';
 import {
   AuthCredentialsValidator,
   TAuthCredentialsValidator,
-} from '@digitalhippo/lib/validators/account-credentials-validator';
+} from '@flowerchild/lib/validators/account-credentials-validator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ZodError } from 'zod';

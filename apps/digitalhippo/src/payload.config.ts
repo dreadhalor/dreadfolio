@@ -11,6 +11,7 @@ import { Orders } from './collections/orders';
 import { Categories } from './collections/categories';
 import { cloudStorage } from '@payloadcms/plugin-cloud-storage';
 import { s3Adapter } from '@payloadcms/plugin-cloud-storage/s3';
+import { OrderItems } from './collections/order-items';
 
 dotenv.config({
   path: path.resolve(__dirname, '../.env'),
@@ -29,15 +30,15 @@ const adapter = s3Adapter({
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  collections: [Users, Products, Media, Orders, Categories],
+  collections: [Users, Products, Media, Orders, OrderItems, Categories],
   routes: {
     admin: '/sell',
   },
   admin: {
     user: 'users',
     meta: {
-      titleSuffix: '- Digital Hippo',
-      favicon: '/favicon.ico',
+      titleSuffix: '- FLOWERCHILD',
+      favicon: '/logo.svg',
       ogImage: '/thumbnail.jpg',
     },
     bundler: webpackBundler(),

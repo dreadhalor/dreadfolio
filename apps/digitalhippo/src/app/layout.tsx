@@ -1,21 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { cn, constructMetadata } from '@digitalhippo/lib/utils';
-import { Navbar } from '@digitalhippo/components/navbar/navbar';
-import { Providers } from '@digitalhippo/components/providers';
+import { cn, constructMetadata } from '@flowerchild/lib/utils';
+import { Navbar } from '@flowerchild/components/navbar/navbar';
+import { Providers } from '@flowerchild/components/providers';
 import { Toaster } from 'sonner';
-import { Footer } from '@digitalhippo/components/footer';
+import { Footer } from '@flowerchild/components/footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = constructMetadata({
-  title: 'DigitalHippo - the marketplace for digital assets',
-  description:
-    'DigitalHippo is an open-source marketplace for high-quality digital goods.',
-  image: '/thumbnail.png',
-  icons: '/favicon.ico',
-});
+export const metadata: Metadata = constructMetadata();
 
 export default function RootLayout({
   children,
@@ -23,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' className='h-full p-0'>
+    <html lang='en' className='bg-primary h-full p-0'>
       <body
         className={cn(
           'relative h-full p-0 font-sans antialiased',

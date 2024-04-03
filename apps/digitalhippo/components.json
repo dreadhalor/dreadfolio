@@ -11,7 +11,7 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@digitalhippo/components",
-    "utils": "@digitalhippo/lib/utils"
+    "components": "@flowerchild/components",
+    "utils": "@flowerchild/lib/utils"
   }
 }

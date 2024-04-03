@@ -1,4 +1,4 @@
-import { Product } from '@digitalhippo/payload-types';
+import { Product } from '@flowerchild/payload-types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 

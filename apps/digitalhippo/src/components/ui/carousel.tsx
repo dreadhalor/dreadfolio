@@ -6,8 +6,8 @@ import useEmblaCarousel, {
 } from 'embla-carousel-react';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { cn } from '@digitalhippo/lib/utils';
-import { Button } from '@digitalhippo/components/ui/button';
+import { cn } from '@flowerchild/lib/utils';
+import { Button } from '@flowerchild/components/ui/button';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;

@@ -1,5 +1,5 @@
-import { cn } from '@digitalhippo/lib/utils';
-import { Category, Product } from '@digitalhippo/payload-types';
+import { cn } from '@flowerchild/lib/utils';
+import { Category, Product } from '@flowerchild/payload-types';
 import { ProductListing } from '../product-listing';
 import { useMediaQuery } from 'react-responsive';
 

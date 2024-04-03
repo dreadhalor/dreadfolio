@@ -51,12 +51,44 @@ export const paymentRouter = router({
         Boolean(priceId),
       );
 
+      // Create order with an empty items array
       const order = await payload.create({
         collection: 'orders',
         data: {
           _isPaid: false,
-          products: filteredProducts.map(({ id }) => id),
+          items: [],
           user: user.id,
+        },
+      });
+
+      // Create order items referencing the order
+      const orderItems = await Promise.all(
+        products.map(async ({ productId, quantity }) => {
+          const product = filteredProducts.find((p) => p.id === productId);
+          if (!product) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `Product with ID ${productId} not found`,
+            });
+          }
+
+          return payload.create({
+            collection: 'order-items',
+            data: {
+              order: order.id,
+              product: product.id,
+              quantity,
+            },
+          });
+        }),
+      );
+
+      // Update the order with the created order items
+      await payload.update({
+        collection: 'orders',
+        id: order.id,
+        data: {
+          items: orderItems.map(({ id }) => id),
         },
       });
 
@@ -99,7 +131,6 @@ export const paymentRouter = router({
         return { url: stripeSession.url };
       } catch (error) {
         console.error(error);
-
         return { url: null };
       }
     }),
@@ -125,7 +156,6 @@ export const paymentRouter = router({
       });
 
       const [order] = orders;
-
       if (!order) {
         throw new TRPCError({
           code: 'NOT_FOUND',

@@ -1,13 +1,13 @@
 import React from 'react';
 import { MaxWidthWrapper } from '../max-width-wrapper';
 import Link from 'next/link';
-import Logo from '@digitalhippo/assets/flowerchild-logo.svg';
-import { cn } from '@digitalhippo/lib/utils';
+import Logo from '@flowerchild/assets/logo-hollow.svg';
+import { cn } from '@flowerchild/lib/utils';
 import { NavItems } from './nav-items';
 import { buttonVariants } from '../ui/button';
 import { Cart } from './cart';
 import { Separator } from '../ui/separator';
-import { getServerSideUser } from '@digitalhippo/lib/payload-utils';
+import { getServerSideUser } from '@flowerchild/lib/payload-utils';
 import { cookies } from 'next/headers';
 import { UserAccountNav } from './user-account-nav';
 import MobileNav from './mobile-nav';

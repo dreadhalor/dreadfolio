@@ -1,4 +1,4 @@
-import { VerifyEmail } from '@digitalhippo/components/verify-email';
+import { VerifyEmail } from '@flowerchild/components/verify-email';
 import Image from 'next/image';
 
 type Props = {

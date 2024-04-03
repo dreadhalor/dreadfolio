@@ -1,9 +1,9 @@
-import { MaxWidthWrapper } from '@digitalhippo/components/max-width-wrapper';
-import { ProductReel } from '@digitalhippo/components/product-reel';
-import { buttonVariants } from '@digitalhippo/components/ui/button';
-import { getPayloadClient } from '@digitalhippo/get-payload';
-import { cn } from '@digitalhippo/lib/utils';
-import { Category } from '@digitalhippo/payload-types';
+import { MaxWidthWrapper } from '@flowerchild/components/max-width-wrapper';
+import { ProductReel } from '@flowerchild/components/product-reel';
+import { buttonVariants } from '@flowerchild/components/ui/button';
+import { getPayloadClient } from '@flowerchild/get-payload';
+import { cn } from '@flowerchild/lib/utils';
+import { Category } from '@flowerchild/payload-types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 

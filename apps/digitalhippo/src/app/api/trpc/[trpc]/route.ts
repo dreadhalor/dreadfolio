@@ -1,4 +1,4 @@
-import { appRouter } from '@digitalhippo/trpc';
+import { appRouter } from '@flowerchild/trpc';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 
 const handler = (req: Request) => {

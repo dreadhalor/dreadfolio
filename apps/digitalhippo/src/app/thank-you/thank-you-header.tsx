@@ -1,4 +1,4 @@
-import { Order } from '@digitalhippo/payload-types';
+import { Order } from '@flowerchild/payload-types';
 
 type Props = {
   order: Order;

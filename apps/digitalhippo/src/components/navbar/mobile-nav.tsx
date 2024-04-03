@@ -1,6 +1,6 @@
 'use client';
 
-import { PRODUCT_CATEGORIES } from '@digitalhippo/config';
+import { PRODUCT_CATEGORIES } from '@flowerchild/config';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

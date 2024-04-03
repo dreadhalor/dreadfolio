@@ -25,10 +25,10 @@ export function formatPrice(
 }
 
 export function constructMetadata({
-  title = 'DigitalHippo - the marketplace for digital assets',
-  description = 'DigitalHippo is an open-source marketplace for high-quality digital goods.',
-  image = '/thumbnail.png',
-  icons = '/favicon.ico',
+  title = 'FLOWERCHILD - an online marketplace for fashion finds',
+  description = 'FLOWERCHILD is an open-source marketplace for high-quality fashion finds.',
+  image = '/thumbnail.jpg',
+  icons = '/favicon.svg',
   noIndex = false,
 }: {
   title?: string;

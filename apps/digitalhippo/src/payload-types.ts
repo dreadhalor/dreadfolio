@@ -12,6 +12,7 @@ export interface Config {
     products: Product;
     media: Media;
     orders: Order;
+    'order-items': OrderItem;
     categories: Category;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -120,7 +121,19 @@ export interface Order {
   id: string;
   _isPaid: boolean;
   user: string | User;
-  products: (string | Product)[];
+  items: (string | OrderItem)[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "order-items".
+ */
+export interface OrderItem {
+  id: string;
+  order: string | Order;
+  product: string | Product;
+  quantity: number;
   updatedAt: string;
   createdAt: string;
 }

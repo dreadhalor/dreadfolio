@@ -31,7 +31,7 @@ export const ReceiptEmail = ({ email, date, orderId, products }: Props) => {
   return (
     <Html>
       <Head />
-      <Preview>Your DigitalHippo Receipt</Preview>
+      <Preview>Your FLOWERCHILD Receipt</Preview>
 
       <Body style={main}>
         <Container style={container}>
@@ -153,7 +153,7 @@ export const ReceiptEmail = ({ email, date, orderId, products }: Props) => {
             <Link href='#'>Privacy Policy </Link>
           </Text>
           <Text style={footerCopyright}>
-            Copyright © 2023 DigitalHippo Inc. <br />{' '}
+            Copyright © 2023 FLOWERCHILD Inc. <br />{' '}
             <Link href='#'>All rights reserved</Link>
           </Text>
         </Container>
