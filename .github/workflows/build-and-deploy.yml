@@ -19,6 +19,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Decrypt .env
+        run: pnpm decrypt
+
       - name: Build project
         run: pnpm build
 
