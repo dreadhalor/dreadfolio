@@ -20,7 +20,7 @@ COPY . .
 RUN pnpm i
 
 # Build all the apps.
-RUN npx turbo run build --concurrency=2
+RUN pnpm dlx turbo run build --concurrency=2
 
 # # Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend
