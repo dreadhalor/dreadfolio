@@ -1,0 +1,60 @@
+name: Build and Deploy
+
+on:
+  repository_dispatch:
+    types: [build_and_deploy]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7.29.1
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Build Docker image
+        run: docker-compose build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: portfolio
+          IMAGE_TAG: latest
+        run: |
+          docker tag dreadfolio-portfolio:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy to EC2
+        env:
+          HOST: ec2-54-164-173-195.compute-1.amazonaws.com
+          USER: ec2-user
+          KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$KEY" > ~/.ssh/portfolio-key-pair.pem
+          chmod 600 ~/.ssh/portfolio-key-pair.pem
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/portfolio-key-pair.pem $USER@$HOST '
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 851725492026.dkr.ecr.us-east-1.amazonaws.com
+            docker pull 851725492026.dkr.ecr.us-east-1.amazonaws.com/portfolio:latest
+            docker stop $(docker ps -q)
+            docker run -d -p 80:3000 851725492026.dkr.ecr.us-east-1.amazonaws.com/portfolio:latest
+          '
