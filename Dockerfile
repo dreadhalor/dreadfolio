@@ -16,6 +16,9 @@ WORKDIR /usr/src/app
 # Install pnpm.
 RUN npm install -g pnpm@${PNPM_VERSION}
 
+# Set the environment variable for the Vercel token (because CI/CD will crash the server unless we use Remote Cache)
+ENV VERCEL_TOKEN=${VERCEL_TOKEN}
+
 # Copy all local files (because secrets + bigger assets aren't in the git repo)
 COPY . .
 
@@ -23,7 +26,7 @@ COPY . .
 RUN pnpm i
 
 # Build all the apps.
-RUN pnpm dlx turbo run build --concurrency=2
+RUN pnpm dlx turbo run build --token=${VERCEL_TOKEN} --concurrency=2
 
 # # Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend

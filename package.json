@@ -2,7 +2,7 @@
   "name": "dreadfolio",
   "private": true,
   "scripts": {
-    "build": "turbo build",
+    "build": "turbo build --token=$VERCEL_TOKEN",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
