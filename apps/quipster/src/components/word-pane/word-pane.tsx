@@ -22,6 +22,7 @@ import { SectionTile } from './section-tile';
 import { DefinitionSection } from './definition-section';
 import { SingleFormField } from '../form-components/single-form-field';
 import { FillInTheBlankQuestionsSection } from './fill-in-the-blank-questions-section';
+import { PromptsSection } from './prompts-section';
 
 export type Example = {
   id: string;
@@ -35,6 +36,11 @@ export type FillInTheBlankQuestion = {
   question: string;
   answer: string;
 };
+export type WordPrompt = {
+  id: string;
+  prompt: string;
+  setup: string;
+};
 
 export type WordFormData = {
   word: string;
@@ -44,6 +50,7 @@ export type WordFormData = {
   background: string;
   examples: Example[];
   fillInTheBlankQuestions: FillInTheBlankQuestion[];
+  prompts: WordPrompt[];
 };
 
 const DEFAULT_FORM_VALUES: WordFormData = {
@@ -54,6 +61,7 @@ const DEFAULT_FORM_VALUES: WordFormData = {
   background: '',
   examples: [],
   fillInTheBlankQuestions: [],
+  prompts: [],
 };
 
 const WordPane = () => {
@@ -196,6 +204,13 @@ const WordPane = () => {
           className='max-h-[400px] overflow-auto p-0'
         >
           <ExamplesSection isEditing={isEditing} />
+        </SectionTile>
+        <SectionTile
+          isEditing={isEditing}
+          label='Prompts'
+          className='max-h-[400px] overflow-auto p-0'
+        >
+          <PromptsSection isEditing={isEditing} />
         </SectionTile>
         {isEditing && (
           <form
