@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../../providers/app-provider';
 import { Button, Textarea } from 'dread-ui';
@@ -5,8 +6,8 @@ import { getScenario } from '../../client';
 
 const PromptQuiz = () => {
   const { words } = useApp();
-  const [currentWord, setCurrentWord] = useState(null);
-  const [currentPrompt, setCurrentPrompt] = useState(null);
+  const [currentWord, setCurrentWord] = useState<any | null>(null);
+  const [currentPrompt, setCurrentPrompt] = useState<any | null>(null);
   const [userResponse, setUserResponse] = useState('');
   const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
@@ -44,7 +45,7 @@ const PromptQuiz = () => {
           response: userResponse,
         });
 
-        const feedback = response.content[0].text.trim();
+        const feedback = response.content[0]!.text.trim();
         setFeedback(feedback);
 
         if (feedback.toLowerCase().startsWith('correct')) {

@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { useApp } from '../providers/app-provider';
 import { Link } from 'react-router-dom';
-// import { Term } from '../utils/terms';
 
 const ListTerms = ({ listId }: { listId: string }) => {
-  const [terms, setTerms] = useState([]);
-  const [listWords, setListWords] = useState([]);
+  const [terms, setTerms] = useState<any[]>([]);
+  const [listWords, setListWords] = useState<any[]>([]);
   const { lists, allTerms, words } = useApp();
 
   useEffect(() => {
