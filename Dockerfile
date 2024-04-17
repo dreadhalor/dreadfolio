@@ -26,7 +26,7 @@ COPY . .
 RUN pnpm i
 
 # Build all the apps.
-RUN pnpm dlx turbo run build --token=${VERCEL_TOKEN} --concurrency=2
+RUN pnpm dlx turbo run build --token=${VERCEL_TOKEN} --team=dreadhalors-projects --concurrency=2
 
 # # Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend
