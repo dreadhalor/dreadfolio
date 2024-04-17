@@ -7,6 +7,9 @@ FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
 
 ARG VERCEL_TOKEN
 
+# Install Git - needed for CI/CD in order to not keep making new images.
+RUN apk update && apk add --no-cache git
+
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
