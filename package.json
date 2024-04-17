@@ -6,7 +6,9 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "ssh": "ssh -i portfolio-key-pair.pem ec2-user@ec2-54-164-173-195.compute-1.amazonaws.com"
+    "ssh": "ssh -i portfolio-key-pair.pem ec2-user@ec2-54-164-173-195.compute-1.amazonaws.com",
+    "encrypt": "dotenvx encrypt",
+    "decrypt": "dotenvx decrypt"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
@@ -29,6 +31,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^0.34.0",
     "@repo/assets": "workspace:*",
     "@repo/utils": "workspace:*",
     "@tailwindcss/container-queries": "^0.1.1",

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@dotenvx/dotenvx':
+        specifier: ^0.34.0
+        version: 0.34.0
       '@repo/assets':
         specifier: workspace:*
         version: link:packages/assets
@@ -418,9 +421,6 @@ importers:
 
   apps/portfolio/backend:
     dependencies:
-      '@dotenvx/dotenvx':
-        specifier: ^0.34.0
-        version: 0.34.0
       '@repo/su-done-ku-backend':
         specifier: workspace:*
         version: link:../../su-done-ku/backend
