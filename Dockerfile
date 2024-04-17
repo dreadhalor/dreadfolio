@@ -2,8 +2,8 @@ ARG NODE_VERSION=21.6.1
 ARG PNPM_VERSION=8.15.1
 
 # Use node image for base image for all stages.
-# FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
-FROM node:${NODE_VERSION}-alpine as base
+FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
+# FROM node:${NODE_VERSION}-alpine as base
 
 ARG VERCEL_TOKEN
 
@@ -26,7 +26,7 @@ COPY . .
 RUN pnpm i
 
 # Build all the apps.
-RUN pnpm dlx turbo run build --token=${VERCEL_TOKEN} --team=dreadhalors-projects --concurrency=2
+RUN pnpm dlx turbo run build --concurrency=2
 
 # # Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend

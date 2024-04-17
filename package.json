@@ -2,10 +2,11 @@
   "name": "dreadfolio",
   "private": true,
   "scripts": {
-    "build": "turbo build --token=$VERCEL_TOKEN --team=dreadhalors-projects",
+    "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "ssh": "ssh -i portfolio-key-pair.pem ec2-user@ec2-54-164-173-195.compute-1.amazonaws.com"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
