@@ -16,7 +16,7 @@ const PageContent = () => {
       )}
     >
       <Section name='about' className='mb-4'>
-        <SectionHeader>About Mehh</SectionHeader>
+        <SectionHeader>About Mehhqqqq</SectionHeader>
         <SectionContent className='flex flex-col gap-4 px-0'>
           <p>
             My web development journey started in high school, automating Model
