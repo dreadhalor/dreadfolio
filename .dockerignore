@@ -22,8 +22,9 @@ Dockerfile
 # Ignore the README
 README.md
 
-# nginx configuration, that's a different image
+# infra configurations, that's not strictly "code"
 infra
+infra/github-actions/.secrets
 
 # local ssl certificates
 **.pem
