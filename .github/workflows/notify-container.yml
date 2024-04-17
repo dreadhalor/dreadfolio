@@ -1,16 +1,15 @@
-# name: Notify Container
+name: Notify Container
 
-# on:
-#   push:
-#     branches:
-#       - master
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   notify:
-#     runs-on: ubuntu-latest
+jobs:
+  notify:
+    runs-on: ubuntu-latest
 
-#     # put in the real url of the ec2 instance
-#     steps:
-#       - name: Notify Container
-#         run: |
-#           curl -X POST -H "Content-Type: application/json" -d '{"event": "push"}' http://<ec2-instance-ip>:3000/webhook
+    steps:
+      - name: Notify Container
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"event": "push"}' https://scottjhetrick.com/webhook
