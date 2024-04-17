@@ -2,7 +2,6 @@ import { ComplexArrayFormField } from '../form-components/complex-array-form-fie
 import { ExampleTile } from './example-tile';
 
 type ExamplesSectionProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isEditing: boolean;
 };
 

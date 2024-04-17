@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   doc,
   updateDoc,
   collection,
-  // getDocs,
   getDoc,
   setDoc,
   getFirestore,

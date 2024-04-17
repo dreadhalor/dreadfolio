@@ -30,6 +30,7 @@ type IntroContextValue = {
   setStartAnimating: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const steps = [
   { key: 'init', duration: 200 },
   { key: 'show-text', duration: 800 },
@@ -48,6 +49,7 @@ export type StepKey = (typeof steps)[number]['key'];
 
 const IntroContext = createContext<IntroContextValue>({} as IntroContextValue);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useIntro = () => {
   const context = useContext(IntroContext);
   if (!context) {

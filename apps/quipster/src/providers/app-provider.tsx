@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAuth } from 'dread-ui';
 import React, { useEffect, useState } from 'react';
 import { useDB } from '../hooks/use-db';
@@ -17,6 +18,7 @@ type AppContextType = {
   saveWord: (word: any) => void;
 };
 export const AppContext = React.createContext({} as AppContextType);
+// eslint-disable-next-line react-refresh/only-export-components
 export const useApp = () => React.useContext(AppContext);
 
 type Props = {
@@ -33,9 +35,7 @@ export const AppProvider = ({ children }: Props) => {
     saveWord,
   } = useDB(uid!);
   const [allTerms, setAllTerms] = useState<Term[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [words, setWords] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedWord, setSelectedWord] = useState<any>({});
   const [lists, setLists] = useState([]);
 
@@ -68,7 +68,6 @@ export const AppProvider = ({ children }: Props) => {
 
   useEffect(() => {
     const unsubscribe = subscribeToWords((words) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setWords(words.sort((a: any, b: any) => a.word.localeCompare(b.word))),
     );
 

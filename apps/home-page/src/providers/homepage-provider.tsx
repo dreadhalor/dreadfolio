@@ -13,6 +13,7 @@ const HomepageContext = createContext<HomepageContextValue>(
   {} as HomepageContextValue,
 );
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useHomepage = () => {
   const context = useContext(HomepageContext);
   if (!context) {

@@ -1,5 +1,4 @@
 import {
-  Button,
   Combobox,
   ComboboxContent,
   ComboboxEmpty,
@@ -8,7 +7,6 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxValue,
-  Input,
 } from 'dread-ui';
 import { MdFavorite, MdFavoriteBorder } from 'react-icons/md';
 import { useApp } from '../providers/app-provider';

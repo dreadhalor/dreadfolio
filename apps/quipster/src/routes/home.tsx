@@ -9,6 +9,7 @@ function Home() {
   const [currentList, setCurrentList] = useState<string>('all');
   const [currentTerms, setCurrentTerms] = useState<Term[]>([]);
   const [currentTerm, setCurrentTerm] = useState<Term | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [currentSituation, setCurrentSituation] = useState<any | null>(null);
 
   const { allTerms, lists, setFavorite } = useApp();

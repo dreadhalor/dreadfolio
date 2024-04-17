@@ -77,32 +77,32 @@ export const ThreeDEngine = (p5: P5) => {
     camera.rotateAroundAxis(camera.getRightVector(), -deltaY * sensitivity);
   };
 
-  const handleKeyboardInput = (deltaTime: number) => {
-    // Move the camera based on keyboard input
-    const moveSpeed = 10; // Adjust the movement speed as desired
-    if (p5.keyIsDown(87)) {
-      // W key
-      camera.moveForward(moveSpeed * deltaTime);
-    }
-    if (p5.keyIsDown(83)) {
-      // S key
-      camera.moveBackward(moveSpeed * deltaTime);
-    }
-    if (p5.keyIsDown(65)) {
-      // A key
-      camera.moveLeft(moveSpeed * deltaTime);
-    }
-    if (p5.keyIsDown(68)) {
-      // D key
-      camera.moveRight(moveSpeed * deltaTime);
-    }
-    if (p5.keyIsDown(32)) {
-      // Space key
-      camera.moveUp(moveSpeed * deltaTime);
-    }
-    if (p5.keyIsDown(16)) {
-      // Shift key
-      camera.moveDown(moveSpeed * deltaTime);
-    }
-  };
+  // const handleKeyboardInput = (deltaTime: number) => {
+  //   // Move the camera based on keyboard input
+  //   const moveSpeed = 10; // Adjust the movement speed as desired
+  //   if (p5.keyIsDown(87)) {
+  //     // W key
+  //     camera.moveForward(moveSpeed * deltaTime);
+  //   }
+  //   if (p5.keyIsDown(83)) {
+  //     // S key
+  //     camera.moveBackward(moveSpeed * deltaTime);
+  //   }
+  //   if (p5.keyIsDown(65)) {
+  //     // A key
+  //     camera.moveLeft(moveSpeed * deltaTime);
+  //   }
+  //   if (p5.keyIsDown(68)) {
+  //     // D key
+  //     camera.moveRight(moveSpeed * deltaTime);
+  //   }
+  //   if (p5.keyIsDown(32)) {
+  //     // Space key
+  //     camera.moveUp(moveSpeed * deltaTime);
+  //   }
+  //   if (p5.keyIsDown(16)) {
+  //     // Shift key
+  //     camera.moveDown(moveSpeed * deltaTime);
+  //   }
+  // };
 };

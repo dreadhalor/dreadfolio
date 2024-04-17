@@ -22,14 +22,14 @@ const Title = ({ variant, text = `Hi, I'm Scott` }: TitleProps) => {
   const dy = Math.min(textHeight * 0.9);
 
   useLayoutEffect(() => {
-    setHeight((_) => heightRef.current?.offsetHeight ?? 0);
+    setHeight(() => heightRef.current?.offsetHeight ?? 0);
     if (height) setInitialLoad(false);
   }, [heightRef.current?.offsetHeight, height]);
 
   useLayoutEffect(() => {
     const dimensions = textRef.current?.getBBox();
-    setTextHeight((_) => dimensions?.height ?? 0);
-    setTextWidth((_) => dimensions?.width ?? 0);
+    setTextHeight(() => dimensions?.height ?? 0);
+    setTextWidth(() => dimensions?.width ?? 0);
   }, [textHeight, textWidth]);
 
   const getWrapperVariant = (variant: TitleProps['variant']) => {
