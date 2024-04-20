@@ -3,14 +3,6 @@ import { CargoHull } from './cargo-hull';
 import { useDredge } from '@dredge/providers/dredge-provider';
 import { fishData } from '@dredge/lib/fish-data';
 import { FishGridImage } from './fish/fish-grid-image';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@dredge/components/ui/select';
 import { HullSelect } from './hull-select';
 
 const INVENTORY_SQUARE_SIZE = 55;
@@ -24,7 +16,7 @@ type HullInventorySquareProps = {
 const HullInventorySquare = ({ square }: HullInventorySquareProps) => {
   return (
     <div
-      className='border-inventory-squareBorder border-[3px]'
+      className='border-inventory-squareBorder hover:bg-inventory-squareBorder border-[3px]'
       style={{
         width: INVENTORY_SQUARE_SIZE,
         height: INVENTORY_SQUARE_SIZE,

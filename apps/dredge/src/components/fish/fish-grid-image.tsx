@@ -29,7 +29,7 @@ export const FishGridImage = ({
 
   return (
     <div
-      className='absolute flex origin-top-left items-center justify-center'
+      className='pointer-events-none absolute flex origin-top-left items-center justify-center'
       style={{
         width: gridSquareSize * width,
         height: gridSquareSize * height,
