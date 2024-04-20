@@ -3,10 +3,12 @@ import { FishEntry } from './fish-entry';
 
 export const FishSelectionGrid = () => {
   return (
-    <div className='grid grid-cols-2 gap-0'>
-      {fishData.map((fish) => (
-        <FishEntry key={fish.id} fish={fish} />
-      ))}
+    <div className='h-full overflow-auto'>
+      <div className='grid grid-cols-2 gap-0'>
+        {fishData.map((fish) => (
+          <FishEntry key={fish.id} fish={fish} />
+        ))}
+      </div>
     </div>
   );
 };
