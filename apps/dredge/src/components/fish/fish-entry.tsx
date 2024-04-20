@@ -50,19 +50,15 @@ const EncyclopediaGridSpacer = () => (
 type Props = { fish: FishDataType };
 export const FishEntry = ({ fish }: Props) => {
   const { id, number, name, width, height } = fish;
-  const { inventory, setInventory } = useDredge();
+  const { inventory, setInventory, packFish, toggleFish } = useDredge();
   const inInventory = inventory.filter((fish) => fish.id === id).length > 0;
 
   return (
     <div
       className='bg-encyclopedia-pageFill flex h-fit cursor-pointer select-none flex-col items-center gap-1 p-3 hover:brightness-105'
-      onClick={() =>
-        setInventory(
-          inInventory
-            ? inventory.filter((fish) => fish.id !== id)
-            : [...inventory, { id, count: 1 }],
-        )
-      }
+      onClick={() => {
+        toggleFish(id);
+      }}
     >
       #{`${number} ${name}${inInventory ? ' (In Inventory)' : ''}`}
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>

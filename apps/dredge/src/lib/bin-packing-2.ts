@@ -8,6 +8,7 @@ export interface Item {
 export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
   const rows = grid.length;
   const cols = grid[0].length;
+  const totalCells = rows * cols;
 
   // Create a copy of the grid to store the solution
   const solution: string[][] = grid.map((row) =>
@@ -60,6 +61,24 @@ export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
     }
   }
 
+  // Helper function to remove an item from the solution grid
+  function removeItem(item: Item): void {
+    const row = item.topLeft![0];
+    const col = item.topLeft![1];
+    const rotation = item.rotation!;
+    const shape = rotateShape(item.shape, rotation);
+    const itemRows = shape.length;
+    const itemCols = shape[0].length;
+
+    for (let i = 0; i < itemRows; i++) {
+      for (let j = 0; j < itemCols; j++) {
+        if (shape[i][j] === 1) {
+          solution[row + i][col + j] = '1';
+        }
+      }
+    }
+  }
+
   // Helper function to rotate a shape
   function rotateShape(shape: number[][], rotation: number): number[][] {
     let rotatedShape = shape;
@@ -73,12 +92,48 @@ export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
   }
 
   // Recursive function to try placing items in the grid
-  function tryPlaceItem(index: number): boolean {
+  function tryPlaceItems(index: number, placedCells: number): boolean {
     if (index === items.length) {
       return true; // All items placed successfully
     }
 
     const item = items[index];
+    const itemCells = item.shape.reduce(
+      (sum, row) => sum + row.reduce((rowSum, cell) => rowSum + cell, 0),
+      0,
+    );
+
+    // Optimization: Check if remaining cells are sufficient for remaining items
+    const remainingCells = totalCells - placedCells;
+    const remainingItemCells = items
+      .slice(index)
+      .reduce(
+        (sum, item) =>
+          sum +
+          item.shape.reduce(
+            (itemSum, row) =>
+              itemSum + row.reduce((rowSum, cell) => rowSum + cell, 0),
+            0,
+          ),
+        0,
+      );
+    if (remainingCells < remainingItemCells) {
+      return false;
+    }
+
+    // Optimization: Check if the item can be trivially added without rearranging
+    if (item.rotation !== undefined && item.topLeft !== undefined) {
+      const row = item.topLeft[0];
+      const col = item.topLeft[1];
+      const rotation = item.rotation;
+      if (fitItem(item, row, col, rotation)) {
+        placeItem(item, row, col, rotation);
+        if (tryPlaceItems(index + 1, placedCells + itemCells)) {
+          return true; // Found a valid placement for all items
+        }
+        removeItem(item);
+      }
+    }
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
@@ -88,12 +143,12 @@ export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
             item.rotation = rotation;
             item.topLeft = [row, col];
 
-            if (tryPlaceItem(index + 1)) {
-              return true; // Found a valid placement for the current item
+            if (tryPlaceItems(index + 1, placedCells + itemCells)) {
+              return true; // Found a valid placement for all items
             }
 
             // Backtrack and remove the item from the solution grid
-            placeItem(item, row, col, rotation);
+            removeItem(item);
             item.rotation = undefined;
             item.topLeft = undefined;
           }
@@ -105,7 +160,7 @@ export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
   }
 
   // Start the recursive placement process
-  if (tryPlaceItem(0)) {
+  if (tryPlaceItems(0, 0)) {
     return items;
   }
 
