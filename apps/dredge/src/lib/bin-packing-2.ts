@@ -5,10 +5,15 @@ export interface Item {
   topLeft?: [number, number];
 }
 
-export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
+export const binPacking2 = (
+  items: Item[],
+  grid: number[][],
+  timeout: number = 5000,
+): Item[] | null => {
   const rows = grid.length;
   const cols = grid[0].length;
   const totalCells = rows * cols;
+  const startTime = Date.now();
 
   // Create a copy of the grid to store the solution
   const solution: string[][] = grid.map((row) =>
@@ -93,6 +98,10 @@ export const binPacking2 = (items: Item[], grid: number[][]): Item[] | null => {
 
   // Recursive function to try placing items in the grid
   function tryPlaceItems(index: number, placedCells: number): boolean {
+    if (Date.now() - startTime > timeout) {
+      return false; // Timeout exceeded, terminate early
+    }
+
     if (index === items.length) {
       return true; // All items placed successfully
     }

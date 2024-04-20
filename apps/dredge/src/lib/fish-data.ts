@@ -7,6 +7,7 @@ import {
   GulfFlounderImage,
   SailfishImage,
   StingrayImage,
+  BronzeWhalerImage,
 } from '@dredge/assets/fish';
 
 export type FishDataType = {
@@ -119,5 +120,18 @@ export const fishData: FishDataType[] = [
     ],
     imageWidth: 5,
     imageHeight: 2,
+  },
+  {
+    id: 'bronze-whaler',
+    number: 9,
+    name: 'Bronze Whaler',
+    image: BronzeWhalerImage,
+    width: 4,
+    height: 3,
+    shape: [
+      [0, 1, 0, 0],
+      [1, 1, 1, 1],
+      [0, 0, 1, 0],
+    ],
   },
 ] as const;
