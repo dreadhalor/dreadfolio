@@ -1,8 +1,4 @@
-export type HullData = {
-  id: number;
-  name: string;
-  grid: number[][];
-};
+import { HullData } from '@dredge/types';
 
 export const hulls: HullData[] = [
   {

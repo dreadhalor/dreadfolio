@@ -3,6 +3,8 @@ import {
   BaitBucketImage,
   BoltOfClothImage,
   DogTagsImage,
+  LumberImage,
+  MetalScrapsImage,
 } from '@dredge/assets/items';
 import { GameItem } from '@dredge/types';
 
@@ -30,5 +32,24 @@ export const itemData: GameItem[] = [
     width: 1,
     height: 2,
     shape: [[1], [1]],
+  },
+  {
+    id: 'metal-scraps',
+    name: 'Metal Scraps',
+    image: MetalScrapsImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    id: 'lumber',
+    name: 'Lumber',
+    image: LumberImage,
+    width: 3,
+    height: 1,
+    shape: [[1, 1, 1]],
   },
 ] as const;

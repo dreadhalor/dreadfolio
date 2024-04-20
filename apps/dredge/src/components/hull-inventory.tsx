@@ -1,36 +1,59 @@
-import { HullData } from '@dredge/lib/hull-data';
 import { CargoHull } from './cargo-hull';
 import { useDredge } from '@dredge/providers/dredge-provider';
 import { FishGridImage } from './fish/fish-grid-image';
 import { HullSelect } from './hull-select';
 import { data } from '@dredge/lib/combined-data';
+import { cn, getItemAt } from '@dredge/lib/utils';
+import { DamageImage } from '@dredge/assets/ui';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
 const EFFECTIVE_SQUARE_SIZE = INVENTORY_SQUARE_SIZE + INVENTORY_SQUARE_GAP;
 
 type HullInventorySquareProps = {
-  square: number;
+  row: number;
+  col: number;
 };
 
-const HullInventorySquare = ({ square }: HullInventorySquareProps) => {
+const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
+  const {
+    hull: { grid },
+    packedItems,
+    toggleSlot,
+  } = useDredge();
+
+  const square = grid[row][col];
+  const item = getItemAt(packedItems, row, col);
+  const unlocked = square ? true : false;
+
   return (
     <div
-      className='border-inventory-squareBorder hover:bg-inventory-squareBorder border-[3px]'
+      className={cn(
+        'border-inventory-squareBorder group border-[3px]',
+        item && 'bg-inventory-squareBorder hover:bg-opacity-60',
+      )}
+      onClick={() => toggleSlot(row, col)}
       style={{
         width: INVENTORY_SQUARE_SIZE,
         height: INVENTORY_SQUARE_SIZE,
-        opacity: square ? 1 : 0,
+        opacity: unlocked ? 1 : 0,
       }}
-    ></div>
+    >
+      {!item && (
+        <img
+          src={DamageImage}
+          className='h-full w-full opacity-0 transition-opacity duration-100 group-hover:opacity-70'
+          draggable={false}
+        />
+      )}
+    </div>
   );
 };
 
-type Props = {
-  hull: HullData;
-};
-
-const HullInventoryGrid = ({ hull: { grid } }: Props) => {
+const HullInventoryGrid = () => {
+  const {
+    hull: { grid },
+  } = useDredge();
   const height = grid.length;
   const width = grid[0].length;
   const { packedItems } = useDredge();
@@ -60,7 +83,8 @@ const HullInventoryGrid = ({ hull: { grid } }: Props) => {
         {Array.from({ length: width * height }, (_, i) => (
           <HullInventorySquare
             key={i}
-            square={grid[Math.floor(i / width)][i % width]}
+            row={Math.floor(i / width)}
+            col={i % width}
           />
         ))}
         {items.map((item) => {
@@ -81,14 +105,12 @@ const HullInventoryGrid = ({ hull: { grid } }: Props) => {
 };
 
 export const HullInventory = () => {
-  const { hull } = useDredge();
-
   return (
     <div className='relative flex flex-1 flex-col items-center'>
       <HullSelect />
       <div className='relative flex flex-col items-center'>
         <CargoHull />
-        <HullInventoryGrid hull={hull} />
+        <HullInventoryGrid />
       </div>
     </div>
   );

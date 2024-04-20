@@ -4,15 +4,15 @@ import { ItemSelectionGrid } from './items/item-selection-grid';
 
 export const SelectionGrid = () => {
   return (
-    <Tabs defaultValue='fish' className='flex h-full max-h-full flex-col'>
+    <Tabs defaultValue='fish' className='flex h-full flex-col'>
       <TabsList className='grid grid-cols-2'>
         <TabsTrigger value='fish'>Fish</TabsTrigger>
         <TabsTrigger value='items'>Items</TabsTrigger>
       </TabsList>
-      <TabsContent value='fish'>
+      <TabsContent value='fish' className='overflow-auto'>
         <FishSelectionGrid />
       </TabsContent>
-      <TabsContent value='items'>
+      <TabsContent value='items' className='overflow-auto'>
         <ItemSelectionGrid />
       </TabsContent>
     </Tabs>

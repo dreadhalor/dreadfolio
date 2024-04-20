@@ -1,4 +1,5 @@
-import CargoHullImage from '@dredge/assets/dredge-cargo-background.png';
+import { CargoBackgroundImage } from '@dredge/assets/ui';
+
 export const CargoHull = () => {
   return (
     <div>
@@ -7,7 +8,7 @@ export const CargoHull = () => {
         style={{
           aspectRatio: 555 / 655,
         }}
-        src={CargoHullImage}
+        src={CargoBackgroundImage}
       />
     </div>
   );

@@ -1,7 +1,8 @@
 import { binPacking2 } from '@dredge/lib/bin-packing-2';
 import { data } from '@dredge/lib/combined-data';
-import { HullData, hulls } from '@dredge/lib/hull-data';
-import { GameItem, InventoryItem, PackedItem } from '@dredge/types';
+import { hulls } from '@dredge/lib/hull-data';
+import { getItemAt } from '@dredge/lib/utils';
+import { GameItem, HullData, InventoryItem, PackedItem } from '@dredge/types';
 import { useState, createContext, useContext, useEffect } from 'react';
 
 type DredgeProviderContextType = {
@@ -10,6 +11,7 @@ type DredgeProviderContextType = {
   hull: HullData;
   setHull: React.Dispatch<React.SetStateAction<HullData>>;
   packedItems: PackedItem[];
+  toggleSlot: (row: number, col: number) => void;
 };
 
 const DredgeProviderContext = createContext<DredgeProviderContextType>(
@@ -28,6 +30,26 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [hull, setHull] = useState<HullData>(hulls[0]);
   const [packedItems, setPackedItems] = useState<PackedItem[]>([]);
+
+  const toggleSlot = (row: number, col: number) => {
+    // if there is an item in the slot, just remove the item
+    const item = getItemAt(packedItems, row, col);
+    if (item) {
+      setInventory(inventory.filter((i) => i.id !== item.id));
+      return;
+    }
+    // if there is no item in the slot, toggle the slot
+    const newGrid = hull.grid.map((r) => r.slice());
+    newGrid[row][col] = newGrid[row][col] ? 0 : 1;
+    setHull({ ...hull, grid: newGrid });
+  };
+
+  // const getItemAt = (row: number, col: number) => {
+  //   return packedItems.find(
+  //     (item) =>
+  //       item.topLeft[0] === row && item.topLeft[1] === col
+  //   );
+  // }
 
   useEffect(() => {
     console.log('Inventory:', inventory);
@@ -51,6 +73,7 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
         hull,
         setHull,
         packedItems,
+        toggleSlot,
       }}
     >
       {children}

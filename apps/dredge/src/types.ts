@@ -24,3 +24,10 @@ export interface InventoryItem {
 export interface Fish extends GameItem {
   number: number;
 }
+
+export interface HullData {
+  id: number;
+  name: string;
+  grid: number[][];
+  disabledSlots?: [number, number][];
+}
