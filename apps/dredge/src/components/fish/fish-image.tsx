@@ -9,6 +9,7 @@ export const FishImage = ({ image, width, height }: Props) => {
   return (
     <div className='absolute inset-0 flex items-center justify-center'>
       <img
+        draggable={false}
         src={image}
         width={GRID_SQUARE_SIZE * width}
         height={GRID_SQUARE_SIZE * height}

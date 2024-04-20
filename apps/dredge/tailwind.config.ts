@@ -22,6 +22,9 @@ export default {
           pageFill: '#D2C3A4',
           squareBorder: '#A69B7F',
         },
+        inventory: {
+          squareBorder: '#2F2529',
+        },
       },
       borderRadius: {
         lg: `var(--radius)`,

@@ -1,5 +1,6 @@
+import { useDredge } from '@dredge/providers/dredge-provider';
 import { FishImage } from './fish-image';
-import { type FishData } from '../lib/fish-data';
+import { type FishDataType } from '@dredge/lib/fish-data';
 
 export const GRID_SQUARE_SIZE = 40;
 
@@ -47,14 +48,26 @@ const EncyclopediaGridSpacer = () => (
 );
 
 type Props = {
-  fish: FishData;
+  fish: FishDataType;
 };
 export const FishEntry = ({
-  fish: { number, name, image, width, height, imageWidth, imageHeight },
+  fish: { id, number, name, image, width, height, imageWidth, imageHeight },
 }: Props) => {
+  const { inventory, setInventory } = useDredge();
+  const inInventory = inventory.filter((fish) => fish.id === id).length > 0;
+
   return (
-    <div className='bg-encyclopedia-pageFill flex h-fit flex-col items-center gap-1 p-3'>
-      #{number} {name}
+    <div
+      className='bg-encyclopedia-pageFill flex h-fit cursor-pointer select-none flex-col items-center gap-1 p-3 hover:brightness-105'
+      onClick={() =>
+        setInventory(
+          inInventory
+            ? inventory.filter((fish) => fish.id !== id)
+            : [...inventory, { id, count: 1 }],
+        )
+      }
+    >
+      #{`${number} ${name}${inInventory ? ' (In Inventory)' : ''}`}
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>
         <EncyclopediaGridSpacer />
         <EncyclopediaGrid width={width} height={height} />

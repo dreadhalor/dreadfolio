@@ -7,20 +7,26 @@ import {
   GulfFlounderImage,
   SailfishImage,
   StingrayImage,
-} from '../assets/fish';
+} from '@dredge/assets/fish';
 
-export type FishData = {
+export type FishDataType = {
   id: string;
   number: number;
   name: string;
   image: string;
   width: number;
   height: number;
+  shape: number[][];
   imageWidth?: number;
   imageHeight?: number;
 };
 
-export const Fish: FishData[] = [
+export type Fish = {
+  id: string;
+  count: number;
+};
+
+export const fishData: FishDataType[] = [
   {
     id: 'blue-mackerel',
     number: 1,
@@ -28,6 +34,7 @@ export const Fish: FishData[] = [
     image: BlueMackerelImage,
     width: 2,
     height: 1,
+    shape: [[1, 1]],
   },
 
   {
@@ -37,6 +44,10 @@ export const Fish: FishData[] = [
     image: CodImage,
     width: 2,
     height: 2,
+    shape: [
+      [1, 1],
+      [0, 1],
+    ],
   },
 
   {
@@ -46,6 +57,7 @@ export const Fish: FishData[] = [
     image: ArrowSquidImage,
     width: 2,
     height: 1,
+    shape: [[1, 1]],
   },
 
   {
@@ -55,6 +67,7 @@ export const Fish: FishData[] = [
     image: GreyEelImage,
     width: 3,
     height: 1,
+    shape: [[1, 1, 1]],
   },
   {
     id: 'gulf-flounder',
@@ -63,6 +76,10 @@ export const Fish: FishData[] = [
     image: GulfFlounderImage,
     width: 2,
     height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
   },
   {
     id: 'black-grouper',
@@ -71,6 +88,10 @@ export const Fish: FishData[] = [
     image: BlackGrouperImage,
     width: 2,
     height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
   },
   {
     id: 'stingray',
@@ -79,6 +100,11 @@ export const Fish: FishData[] = [
     image: StingrayImage,
     width: 3,
     height: 3,
+    shape: [
+      [0, 1, 1],
+      [1, 1, 1],
+      [0, 1, 1],
+    ],
   },
   {
     id: 'sailfish',
@@ -87,6 +113,10 @@ export const Fish: FishData[] = [
     image: SailfishImage,
     width: 6,
     height: 2,
+    shape: [
+      [0, 1, 1, 1, 0, 0],
+      [1, 1, 1, 1, 1, 1],
+    ],
     imageWidth: 5,
     imageHeight: 2,
   },
