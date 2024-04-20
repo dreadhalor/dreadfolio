@@ -47,12 +47,9 @@ const EncyclopediaGridSpacer = () => (
   />
 );
 
-type Props = {
-  fish: FishDataType;
-};
-export const FishEntry = ({
-  fish: { id, number, name, image, width, height, imageWidth, imageHeight },
-}: Props) => {
+type Props = { fish: FishDataType };
+export const FishEntry = ({ fish }: Props) => {
+  const { id, number, name, width, height } = fish;
   const { inventory, setInventory } = useDredge();
   const inInventory = inventory.filter((fish) => fish.id === id).length > 0;
 
@@ -71,11 +68,9 @@ export const FishEntry = ({
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>
         <EncyclopediaGridSpacer />
         <EncyclopediaGrid width={width} height={height} />
-        <FishImage
-          image={image}
-          width={imageWidth || width}
-          height={imageHeight || height}
-        />
+        <div className='absolute inset-0 flex items-center justify-center'>
+          <FishImage fish={fish} />
+        </div>
       </div>
     </div>
   );

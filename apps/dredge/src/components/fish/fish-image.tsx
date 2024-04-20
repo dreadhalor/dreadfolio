@@ -1,18 +1,30 @@
+import { FishDataType } from '@dredge/lib/fish-data';
 import { GRID_SQUARE_SIZE } from './fish-entry';
 
 type Props = {
-  image: string;
-  width: number;
-  height: number;
+  fish: FishDataType;
+  gridSquareSize?: number;
+  rotation?: number;
 };
-export const FishImage = ({ image, width, height }: Props) => {
+export const FishImage = ({
+  fish: { image, width, height, imageWidth, imageHeight },
+  gridSquareSize = GRID_SQUARE_SIZE,
+  rotation = 0,
+}: Props) => {
   return (
-    <div className='absolute inset-0 flex items-center justify-center'>
+    <div
+      className='flex items-center justify-center'
+      style={{
+        width: gridSquareSize * width,
+        height: gridSquareSize * height,
+        rotate: `${rotation}deg`,
+      }}
+    >
       <img
         draggable={false}
         src={image}
-        width={GRID_SQUARE_SIZE * width}
-        height={GRID_SQUARE_SIZE * height}
+        width={gridSquareSize * (imageWidth || width)}
+        height={gridSquareSize * (imageHeight || height)}
       />
     </div>
   );
