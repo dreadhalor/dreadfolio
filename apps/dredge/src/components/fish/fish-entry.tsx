@@ -64,7 +64,7 @@ export const FishEntry = ({ fish }: Props) => {
         )
       }
     >
-      #{`${number} ${name}${inInventory ? ' (In Inventory)' : ''}`}
+      #{`${number} ${name}${inInventory ? ' (✓)' : ''}`}
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>
         <EncyclopediaGridSpacer />
         <EncyclopediaGrid width={width} height={height} />

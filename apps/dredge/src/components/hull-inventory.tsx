@@ -2,8 +2,15 @@ import { HullData } from '@dredge/lib/hull-data';
 import { CargoHull } from './cargo-hull';
 import { useDredge } from '@dredge/providers/dredge-provider';
 import { fishData } from '@dredge/lib/fish-data';
-import { FishImage } from './fish/fish-image';
 import { FishGridImage } from './fish/fish-grid-image';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@dredge/components/ui/select';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -84,9 +91,24 @@ export const HullInventory = () => {
   const { hull } = useDredge();
 
   return (
-    <div className='relative flex'>
-      <CargoHull />
-      <HullInventoryGrid hull={hull} />
+    <div className='relative flex flex-col items-center'>
+      <Select defaultValue='1'>
+        <SelectTrigger className='w-[180px] bg-white'>
+          <SelectValue placeholder='Select a hull' />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value='1'>Tier 1</SelectItem>
+            <SelectItem value='2'>Tier 2</SelectItem>
+            <SelectItem value='3'>Tier 3</SelectItem>
+            <SelectItem value='4'>Tier 4</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <div className='relative flex flex-col items-center'>
+        <CargoHull />
+        <HullInventoryGrid hull={hull} />
+      </div>
     </div>
   );
 };

@@ -8,6 +8,7 @@ import {
   SailfishImage,
   StingrayImage,
   BronzeWhalerImage,
+  BlacktipReefSharkImage,
 } from '@dredge/assets/fish';
 
 export type FishDataType = {
@@ -132,6 +133,19 @@ export const fishData: FishDataType[] = [
       [0, 1, 0, 0],
       [1, 1, 1, 1],
       [0, 0, 1, 0],
+    ],
+  },
+  {
+    id: 'blacktip-reef-shark',
+    number: 10,
+    name: 'Blacktip Reef Shark',
+    image: BlacktipReefSharkImage,
+    width: 4,
+    height: 3,
+    shape: [
+      [0, 0, 1, 0],
+      [1, 1, 1, 1],
+      [0, 1, 0, 0],
     ],
   },
 ] as const;

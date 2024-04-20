@@ -7,3 +7,4 @@ export { default as BlackGrouperImage } from './black-grouper.webp';
 export { default as StingrayImage } from './stingray.webp';
 export { default as SailfishImage } from './sailfish.webp';
 export { default as BronzeWhalerImage } from './bronze-whaler.webp';
+export { default as BlacktipReefSharkImage } from './blacktip-reef-shark.webp';
