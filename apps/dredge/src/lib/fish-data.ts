@@ -50,25 +50,9 @@ import {
   CuskEelImage,
   SnakeMackerelImage,
 } from '@dredge/assets/fish';
+import { Fish } from '@dredge/types';
 
-export type FishDataType = {
-  id: string;
-  number: number;
-  name: string;
-  image: string;
-  width: number;
-  height: number;
-  shape: number[][];
-  imageWidth?: number;
-  imageHeight?: number;
-};
-
-export type Fish = {
-  id: string;
-  count: number;
-};
-
-export const fishData: FishDataType[] = [
+export const fishData: Fish[] = [
   {
     id: 'blue-mackerel',
     number: 1,

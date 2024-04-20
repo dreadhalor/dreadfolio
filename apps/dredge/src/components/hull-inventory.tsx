@@ -1,9 +1,9 @@
 import { HullData } from '@dredge/lib/hull-data';
 import { CargoHull } from './cargo-hull';
 import { useDredge } from '@dredge/providers/dredge-provider';
-import { fishData } from '@dredge/lib/fish-data';
 import { FishGridImage } from './fish/fish-grid-image';
 import { HullSelect } from './hull-select';
+import { data } from '@dredge/lib/combined-data';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -33,19 +33,19 @@ type Props = {
 const HullInventoryGrid = ({ hull: { grid } }: Props) => {
   const height = grid.length;
   const width = grid[0].length;
-  const { packedFish } = useDredge();
+  const { packedItems } = useDredge();
 
-  const fish = packedFish
+  const items = packedItems
     .map((item) => {
-      const _fish = fishData.find((data) => data.id === item.id);
-      if (!_fish) {
+      const _item = data.find((data) => data.id === item.id);
+      if (!_item) {
         return null;
       }
-      return { item, fish: _fish };
+      return { item, fish: _item };
     })
     .filter(Boolean);
 
-  console.log('FISH:', fish);
+  console.log('FISH:', items);
 
   return (
     <div className='absolute inset-0 flex items-center justify-center'>
@@ -63,7 +63,7 @@ const HullInventoryGrid = ({ hull: { grid } }: Props) => {
             square={grid[Math.floor(i / width)][i % width]}
           />
         ))}
-        {fish.map((item) => {
+        {items.map((item) => {
           const tl = { x: item?.item?.topLeft[1], y: item?.item?.topLeft[0] };
           return (
             <FishGridImage

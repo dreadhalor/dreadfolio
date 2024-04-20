@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@dredge/components/ui/select';
+} from '@dredge/ui/select';
 import { hulls } from '@dredge/lib/hull-data';
 import { useDredge } from '@dredge/providers/dredge-provider';
 export const HullSelect = () => {
@@ -18,7 +18,7 @@ export const HullSelect = () => {
   };
   return (
     <Select value={`${hull.id}`} onValueChange={handleSelect}>
-      <SelectTrigger className='w-[180px] bg-white'>
+      <SelectTrigger className='w-[180px]'>
         <SelectValue placeholder='Select a hull' />
       </SelectTrigger>
       <SelectContent>

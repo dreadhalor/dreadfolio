@@ -1,8 +1,8 @@
-import { FishDataType } from '@dredge/lib/fish-data';
+import { Fish } from '@dredge/types';
 import { GRID_SQUARE_SIZE } from './fish-entry';
 
 type Props = {
-  fish: FishDataType;
+  fish: Fish;
   gridSquareSize?: number;
   rotation?: number;
   topLeft?: { x: number; y: number };

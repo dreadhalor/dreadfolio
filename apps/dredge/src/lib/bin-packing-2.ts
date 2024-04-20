@@ -1,15 +1,10 @@
-export interface Item {
-  id: string;
-  shape: number[][];
-  rotation?: number;
-  topLeft?: [number, number];
-}
+import { PackedItem } from '@dredge/types';
 
 export const binPacking2 = (
-  items: Item[],
+  items: PackedItem[],
   grid: number[][],
   timeout: number = 5000,
-): Item[] | null => {
+): PackedItem[] | null => {
   const rows = grid.length;
   const cols = grid[0].length;
   const totalCells = rows * cols;
@@ -22,7 +17,7 @@ export const binPacking2 = (
 
   // Helper function to check if an item fits at a given position
   function fitItem(
-    item: Item,
+    item: PackedItem,
     row: number,
     col: number,
     rotation: number,
@@ -48,7 +43,7 @@ export const binPacking2 = (
 
   // Helper function to place an item in the solution grid
   function placeItem(
-    item: Item,
+    item: PackedItem,
     row: number,
     col: number,
     rotation: number,
@@ -67,7 +62,7 @@ export const binPacking2 = (
   }
 
   // Helper function to remove an item from the solution grid
-  function removeItem(item: Item): void {
+  function removeItem(item: PackedItem): void {
     const row = item.topLeft![0];
     const col = item.topLeft![1];
     const rotation = item.rotation!;

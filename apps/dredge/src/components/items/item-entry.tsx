@@ -1,6 +1,6 @@
 import { useDredge } from '@dredge/providers/dredge-provider';
-import { FishImage } from './fish-image';
-import { Fish } from '@dredge/types';
+import { FishImage } from '../fish/fish-image';
+import { GameItem } from '@dredge/types';
 
 export const GRID_SQUARE_SIZE = 40;
 
@@ -47,11 +47,11 @@ const EncyclopediaGridSpacer = () => (
   />
 );
 
-type Props = { fish: Fish };
-export const FishEntry = ({ fish }: Props) => {
-  const { id, number, name, width, height } = fish;
+type Props = { item: GameItem };
+export const ItemEntry = ({ item: item }: Props) => {
+  const { id, name, width, height } = item;
   const { inventory, setInventory } = useDredge();
-  const inInventory = inventory.filter((fish) => fish.id === id).length > 0;
+  const inInventory = inventory.filter((item) => item.id === id).length > 0;
 
   return (
     <div
@@ -59,17 +59,17 @@ export const FishEntry = ({ fish }: Props) => {
       onClick={() =>
         setInventory(
           inInventory
-            ? inventory.filter((fish) => fish.id !== id)
+            ? inventory.filter((item) => item.id !== id)
             : [...inventory, { id, count: 1 }],
         )
       }
     >
-      #{`${number} ${name}${inInventory ? ' (✓)' : ''}`}
+      {`${name}${inInventory ? ' (✓)' : ''}`}
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>
         <EncyclopediaGridSpacer />
         <EncyclopediaGrid width={width} height={height} />
         <div className='absolute inset-0 flex items-center justify-center'>
-          <FishImage fish={fish} />
+          <FishImage fish={{ ...item, number: 0 }} />
         </div>
       </div>
     </div>

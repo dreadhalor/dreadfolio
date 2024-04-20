@@ -22,7 +22,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "@dredge/*": ["src/*"]
+      "@dredge/*": ["src/*"],
+      "@dredge/ui/*": ["src/components/ui/*"]
     }
   },
   "include": ["src"],

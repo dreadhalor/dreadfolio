@@ -1,15 +1,15 @@
-import { Item } from '@dredge/lib/bin-packing';
 import { binPacking2 } from '@dredge/lib/bin-packing-2';
-import { Fish, fishData, FishDataType } from '@dredge/lib/fish-data';
+import { data } from '@dredge/lib/combined-data';
 import { HullData, hulls } from '@dredge/lib/hull-data';
+import { GameItem, InventoryItem, PackedItem } from '@dredge/types';
 import { useState, createContext, useContext, useEffect } from 'react';
 
 type DredgeProviderContextType = {
-  inventory: Fish[];
-  setInventory: React.Dispatch<React.SetStateAction<Fish[]>>;
+  inventory: InventoryItem[];
+  setInventory: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
   hull: HullData;
   setHull: React.Dispatch<React.SetStateAction<HullData>>;
-  packedFish: Item[];
+  packedItems: PackedItem[];
 };
 
 const DredgeProviderContext = createContext<DredgeProviderContextType>(
@@ -25,26 +25,33 @@ export const useDredge = () => {
 };
 
 export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [inventory, setInventory] = useState<Fish[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [hull, setHull] = useState<HullData>(hulls[0]);
-  const [packedFish, setPackedFish] = useState<Item[]>([]);
+  const [packedItems, setPackedItems] = useState<PackedItem[]>([]);
 
   useEffect(() => {
     console.log('Inventory:', inventory);
-    const items: Item[] = inventory.map((fish: Fish) => ({
-      id: fish.id,
-      shape:
-        fishData.find((data: FishDataType) => data.id === fish.id)?.shape || [],
-    }));
-    console.log('Items:', items);
-    const packed = binPacking2(items, hull.grid);
-    setPackedFish(packed || []);
+    const unpackedItems: PackedItem[] = inventory.map(
+      (item: InventoryItem) => ({
+        id: item.id,
+        shape: data.find((data: GameItem) => data.id === item.id)?.shape || [],
+      }),
+    );
+    console.log('Unpacked:', unpackedItems);
+    const packed = binPacking2(unpackedItems, hull.grid);
+    setPackedItems(packed || []);
     console.log('Packed:', packed);
   }, [inventory, hull]);
 
   return (
     <DredgeProviderContext.Provider
-      value={{ inventory, setInventory, hull, setHull, packedFish }}
+      value={{
+        inventory,
+        setInventory,
+        hull,
+        setHull,
+        packedItems,
+      }}
     >
       {children}
     </DredgeProviderContext.Provider>
