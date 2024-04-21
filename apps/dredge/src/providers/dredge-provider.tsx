@@ -10,6 +10,7 @@ import {
   SlotType,
 } from '@dredge/types';
 import { useState, createContext, useContext, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 type DredgeProviderContextType = {
   inventory: InventoryItem[];
@@ -41,7 +42,11 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     // if there is an item in the slot, just remove the item
     const item = getItemAt(packedItems, row, col);
     if (item) {
-      setInventory(inventory.filter((i) => i.id !== item.id));
+      const index = inventory.findIndex((i) => i.id === item.itemId);
+      if (index === -1) return;
+      const newInventory = inventory.map((i) => ({ ...i }));
+      newInventory.splice(index, 1);
+      setInventory(newInventory);
       return;
     }
     // if there is no item in the slot, toggle the slot
@@ -64,12 +69,18 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('Inventory:', inventory);
     const unpackedItems: PackedItem[] = inventory.map(
       (item: InventoryItem) => ({
-        id: item.id,
+        id: uuidv4(),
+        itemId: item.id,
         shape: data.find((data: GameItem) => data.id === item.id)?.shape || [],
       }),
     );
     console.log('Unpacked:', unpackedItems);
     const packed = binPacking2(unpackedItems, hull.grid);
+    if (!packed) {
+      // remove the last item from the inventory
+      setInventory(inventory.slice(0, -1));
+      return;
+    }
     setPackedItems(packed || []);
     console.log('Packed:', packed);
   }, [inventory, hull]);

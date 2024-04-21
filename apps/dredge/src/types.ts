@@ -1,5 +1,6 @@
 export interface PackedItem {
   id: string;
+  itemId: string;
   shape: number[][];
   rotation?: number;
   topLeft?: [number, number];

@@ -68,7 +68,7 @@ const HullInventoryGrid = () => {
 
   const items = packedItems
     .map((item) => {
-      const _item = data.find((data) => data.id === item.id);
+      const _item = data.find((data) => data.id === item.itemId);
       if (!_item) {
         return null;
       }

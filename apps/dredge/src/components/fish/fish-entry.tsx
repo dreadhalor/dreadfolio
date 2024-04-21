@@ -56,13 +56,7 @@ export const FishEntry = ({ fish }: Props) => {
   return (
     <div
       className='bg-encyclopedia-pageFill flex h-fit cursor-pointer select-none flex-col items-center gap-1 p-3 text-black hover:brightness-105'
-      onClick={() =>
-        setInventory(
-          inInventory
-            ? inventory.filter((fish) => fish.id !== id)
-            : [...inventory, { id, count: 1 }],
-        )
-      }
+      onClick={() => setInventory([...inventory, { id, count: 1 }])}
     >
       #{`${number} ${name}${inInventory ? ' (✓)' : ''}`}
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>
