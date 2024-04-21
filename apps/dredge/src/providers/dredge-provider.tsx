@@ -60,13 +60,6 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     setHull({ ...hull, grid: newGrid });
   };
 
-  // const getItemAt = (row: number, col: number) => {
-  //   return packedItems.find(
-  //     (item) =>
-  //       item.topLeft[0] === row && item.topLeft[1] === col
-  //   );
-  // }
-
   useEffect(() => {
     console.log('Inventory:', inventory);
     const unpackedItems: PackedItem[] = inventory.map(
