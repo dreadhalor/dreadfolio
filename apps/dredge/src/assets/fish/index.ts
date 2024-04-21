@@ -84,3 +84,59 @@ export { default as ArmoredSearobinImage } from './armored-searobin.webp';
 export { default as CuskEelImage } from './cusk-eel.webp';
 // snake mackerel
 export { default as SnakeMackerelImage } from './snake-mackerel.webp';
+// pale skate
+export { default as PaleSkateImage } from './pale-skate.webp';
+// ghost shark
+export { default as GhostSharkImage } from './ghost-shark.webp';
+// frilled shark
+export { default as FrilledSharkImage } from './frilled-shark.webp';
+// volcano snail
+export { default as VolcanoSnailImage } from './volcano-snail.webp';
+// squat lobster
+export { default as SquatLobsterImage } from './squat-lobster.webp';
+// spider crab
+export { default as SpiderCrabImage } from './spider-crab.webp';
+// anchovy
+export { default as AnchovyImage } from './anchovy.webp';
+// scarlet prawn
+export { default as ScarletPrawnImage } from './scarlet-prawn.webp';
+// blackfin tuna
+export { default as BlackfinTunaImage } from './blackfin-tuna.webp';
+// viperfish
+export { default as ViperfishImage } from './viperfish.webp';
+// moonfish
+export { default as MoonfishImage } from './moonfish.webp';
+// rattail
+export { default as RattailImage } from './rattail.webp';
+// ocean sunfish
+export { default as OceanSunfishImage } from './ocean-sunfish.webp';
+// icefish
+export { default as IcefishImage } from './icefish.webp';
+// char
+export { default as CharImage } from './char.webp';
+// wolffish
+export { default as WolffishImage } from './wolffish.webp';
+// stargazer
+export { default as StargazerImage } from './stargazer.webp';
+// lizardfish
+export { default as LizardfishImage } from './lizardfish.webp';
+// toothfish
+export { default as ToothfishImage } from './toothfish.webp';
+// goblin shark
+export { default as GoblinSharkImage } from './goblin-shark.webp';
+// colossal squid
+export { default as ColossalSquidImage } from './colossal-squid.webp';
+// sea stars
+export { default as SeaStarsImage } from './sea-stars.webp';
+// king crab
+export { default as KingCrabImage } from './king-crab.webp';
+// oarfish
+export { default as OarfishImage } from './oarfish.webp';
+// gulper eel
+export { default as GulperEelImage } from './gulper-eel.webp';
+// goliath tigerfish
+export { default as GoliathTigerfishImage } from './goliath-tigerfish.webp';
+// coelacanth
+export { default as CoelacanthImage } from './coelacanth.webp';
+// sleeper shark
+export { default as SleeperSharkImage } from './sleeper-shark.webp';
