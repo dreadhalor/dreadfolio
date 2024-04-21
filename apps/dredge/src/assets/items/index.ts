@@ -8,3 +8,5 @@ export { default as BoltOfClothImage } from './bolt-of-cloth.webp';
 export { default as MetalScrapsImage } from './metal-scraps.webp';
 // lumber
 export { default as LumberImage } from './lumber.webp';
+// packed explosives
+export { default as PackedExplosivesImage } from './packed-explosives.webp';

@@ -5,6 +5,7 @@ import {
   DogTagsImage,
   LumberImage,
   MetalScrapsImage,
+  PackedExplosivesImage,
 } from '@dredge/assets/items';
 import { GameItem } from '@dredge/types';
 
@@ -51,5 +52,13 @@ export const itemData: GameItem[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+  },
+  {
+    id: 'packed-explosives',
+    name: 'Packed Explosives',
+    image: PackedExplosivesImage,
+    width: 1,
+    height: 2,
+    shape: [[1], [1]],
   },
 ] as const;

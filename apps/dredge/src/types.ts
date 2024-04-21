@@ -29,5 +29,10 @@ export interface HullData {
   id: number;
   name: string;
   grid: number[][];
-  disabledSlots?: [number, number][];
+}
+
+export enum SlotType {
+  Locked,
+  Available,
+  Damaged,
 }

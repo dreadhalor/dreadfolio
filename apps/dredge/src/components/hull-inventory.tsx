@@ -5,6 +5,7 @@ import { HullSelect } from './hull-select';
 import { data } from '@dredge/lib/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
 import { DamageImage } from '@dredge/assets/ui';
+import { SlotType } from '@dredge/types';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -26,13 +27,17 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
   const item = getItemAt(packedItems, row, col);
   const unlocked = square ? true : false;
 
+  const handleClick = () => {
+    toggleSlot(row, col);
+  };
+
   return (
     <div
       className={cn(
         'border-inventory-squareBorder group border-[3px]',
         item && 'bg-inventory-squareBorder hover:bg-opacity-60',
       )}
-      onClick={() => toggleSlot(row, col)}
+      onClick={handleClick}
       style={{
         width: INVENTORY_SQUARE_SIZE,
         height: INVENTORY_SQUARE_SIZE,
@@ -42,7 +47,10 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
       {!item && (
         <img
           src={DamageImage}
-          className='h-full w-full opacity-0 transition-opacity duration-100 group-hover:opacity-70'
+          className={cn(
+            'h-full w-full opacity-0 transition-opacity duration-100 group-hover:opacity-70',
+            square === SlotType.Damaged && 'opacity-100 group-hover:opacity-90',
+          )}
           draggable={false}
         />
       )}

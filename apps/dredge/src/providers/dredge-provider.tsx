@@ -2,7 +2,13 @@ import { binPacking2 } from '@dredge/lib/bin-packing-2';
 import { data } from '@dredge/lib/combined-data';
 import { hulls } from '@dredge/lib/hull-data';
 import { getItemAt } from '@dredge/lib/utils';
-import { GameItem, HullData, InventoryItem, PackedItem } from '@dredge/types';
+import {
+  GameItem,
+  HullData,
+  InventoryItem,
+  PackedItem,
+  SlotType,
+} from '@dredge/types';
 import { useState, createContext, useContext, useEffect } from 'react';
 
 type DredgeProviderContextType = {
@@ -40,7 +46,17 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     }
     // if there is no item in the slot, toggle the slot
     const newGrid = hull.grid.map((r) => r.slice());
-    newGrid[row][col] = newGrid[row][col] ? 0 : 1;
+    const slot = newGrid[row][col];
+    switch (slot) {
+      case SlotType.Locked:
+        break;
+      case SlotType.Available:
+        newGrid[row][col] = SlotType.Damaged;
+        break;
+      case SlotType.Damaged:
+        newGrid[row][col] = SlotType.Available;
+        break;
+    }
     setHull({ ...hull, grid: newGrid });
   };
 
