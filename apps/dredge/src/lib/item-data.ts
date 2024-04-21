@@ -1,11 +1,19 @@
 import {} from '@dredge/assets/fish';
 import {
+  BagOfDoubloonsImage,
   BaitBucketImage,
+  BigBagOfDoubloonsImage,
   BoltOfClothImage,
+  BrokenSpectaclesImage,
+  ChunkOfFleshImage,
   DogTagsImage,
+  DoubloonImage,
   LumberImage,
   MetalScrapsImage,
   PackedExplosivesImage,
+  RefinedMetalImage,
+  ResearchPartImage,
+  SextantImage,
 } from '@dredge/assets/items';
 import { GameItem } from '@dredge/types';
 
@@ -60,5 +68,82 @@ export const itemData: GameItem[] = [
     width: 1,
     height: 2,
     shape: [[1], [1]],
+  },
+  {
+    id: 'research-part',
+    name: 'Research Part',
+    image: ResearchPartImage,
+    width: 1,
+    height: 1,
+    shape: [[1]],
+  },
+  {
+    id: 'refined-metal',
+    name: 'Refined Metal',
+    image: RefinedMetalImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [0, 1],
+      [1, 1],
+    ],
+  },
+  {
+    id: 'chunk-of-flesh',
+    name: 'Chunk of Flesh',
+    image: ChunkOfFleshImage,
+    width: 2,
+    height: 3,
+    shape: [
+      [1, 1],
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    id: 'broken-spectacles',
+    name: 'Broken Spectacles',
+    image: BrokenSpectaclesImage,
+    width: 2,
+    height: 1,
+    shape: [[1, 1]],
+  },
+  {
+    id: 'doubloon',
+    name: 'Doubloon',
+    image: DoubloonImage,
+    width: 1,
+    height: 1,
+    shape: [[1]],
+  },
+  {
+    id: 'bag-of-doubloons',
+    name: 'Bag of Doubloons',
+    image: BagOfDoubloonsImage,
+    width: 1,
+    height: 2,
+    shape: [[1], [1]],
+  },
+  {
+    id: 'big-bag-of-doubloons',
+    name: 'Big Bag of Doubloons',
+    image: BigBagOfDoubloonsImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    id: 'sextant',
+    name: 'Sextant',
+    image: SextantImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
   },
 ] as const;

@@ -10,3 +10,19 @@ export { default as MetalScrapsImage } from './metal-scraps.webp';
 export { default as LumberImage } from './lumber.webp';
 // packed explosives
 export { default as PackedExplosivesImage } from './packed-explosives.webp';
+// research part
+export { default as ResearchPartImage } from './research-part.webp';
+// refined metal
+export { default as RefinedMetalImage } from './refined-metal.webp';
+// chunk of flesh
+export { default as ChunkOfFleshImage } from './chunk-of-flesh.webp';
+// broken spectacles
+export { default as BrokenSpectaclesImage } from './broken-spectacles.png';
+// doubloon
+export { default as DoubloonImage } from './doubloon.png';
+// bag of doubloons
+export { default as BagOfDoubloonsImage } from './bag-of-doubloons.png';
+// big bag of doubloons
+export { default as BigBagOfDoubloonsImage } from './big-bag-of-doubloons.png';
+// sextant
+export { default as SextantImage } from './sextant.png';

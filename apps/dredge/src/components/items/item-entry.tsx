@@ -1,6 +1,7 @@
 import { useDredge } from '@dredge/providers/dredge-provider';
 import { FishImage } from '../fish/fish-image';
 import { GameItem } from '@dredge/types';
+import { EncyclopediaUnderlineImage } from '@dredge/assets/ui';
 
 export const GRID_SQUARE_SIZE = 40;
 
@@ -58,7 +59,10 @@ export const ItemEntry = ({ item: item }: Props) => {
       className='bg-encyclopedia-pageFill flex h-fit cursor-pointer select-none flex-col items-center gap-1 p-3 text-black hover:brightness-105'
       onClick={() => setInventory([...inventory, { id, count: 1 }])}
     >
-      {`${name}${inInventory ? ' (✓)' : ''}`}
+      <span className='flex flex-col items-center'>
+        {`${name}${inInventory ? ' (✓)' : ''}`}
+        <img src={EncyclopediaUnderlineImage} width={100} />
+      </span>
       <div className='bg-encyclopedia-entryFill border-encyclopedia-border relative items-center justify-center border-[5px] p-[2px]'>
         <EncyclopediaGridSpacer />
         <EncyclopediaGrid width={width} height={height} />
