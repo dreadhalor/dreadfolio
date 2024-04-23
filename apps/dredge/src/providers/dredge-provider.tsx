@@ -1,6 +1,6 @@
+import { useZustandAdapter } from '@dredge/hooks/use-zustand-adapter';
 import { binPacking2 } from '@dredge/lib/bin-packing-2';
 import { data } from '@dredge/lib/combined-data';
-import { hulls } from '@dredge/lib/hull-data';
 import { getItemAt } from '@dredge/lib/utils';
 import {
   GameItem,
@@ -9,14 +9,14 @@ import {
   PackedItem,
   SlotType,
 } from '@dredge/types';
-import { useState, createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 type DredgeProviderContextType = {
   inventory: InventoryItem[];
-  setInventory: React.Dispatch<React.SetStateAction<InventoryItem[]>>;
+  setInventory: (newInventory: InventoryItem[]) => void;
   hull: HullData;
-  setHull: React.Dispatch<React.SetStateAction<HullData>>;
+  setHull: (newHull: HullData) => void;
   packedItems: PackedItem[];
   toggleSlot: (row: number, col: number) => void;
 };
@@ -34,9 +34,14 @@ export const useDredge = () => {
 };
 
 export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [hull, setHull] = useState<HullData>(hulls[0]);
-  const [packedItems, setPackedItems] = useState<PackedItem[]>([]);
+  const {
+    hull,
+    setHull,
+    inventory,
+    setInventory,
+    packedItems,
+    setPackedItems,
+  } = useZustandAdapter();
 
   const toggleSlot = (row: number, col: number) => {
     // if there is an item in the slot, just remove the item
@@ -83,7 +88,7 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     }
     setPackedItems(packed || []);
     console.log('Packed:', packed);
-  }, [inventory, hull]);
+  }, [inventory, hull, setPackedItems, setInventory]);
 
   return (
     <DredgeProviderContext.Provider

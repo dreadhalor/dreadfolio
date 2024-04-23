@@ -24,6 +24,7 @@ export interface InventoryItem {
 
 export interface Fish extends GameItem {
   number: number;
+  value?: number;
 }
 
 export interface HullData {

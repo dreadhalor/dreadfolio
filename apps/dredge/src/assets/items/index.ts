@@ -17,12 +17,12 @@ export { default as RefinedMetalImage } from './refined-metal.webp';
 // chunk of flesh
 export { default as ChunkOfFleshImage } from './chunk-of-flesh.webp';
 // broken spectacles
-export { default as BrokenSpectaclesImage } from './broken-spectacles.png';
+export { default as BrokenSpectaclesImage } from './broken-spectacles.webp';
 // doubloon
-export { default as DoubloonImage } from './doubloon.png';
+export { default as DoubloonImage } from './doubloon.webp';
 // bag of doubloons
-export { default as BagOfDoubloonsImage } from './bag-of-doubloons.png';
+export { default as BagOfDoubloonsImage } from './bag-of-doubloons.webp';
 // big bag of doubloons
-export { default as BigBagOfDoubloonsImage } from './big-bag-of-doubloons.png';
+export { default as BigBagOfDoubloonsImage } from './big-bag-of-doubloons.webp';
 // sextant
-export { default as SextantImage } from './sextant.png';
+export { default as SextantImage } from './sextant.webp';

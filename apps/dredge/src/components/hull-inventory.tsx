@@ -6,6 +6,7 @@ import { data } from '@dredge/lib/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
 import { DamageImage } from '@dredge/assets/ui';
 import { SlotType } from '@dredge/types';
+import { fishData } from '@dredge/lib/fish-data';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -34,7 +35,7 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
   return (
     <div
       className={cn(
-        'border-inventory-squareBorder group border-[3px]',
+        'border-inventory-squareBorder group cursor-pointer border-[3px]',
         item && 'bg-inventory-squareBorder hover:bg-opacity-60',
       )}
       onClick={handleClick}
@@ -61,10 +62,10 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
 const HullInventoryGrid = () => {
   const {
     hull: { grid },
+    packedItems,
   } = useDredge();
   const height = grid.length;
   const width = grid[0].length;
-  const { packedItems } = useDredge();
 
   const items = packedItems
     .map((item) => {
@@ -113,12 +114,27 @@ const HullInventoryGrid = () => {
 };
 
 export const HullInventory = () => {
+  const { packedItems } = useDredge();
   return (
     <div className='relative flex flex-1 flex-col items-center'>
       <HullSelect />
       <div className='relative flex flex-col items-center'>
         <CargoHull />
         <HullInventoryGrid />
+      </div>
+      <div className='flex flex-col items-center'>
+        Total value:
+        <span className='text-2xl'>
+          {packedItems
+            .reduce((total, item) => {
+              const fish = fishData.find((_fish) => _fish.id === item.itemId);
+              return total + (fish?.value || 0);
+            }, 0)
+            .toLocaleString('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            })}
+        </span>
       </div>
     </div>
   );
