@@ -106,18 +106,22 @@ const HullInventoryGrid = ({ scale }: Props) => {
             col={i % width}
           />
         ))}
-        {items.map((item) => {
-          const tl = { x: item?.item?.topLeft[1], y: item?.item?.topLeft[0] };
-          return (
-            <GridImage
-              key={item?.item?.id}
-              item={item?.fish}
-              gridSquareSize={EFFECTIVE_SQUARE_SIZE}
-              rotation={item?.item?.rotation}
-              topLeft={tl}
-            />
-          );
-        })}
+        {items
+          .filter((item) => item?.item?.topLeft)
+          .map((item) => {
+            if (!item) return null;
+            if (!item?.item?.topLeft) return null;
+            const tl = { x: item?.item?.topLeft[1], y: item?.item?.topLeft[0] };
+            return (
+              <GridImage
+                key={item?.item?.id}
+                item={item?.fish}
+                gridSquareSize={EFFECTIVE_SQUARE_SIZE}
+                rotation={item?.item?.rotation}
+                topLeft={tl}
+              />
+            );
+          })}
       </div>
     </div>
   );
@@ -146,7 +150,7 @@ export const HullInventory = () => {
 
   return (
     <div className='relative flex flex-1 flex-col items-center'>
-      <HullLoadingScreen />
+      {/* <HullLoadingScreen /> */}
       <div
         className='relative flex flex-col items-center gap-[10px] px-[42px] pb-[36px] pt-[20px]'
         style={{

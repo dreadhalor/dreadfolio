@@ -22,7 +22,10 @@ export const useZustandAdapter = create<DredgeData>()(
         set({ inventory: newInventory }),
       packedItems: [],
       setPackedItems: (newPackedItems: PackedItem[]) =>
-        set({ packedItems: newPackedItems }),
+        set({
+          packedItems:
+            JSON.stringify(newPackedItems) !== '{}' ? newPackedItems : [],
+        }),
     }),
     {
       name: 'dredge-storage',

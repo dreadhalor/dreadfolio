@@ -1,5 +1,4 @@
 import { useZustandAdapter } from '@dredge/hooks/use-zustand-adapter';
-import { binPacking } from '@dredge/lib/bin-packing';
 import { data } from '@dredge/data/combined-data';
 import { getItemAt } from '@dredge/lib/utils';
 import {
@@ -11,6 +10,7 @@ import {
 } from '@dredge/types';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { binPackingAsync } from '@dredge/lib/bin-packing';
 
 type DredgeProviderContextType = {
   inventory: GridItem[];
@@ -75,22 +75,26 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    console.log('Inventory:', inventory);
-    const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
-      id: uuidv4(),
-      itemId: item.id,
-      shape:
-        data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
-    }));
-    console.log('Unpacked:', unpackedItems);
-    const packed = binPacking(unpackedItems, hull.grid);
-    if (!packed) {
-      // remove the last item from the inventory
-      setInventory(inventory.slice(0, -1));
-      return;
-    }
-    setPackedItems(packed || []);
-    console.log('Packed:', packed);
+    const pack = async () => {
+      console.log('Inventory:', inventory);
+      const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
+        id: uuidv4(),
+        itemId: item.id,
+        shape:
+          data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
+      }));
+      console.log('Unpacked:', unpackedItems);
+      const packed = await binPackingAsync(unpackedItems, hull.grid);
+      if (!packed) {
+        // remove the last item from the inventory
+        setInventory(inventory.slice(0, -1));
+        return;
+      }
+      setPackedItems(packed || []);
+      console.log('Packed:', packed);
+    };
+
+    pack();
   }, [inventory, hull, setPackedItems, setInventory]);
 
   return (
