@@ -36,8 +36,6 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
     toggleSlot(row, col);
   };
 
-  console.log('shapes', getUniqueShapes(data));
-
   return (
     <div
       className={cn(
