@@ -1,5 +1,5 @@
 import { useZustandAdapter } from '@dredge/hooks/use-zustand-adapter';
-import { binPacking2 } from '@dredge/lib/bin-packing-2';
+import { binPacking } from '@dredge/lib/bin-packing';
 import { data } from '@dredge/data/combined-data';
 import { getItemAt } from '@dredge/lib/utils';
 import {
@@ -83,7 +83,7 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
         data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
     }));
     console.log('Unpacked:', unpackedItems);
-    const packed = binPacking2(unpackedItems, hull.grid);
+    const packed = binPacking(unpackedItems, hull.grid);
     if (!packed) {
       // remove the last item from the inventory
       setInventory(inventory.slice(0, -1));

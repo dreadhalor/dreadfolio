@@ -7,9 +7,9 @@ import { cn, getItemAt } from '@dredge/lib/utils';
 import { BorderImage, DamageImage, AutoPackIcon } from '@dredge/assets/ui';
 import { SlotType } from '@dredge/types';
 import { fishData } from '@dredge/data/fish-data';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useResizeObserver } from '@dredge/hooks/use-resize-observer';
-// import { SecondaryInventory } from './secondary-inventory';
+import { HullLoadingScreen } from './hull-loading-screen';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -84,8 +84,6 @@ const HullInventoryGrid = ({ scale }: Props) => {
     })
     .filter(Boolean);
 
-  console.log('FISH:', items);
-
   return (
     <div
       className='absolute inset-0 flex items-center justify-center'
@@ -131,21 +129,9 @@ export const HullInventory = () => {
   const desiredWidth = 572;
   const [scale, setScale] = useState(1);
 
-  const handleResize = ({
-    width,
-    height,
-  }: {
-    width: number;
-    height: number;
-  }) => {
-    // Perform actions based on the new width and height
-    console.log('Div size changed:', width, height);
+  const handleResize = ({ width }: { width: number }) => {
     setScale(width / desiredWidth);
   };
-
-  useEffect(() => {
-    console.log('Scale:', scale);
-  }, [scale]);
 
   const hullAreaRef = useResizeObserver(handleResize);
   const totalValue = (packedItems || [])
@@ -160,6 +146,7 @@ export const HullInventory = () => {
 
   return (
     <div className='relative flex flex-1 flex-col items-center'>
+      <HullLoadingScreen />
       <div
         className='relative flex flex-col items-center gap-[10px] px-[42px] pb-[36px] pt-[20px]'
         style={{
