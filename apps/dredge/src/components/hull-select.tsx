@@ -17,7 +17,7 @@ export const HullSelect = () => {
     }
   };
   return (
-    <Select value={`${hull.id}`} onValueChange={handleSelect}>
+    <Select value={`${hull?.id || ''}`} onValueChange={handleSelect}>
       <SelectTrigger className='w-[180px]'>
         <SelectValue placeholder='Select a hull' />
       </SelectTrigger>

@@ -1,17 +1,20 @@
-import { Fish } from '@dredge/types';
+import { GridItem } from '@dredge/types';
 import { GRID_SQUARE_SIZE } from '../selection-grid/grid-entry';
+import { cn } from '@dredge/lib/utils';
 
 type Props = {
-  fish: Fish;
+  item: GridItem;
   gridSquareSize?: number;
   rotation?: number;
   topLeft?: { x: number; y: number };
+  className?: string;
 };
-export const FishGridImage = ({
-  fish: { image, width, height, imageWidth, imageHeight },
+export const GridImage = ({
+  item: { image, width, height, imageWidth, imageHeight },
   gridSquareSize = GRID_SQUARE_SIZE,
   rotation = 0,
   topLeft = { x: 0, y: 0 },
+  className,
 }: Props) => {
   const getRotatedTop = () => {
     if (rotation === 270) return (topLeft?.y + width) * gridSquareSize;
@@ -29,7 +32,10 @@ export const FishGridImage = ({
 
   return (
     <div
-      className='pointer-events-none absolute flex origin-top-left items-center justify-center'
+      className={cn(
+        'pointer-events-none absolute flex origin-top-left items-center justify-center',
+        className,
+      )}
       style={{
         width: gridSquareSize * width,
         height: gridSquareSize * height,

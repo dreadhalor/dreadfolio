@@ -1,6 +1,6 @@
 import { CargoHull } from './cargo-hull';
 import { useDredge } from '@dredge/providers/dredge-provider';
-import { FishGridImage } from './fish/fish-grid-image';
+import { GridImage } from './fish/grid-image';
 import { HullSelect } from './hull-select';
 import { data } from '@dredge/data/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
@@ -111,9 +111,9 @@ const HullInventoryGrid = ({ scale }: Props) => {
         {items.map((item) => {
           const tl = { x: item?.item?.topLeft[1], y: item?.item?.topLeft[0] };
           return (
-            <FishGridImage
+            <GridImage
               key={item?.item?.id}
-              fish={item?.fish}
+              item={item?.fish}
               gridSquareSize={EFFECTIVE_SQUARE_SIZE}
               rotation={item?.item?.rotation}
               topLeft={tl}
@@ -148,7 +148,7 @@ export const HullInventory = () => {
   }, [scale]);
 
   const hullAreaRef = useResizeObserver(handleResize);
-  const totalValue = packedItems
+  const totalValue = (packedItems || [])
     .reduce((total, item) => {
       const fish = fishData.find((_fish) => _fish.id === item.itemId);
       return total + (fish?.value || 0);
