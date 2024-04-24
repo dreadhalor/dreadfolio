@@ -10,6 +10,7 @@ import { fishData } from '@dredge/data/fish-data';
 import { useState } from 'react';
 import { useResizeObserver } from '@dredge/hooks/use-resize-observer';
 import { HullLoadingScreen } from './hull-loading-screen';
+import { getUniqueShapes } from '@dredge/lib/get-unique-shapes';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -34,6 +35,8 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
   const handleClick = () => {
     toggleSlot(row, col);
   };
+
+  console.log('shapes', getUniqueShapes(data));
 
   return (
     <div

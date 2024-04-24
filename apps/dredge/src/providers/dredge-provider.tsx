@@ -2,7 +2,7 @@ import { useZustandAdapter } from '@dredge/hooks/use-zustand-adapter';
 import { getItemAt } from '@dredge/lib/utils';
 import { HullData, PackedItem, SlotType } from '@dredge/types';
 import { createContext, useContext, useState } from 'react';
-import { binPackingAsync } from '@dredge/lib/bin-packing-async';
+import { binPackingAsync } from '@dredge/lib/bin-packing/bin-packing-async';
 
 type DredgeProviderContextType = {
   hull: HullData;

@@ -41,7 +41,7 @@ export const crabPotData: CrabPot[] = [
   {
     type: 'crab-pot',
     id: 'large-crab-pot',
-    name: 'large Crab Pot',
+    name: 'Large Crab Pot',
     image: LargeCrabPotImage,
     width: 2,
     height: 2,
