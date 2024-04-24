@@ -10,7 +10,7 @@ import {
 } from '@dredge/types';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { binPackingAsync } from '@dredge/lib/bin-packing';
+import { binPackingAsync } from '@dredge/lib/bin-packing-async';
 
 type DredgeProviderContextType = {
   inventory: GridItem[];
@@ -19,9 +19,8 @@ type DredgeProviderContextType = {
   setHull: (newHull: HullData) => void;
   packedItems: PackedItem[];
   toggleSlot: (row: number, col: number) => void;
-  movingItem: GridItem | null;
-  setMovingItem: (item: GridItem | null) => void;
   isLoading: boolean;
+  cancelCalculation: () => void;
 };
 
 const DredgeProviderContext = createContext<DredgeProviderContextType>(
@@ -46,8 +45,9 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     setPackedItems,
   } = useZustandAdapter();
 
-  const [movingItem, setMovingItem] = useState<GridItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [abortController, setAbortController] =
+    useState<AbortController | null>(null);
 
   const toggleSlot = (row: number, col: number) => {
     // if there is an item in the slot, just remove the item
@@ -76,27 +76,51 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     setHull({ ...hull, grid: newGrid });
   };
 
+  const cancelCalculation = () => {
+    if (abortController) {
+      abortController.abort();
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const pack = async () => {
+      const controller = new AbortController();
+      setAbortController(controller);
       setIsLoading(true);
-      console.log('Inventory:', inventory);
-      const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
-        id: uuidv4(),
-        itemId: item.id,
-        shape:
-          data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
-      }));
-      console.log('Unpacked:', unpackedItems);
 
-      const packed = await binPackingAsync(unpackedItems, hull.grid);
-      if (!packed) {
-        // remove the last item from the inventory
-        setInventory(inventory.slice(0, -1));
-      } else {
-        setPackedItems(packed);
-        console.log('Packed:', packed);
+      try {
+        console.log('Inventory:', inventory);
+        const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
+          id: uuidv4(),
+          itemId: item.id,
+          shape:
+            data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
+        }));
+        console.log('Unpacked:', unpackedItems);
+
+        const packed = await binPackingAsync(
+          unpackedItems,
+          hull.grid,
+          controller.signal,
+        );
+        if (!packed) {
+          // remove the last item from the inventory
+          setInventory(inventory.slice(0, -1));
+        } else {
+          setPackedItems(packed);
+          console.log('Packed:', packed);
+        }
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') {
+          console.log('Calculation aborted');
+        } else {
+          console.error('Error during calculation:', error);
+        }
+      } finally {
+        setIsLoading(false);
+        setAbortController(null);
       }
-      setIsLoading(false);
     };
 
     pack();
@@ -111,9 +135,8 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
         setHull,
         packedItems,
         toggleSlot,
-        movingItem,
-        setMovingItem,
         isLoading,
+        cancelCalculation,
       }}
     >
       {children}
