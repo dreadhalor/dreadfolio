@@ -21,6 +21,7 @@ import {
   ResearchPartImage,
   SextantImage,
   OldIronChainImage,
+  AurousAnchorImage,
 } from '@dredge/assets/items';
 import { Item } from '@dredge/types';
 
@@ -238,5 +239,14 @@ export const itemData: Item[] = [
     width: 1,
     height: 1,
     shape: [[1]],
+  },
+  {
+    type: 'item',
+    id: 'aurous-anchor',
+    name: 'Aurous Anchor',
+    image: AurousAnchorImage,
+    width: 1,
+    height: 2,
+    shape: [[1], [1]],
   },
 ] as const;

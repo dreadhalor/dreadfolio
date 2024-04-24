@@ -4,7 +4,7 @@ import { FishGridImage } from './fish/fish-grid-image';
 import { HullSelect } from './hull-select';
 import { data } from '@dredge/data/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
-import { DamageImage } from '@dredge/assets/ui';
+import { BorderImage, DamageImage } from '@dredge/assets/ui';
 import { SlotType } from '@dredge/types';
 import { fishData } from '@dredge/data/fish-data';
 import { useEffect, useState } from 'react';
@@ -151,9 +151,19 @@ export const HullInventory = () => {
   return (
     <div className='relative flex flex-1 flex-col items-center'>
       <HullSelect />
-      <div className='relative flex flex-col items-center' ref={hullAreaRef}>
-        <CargoHull />
-        <HullInventoryGrid scale={scale} />
+      <div
+        className='relative flex flex-col items-center px-[42px] pb-[36px] pt-[50px]'
+        style={{
+          borderImage: `url(${BorderImage})`,
+          borderImageSlice: '50',
+          borderImageRepeat: 'repeat',
+          borderImageWidth: '20px',
+        }}
+      >
+        <div className='relative flex flex-col items-center' ref={hullAreaRef}>
+          <CargoHull />
+          <HullInventoryGrid scale={scale} />
+        </div>
       </div>
       <div className='flex flex-col items-center'>
         Total value:

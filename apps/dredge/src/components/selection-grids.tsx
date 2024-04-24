@@ -1,33 +1,52 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@dredge/ui/tabs';
 import { SelectionGrid } from './selection-grid/selection-grid';
 import { fishData } from '@dredge/data/fish-data';
 import { itemData } from '@dredge/data/item-data';
 import { crabPotData } from '@dredge/data/crab-pot-data';
 import { SectionDivider } from './selection-grid/section-divider';
+import { Input } from './ui/input';
+import { useEffect, useState } from 'react';
 
 export const SelectionGrids = () => {
+  const [filter, setFilter] = useState('' as string);
+  const [filteredFishData, setFilteredFishData] = useState(fishData);
+  const [filteredItemData, setFilteredItemData] = useState(itemData);
+  const [filteredCrabPotData, setFilteredCrabPotData] = useState(crabPotData);
+
+  useEffect(() => {
+    setFilteredFishData(
+      fishData.filter((fish) =>
+        fish.name.toLowerCase().includes(filter.toLowerCase()),
+      ),
+    );
+    setFilteredItemData(
+      itemData.filter((item) =>
+        item.name.toLowerCase().includes(filter.toLowerCase()),
+      ),
+    );
+    setFilteredCrabPotData(
+      crabPotData.filter((crabPot) =>
+        crabPot.name.toLowerCase().includes(filter.toLowerCase()),
+      ),
+    );
+  }, [filter]);
+
   return (
-    <Tabs defaultValue='fish' className='flex h-full flex-col'>
-      <TabsList className='grid grid-cols-3'>
-        <TabsTrigger value='fish'>Fish</TabsTrigger>
-        <TabsTrigger value='items'>Items</TabsTrigger>
-        <TabsTrigger value='crab-pots'>Crab Pots</TabsTrigger>
-      </TabsList>
-      <TabsContent value='fish' className='overflow-auto'>
-        <SelectionGrid items={fishData} />
-      </TabsContent>
-      <TabsContent value='items' className='overflow-auto'>
-        <SelectionGrid items={itemData} />
-      </TabsContent>
-      <TabsContent
-        value='crab-pots'
-        className='bg-encyclopedia-pageFill overflow-auto'
-      >
-        <SectionDivider title='Items' />
-        <SelectionGrid items={itemData} />
-        <SectionDivider title='Crab Pots' />
-        <SelectionGrid items={crabPotData} />
-      </TabsContent>
-    </Tabs>
+    <div className='bg-encyclopedia-pageFill flex h-full flex-col overflow-auto'>
+      <div className='bg-encyclopedia-pageFill sticky top-0 z-10 w-full p-2'>
+        <Input
+          type='search'
+          placeholder='Search...'
+          className='border-encyclopedia-border bg-encyclopedia-entryFill w-full rounded-none border-4 text-black placeholder:text-gray-600'
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      </div>
+      <SectionDivider title='Fish' />
+      <SelectionGrid items={filteredFishData} />
+      <SectionDivider title='Items' />
+      <SelectionGrid items={filteredItemData} />
+      <SectionDivider title='Crab Pots' />
+      <SelectionGrid items={filteredCrabPotData} />
+    </div>
   );
 };

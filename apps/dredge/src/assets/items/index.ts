@@ -40,3 +40,5 @@ export { default as MortarBarrelImage } from './mortar-barrel.png';
 export { default as MortarFrameImage } from './mortar-frame.png';
 // old iron chain
 export { default as OldIronChainImage } from './old-iron-chain.png';
+// aurous anchor
+export { default as AurousAnchorImage } from './aurous-anchor.png';
