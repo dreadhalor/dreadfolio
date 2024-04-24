@@ -4,7 +4,7 @@ import { GridImage } from './fish/grid-image';
 import { HullSelect } from './hull-select';
 import { data } from '@dredge/data/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
-import { BorderImage, DamageImage, AutoPackIcon } from '@dredge/assets/ui';
+import { BorderImage, DamageImage } from '@dredge/assets/ui';
 import { SlotType } from '@dredge/types';
 import { fishData } from '@dredge/data/fish-data';
 import { useState } from 'react';
@@ -166,7 +166,6 @@ export const HullInventory = () => {
             Total value:
             <span className='text-2xl'>{totalValue}</span>
           </div>
-          <AutoPackIcon className='h-8 w-8' />
         </div>
         <div className='relative flex flex-col items-center' ref={hullAreaRef}>
           <CargoHull />

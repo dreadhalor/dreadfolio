@@ -1,26 +1,18 @@
 import { useZustandAdapter } from '@dredge/hooks/use-zustand-adapter';
-import { data } from '@dredge/data/combined-data';
 import { getItemAt } from '@dredge/lib/utils';
-import {
-  GridItemBase,
-  HullData,
-  GridItem,
-  PackedItem,
-  SlotType,
-} from '@dredge/types';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { HullData, PackedItem, SlotType } from '@dredge/types';
+import { createContext, useContext, useState } from 'react';
 import { binPackingAsync } from '@dredge/lib/bin-packing-async';
 
 type DredgeProviderContextType = {
-  inventory: GridItem[];
-  setInventory: (newInventory: GridItem[]) => void;
   hull: HullData;
   setHull: (newHull: HullData) => void;
   packedItems: PackedItem[];
+  setPackedItems: (items: PackedItem[]) => void;
   toggleSlot: (row: number, col: number) => void;
   isLoading: boolean;
   cancelCalculation: () => void;
+  packItems: (newItems: PackedItem[]) => void;
 };
 
 const DredgeProviderContext = createContext<DredgeProviderContextType>(
@@ -36,30 +28,20 @@ export const useDredge = () => {
 };
 
 export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
-  const {
-    hull,
-    setHull,
-    inventory,
-    setInventory,
-    packedItems,
-    setPackedItems,
-  } = useZustandAdapter();
-
+  const { hull, setHull, packedItems, setPackedItems } = useZustandAdapter();
   const [isLoading, setIsLoading] = useState(false);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
 
   const toggleSlot = (row: number, col: number) => {
-    // if there is an item in the slot, just remove the item
+    // if there is an item in the slot, remove the item
     const item = getItemAt(packedItems, row, col);
     if (item) {
-      const index = inventory.findIndex((i) => i.id === item.itemId);
-      if (index === -1) return;
-      const newInventory = inventory.map((i) => ({ ...i }));
-      newInventory.splice(index, 1);
-      setInventory(newInventory);
+      const newPackedItems = packedItems.filter((i) => i.id !== item.id);
+      setPackedItems(newPackedItems);
       return;
     }
+
     // if there is no item in the slot, toggle the slot
     const newGrid = hull.grid.map((r) => r.slice());
     const slot = newGrid[row][col];
@@ -83,60 +65,48 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    const pack = async () => {
-      const controller = new AbortController();
-      setAbortController(controller);
-      setIsLoading(true);
+  const packItems = async (newItems: PackedItem[]) => {
+    console.log('Packing items:', newItems);
+    const controller = new AbortController();
+    setAbortController(controller);
+    setIsLoading(true);
 
-      try {
-        console.log('Inventory:', inventory);
-        const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
-          id: uuidv4(),
-          itemId: item.id,
-          shape:
-            data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
-        }));
-        console.log('Unpacked:', unpackedItems);
+    try {
+      const allItems = [...packedItems, ...newItems];
+      console.log('All items:', allItems);
 
-        const packed = await binPackingAsync(
-          unpackedItems,
-          hull.grid,
-          controller.signal,
-        );
-        if (!packed) {
-          // remove the last item from the inventory
-          setInventory(inventory.slice(0, -1));
-        } else {
-          setPackedItems(packed);
-          console.log('Packed:', packed);
-        }
-      } catch (error) {
-        if ((error as Error).name === 'AbortError') {
-          console.log('Calculation aborted');
-        } else {
-          console.error('Error during calculation:', error);
-        }
-      } finally {
-        setIsLoading(false);
-        setAbortController(null);
+      const packed = await binPackingAsync(
+        allItems,
+        hull.grid,
+        controller.signal,
+      );
+      if (packed) {
+        setPackedItems(packed);
+        console.log('Packed:', packed);
       }
-    };
-
-    pack();
-  }, [inventory, hull, setPackedItems, setInventory]);
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        console.log('Calculation aborted');
+      } else {
+        console.error('Error during calculation:', error);
+      }
+    } finally {
+      setIsLoading(false);
+      setAbortController(null);
+    }
+  };
 
   return (
     <DredgeProviderContext.Provider
       value={{
-        inventory,
-        setInventory,
         hull,
         setHull,
         packedItems,
+        setPackedItems,
         toggleSlot,
         isLoading,
         cancelCalculation,
+        packItems,
       }}
     >
       {children}

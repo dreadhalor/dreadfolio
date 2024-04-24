@@ -1,7 +1,8 @@
 import { useDredge } from '@dredge/providers/dredge-provider';
 import { FishImage } from '../fish/fish-image';
-import { GridItem } from '@dredge/types';
+import { GridItem, PackedItem } from '@dredge/types';
 import { EncyclopediaUnderlineImage } from '@dredge/assets/ui';
+import { v4 as uuidv4 } from 'uuid';
 
 export const GRID_SQUARE_SIZE = 40;
 
@@ -21,6 +22,7 @@ type EncyclopediaGridProps = {
   width: number;
   height: number;
 };
+
 const EncyclopediaGrid = ({ width, height }: EncyclopediaGridProps) => {
   return (
     <div className='absolute inset-0 flex items-center justify-center'>
@@ -48,11 +50,17 @@ const EncyclopediaGridSpacer = () => (
   />
 );
 
-type Props = { item: GridItem };
-export const GridItemEntry = ({ item: item }: Props) => {
+type Props = {
+  item: GridItem;
+};
+
+export const GridItemEntry = ({ item }: Props) => {
   const { id, name, width, height } = item;
-  const { inventory, setInventory } = useDredge();
-  const inInventory = inventory.filter((item) => item.id === id).length > 0;
+  const { packedItems, packItems } = useDredge();
+
+  const inInventory = packedItems.some(
+    (packedItem) => packedItem.itemId === id,
+  );
 
   const getTitle = () => {
     if (item.type === 'fish') {
@@ -61,10 +69,19 @@ export const GridItemEntry = ({ item: item }: Props) => {
     return name;
   };
 
+  const handleClick = () => {
+    const newPackedItem: PackedItem = {
+      id: uuidv4(),
+      itemId: item.id,
+      shape: item.shape,
+    };
+    packItems([newPackedItem]);
+  };
+
   return (
     <div
       className='bg-encyclopedia-pageFill flex h-fit cursor-pointer select-none flex-col items-center gap-1 p-3 text-black hover:brightness-105'
-      onClick={() => setInventory([...inventory, item])}
+      onClick={handleClick}
     >
       <span className='flex flex-col items-center'>
         {`${getTitle()}${inInventory ? ' (✓)' : ''}`}
