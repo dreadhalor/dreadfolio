@@ -9,7 +9,7 @@ import {
   PackedItem,
   SlotType,
 } from '@dredge/types';
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 type DredgeProviderContextType = {
@@ -19,6 +19,8 @@ type DredgeProviderContextType = {
   setHull: (newHull: HullData) => void;
   packedItems: PackedItem[];
   toggleSlot: (row: number, col: number) => void;
+  movingItem: GridItem | null;
+  setMovingItem: (item: GridItem | null) => void;
 };
 
 const DredgeProviderContext = createContext<DredgeProviderContextType>(
@@ -42,6 +44,8 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
     packedItems,
     setPackedItems,
   } = useZustandAdapter();
+
+  const [movingItem, setMovingItem] = useState<GridItem | null>(null);
 
   const toggleSlot = (row: number, col: number) => {
     // if there is an item in the slot, just remove the item
@@ -98,6 +102,8 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
         setHull,
         packedItems,
         toggleSlot,
+        movingItem,
+        setMovingItem,
       }}
     >
       {children}

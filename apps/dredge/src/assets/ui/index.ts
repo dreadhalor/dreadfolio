@@ -3,3 +3,4 @@ export { default as DamageImage } from './damage.png';
 export { default as EncyclopediaUnderlineImage } from './encyclopedia-underline.png';
 export { default as TabImage } from './tab.png';
 export { default as BorderImage } from './border.png';
+export { default as AutoPackIcon } from './auto-pack-icon.svg?react';

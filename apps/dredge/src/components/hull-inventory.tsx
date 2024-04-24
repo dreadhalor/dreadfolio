@@ -4,11 +4,12 @@ import { FishGridImage } from './fish/fish-grid-image';
 import { HullSelect } from './hull-select';
 import { data } from '@dredge/data/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
-import { BorderImage, DamageImage } from '@dredge/assets/ui';
+import { BorderImage, DamageImage, AutoPackIcon } from '@dredge/assets/ui';
 import { SlotType } from '@dredge/types';
 import { fishData } from '@dredge/data/fish-data';
 import { useEffect, useState } from 'react';
 import { useResizeObserver } from '@dredge/hooks/use-resize-observer';
+// import { SecondaryInventory } from './secondary-inventory';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -147,12 +148,20 @@ export const HullInventory = () => {
   }, [scale]);
 
   const hullAreaRef = useResizeObserver(handleResize);
+  const totalValue = packedItems
+    .reduce((total, item) => {
+      const fish = fishData.find((_fish) => _fish.id === item.itemId);
+      return total + (fish?.value || 0);
+    }, 0)
+    .toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    });
 
   return (
     <div className='relative flex flex-1 flex-col items-center'>
-      <HullSelect />
       <div
-        className='relative flex flex-col items-center px-[42px] pb-[36px] pt-[50px]'
+        className='relative flex flex-col items-center gap-[10px] px-[42px] pb-[36px] pt-[20px]'
         style={{
           borderImage: `url(${BorderImage})`,
           borderImageSlice: '50',
@@ -160,24 +169,18 @@ export const HullInventory = () => {
           borderImageWidth: '20px',
         }}
       >
+        <div className='flex items-center gap-5'>
+          <HullSelect />
+          <div className='flex flex-col items-center'>
+            Total value:
+            <span className='text-2xl'>{totalValue}</span>
+          </div>
+          <AutoPackIcon className='h-8 w-8' />
+        </div>
         <div className='relative flex flex-col items-center' ref={hullAreaRef}>
           <CargoHull />
           <HullInventoryGrid scale={scale} />
         </div>
-      </div>
-      <div className='flex flex-col items-center'>
-        Total value:
-        <span className='text-2xl'>
-          {packedItems
-            .reduce((total, item) => {
-              const fish = fishData.find((_fish) => _fish.id === item.itemId);
-              return total + (fish?.value || 0);
-            }, 0)
-            .toLocaleString('en-US', {
-              style: 'currency',
-              currency: 'USD',
-            })}
-        </span>
       </div>
     </div>
   );
