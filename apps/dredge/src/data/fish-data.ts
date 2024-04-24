@@ -3,6 +3,7 @@ import { Fish } from '@dredge/types';
 
 export const fishData: Fish[] = [
   {
+    type: 'fish',
     id: 'blue-mackerel',
     number: 1,
     name: 'Blue Mackerel',
@@ -14,6 +15,7 @@ export const fishData: Fish[] = [
   },
 
   {
+    type: 'fish',
     id: 'cod',
     number: 2,
     name: 'Cod',
@@ -28,6 +30,7 @@ export const fishData: Fish[] = [
   },
 
   {
+    type: 'fish',
     id: 'arrow-squid',
     number: 3,
     name: 'Arrow Squid',
@@ -39,6 +42,7 @@ export const fishData: Fish[] = [
   },
 
   {
+    type: 'fish',
     id: 'grey-eel',
     number: 4,
     name: 'Grey Eel',
@@ -49,6 +53,7 @@ export const fishData: Fish[] = [
     value: 18,
   },
   {
+    type: 'fish',
     id: 'gulf-flounder',
     number: 5,
     name: 'Gulf Flounder',
@@ -62,6 +67,7 @@ export const fishData: Fish[] = [
     value: 18,
   },
   {
+    type: 'fish',
     id: 'black-grouper',
     number: 6,
     name: 'Black Grouper',
@@ -75,6 +81,7 @@ export const fishData: Fish[] = [
     value: 35,
   },
   {
+    type: 'fish',
     id: 'stingray',
     number: 7,
     name: 'Stingray',
@@ -89,6 +96,7 @@ export const fishData: Fish[] = [
     value: 60,
   },
   {
+    type: 'fish',
     id: 'sailfish',
     number: 8,
     name: 'Sailfish',
@@ -104,6 +112,7 @@ export const fishData: Fish[] = [
     value: 120,
   },
   {
+    type: 'fish',
     id: 'bronze-whaler',
     number: 9,
     name: 'Bronze Whaler',
@@ -118,6 +127,7 @@ export const fishData: Fish[] = [
     value: 100,
   },
   {
+    type: 'fish',
     id: 'blacktip-reef-shark',
     number: 10,
     name: 'Blacktip Reef Shark',
@@ -132,6 +142,7 @@ export const fishData: Fish[] = [
     value: 120,
   },
   {
+    type: 'fish',
     id: 'common-crab',
     number: 11,
     name: 'Common Crab',
@@ -142,6 +153,7 @@ export const fishData: Fish[] = [
     value: 5.25,
   },
   {
+    type: 'fish',
     id: 'fiddler-crab',
     number: 12,
     name: 'Fiddler Crab',
@@ -155,6 +167,7 @@ export const fishData: Fish[] = [
     value: 35,
   },
   {
+    type: 'fish',
     id: 'oceanic-perch',
     number: 13,
     name: 'Oceanic Perch',
@@ -165,6 +178,7 @@ export const fishData: Fish[] = [
     value: 5.5,
   },
   {
+    type: 'fish',
     id: 'tiger-mackerel',
     number: 14,
     name: 'Tiger Mackerel',
@@ -175,6 +189,7 @@ export const fishData: Fish[] = [
     value: 12.5,
   },
   {
+    type: 'fish',
     id: 'black-sea-bass',
     number: 15,
     name: 'Black Sea Bass',
@@ -185,6 +200,7 @@ export const fishData: Fish[] = [
     value: 15,
   },
   {
+    type: 'fish',
     id: 'stonefish',
     number: 16,
     name: 'Stonefish',
@@ -198,6 +214,7 @@ export const fishData: Fish[] = [
     value: 22,
   },
   {
+    type: 'fish',
     id: 'blackmouth-salmon',
     number: 17,
     name: 'Blackmouth Salmon',
@@ -211,6 +228,7 @@ export const fishData: Fish[] = [
     value: 20,
   },
   {
+    type: 'fish',
     id: 'conger-eel',
     number: 18,
     name: 'Conger Eel',
@@ -224,6 +242,7 @@ export const fishData: Fish[] = [
     value: 50,
   },
   {
+    type: 'fish',
     id: 'devil-ray',
     number: 19,
     name: 'Devil Ray',
@@ -238,6 +257,7 @@ export const fishData: Fish[] = [
     value: 55,
   },
   {
+    type: 'fish',
     id: 'sturgeon',
     number: 20,
     name: 'Sturgeon',
@@ -251,6 +271,7 @@ export const fishData: Fish[] = [
     value: 50,
   },
   {
+    type: 'fish',
     id: 'wreckfish',
     number: 21,
     name: 'Wreckfish',
@@ -264,6 +285,7 @@ export const fishData: Fish[] = [
     value: 60,
   },
   {
+    type: 'fish',
     id: 'rock-crab',
     number: 22,
     name: 'Rock Crab',
@@ -274,6 +296,7 @@ export const fishData: Fish[] = [
     value: 11.5,
   },
   {
+    type: 'fish',
     id: 'decorator-crab',
     number: 23,
     name: 'Decorator Crab',
@@ -287,6 +310,7 @@ export const fishData: Fish[] = [
     value: 27,
   },
   {
+    type: 'fish',
     id: 'aurora-jellyfish',
     number: 24,
     name: 'Aurora Jellyfish',
@@ -300,6 +324,7 @@ export const fishData: Fish[] = [
     value: 10,
   },
   {
+    type: 'fish',
     id: 'fangtooth',
     number: 25,
     name: 'Fangtooth',
@@ -310,6 +335,7 @@ export const fishData: Fish[] = [
     value: 8,
   },
   {
+    type: 'fish',
     id: 'barreleye',
     number: 26,
     name: 'Barreleye',
@@ -320,6 +346,7 @@ export const fishData: Fish[] = [
     value: 15,
   },
   {
+    type: 'fish',
     id: 'firefly-squid',
     number: 27,
     name: 'Firefly Squid',
@@ -330,6 +357,7 @@ export const fishData: Fish[] = [
     value: 15,
   },
   {
+    type: 'fish',
     id: 'red-snapper',
     number: 28,
     name: 'Red Snapper',
@@ -340,6 +368,7 @@ export const fishData: Fish[] = [
     value: 13,
   },
   {
+    type: 'fish',
     id: 'giant-amphipod',
     number: 29,
     name: 'Giant Amphipod',
@@ -350,6 +379,7 @@ export const fishData: Fish[] = [
     value: 30,
   },
   {
+    type: 'fish',
     id: 'loosejaw',
     number: 30,
     name: 'Loosejaw',
@@ -363,6 +393,7 @@ export const fishData: Fish[] = [
     value: 25,
   },
   {
+    type: 'fish',
     id: 'snailfish',
     number: 31,
     name: 'Snailfish',
@@ -372,6 +403,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'coral-grouper',
     number: 32,
     name: 'Coral Grouper',
@@ -384,6 +416,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'glowing-octopus',
     number: 33,
     name: 'Glowing Octopus',
@@ -396,6 +429,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'anglerfish',
     number: 34,
     name: 'Anglerfish',
@@ -408,6 +442,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'barracuda',
     number: 35,
     name: 'Barracuda',
@@ -417,6 +452,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'hammerhead-shark',
     number: 36,
     name: 'Hammerhead Shark',
@@ -430,6 +466,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'crown-of-thorns',
     number: 37,
     name: 'Crown of Thorns',
@@ -443,6 +480,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'blue-crab',
     number: 38,
     name: 'Blue Crab',
@@ -452,6 +490,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
   },
   {
+    type: 'fish',
     id: 'spiny-lobster',
     number: 39,
     name: 'Spiny Lobster',
@@ -464,6 +503,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'grey-mullet',
     number: 40,
     name: 'Grey Mullet',
@@ -473,6 +513,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
   },
   {
+    type: 'fish',
     id: 'tarpon',
     number: 41,
     name: 'Tarpon',
@@ -482,6 +523,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'sergeant-fish',
     number: 42,
     name: 'Sergeant Fish',
@@ -491,6 +533,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'gar',
     number: 43,
     name: 'Gar',
@@ -500,6 +543,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'longfin-eel',
     number: 44,
     name: 'Longfin Eel',
@@ -513,6 +557,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'catfish',
     number: 45,
     name: 'Catfish',
@@ -525,6 +570,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'horseshoe-crab',
     number: 46,
     name: 'Horseshoe Crab',
@@ -534,6 +580,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
   },
   {
+    type: 'fish',
     id: 'giant-mud-crab',
     number: 47,
     name: 'Giant Mud Crab',
@@ -546,6 +593,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'armored-searobin',
     number: 48,
     name: 'Armored Searobin',
@@ -558,6 +606,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'cusk-eel',
     number: 49,
     name: 'Cusk Eel',
@@ -567,6 +616,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'snake-mackerel',
     number: 50,
     name: 'Snake Mackerel',
@@ -576,6 +626,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'pale-skate',
     number: 51,
     name: 'Pale Skate',
@@ -589,6 +640,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'ghost-shark',
     number: 52,
     name: 'Ghost Shark',
@@ -601,6 +653,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'frilled-shark',
     number: 53,
     name: 'Frilled Shark',
@@ -613,6 +666,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'volcano-snail',
     number: 54,
     name: 'Volcano Snail',
@@ -625,6 +679,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'squat-lobster',
     number: 55,
     name: 'Squat Lobster',
@@ -638,6 +693,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'spider-crab',
     number: 56,
     name: 'Spider Crab',
@@ -651,6 +707,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'anchovy',
     number: 57,
     name: 'Anchovy',
@@ -660,6 +717,7 @@ export const fishData: Fish[] = [
     shape: [[1]],
   },
   {
+    type: 'fish',
     id: 'scarlet-prawn',
     number: 58,
     name: 'Scarlet Prawn',
@@ -669,6 +727,7 @@ export const fishData: Fish[] = [
     shape: [[1]],
   },
   {
+    type: 'fish',
     id: 'blackfin-tuna',
     number: 59,
     name: 'Blackfin Tuna',
@@ -678,6 +737,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
   },
   {
+    type: 'fish',
     id: 'viperfish',
     number: 60,
     name: 'Viperfish',
@@ -687,6 +747,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'moonfish',
     number: 61,
     name: 'Moonfish',
@@ -699,6 +760,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'rattail',
     number: 62,
     name: 'Rattail',
@@ -712,6 +774,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'ocean-sunfish',
     number: 63,
     name: 'Ocean Sunfish',
@@ -725,6 +788,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'icefish',
     number: 64,
     name: 'Icefish',
@@ -734,6 +798,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
   },
   {
+    type: 'fish',
     id: 'char',
     number: 65,
     name: 'Char',
@@ -746,6 +811,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'wolffish',
     number: 66,
     name: 'Wolffish',
@@ -755,6 +821,7 @@ export const fishData: Fish[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'fish',
     id: 'stargazer',
     number: 67,
     name: 'Stargazer',
@@ -767,6 +834,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'lizardfish',
     number: 68,
     name: 'Lizardfish',
@@ -780,6 +848,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'toothfish',
     number: 69,
     name: 'Toothfish',
@@ -792,6 +861,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'goblin-shark',
     number: 70,
     name: 'Goblin Shark',
@@ -804,6 +874,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'colossal-squid',
     number: 71,
     name: 'Colossal Squid',
@@ -817,6 +888,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'sea-stars',
     number: 72,
     name: 'Sea Stars',
@@ -826,6 +898,7 @@ export const fishData: Fish[] = [
     shape: [[1], [1]],
   },
   {
+    type: 'fish',
     id: 'king-crab',
     number: 73,
     name: 'King Crab',
@@ -838,6 +911,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'oarfish',
     number: 74,
     name: 'Oarfish',
@@ -850,6 +924,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'gulper-eel',
     number: 75,
     name: 'Gulper Eel',
@@ -862,6 +937,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'goliath-tigerfish',
     number: 76,
     name: 'Goliath Tigerfish',
@@ -874,6 +950,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'coelacanth',
     number: 77,
     name: 'Coelacanth',
@@ -886,6 +963,7 @@ export const fishData: Fish[] = [
     ],
   },
   {
+    type: 'fish',
     id: 'sleeper-shark',
     number: 78,
     name: 'Sleeper Shark',

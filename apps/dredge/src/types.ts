@@ -6,7 +6,7 @@ export interface PackedItem {
   topLeft?: [number, number];
 }
 
-export interface GameItem {
+export interface GridItemBase {
   id: string;
   name: string;
   image: string;
@@ -17,15 +17,19 @@ export interface GameItem {
   imageHeight?: number;
 }
 
-export interface InventoryItem {
-  id: string;
-  count: number;
-}
-
-export interface Fish extends GameItem {
+export interface Fish extends GridItemBase {
+  type: 'fish';
   number: number;
   value?: number;
 }
+export interface Item extends GridItemBase {
+  type: 'item';
+}
+export interface CrabPot extends GridItemBase {
+  type: 'crab-pot';
+}
+
+export type GridItem = Fish | Item | CrabPot;
 
 export interface HullData {
   id: number;

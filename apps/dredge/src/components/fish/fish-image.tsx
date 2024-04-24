@@ -1,8 +1,8 @@
-import { Fish } from '@dredge/types';
-import { GRID_SQUARE_SIZE } from './fish-entry';
+import { GridItem } from '@dredge/types';
+import { GRID_SQUARE_SIZE } from '../selection-grid/grid-entry';
 
 type Props = {
-  fish: Fish;
+  fish: GridItem;
   gridSquareSize?: number;
   rotation?: number;
 };

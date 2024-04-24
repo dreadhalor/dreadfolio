@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@dredge/ui/select';
-import { hulls } from '@dredge/lib/hull-data';
+import { hulls } from '@dredge/data/hull-data';
 import { useDredge } from '@dredge/providers/dredge-provider';
 export const HullSelect = () => {
   const { hull, setHull } = useDredge();

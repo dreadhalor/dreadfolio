@@ -1,0 +1,101 @@
+import {
+  BasicCrabPotImage,
+  ComplexCrabPotImage,
+  EfficientCrabPotImage,
+  HardyCrabPotImage,
+  LargeCrabPotImage,
+  MassiveCrabPotImage,
+  MouthOfTheDeepImage,
+  ReinforcedCrabPotImage,
+} from '@dredge/assets/crab-pots';
+import { CrabPot } from '../types';
+
+export const crabPotData: CrabPot[] = [
+  {
+    type: 'crab-pot',
+    id: 'basic-crab-pot',
+    name: 'Basic Crab Pot',
+    image: BasicCrabPotImage,
+    width: 2,
+    height: 1,
+    shape: [[1, 1]],
+  },
+  {
+    type: 'crab-pot',
+    id: 'efficient-crab-pot',
+    name: 'Efficient Crab Pot',
+    image: EfficientCrabPotImage,
+    width: 2,
+    height: 1,
+    shape: [[1, 1]],
+  },
+  {
+    type: 'crab-pot',
+    id: 'hardy-crab-pot',
+    name: 'Hardy Crab Pot',
+    image: HardyCrabPotImage,
+    width: 3,
+    height: 1,
+    shape: [[1, 1, 1]],
+  },
+  {
+    type: 'crab-pot',
+    id: 'large-crab-pot',
+    name: 'large Crab Pot',
+    image: LargeCrabPotImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 0],
+    ],
+  },
+  {
+    type: 'crab-pot',
+    id: 'complex-crab-pot',
+    name: 'Complex Crab Pot',
+    image: ComplexCrabPotImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'crab-pot',
+    id: 'massive-crab-pot',
+    name: 'Massive Crab Pot',
+    image: MassiveCrabPotImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'crab-pot',
+    id: 'reinforced-crab-pot',
+    name: 'Reinforced Crab Pot',
+    image: ReinforcedCrabPotImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'crab-pot',
+    id: 'mouth-of-the-deep',
+    name: 'Mouth of the Deep',
+    image: MouthOfTheDeepImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+];

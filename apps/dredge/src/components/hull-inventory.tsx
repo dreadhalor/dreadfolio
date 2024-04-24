@@ -2,11 +2,13 @@ import { CargoHull } from './cargo-hull';
 import { useDredge } from '@dredge/providers/dredge-provider';
 import { FishGridImage } from './fish/fish-grid-image';
 import { HullSelect } from './hull-select';
-import { data } from '@dredge/lib/combined-data';
+import { data } from '@dredge/data/combined-data';
 import { cn, getItemAt } from '@dredge/lib/utils';
 import { DamageImage } from '@dredge/assets/ui';
 import { SlotType } from '@dredge/types';
-import { fishData } from '@dredge/lib/fish-data';
+import { fishData } from '@dredge/data/fish-data';
+import { useEffect, useState } from 'react';
+import { useResizeObserver } from '@dredge/hooks/use-resize-observer';
 
 const INVENTORY_SQUARE_SIZE = 55;
 const INVENTORY_SQUARE_GAP = 6;
@@ -36,6 +38,7 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
     <div
       className={cn(
         'border-inventory-squareBorder group cursor-pointer border-[3px]',
+        !unlocked && 'pointer-events-none',
         item && 'bg-inventory-squareBorder hover:bg-opacity-60',
       )}
       onClick={handleClick}
@@ -59,7 +62,10 @@ const HullInventorySquare = ({ row, col }: HullInventorySquareProps) => {
   );
 };
 
-const HullInventoryGrid = () => {
+interface Props {
+  scale: number;
+}
+const HullInventoryGrid = ({ scale }: Props) => {
   const {
     hull: { grid },
     packedItems,
@@ -80,7 +86,12 @@ const HullInventoryGrid = () => {
   console.log('FISH:', items);
 
   return (
-    <div className='absolute inset-0 flex items-center justify-center'>
+    <div
+      className='absolute inset-0 flex items-center justify-center'
+      style={{
+        scale: `${scale}`,
+      }}
+    >
       <div
         className='relative grid'
         style={{
@@ -115,12 +126,34 @@ const HullInventoryGrid = () => {
 
 export const HullInventory = () => {
   const { packedItems } = useDredge();
+
+  const desiredWidth = 572;
+  const [scale, setScale] = useState(1);
+
+  const handleResize = ({
+    width,
+    height,
+  }: {
+    width: number;
+    height: number;
+  }) => {
+    // Perform actions based on the new width and height
+    console.log('Div size changed:', width, height);
+    setScale(width / desiredWidth);
+  };
+
+  useEffect(() => {
+    console.log('Scale:', scale);
+  }, [scale]);
+
+  const hullAreaRef = useResizeObserver(handleResize);
+
   return (
     <div className='relative flex flex-1 flex-col items-center'>
       <HullSelect />
-      <div className='relative flex flex-col items-center'>
+      <div className='relative flex flex-col items-center' ref={hullAreaRef}>
         <CargoHull />
-        <HullInventoryGrid />
+        <HullInventoryGrid scale={scale} />
       </div>
       <div className='flex flex-col items-center'>
         Total value:

@@ -1,32 +1,41 @@
 import {} from '@dredge/assets/fish';
 import {
   BagOfDoubloonsImage,
-  BaitBucketImage,
+  MixedBaitImage,
+  BeltBuckleImage,
   BigBagOfDoubloonsImage,
   BoltOfClothImage,
   BrokenSpectaclesImage,
   ChunkOfFleshImage,
   DogTagsImage,
   DoubloonImage,
+  FamilyCrestImage,
+  FathomlessFlameImage,
+  FusedTabletImage,
   LumberImage,
   MetalScrapsImage,
+  MortarBarrelImage,
+  MortarFrameImage,
   PackedExplosivesImage,
   RefinedMetalImage,
   ResearchPartImage,
   SextantImage,
+  OldIronChainImage,
 } from '@dredge/assets/items';
-import { GameItem } from '@dredge/types';
+import { Item } from '@dredge/types';
 
-export const itemData: GameItem[] = [
+export const itemData: Item[] = [
   {
-    id: 'bait-bucket',
-    name: 'Bait Bucket',
-    image: BaitBucketImage,
+    type: 'item',
+    id: 'mixed-bait',
+    name: 'Mixed Bait',
+    image: MixedBaitImage,
     width: 1,
     height: 2,
     shape: [[1], [1]],
   },
   {
+    type: 'item',
     id: 'dog-tags',
     name: 'Dog Tags',
     image: DogTagsImage,
@@ -35,6 +44,7 @@ export const itemData: GameItem[] = [
     shape: [[1], [1]],
   },
   {
+    type: 'item',
     id: 'bolt-of-cloth',
     name: 'Bolt of Cloth',
     image: BoltOfClothImage,
@@ -43,6 +53,7 @@ export const itemData: GameItem[] = [
     shape: [[1], [1]],
   },
   {
+    type: 'item',
     id: 'metal-scraps',
     name: 'Metal Scraps',
     image: MetalScrapsImage,
@@ -54,6 +65,7 @@ export const itemData: GameItem[] = [
     ],
   },
   {
+    type: 'item',
     id: 'lumber',
     name: 'Lumber',
     image: LumberImage,
@@ -62,6 +74,7 @@ export const itemData: GameItem[] = [
     shape: [[1, 1, 1]],
   },
   {
+    type: 'item',
     id: 'packed-explosives',
     name: 'Packed Explosives',
     image: PackedExplosivesImage,
@@ -70,6 +83,7 @@ export const itemData: GameItem[] = [
     shape: [[1], [1]],
   },
   {
+    type: 'item',
     id: 'research-part',
     name: 'Research Part',
     image: ResearchPartImage,
@@ -78,6 +92,7 @@ export const itemData: GameItem[] = [
     shape: [[1]],
   },
   {
+    type: 'item',
     id: 'refined-metal',
     name: 'Refined Metal',
     image: RefinedMetalImage,
@@ -89,6 +104,7 @@ export const itemData: GameItem[] = [
     ],
   },
   {
+    type: 'item',
     id: 'chunk-of-flesh',
     name: 'Chunk of Flesh',
     image: ChunkOfFleshImage,
@@ -101,6 +117,7 @@ export const itemData: GameItem[] = [
     ],
   },
   {
+    type: 'item',
     id: 'broken-spectacles',
     name: 'Broken Spectacles',
     image: BrokenSpectaclesImage,
@@ -109,6 +126,7 @@ export const itemData: GameItem[] = [
     shape: [[1, 1]],
   },
   {
+    type: 'item',
     id: 'doubloon',
     name: 'Doubloon',
     image: DoubloonImage,
@@ -117,6 +135,7 @@ export const itemData: GameItem[] = [
     shape: [[1]],
   },
   {
+    type: 'item',
     id: 'bag-of-doubloons',
     name: 'Bag of Doubloons',
     image: BagOfDoubloonsImage,
@@ -125,6 +144,7 @@ export const itemData: GameItem[] = [
     shape: [[1], [1]],
   },
   {
+    type: 'item',
     id: 'big-bag-of-doubloons',
     name: 'Big Bag of Doubloons',
     image: BigBagOfDoubloonsImage,
@@ -136,6 +156,7 @@ export const itemData: GameItem[] = [
     ],
   },
   {
+    type: 'item',
     id: 'sextant',
     name: 'Sextant',
     image: SextantImage,
@@ -145,5 +166,77 @@ export const itemData: GameItem[] = [
       [1, 1],
       [1, 1],
     ],
+  },
+  {
+    type: 'item',
+    id: 'belt-buckle',
+    name: 'Belt Buckle',
+    image: BeltBuckleImage,
+    width: 1,
+    height: 1,
+    shape: [[1]],
+  },
+  {
+    type: 'item',
+    id: 'family-crest',
+    name: 'Family Crest',
+    image: FamilyCrestImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'item',
+    id: 'fathomless-flame',
+    name: 'Fathomless Flame',
+    image: FathomlessFlameImage,
+    width: 1,
+    height: 2,
+    shape: [[1], [1]],
+  },
+  {
+    type: 'item',
+    id: 'fused-tablet',
+    name: 'Fused Tablet',
+    image: FusedTabletImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'item',
+    id: 'mortar-barrel',
+    name: 'Mortar Barrel',
+    image: MortarBarrelImage,
+    width: 3,
+    height: 1,
+    shape: [[1, 1, 1]],
+  },
+  {
+    type: 'item',
+    id: 'mortar-frame',
+    name: 'Mortar Frame',
+    image: MortarFrameImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'item',
+    id: 'old-iron-chain',
+    name: 'Old Iron Chain',
+    image: OldIronChainImage,
+    width: 1,
+    height: 1,
+    shape: [[1]],
   },
 ] as const;

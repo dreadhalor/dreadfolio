@@ -1,11 +1,11 @@
 import { useZustandAdapter } from '@dredge/hooks/use-zustand-adapter';
 import { binPacking2 } from '@dredge/lib/bin-packing-2';
-import { data } from '@dredge/lib/combined-data';
+import { data } from '@dredge/data/combined-data';
 import { getItemAt } from '@dredge/lib/utils';
 import {
-  GameItem,
+  GridItemBase,
   HullData,
-  InventoryItem,
+  GridItem,
   PackedItem,
   SlotType,
 } from '@dredge/types';
@@ -13,8 +13,8 @@ import { createContext, useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 type DredgeProviderContextType = {
-  inventory: InventoryItem[];
-  setInventory: (newInventory: InventoryItem[]) => void;
+  inventory: GridItem[];
+  setInventory: (newInventory: GridItem[]) => void;
   hull: HullData;
   setHull: (newHull: HullData) => void;
   packedItems: PackedItem[];
@@ -72,13 +72,12 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log('Inventory:', inventory);
-    const unpackedItems: PackedItem[] = inventory.map(
-      (item: InventoryItem) => ({
-        id: uuidv4(),
-        itemId: item.id,
-        shape: data.find((data: GameItem) => data.id === item.id)?.shape || [],
-      }),
-    );
+    const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
+      id: uuidv4(),
+      itemId: item.id,
+      shape:
+        data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
+    }));
     console.log('Unpacked:', unpackedItems);
     const packed = binPacking2(unpackedItems, hull.grid);
     if (!packed) {
