@@ -128,7 +128,7 @@ const HullInventoryGrid = ({ scale }: Props) => {
 };
 
 export const HullInventory = () => {
-  const { packedItems } = useDredge();
+  const { packedItems, isLoading } = useDredge();
 
   const desiredWidth = 572;
   const [scale, setScale] = useState(1);
@@ -150,7 +150,7 @@ export const HullInventory = () => {
 
   return (
     <div className='relative flex flex-1 flex-col items-center'>
-      {/* <HullLoadingScreen /> */}
+      {isLoading && <HullLoadingScreen />}
       <div
         className='relative flex flex-col items-center gap-[10px] px-[42px] pb-[36px] pt-[20px]'
         style={{

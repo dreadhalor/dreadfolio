@@ -21,6 +21,7 @@ type DredgeProviderContextType = {
   toggleSlot: (row: number, col: number) => void;
   movingItem: GridItem | null;
   setMovingItem: (item: GridItem | null) => void;
+  isLoading: boolean;
 };
 
 const DredgeProviderContext = createContext<DredgeProviderContextType>(
@@ -46,6 +47,7 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
   } = useZustandAdapter();
 
   const [movingItem, setMovingItem] = useState<GridItem | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleSlot = (row: number, col: number) => {
     // if there is an item in the slot, just remove the item
@@ -76,6 +78,7 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const pack = async () => {
+      setIsLoading(true);
       console.log('Inventory:', inventory);
       const unpackedItems: PackedItem[] = inventory.map((item: GridItem) => ({
         id: uuidv4(),
@@ -84,14 +87,16 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
           data.find((data: GridItemBase) => data.id === item.id)?.shape || [],
       }));
       console.log('Unpacked:', unpackedItems);
+
       const packed = await binPackingAsync(unpackedItems, hull.grid);
       if (!packed) {
         // remove the last item from the inventory
         setInventory(inventory.slice(0, -1));
-        return;
+      } else {
+        setPackedItems(packed);
+        console.log('Packed:', packed);
       }
-      setPackedItems(packed || []);
-      console.log('Packed:', packed);
+      setIsLoading(false);
     };
 
     pack();
@@ -108,6 +113,7 @@ export const DredgeProvider = ({ children }: { children: React.ReactNode }) => {
         toggleSlot,
         movingItem,
         setMovingItem,
+        isLoading,
       }}
     >
       {children}
