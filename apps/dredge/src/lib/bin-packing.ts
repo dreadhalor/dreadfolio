@@ -1,4 +1,4 @@
-import { PackedItem } from '@dredge/types';
+import { PackedItem, SlotType } from '@dredge/types';
 
 export const binPacking = (
   items: PackedItem[],
@@ -6,11 +6,15 @@ export const binPacking = (
 ): PackedItem[] | null => {
   const rows = grid.length;
   const cols = grid[0].length;
-  const totalCells = rows * cols;
+  const availableCells = grid.reduce(
+    (sum, row) =>
+      sum + row.filter((cell) => cell === SlotType.Available).length,
+    0,
+  );
 
   // Create a copy of the grid to store the solution
   const solution: string[][] = grid.map((row) =>
-    row.map((cell) => (cell === 1 ? '1' : '0')),
+    row.map((cell) => (cell === SlotType.Available ? '1' : '0')),
   );
 
   // Helper function to check if an item fits at a given position
@@ -101,8 +105,8 @@ export const binPacking = (
       0,
     );
 
-    // Optimization: Check if remaining cells are sufficient for remaining items
-    const remainingCells = totalCells - placedCells;
+    // Optimization: Check if remaining available cells are sufficient for remaining items
+    const remainingAvailableCells = availableCells - placedCells;
     const remainingItemCells = items
       .slice(index)
       .reduce(
@@ -115,7 +119,7 @@ export const binPacking = (
           ),
         0,
       );
-    if (remainingCells < remainingItemCells) {
+    if (remainingAvailableCells < remainingItemCells) {
       return false;
     }
 
