@@ -17,6 +17,47 @@ export const binPacking = (
     row.map((cell) => (cell === SlotType.Available ? '1' : '0')),
   );
 
+  // Separate items into multi-slot and single-slot items
+  const multiSlotItems = items.filter(
+    (item) => item.shape.flat().reduce((sum, cell) => sum + cell, 0) > 1,
+  );
+  const singleSlotItems = items.filter(
+    (item) => item.shape.flat().reduce((sum, cell) => sum + cell, 0) === 1,
+  );
+
+  // Check if the total slots required by all items exceed the available slots
+  const totalItemCells = items.reduce(
+    (sum, item) =>
+      sum + item.shape.flat().reduce((itemSum, cell) => itemSum + cell, 0),
+    0,
+  );
+  if (totalItemCells > availableCells) {
+    return null; // No valid bin packing solution possible
+  }
+
+  // Pack multi-slot items first
+  if (!tryPlaceItems(0, 0, multiSlotItems)) {
+    return null; // No valid bin packing solution found for multi-slot items
+  }
+
+  // Fill in the gaps with single-slot items
+  let singleSlotIndex = 0;
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      if (solution[row][col] === '1') {
+        const singleSlotItem = singleSlotItems[singleSlotIndex];
+        if (singleSlotItem) {
+          placeItem(singleSlotItem, row, col, 0);
+          singleSlotItem.rotation = 0;
+          singleSlotItem.topLeft = [row, col];
+          singleSlotIndex++;
+        }
+      }
+    }
+  }
+
+  return [...multiSlotItems, ...singleSlotItems];
+
   // Helper function to check if an item fits at a given position
   function fitItem(
     item: PackedItem,
@@ -93,8 +134,12 @@ export const binPacking = (
     return rotatedShape;
   }
 
-  // Recursive function to try placing items in the grid
-  function tryPlaceItems(index: number, placedCells: number): boolean {
+  // Recursive function to try placing multi-slot items in the grid
+  function tryPlaceItems(
+    index: number,
+    placedCells: number,
+    items: PackedItem[],
+  ): boolean {
     if (index === items.length) {
       return true; // All items placed successfully
     }
@@ -130,7 +175,7 @@ export const binPacking = (
       const rotation = item.rotation;
       if (fitItem(item, row, col, rotation)) {
         placeItem(item, row, col, rotation);
-        if (tryPlaceItems(index + 1, placedCells + itemCells)) {
+        if (tryPlaceItems(index + 1, placedCells + itemCells, items)) {
           return true; // Found a valid placement for all items
         }
         removeItem(item);
@@ -145,7 +190,7 @@ export const binPacking = (
             item.rotation = rotation;
             item.topLeft = [row, col];
 
-            if (tryPlaceItems(index + 1, placedCells + itemCells)) {
+            if (tryPlaceItems(index + 1, placedCells + itemCells, items)) {
               return true; // Found a valid placement for all items
             }
 
@@ -160,11 +205,4 @@ export const binPacking = (
 
     return false; // No valid placement found for the current item
   }
-
-  // Start the recursive placement process
-  if (tryPlaceItems(0, 0)) {
-    return items;
-  }
-
-  return null; // No valid bin packing solution found
 };
