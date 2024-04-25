@@ -43,58 +43,58 @@ export { default as OldIronChainImage } from './old-iron-chain.png';
 // aurous anchor
 export { default as AurousAnchorImage } from './aurous-anchor.png';
 // broken monocle
-export { default as BrokenMonocleImage } from './broken-monocle.png';
+export { default as BrokenMonocleImage } from './broken-monocle.webp';
 // worn gold ring
 export { default as WornGoldRingImage } from './worn-gold-ring.png';
 // castaway
-export { default as CastawayImage } from './castaway.png';
+export { default as CastawayImage } from './castaway.webp';
 // silver trinket
 export { default as SilverTrinketImage } from './silver-trinket.png';
 // emerald ring
-export { default as EmeraldRingImage } from './emerald-ring.png';
+export { default as EmeraldRingImage } from './emerald-ring.webp';
 // citrine ring
-export { default as CitrineRingImage } from './citrine-ring.png';
+export { default as CitrineRingImage } from './citrine-ring.webp';
 // ruby ring
 export { default as RubyRingImage } from './ruby-ring.png';
 // sapphire ring
 export { default as SapphireRingImage } from './sapphire-ring.png';
 // opal ring
-export { default as OpalRingImage } from './opal-ring.png';
+export { default as OpalRingImage } from './opal-ring.webp';
 // signet ring
 export { default as SignetRingImage } from './signet-ring.png';
 // opal, pearl, sapphire, emerald, ruby earrings
-export { default as OpalEarringsImage } from './opal-earrings.png';
-export { default as PearlEarringsImage } from './pearl-earrings.png';
+export { default as OpalEarringsImage } from './opal-earrings.webp';
+export { default as PearlEarringsImage } from './pearl-earrings.webp';
 export { default as SapphireEarringsImage } from './sapphire-earrings.png';
-export { default as EmeraldEarringsImage } from './emerald-earrings.png';
+export { default as EmeraldEarringsImage } from './emerald-earrings.webp';
 export { default as RubyEarringsImage } from './ruby-earrings.png';
 // goblet
-export { default as GobletImage } from './goblet.png';
+export { default as GobletImage } from './goblet.webp';
 // fancy boot
-export { default as FancyBootImage } from './fancy-boot.png';
+export { default as FancyBootImage } from './fancy-boot.webp';
 // silver plate
 export { default as SilverPlateImage } from './silver-plate.png';
 // repulsion machine
 export { default as RepulsionMachineImage } from './repulsion-machine.png';
 // dog
-export { default as DogImage } from './dog.png';
+export { default as DogImage } from './dog.webp';
 // stone tablets 1,2,3
 export { default as StoneTablet1Image } from './stone-tablet-1.png';
 export { default as StoneTablet2Image } from './stone-tablet-2.png';
 export { default as StoneTablet3Image } from './stone-tablet-3.png';
 // pungent, fetid, reeking bait
-export { default as PungentBaitImage } from './pungent-bait.png';
-export { default as FetidBaitImage } from './fetid-bait.png';
+export { default as PungentBaitImage } from './pungent-bait.webp';
+export { default as FetidBaitImage } from './fetid-bait.webp';
 export { default as ReekingBaitImage } from './reeking-bait.png';
 // small, large ice block
 export { default as SmallIceBlockImage } from './small-ice-block.png';
-export { default as LargeIceBlockImage } from './large-ice-block.png';
+export { default as LargeIceBlockImage } from './large-ice-block.webp';
 // icebreaker plow half 1,2, icebreaker bracing
-export { default as IcebreakerPlowHalf1Image } from './icebreaker-plow-half-1.png';
-export { default as IcebreakerPlowHalf2Image } from './icebreaker-plow-half-2.png';
-export { default as IcebreakerBracingImage } from './icebreaker-bracing.png';
+export { default as IcebreakerPlowHalf1Image } from './icebreaker-plow-half-1.webp';
+export { default as IcebreakerPlowHalf2Image } from './icebreaker-plow-half-2.webp';
+export { default as IcebreakerBracingImage } from './icebreaker-bracing.webp';
 // ice axe
-export { default as IceAxeImage } from './ice-axe.png';
-export { default as FrozenHeartImage } from './frozen-heart.png';
+export { default as IceAxeImage } from './ice-axe.webp';
+export { default as FrozenHeartImage } from './frozen-heart.webp';
 // ice shaper
-export { default as IceShaperImage } from './ice-shaper.png';
+export { default as IceShaperImage } from './ice-shaper.webp';

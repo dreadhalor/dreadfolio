@@ -13,7 +13,6 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
     value: 10,
   },
-
   {
     type: 'fish',
     id: 'cod',
@@ -28,7 +27,6 @@ export const fishData: Fish[] = [
     ],
     value: 18,
   },
-
   {
     type: 'fish',
     id: 'arrow-squid',
@@ -40,7 +38,6 @@ export const fishData: Fish[] = [
     shape: [[1, 1]],
     value: 14,
   },
-
   {
     type: 'fish',
     id: 'grey-eel',
