@@ -401,6 +401,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 40,
   },
   {
     type: 'fish',
@@ -414,6 +415,7 @@ export const fishData: Fish[] = [
       [1, 1, 0],
       [1, 1, 1],
     ],
+    value: 40,
   },
   {
     type: 'fish',
@@ -427,6 +429,7 @@ export const fishData: Fish[] = [
       [0, 1, 1],
       [1, 1, 1],
     ],
+    value: 40,
   },
   {
     type: 'fish',
@@ -440,6 +443,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [0, 1, 1],
     ],
+    value: 50,
   },
   {
     type: 'fish',
@@ -450,6 +454,7 @@ export const fishData: Fish[] = [
     width: 4,
     height: 1,
     shape: [[1, 1, 1, 1]],
+    value: 35,
   },
   {
     type: 'fish',
@@ -464,6 +469,7 @@ export const fishData: Fish[] = [
       [1, 1, 1, 1, 1],
       [0, 0, 1, 0, 1],
     ],
+    value: 175,
   },
   {
     type: 'fish',
@@ -478,6 +484,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 1, 1],
     ],
+    value: 10,
   },
   {
     type: 'fish',
@@ -488,6 +495,7 @@ export const fishData: Fish[] = [
     width: 2,
     height: 1,
     shape: [[1, 1]],
+    value: 15,
   },
   {
     type: 'fish',
@@ -501,6 +509,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 1],
     ],
+    value: 30,
   },
   {
     type: 'fish',
@@ -511,6 +520,7 @@ export const fishData: Fish[] = [
     width: 2,
     height: 1,
     shape: [[1, 1]],
+    value: 14,
   },
   {
     type: 'fish',
@@ -521,6 +531,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 25,
   },
   {
     type: 'fish',
@@ -531,6 +542,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 30,
   },
   {
     type: 'fish',
@@ -541,6 +553,7 @@ export const fishData: Fish[] = [
     width: 4,
     height: 1,
     shape: [[1, 1, 1, 1]],
+    value: 40,
   },
   {
     type: 'fish',
@@ -555,6 +568,7 @@ export const fishData: Fish[] = [
       [1, 0, 0],
       [1, 0, 0],
     ],
+    value: 65,
   },
   {
     type: 'fish',
@@ -568,6 +582,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 1, 1],
     ],
+    value: 70,
   },
   {
     type: 'fish',
@@ -578,6 +593,7 @@ export const fishData: Fish[] = [
     width: 2,
     height: 1,
     shape: [[1, 1]],
+    value: 12.5,
   },
   {
     type: 'fish',
@@ -591,6 +607,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 1, 1],
     ],
+    value: 50,
   },
   {
     type: 'fish',
@@ -604,6 +621,7 @@ export const fishData: Fish[] = [
       [1, 0],
       [1, 1],
     ],
+    value: 22,
   },
   {
     type: 'fish',
@@ -614,6 +632,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 30,
   },
   {
     type: 'fish',
@@ -624,6 +643,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 22,
   },
   {
     type: 'fish',
@@ -638,6 +658,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 1],
     ],
+    value: 55,
   },
   {
     type: 'fish',
@@ -651,6 +672,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [0, 1, 0],
     ],
+    value: 50,
   },
   {
     type: 'fish',
@@ -664,6 +686,7 @@ export const fishData: Fish[] = [
       [1, 1, 0, 0, 0],
       [0, 1, 1, 1, 1],
     ],
+    value: 125,
   },
   {
     type: 'fish',
@@ -677,6 +700,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 1],
     ],
+    value: 27,
   },
   {
     type: 'fish',
@@ -691,6 +715,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 0, 0],
     ],
+    value: 45,
   },
   {
     type: 'fish',
@@ -705,6 +730,7 @@ export const fishData: Fish[] = [
       [1, 0, 1],
       [1, 0, 1],
     ],
+    value: 80,
   },
   {
     type: 'fish',
@@ -715,6 +741,7 @@ export const fishData: Fish[] = [
     width: 1,
     height: 1,
     shape: [[1]],
+    value: 6.5,
   },
   {
     type: 'fish',
@@ -725,6 +752,7 @@ export const fishData: Fish[] = [
     width: 1,
     height: 1,
     shape: [[1]],
+    value: 7,
   },
   {
     type: 'fish',
@@ -735,6 +763,7 @@ export const fishData: Fish[] = [
     width: 2,
     height: 1,
     shape: [[1, 1]],
+    value: 20,
   },
   {
     type: 'fish',
@@ -745,6 +774,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 24,
   },
   {
     type: 'fish',
@@ -758,6 +788,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 1],
     ],
+    value: 45,
   },
   {
     type: 'fish',
@@ -772,6 +803,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 0, 0],
     ],
+    value: 60,
   },
   {
     type: 'fish',
@@ -786,6 +818,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 1, 1],
     ],
+    value: 115,
   },
   {
     type: 'fish',
@@ -796,6 +829,7 @@ export const fishData: Fish[] = [
     width: 2,
     height: 1,
     shape: [[1, 1]],
+    value: 13,
   },
   {
     type: 'fish',
@@ -809,6 +843,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 0],
     ],
+    value: 18,
   },
   {
     type: 'fish',
@@ -819,6 +854,7 @@ export const fishData: Fish[] = [
     width: 3,
     height: 1,
     shape: [[1, 1, 1]],
+    value: 25,
   },
   {
     type: 'fish',
@@ -832,6 +868,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 1],
     ],
+    value: 35,
   },
   {
     type: 'fish',
@@ -846,6 +883,7 @@ export const fishData: Fish[] = [
       [1, 0],
       [1, 1],
     ],
+    value: 45,
   },
   {
     type: 'fish',
@@ -859,6 +897,7 @@ export const fishData: Fish[] = [
       [1, 1, 1],
       [1, 1, 1],
     ],
+    value: 60,
   },
   {
     type: 'fish',
@@ -872,6 +911,7 @@ export const fishData: Fish[] = [
       [0, 1, 0, 0],
       [1, 1, 1, 1],
     ],
+    value: 75,
   },
   {
     type: 'fish',
@@ -886,6 +926,7 @@ export const fishData: Fish[] = [
       [1, 1, 1, 1, 1],
       [0, 0, 1, 1, 1],
     ],
+    value: 200,
   },
   {
     type: 'fish',
@@ -896,6 +937,7 @@ export const fishData: Fish[] = [
     width: 1,
     height: 2,
     shape: [[1], [1]],
+    value: 12,
   },
   {
     type: 'fish',
@@ -909,6 +951,7 @@ export const fishData: Fish[] = [
       [1, 1],
       [1, 1],
     ],
+    value: 35,
   },
   {
     type: 'fish',
@@ -922,6 +965,7 @@ export const fishData: Fish[] = [
       [0, 0, 0, 0, 0, 1],
       [1, 1, 1, 1, 1, 1],
     ],
+    value: 250,
   },
   {
     type: 'fish',
@@ -935,6 +979,7 @@ export const fishData: Fish[] = [
       [1, 1, 1, 1],
       [1, 1, 0, 1],
     ],
+    value: 250,
   },
   {
     type: 'fish',
@@ -948,6 +993,7 @@ export const fishData: Fish[] = [
       [1, 1, 1, 1],
       [1, 1, 1, 1],
     ],
+    value: 250,
   },
   {
     type: 'fish',
@@ -961,6 +1007,7 @@ export const fishData: Fish[] = [
       [0, 1, 0, 1, 0],
       [1, 1, 1, 1, 1],
     ],
+    value: 250,
   },
   {
     type: 'fish',
@@ -971,5 +1018,6 @@ export const fishData: Fish[] = [
     width: 5,
     height: 1,
     shape: [[1, 1, 1, 1, 1]],
+    value: 250,
   },
 ] as const;

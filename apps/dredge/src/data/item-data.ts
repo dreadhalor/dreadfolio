@@ -6,6 +6,8 @@ import {
   PackedExplosivesImage,
   RefinedMetalImage,
   ResearchPartImage,
+  SmallIceBlockImage,
+  LargeIceBlockImage,
 } from '@dredge/assets/items';
 import { Item } from '@dredge/types';
 
@@ -76,6 +78,27 @@ export const itemData: Item[] = [
     height: 2,
     shape: [
       [0, 1],
+      [1, 1],
+    ],
+  },
+  {
+    type: 'item',
+    id: 'small-ice-block',
+    name: 'Small Ice Block',
+    image: SmallIceBlockImage,
+    width: 2,
+    height: 1,
+    shape: [[1, 1]],
+  },
+  {
+    type: 'item',
+    id: 'large-ice-block',
+    name: 'Large Ice Block',
+    image: LargeIceBlockImage,
+    width: 2,
+    height: 2,
+    shape: [
+      [1, 1],
       [1, 1],
     ],
   },
