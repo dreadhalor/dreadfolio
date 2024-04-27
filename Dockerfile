@@ -1,10 +1,10 @@
 ARG NODE_VERSION=21.6.1
-ARG PNPM_VERSION=9.0.6
 
 # Use node image for base image for all stages.
 FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
 # FROM node:${NODE_VERSION}-alpine as base
 
+ARG PNPM_VERSION=8.15.1
 ARG VERCEL_TOKEN
 
 # Install Git - needed for CI/CD in order to not keep making new images.

@@ -28,5 +28,5 @@ infra
 # local ssl certificates
 **.pem
 
-# Ignore the .env file
-# .env
+# Ignore the lockfile
+pnpm-lock.yaml

@@ -2,7 +2,7 @@
 
 # Build the Docker image
 pnpm build
-docker-compose build
+docker-compose -f docker-compose.yml build
 
 # Save the Docker image to a tar file
 docker save dreadfolio-portfolio:latest > portfolio.tar
