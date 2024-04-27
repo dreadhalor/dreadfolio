@@ -42,3 +42,6 @@ yarn-error.log*
 
 # infra secrets
 /infra/github-actions
+
+# docker image tar
+portfolio.tar
