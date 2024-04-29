@@ -11,7 +11,8 @@
     "ssh": "ssh -i portfolio-key-pair.pem ec2-user@ec2-54-164-173-195.compute-1.amazonaws.com",
     "encrypt": "dotenvx encrypt",
     "decrypt": "dotenvx decrypt",
-    "pull-submodules": "git submodule update --init --recursive"
+    "pull-submodules": "git submodule update --init --recursive",
+    "install:vercel": "pnpm run pull-submodules && pnpm install"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
