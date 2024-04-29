@@ -11,9 +11,8 @@
 .vscode
 
 # Ignore version control files
-# JK we need these now for CI/CD
-# .git
-# .gitignore
+**/.git
+**/.gitignore
 
 # Ignore Docker files
 Dockerfile
@@ -30,3 +29,6 @@ infra
 
 # Ignore the lockfile
 pnpm-lock.yaml
+
+# Ignore the previous image
+portfolio.tar
