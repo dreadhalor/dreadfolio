@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo build",
     "build-low-mem": "turbo build --concurrency=2",
+    "build-more-mem": "turbo build --concurrency=8",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

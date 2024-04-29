@@ -26,7 +26,7 @@ COPY . .
 RUN pnpm i
 
 # Build all the apps.
-RUN pnpm build-low-mem
+RUN pnpm build-more-mem
 
 # # Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend

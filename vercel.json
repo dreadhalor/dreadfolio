@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "app1/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "app1/build" }
+    },
+    {
+      "src": "app2/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "app2/build" }
+    }
+  ]
+}
