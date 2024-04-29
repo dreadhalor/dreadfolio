@@ -10,7 +10,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ssh": "ssh -i portfolio-key-pair.pem ec2-user@ec2-54-164-173-195.compute-1.amazonaws.com",
     "encrypt": "dotenvx encrypt",
-    "decrypt": "dotenvx decrypt"
+    "decrypt": "dotenvx decrypt",
+    "pull-submodules": "git submodule update --init --recursive"
   },
   "devDependencies": {
     "@repo/config": "workspace:*",
