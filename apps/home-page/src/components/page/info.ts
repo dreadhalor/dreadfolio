@@ -64,7 +64,7 @@ export const experience = [
     company: 'Broadlume',
     date: '2022 - 2024',
     description:
-      'Working on the Google Search team to improve the search experience for users.',
+      'Managed team as UI Tech Lead to create a component library and design system for the distributed BroadlumeX ecosystem. Managed CI/CD pipelines and deployments for the Tatami monorepo.',
     link: 'https://www.broadlume.com/',
     technologies: [
       'HTML + SCSS',
@@ -91,7 +91,7 @@ export const experience = [
     company: 'Stash',
     date: '2021 - 2022',
     description:
-      'Worked on the Stash website to improve the user experience and performance.',
+      'Collaborated with graphic designers to implement new routes and features on the Stash website, enhancing user experience and site navigation. Utilized React and TypeScript to develop clean, efficient, and maintainable code.',
     link: 'https://www.stash.com/',
     technologies: [
       'React',
@@ -104,22 +104,24 @@ export const experience = [
       'Pug',
       'Jest',
       'Cypress',
+      'Serverless',
     ],
   },
   {
     title: 'Software Developer',
     company: 'Ultra Mobile',
     date: '2019-2020',
-    description:
-      'Worked on the Ultra Mobile website to improve the user experience and performance.',
+    description: `Developed software solutions to interface with T-Mobile's network, ensuring seamless integration and optimal performance for Ultra Mobile users. Worked with a variety of technologies to deliver reliable and efficient code.`,
     link: 'https://www.ultramobile.com/',
+    technologies: ['JavaScript', 'Node.js', 'Express', 'MySQL', 'AWS'],
   },
   {
     title: 'Software Developer',
     company: 'West End Designs',
     date: '2015 - 2020',
     description:
-      'Worked on the West End Designs website to improve the user experience and performance.',
+      'Provided consulting services to clients, developing custom WordPress websites tailored to their specific needs. Implemented responsive designs, optimized site performance, and integrated various plugins to enhance functionality and user experience.',
     link: 'https://www.westendwebdesigns.com/',
+    technologies: ['WordPress', 'PHP', 'HTML', 'CSS', 'JavaScript', 'MySQL'],
   },
 ];
