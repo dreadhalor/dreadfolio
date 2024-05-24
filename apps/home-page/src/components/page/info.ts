@@ -1,6 +1,7 @@
 import {
   EnlightScreenshot,
   FallcrateScreenshot,
+  HermitcraftHornsScreenshot,
   MinesweeperScreenshot,
   PathfinderVisualizerScreenshot,
   ShareMeScreenshot,
@@ -9,52 +10,79 @@ import {
 
 export const projects = [
   {
+    id: 'hermitcraft-horns',
+    title: 'HermitCraft Horns',
+    description:
+      'An app for making & sharing audio clips of Hermitcraft videos. Built for scale, as it currently receives traffic of 5,000 requests per day.',
+    image: HermitcraftHornsScreenshot,
+    technologies: [
+      'Next.js',
+      'React',
+      'AWS',
+      'Docker',
+      'PostgreSQL',
+      'Redis',
+      'Responsive Design',
+      'TypeScript',
+      'Tailwind CSS',
+      'Drizzle',
+      'Vercel',
+      'trpc',
+    ],
+  },
+  {
+    id: 'shareme',
     title: 'ShareMe',
     description:
       'A Pinterest-inspired social media platform for sharing and discovering images. Built with React, Sanity.io, and Firebase.',
     image: ShareMeScreenshot,
-    link: '/shareme',
-    technologies: ['React', 'Sanity.io', 'Firebase'],
+    technologies: [
+      'React',
+      'Sanity.io',
+      'Firebase',
+      'TypeScript',
+      'Tailwind CSS',
+    ],
   },
   {
+    id: 'minesweeper',
     title: 'Minesweeper',
     description:
       'Classic Minesweeper game with customizable grid size and mine count. Built with React, TypeScript, and Tailwind CSS.',
     image: MinesweeperScreenshot,
-    link: '/minesweeper',
     technologies: ['React', 'TypeScript', 'Tailwind CSS'],
   },
   {
+    id: 'pathfinder-visualizer',
     title: 'Pathfinding Visualizer',
     description:
       "Visualize pathfinding algorithms like Dijkstra's, BFS and A* on a grid. Built with React, TypeScript, and Tailwind CSS.",
     image: PathfinderVisualizerScreenshot,
-    link: '/pathfinder-visualizer',
     technologies: ['React', 'TypeScript', 'Tailwind CSS'],
   },
   {
+    id: 'fallcrate',
     title: 'Fallcrate',
     description:
       'A Dropbox-inspired cloud storage app. Built with React, TypeScript, and Tailwind CSS.',
     image: FallcrateScreenshot,
-    link: '/fallcrate',
-    technologies: ['React', 'TypeScript', 'Tailwind CSS'],
+    technologies: ['React', 'TypeScript', 'Tailwind CSS', 'Firebase'],
   },
   {
+    id: 'enlight',
     title: 'Enlight',
     description:
       'A raycasting app that visualizes the path of light rays as they hit obstacles. Built with vanilla Javascript + TypeScript.',
     image: EnlightScreenshot,
-    link: '/enlight',
     technologies: ['JavaScript', 'TypeScript'],
   },
   {
+    id: 'su-done-ku',
     title: 'Su-Done-Ku',
     description:
       'A Sudoku solver that can be used to show step-by-step how to logically solve Sudoku puzzles. Built with React, TypeScript, and Tailwind CSS.',
     image: SuDoneKuScreenshot,
-    link: '/su-done-ku',
-    technologies: ['React', 'TypeScript', 'Tailwind CSS'],
+    technologies: ['React', 'TypeScript', 'Tailwind CSS', 'REST API'],
   },
 ];
 

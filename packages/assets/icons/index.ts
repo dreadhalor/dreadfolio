@@ -10,3 +10,5 @@ export { default as SteeringTextIcon } from './steering-text-icon.svg';
 export { default as GifsterIcon } from './gifster-icon.svg';
 export { default as DreadUiIcon } from './dread-ui-icon.svg';
 export { default as FallcrateIcon } from './fallcrate-icon.svg';
+export { default as HermitcraftHornsIcon } from './hermitcraft-horns-icon.svg';
+export { default as DredgedUpIcon } from './dredged-up-icon.svg';

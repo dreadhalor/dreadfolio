@@ -4,17 +4,17 @@ import { Badge, useIframe } from 'dread-ui';
 import { MouseEvent } from 'react';
 
 type ProjectCardProps = {
+  id: string;
   title: string;
   description: string;
   technologies: string[];
-  link: string;
   image: string;
 };
 const ProjectCard = ({
+  id,
   title,
   description,
   technologies,
-  link,
   image,
 }: ProjectCardProps) => {
   const { sendMessageToParent } = useIframe();
@@ -27,10 +27,9 @@ const ProjectCard = ({
       onClick={() => {
         sendMessageToParent({
           type: 'scroll-to-app',
-          link,
+          id,
         });
       }}
-      link={link}
     >
       <img
         src={image}
