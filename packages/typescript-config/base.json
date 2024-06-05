@@ -22,7 +22,8 @@
     "paths": {
       "@dread-ui/*": ["../dread-ui/src/*"],
       "@shareme/*": ["../../apps/shareme/frontend/src/*"],
-      "@fallcrate/*": ["../../apps/fallcrate/src/*"]
+      "@fallcrate/*": ["../../apps/fallcrate/src/*"],
+      "@resume/*": ["../../apps/resume/src/*"],
     }
   }
 }
