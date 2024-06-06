@@ -27,8 +27,8 @@ const LanguageItem = ({ logo: Logo, label }: LanguageItemProps) => (
 
 export const Languages = () => {
   return (
-    <div className='flex flex-col'>
-      <div className='flex items-center gap-2 text-2xl uppercase'>
+    <div className='mt-3 flex flex-col gap-2'>
+      <div className='flex items-center gap-2 text-2xl font-bold uppercase'>
         <FaLaptopCode />
         Languages
       </div>
