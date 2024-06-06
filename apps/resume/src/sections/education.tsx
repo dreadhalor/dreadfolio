@@ -10,7 +10,7 @@ const EducationGridItem = ({ children }: { children: React.ReactNode }) => (
 );
 
 export const Education = () => (
-  <div className='flex w-[300px] flex-col gap-4'>
+  <div className='flex min-w-[300px] flex-col gap-4'>
     <div className='flex gap-2'>
       <FaUniversity className='h-8 w-8' />
       <h2 className='text-3xl font-bold uppercase'>Education</h2>

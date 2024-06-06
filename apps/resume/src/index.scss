@@ -5,10 +5,12 @@
 html {
   width: 100%;
   height: 100%;
+  background-color: hsl(var(--background));
 }
 body {
   width: 8.5in;
   height: 100%;
+  background-color: hsl(var(--background));
 }
 
 @layer base {

@@ -2,11 +2,11 @@ import { Separator } from '@dread-ui/index';
 import { Education } from './sections/education';
 import { Header } from './sections/header';
 import { Languages } from './sections/languages';
-import { Work } from './sections/work';
+import { Experience } from './sections/experience';
 
 export const App = () => {
   return (
-    <div className='flex h-full w-full flex-col p-7'>
+    <div className='flex h-[1056px] w-full flex-col p-7'>
       <Header />
 
       <Languages />
@@ -18,7 +18,7 @@ export const App = () => {
         <div className='mx-2'>
           <Separator className='bg-white' orientation='vertical' />
         </div>
-        <Work />
+        <Experience />
       </div>
     </div>
   );

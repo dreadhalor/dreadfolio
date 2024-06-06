@@ -138,7 +138,7 @@ export const experience = [
   {
     title: 'Software Developer',
     company: 'Ultra Mobile',
-    date: '2019-2020',
+    date: '2019 - 2020',
     description: `Developed software solutions to interface with T-Mobile's network, ensuring seamless integration and optimal performance for Ultra Mobile users. Worked with a variety of technologies to deliver reliable and efficient code.`,
     link: 'https://www.ultramobile.com/',
     technologies: ['JavaScript', 'Node.js', 'Express', 'MySQL', 'AWS'],
