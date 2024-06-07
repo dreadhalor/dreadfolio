@@ -55,7 +55,7 @@ export const EXPERIENCE = [
     ],
   },
   {
-    title: 'Software Developer',
+    title: 'Software Engineer II',
     company: 'Ultra Mobile',
     dates: '2019 - 2020',
     description: `Developed software solutions to interface with T-Mobile's network, ensuring seamless integration and optimal performance for Ultra Mobile users. Worked with a variety of technologies to deliver reliable and efficient code.`,

@@ -9,7 +9,12 @@ export const Card = ({
   className?: string;
 }) => {
   return (
-    <div className={cn('rounded-md bg-white bg-opacity-[0.08] p-3', className)}>
+    <div
+      className={cn(
+        'rounded-lg bg-white bg-opacity-10 p-4 shadow-lg backdrop-blur-md',
+        className,
+      )}
+    >
       {children}
     </div>
   );
