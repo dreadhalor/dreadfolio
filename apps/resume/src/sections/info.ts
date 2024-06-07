@@ -5,11 +5,11 @@ import WestEndDesignsLogo from '@resume/assets/icons/west-end-designs-logo.svg?r
 
 export const EXPERIENCE = [
   {
-    title: 'Senior Full Stack Engineer',
+    title: 'Tech Lead',
     company: 'Broadlume',
     dates: '2022 - 2024',
     description:
-      'Managed team as UI Tech Lead to create a component library and design system for the distributed BroadlumeX ecosystem. Managed CI/CD pipelines and deployments for the Tatami monorepo.',
+      'Managed team as Tech Lead to create a custom analytics service, component library + design system & unified portal with integrations for the distributed BroadlumeX ecosystem. Managed CI/CD pipelines and deployments for the Tatami monorepo.',
     website: 'www.broadlume.com',
     logo: BroadlumeLogo,
     technologies: [
@@ -33,7 +33,7 @@ export const EXPERIENCE = [
     ],
   },
   {
-    title: 'Software Developer',
+    title: 'Senior Full Stack Engineer',
     company: 'Stash',
     dates: '2021 - 2022',
     description:
@@ -68,7 +68,7 @@ export const EXPERIENCE = [
     company: 'West End Designs',
     dates: '2015 - 2020',
     description:
-      'Provided consulting services to clients, developing custom WordPress websites tailored to their specific needs. Implemented responsive designs, optimized site performance, and integrated various plugins to enhance functionality and user experience.',
+      'Provided consulting services to clients, developing custom WordPress websites tailored to their specific needs. Implemented responsive designs & optimized site performance.',
     website: 'www.westendwebdesigns.com',
     logo: WestEndDesignsLogo,
     technologies: ['WordPress', 'PHP', 'HTML', 'CSS', 'JavaScript', 'MySQL'],

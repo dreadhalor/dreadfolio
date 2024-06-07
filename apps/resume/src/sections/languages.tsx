@@ -8,11 +8,11 @@ import {
   FaPhp,
   FaPython,
 } from 'react-icons/fa6';
-import { IoLogoJavascript } from 'react-icons/io5';
 import { SiJavascript, SiTypescript, SiCplusplus, SiC } from 'react-icons/si';
 import { DiRuby } from 'react-icons/di';
 import NoSQLIcon from '@resume/assets/icons/nosql-icon.svg?react';
 import CSharpLogo from '@resume/assets/icons/csharp-logo.svg?react';
+import { Card } from '@resume/card';
 
 interface LanguageItemProps {
   logo: React.FC<{ className: string }>;
@@ -32,22 +32,23 @@ export const Languages = () => {
         <FaLaptopCode />
         Languages
       </div>
-
-      <div className='grid w-full grid-cols-[repeat(13,minmax(0,1fr))] gap-2'>
-        <LanguageItem logo={FaHtml5} label='HTML' />
-        <LanguageItem logo={FaCss3Alt} label='CSS' />
-        <LanguageItem logo={SiJavascript} label='JavaScript' />
-        <LanguageItem logo={FaDatabase} label='SQL' />
-        <LanguageItem logo={SiTypescript} label='TypeScript' />
-        <LanguageItem logo={NoSQLIcon as React.FC} label='NoSQL' />
-        <LanguageItem logo={FaJava} label='Java' />
-        <LanguageItem logo={SiC} label='C' />
-        <LanguageItem logo={SiCplusplus} label='C++' />
-        <LanguageItem logo={DiRuby} label='Ruby' />
-        <LanguageItem logo={FaPhp} label='PHP' />
-        <LanguageItem logo={FaPython} label='Python' />
-        <LanguageItem logo={CSharpLogo as React.FC} label='C#' />
-      </div>
+      <Card>
+        <div className='grid w-full grid-cols-[repeat(13,minmax(0,1fr))] gap-2'>
+          <LanguageItem logo={FaHtml5} label='HTML' />
+          <LanguageItem logo={FaCss3Alt} label='CSS' />
+          <LanguageItem logo={SiJavascript} label='JavaScript' />
+          <LanguageItem logo={FaDatabase} label='SQL' />
+          <LanguageItem logo={SiTypescript} label='TypeScript' />
+          <LanguageItem logo={CSharpLogo as React.FC} label='C#' />
+          <LanguageItem logo={NoSQLIcon as React.FC} label='NoSQL' />
+          <LanguageItem logo={FaJava} label='Java' />
+          <LanguageItem logo={SiC} label='C' />
+          <LanguageItem logo={SiCplusplus} label='C++' />
+          <LanguageItem logo={DiRuby} label='Ruby' />
+          <LanguageItem logo={FaPhp} label='PHP' />
+          <LanguageItem logo={FaPython} label='Python' />
+        </div>
+      </Card>
     </div>
   );
 };
