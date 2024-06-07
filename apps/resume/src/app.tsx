@@ -4,12 +4,13 @@ import { Languages } from './sections/languages';
 import { Experience } from './sections/experience';
 import { Technologies } from './sections/technologies';
 import { Background } from './background';
+import { KnockoutEffect } from './test';
 
 export const App = () => {
   return (
-    <div className='relative flex min-h-[1056px]'>
-      <Background />
-      <div className='z-10 h-full w-full flex-col p-7'>
+    <div className='relative flex max-h-[1056px] min-h-[1056px]'>
+      {/* <Background />
+      <div className='z-10 mt-[-30px] h-full w-full flex-col p-7'>
         <Header />
 
         <Languages />
@@ -21,7 +22,8 @@ export const App = () => {
           </div>
           <Experience />
         </div>
-      </div>
+      </div> */}
+      <KnockoutEffect />
     </div>
   );
 };
