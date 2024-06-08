@@ -11,10 +11,7 @@ export const Card = ({
   return (
     <div
       data-knockout-div
-      className={cn(
-        'rounded-lg bg-white bg-opacity-[0.1] p-4 shadow-lg',
-        className,
-      )}
+      className={cn('rounded-lg bg-white bg-opacity-[0.1] p-4', className)}
     >
       {children}
     </div>

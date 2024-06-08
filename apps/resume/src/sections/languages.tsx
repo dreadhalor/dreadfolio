@@ -32,7 +32,7 @@ export const Languages = () => {
         <FaLaptopCode />
         Languages
       </div>
-      <Card>
+      <Card className='shadow-md'>
         <div className='grid w-full grid-cols-[repeat(13,minmax(0,1fr))] gap-2'>
           <LanguageItem logo={FaHtml5} label='HTML' />
           <LanguageItem logo={FaCss3Alt} label='CSS' />

@@ -62,7 +62,7 @@ const Title = () => (
   </div>
 );
 export const Header = () => (
-  <Card className='-mt-0 flex w-full items-center gap-5 py-3'>
+  <Card className='flex w-full items-center gap-5 py-3 shadow-md'>
     <div className='border-foreground/50 flex h-24 w-24 justify-center overflow-hidden rounded-full border-0'>
       <img
         src={ProfilePic}
