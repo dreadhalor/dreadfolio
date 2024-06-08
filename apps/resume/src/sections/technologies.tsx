@@ -42,10 +42,10 @@ const TechnologyItem = ({ logo: Logo, label }: TechnologyItemProps) => (
 
 export const Technologies = () => {
   return (
-    <div className='flex flex-1 flex-col gap-4'>
-      <div className='flex gap-2'>
-        <BsStack className='h-8 w-8' />
-        <h2 className='text-2xl font-bold uppercase'>Technologies</h2>
+    <div className='flex flex-1 flex-col gap-2'>
+      <div className='flex items-center gap-2 text-2xl'>
+        <BsStack />
+        <h2 className='font-bold uppercase'>Technologies</h2>
       </div>
       <Card className='grid flex-1 grid-cols-4 gap-y-2'>
         <TechnologyItem logo={FaReact} label='React' />

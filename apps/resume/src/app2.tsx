@@ -4,18 +4,21 @@ import { Languages } from './sections/languages';
 import { Experience } from './sections/experience';
 import { Technologies } from './sections/technologies';
 import { Background } from './background';
-import {
-  KnockoutBackground,
-  KnockoutDiv,
-  KnockoutEffect,
-  KnockoutForeground,
-} from './knockout';
+import { KnockoutBackground, KnockoutForeground } from './knockout';
 
 export const App = () => {
   return (
     <div className='relative flex max-h-[1056px] min-h-[1056px]'>
-      {/* <Background />
-      <div className='z-10 mt-[-30px] h-full w-full flex-col p-7'>
+      <div className='absolute inset-0'>
+        <KnockoutBackground>
+          <Background />
+        </KnockoutBackground>
+        <KnockoutForeground>
+          <Background className='opacity-100 blur-xl' />
+        </KnockoutForeground>
+      </div>
+
+      <div className='z-10 h-full w-full flex-col p-6'>
         <Header />
 
         <Languages />
@@ -27,26 +30,7 @@ export const App = () => {
           </div>
           <Experience />
         </div>
-      </div> */}
-      <KnockoutEffect>
-        <KnockoutBackground>
-          <div className='h-full w-full bg-blue-500' />
-        </KnockoutBackground>
-        <KnockoutForeground>
-          <div className='h-full w-full bg-red-500' />
-        </KnockoutForeground>
-        <div className='relative z-10 flex h-full w-full flex-wrap items-center justify-center gap-4 p-4'>
-          {['mask1', 'mask2'].map((id) => (
-            <KnockoutDiv
-              key={id}
-              id={id}
-              className='rounded-lg bg-white bg-opacity-10 p-4'
-            >
-              <p className='text-black'>Content Inside</p>
-            </KnockoutDiv>
-          ))}
-        </div>
-      </KnockoutEffect>
+      </div>
     </div>
   );
 };

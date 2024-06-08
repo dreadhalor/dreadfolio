@@ -68,7 +68,7 @@ export const EXPERIENCE = [
     company: 'West End Designs',
     dates: '2015 - 2020',
     description:
-      'Provided consulting services to clients, developing custom WordPress websites tailored to their specific needs. Implemented responsive designs & optimized site performance.',
+      'Provided client consulting, developing custom WordPress websites. Implemented responsive designs & optimized site performance.',
     website: 'www.westendwebdesigns.com',
     logo: WestEndDesignsLogo,
     technologies: ['WordPress', 'PHP', 'HTML', 'CSS', 'JavaScript', 'MySQL'],

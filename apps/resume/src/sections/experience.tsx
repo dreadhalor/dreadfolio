@@ -45,9 +45,9 @@ const ExperienceCard = ({
 export const Experience = () => {
   return (
     <div className='flex flex-col gap-2'>
-      <div className='flex gap-2'>
-        <FaBriefcase className='h-8 w-8' />
-        <h2 className='text-2xl font-bold uppercase'>Experience</h2>
+      <div className='flex items-center gap-2 text-2xl'>
+        <FaBriefcase />
+        <h2 className='font-bold uppercase'>Experience</h2>
       </div>
       <div className='flex flex-col gap-4'>
         {EXPERIENCE.map((experience, index) => (
