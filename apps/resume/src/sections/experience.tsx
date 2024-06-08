@@ -34,7 +34,9 @@ const ExperienceCard = ({
           <span className='uppercase'>
             {title} - {company}
           </span>
-          <span className='-mt-1 opacity-60'>{website}</span>
+          <a href={`https://${website}`} className='-mt-1 opacity-60'>
+            {website}
+          </a>
           <span>{description}</span>
         </div>
       </div>

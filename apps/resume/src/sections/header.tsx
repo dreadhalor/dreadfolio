@@ -11,11 +11,11 @@ const ContactInfo = () => (
   <div className='text-foreground grid h-min grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 text-xs'>
     <div className='col-span-2 grid grid-cols-subgrid items-center'>
       <TbWorld className='text-lg' />
-      <div>scottjhetrick.com</div>
+      <a href='https://www.scottjhetrick.com'>scottjhetrick.com</a>
     </div>
     <div className='col-span-2 grid grid-cols-subgrid items-center'>
       <FaGithub className='text-lg' />
-      <div>dreadhalor</div>
+      <a href='https://www.github.com/dreadhalor'>dreadhalor</a>
     </div>
     <div className='col-span-2 grid grid-cols-subgrid items-center'>
       <IoMdMailUnread className='text-lg' />
@@ -62,7 +62,7 @@ const Title = () => (
   </div>
 );
 export const Header = () => (
-  <Card className='-mt-1 flex w-full items-center gap-4 py-3'>
+  <Card className='-mt-0 flex w-full items-center gap-5 py-3'>
     <div className='border-foreground/50 flex h-24 w-24 justify-center overflow-hidden rounded-full border-0'>
       <img
         src={ProfilePic}
