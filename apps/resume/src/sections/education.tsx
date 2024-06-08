@@ -4,9 +4,19 @@ import UCLALogo from '@resume/assets/ucla-logo.svg?react';
 import React from 'react';
 import { Card } from '@resume/card';
 
-const EducationGridItem = ({ children }: { children: React.ReactNode }) => (
+const EducationGridItem = ({
+  title,
+  icon,
+  subtitle,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  subtitle: string;
+}) => (
   <div className='row-span-3 grid grid-rows-subgrid items-center justify-items-center'>
-    {children}
+    {icon}
+    <p className='text-[13px] opacity-50'>{title}</p>
+    <p className='mt-[-3px] text-[13px] leading-4'>{subtitle}</p>
   </div>
 );
 
@@ -26,25 +36,22 @@ export const Education = () => (
         </h2>
       </div>
       <div className='grid grid-cols-3 grid-rows-[auto_auto_auto] justify-center gap-y-1 text-center'>
-        <EducationGridItem>
-          <FaBook className='h-7 w-7' />
-          <p className='text-[13px] opacity-50'>Field</p>
-          <p className='mt-[-2px] text-[13px]'>
-            Computer Science + Engineering
-          </p>
-        </EducationGridItem>
-        <EducationGridItem>
-          <GiLaurels className='h-8 w-8' />
-          <p className='text-[13px] opacity-50'>President</p>
-          <p className='mt-[-2px] text-[13px]'>
-            Triangle Engineering Fraternity
-          </p>
-        </EducationGridItem>
-        <EducationGridItem>
-          <FaGavel className='h-8 w-8' />
-          <p className='text-[13px] opacity-50'>Exec Board</p>
-          <p className='mt-[-2px] text-[13px]'>Model United Nations</p>
-        </EducationGridItem>
+        <EducationGridItem
+          icon={<FaBook className='h-7 w-7' />}
+          title='Field'
+          subtitle='Computer Science + Engineering'
+        />
+
+        <EducationGridItem
+          icon={<GiLaurels className='h-8 w-8' />}
+          title='President'
+          subtitle='Triangle Engineering Fraternity'
+        />
+        <EducationGridItem
+          icon={<FaGavel className='h-8 w-8' />}
+          title='Exec Board'
+          subtitle='Model United Nations'
+        />
       </div>
     </Card>
   </div>
