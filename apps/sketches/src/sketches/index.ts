@@ -21,6 +21,7 @@ import { Skyscraper } from './skyscraper/skyscraper';
 import { RgbBlobs } from './rgb-blobs/rgb-blobs';
 export * from './marching-squares/marching-squares';
 import { ThreeDEngine } from './3d-engine/3d-engine';
+import { Ripples } from './ripples/ripples';
 
 export type FpsSketchProps = SketchProps & {
   setFps: (framerate: number) => void;
@@ -111,6 +112,10 @@ export const sketches = {
   '3d-engine': {
     name: '3D Engine',
     sketch: ThreeDEngine,
+  },
+  ripples: {
+    name: 'Ripples',
+    sketch: Ripples,
   },
 } as const;
 
