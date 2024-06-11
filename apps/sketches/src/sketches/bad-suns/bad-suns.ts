@@ -93,7 +93,7 @@ export const BadSuns = (p5: P5) => {
           dynamicFrameCount,
         ) *
         p5.min(p5.width, p5.height) *
-        0.8;
+        1;
       PRAMAS.lineTarget[i]! = radius;
     }
   }

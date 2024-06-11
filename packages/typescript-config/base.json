@@ -24,6 +24,7 @@
       "@shareme/*": ["../../apps/shareme/frontend/src/*"],
       "@fallcrate/*": ["../../apps/fallcrate/src/*"],
       "@resume/*": ["../../apps/resume/src/*"],
+      "@frontend/*": ["../../apps/portfolio/frontend/src/*"],
     }
   }
 }

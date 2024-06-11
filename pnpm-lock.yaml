@@ -269,8 +269,8 @@ importers:
         specifier: ^4.3.4
         version: 4.4.0(react-dom@18.3.1)(react@18.3.1)
       '@splinetool/react-spline':
-        specifier: ^2.2.6
-        version: 2.2.6(@splinetool/runtime@1.1.9)(react-dom@18.3.1)(react@18.3.1)
+        specifier: ^3.1.0
+        version: 3.1.0(@splinetool/runtime@1.1.9)(react-dom@18.3.1)(react@18.3.1)
       dread-ui:
         specifier: workspace:*
         version: link:../../packages/dread-ui
@@ -449,6 +449,9 @@ importers:
 
   apps/portfolio/frontend:
     dependencies:
+      '@repo/sketches':
+        specifier: workspace:*
+        version: link:../../sketches
       dread-ui:
         specifier: workspace:*
         version: link:../../../packages/dread-ui
@@ -598,7 +601,7 @@ importers:
         version: 5.4.5
       vite:
         specifier: ^5.2.0
-        version: 5.2.10
+        version: 5.2.10(@types/node@20.12.7)(sass@1.75.0)
 
   apps/shared-backend:
     devDependencies:
@@ -3511,7 +3514,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       espree: 9.6.1
       globals: 13.24.0
       ignore: 5.3.1
@@ -4052,7 +4055,7 @@ packages:
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -6561,18 +6564,24 @@ packages:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
 
-  /@splinetool/react-spline@2.2.6(@splinetool/runtime@1.1.9)(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-y9L2VEbnC6FNZZu8XMmWM9YTTTWal6kJVfP05Amf0QqDNzCSumKsJxZyGUODvuCmiAvy0PfIfEsiVKnSxvhsDw==}
+  /@splinetool/react-spline@3.1.0(@splinetool/runtime@1.1.9)(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-UGX0o5RUK+U8IkR795cb7+AuiG3EqmBfF3/SQlUqQtpb9EfSKUcNOF48xCKv+1Vb7j8KNVZ8H1lBQSL+I8ybmQ==}
     peerDependencies:
       '@splinetool/runtime': '*'
-      react: '>=17.0.0'
-      react-dom: '>=17.0.0'
+      next: '*'
+      react: '*'
+      react-dom: '*'
+    peerDependenciesMeta:
+      next:
+        optional: true
     dependencies:
       '@splinetool/runtime': 1.1.9
+      blurhash: 2.0.5
       lodash.debounce: 4.0.8
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-merge-refs: 2.1.1
+      thumbhash: 0.1.1
     dev: false
 
   /@splinetool/runtime@1.1.9:
@@ -8256,7 +8265,7 @@ packages:
       '@typescript-eslint/type-utils': 7.7.1(eslint@8.57.0)(typescript@5.4.5)
       '@typescript-eslint/utils': 7.7.1(eslint@8.57.0)(typescript@5.4.5)
       '@typescript-eslint/visitor-keys': 7.7.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       eslint: 8.57.0
       graphemer: 1.4.0
       ignore: 5.3.1
@@ -8303,7 +8312,7 @@ packages:
       '@typescript-eslint/types': 7.7.1
       '@typescript-eslint/typescript-estree': 7.7.1(typescript@5.4.5)
       '@typescript-eslint/visitor-keys': 7.7.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       eslint: 8.57.0
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -8366,7 +8375,7 @@ packages:
     dependencies:
       '@typescript-eslint/typescript-estree': 7.7.1(typescript@5.4.5)
       '@typescript-eslint/utils': 7.7.1(eslint@8.57.0)(typescript@5.4.5)
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       eslint: 8.57.0
       ts-api-utils: 1.3.0(typescript@5.4.5)
       typescript: 5.4.5
@@ -8443,7 +8452,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 7.7.1
       '@typescript-eslint/visitor-keys': 7.7.1
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.4
@@ -8661,7 +8670,7 @@ packages:
       vite: ^4 || ^5
     dependencies:
       '@swc/core': 1.5.0
-      vite: 5.2.10
+      vite: 5.2.10(@types/node@20.12.7)(sass@1.75.0)
     transitivePeerDependencies:
       - '@swc/helpers'
     dev: true
@@ -9450,6 +9459,10 @@ packages:
       buffer: 5.7.1
       inherits: 2.0.4
       readable-stream: 3.6.2
+
+  /blurhash@2.0.5:
+    resolution: {integrity: sha512-cRygWd7kGBQO3VEhPiTgq4Wc43ctsM+o46urrmPOiuAe+07fzlSB9OJVdpgDL0jPqXUVQ9ht7aq7kxOeJHRK+w==}
+    dev: false
 
   /body-parser@1.20.2:
     resolution: {integrity: sha512-ml9pReCu3M61kGlqoTm2umSXTlRTuGTx0bfYj+uIUKKYycG5NtSbeetV3faSU6R7ajOPw0g/J1PvK4qNy7s5bA==}
@@ -10324,17 +10337,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.3
-
-  /debug@4.3.4:
-    resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-    dependencies:
-      ms: 2.1.2
 
   /debug@4.3.4(supports-color@5.5.0):
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
@@ -11596,7 +11598,7 @@ packages:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.4
+      debug: 4.3.4(supports-color@5.5.0)
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
@@ -17886,6 +17888,10 @@ packages:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
     dev: false
 
+  /thumbhash@0.1.1:
+    resolution: {integrity: sha512-kH5pKeIIBPQXAOni2AiY/Cu/NKdkFREdpH+TLdM0g6WA7RriCv0kPLgP731ady67MhTAqrVG/4mnEeibVuCJcg==}
+    dev: false
+
   /tiny-invariant@1.3.1:
     resolution: {integrity: sha512-AD5ih2NlSssTCwsMznbvwMZpJ1cbhkGd2uueNxzv2jDlEeZdU04JQfRnggJQ8DrcVBGjAsCKwFBbDlVNtEMlzw==}
     dev: false
@@ -18731,41 +18737,6 @@ packages:
       sass: 1.75.0
     optionalDependencies:
       fsevents: 2.3.3
-
-  /vite@5.2.10:
-    resolution: {integrity: sha512-PAzgUZbP7msvQvqdSD+ErD5qGnSFiGOoWmV5yAKUEI0kdhjbH6nMWVyZQC/hSc4aXwc0oJ9aEdIiF9Oje0JFCw==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': ^18.0.0 || >=20.0.0
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      esbuild: 0.20.2
-      postcss: 8.4.38
-      rollup: 4.16.4
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: true
 
   /vite@5.2.10(@types/node@20.12.7)(sass@1.75.0):
     resolution: {integrity: sha512-PAzgUZbP7msvQvqdSD+ErD5qGnSFiGOoWmV5yAKUEI0kdhjbH6nMWVyZQC/hSc4aXwc0oJ9aEdIiF9Oje0JFCw==}

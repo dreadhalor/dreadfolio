@@ -1,4 +1,3 @@
-import { Badge } from '@dread-ui/index';
 import { cn } from '@repo/utils';
 import { FaBriefcase } from 'react-icons/fa';
 
