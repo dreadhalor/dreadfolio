@@ -88,16 +88,17 @@ export const projects = [
 
 export const experience = [
   {
-    title: 'Senior Full Stack Engineer',
+    title: 'Tech Lead',
     company: 'Broadlume',
     date: '2022 - 2024',
     description:
-      'Managed team as UI Tech Lead to create a component library and design system for the distributed BroadlumeX ecosystem. Managed CI/CD pipelines and deployments for the Tatami monorepo.',
+      'Managed team as Tech Lead to create a custom analytics service, component library + design system & unified portal with integrations for the distributed BroadlumeX ecosystem. Managed CI/CD pipelines and deployments for the Tatami monorepo.',
     link: 'https://www.broadlume.com/',
     technologies: [
       'HTML + SCSS',
       'React',
       'Docker',
+      'Redis',
       'CircleCI',
       'Github Actions',
       'Google Cloud',
@@ -115,7 +116,7 @@ export const experience = [
     ],
   },
   {
-    title: 'Software Developer',
+    title: 'Senior Full Stack Engineer',
     company: 'Stash',
     date: '2021 - 2022',
     description:
@@ -136,7 +137,7 @@ export const experience = [
     ],
   },
   {
-    title: 'Software Developer',
+    title: 'Software Engineer II',
     company: 'Ultra Mobile',
     date: '2019 - 2020',
     description: `Developed software solutions to interface with T-Mobile's network, ensuring seamless integration and optimal performance for Ultra Mobile users. Worked with a variety of technologies to deliver reliable and efficient code.`,
@@ -148,7 +149,7 @@ export const experience = [
     company: 'West End Designs',
     date: '2015 - 2020',
     description:
-      'Provided consulting services to clients, developing custom WordPress websites tailored to their specific needs. Implemented responsive designs, optimized site performance, and integrated various plugins to enhance functionality and user experience.',
+      'Provided client consulting, developing custom WordPress websites. Implemented responsive designs & optimized site performance.',
     link: 'https://www.westendwebdesigns.com/',
     technologies: ['WordPress', 'PHP', 'HTML', 'CSS', 'JavaScript', 'MySQL'],
   },

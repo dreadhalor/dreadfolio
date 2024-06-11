@@ -24,7 +24,7 @@ const PageHeader = ({ parent }: { parent: RefObject<HTMLDivElement> }) => {
           ></spline-viewer>
         </h1>
         <h2 className='mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl'>
-          Programming. Pizza. Punchlines.
+          Pizza. Programming. Punchlines.
         </h2>
         <h2 className='text-md mt-2 font-medium tracking-tight text-slate-400 sm:text-lg'>
           Not necessarily in that order.
