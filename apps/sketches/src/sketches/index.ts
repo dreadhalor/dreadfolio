@@ -51,6 +51,11 @@ export const sketches = {
   'flow-field': {
     name: 'Flow Field',
     sketch: FlowField,
+    colors: {
+      top: 'hsl(240,100%,80%)',
+      middle: 'hsl(240,100%,80%)',
+      bottom: 'hsl(240,100%,80%)',
+    },
   },
   'dvd-logo': {
     name: 'DVD Logo',
@@ -60,9 +65,9 @@ export const sketches = {
     name: 'Scrunching',
     sketch: Scrunching,
     colors: {
-      top: [0, 100, 100],
-      middle: [120, 100, 100],
-      bottom: [240, 100, 100],
+      top: 'hsl(0,0%,100%)',
+      middle: 'hsl(0,0%,100%)',
+      bottom: 'hsl(0,0%,100%)',
     },
   },
   'moonlight-ocean': {
@@ -96,10 +101,20 @@ export const sketches = {
   'lo-fi-mountains': {
     name: 'Lo-Fi Mountains',
     sketch: LoFiMountains,
+    colors: {
+      top: 'hsl(0,0%,100%)',
+      middle: 'hsl(0,0%,60%)',
+      bottom: 'hsl(0,0%,20%)',
+    },
   },
   'bad-suns': {
     name: 'Bad Suns',
     sketch: BadSuns,
+    colors: {
+      top: 'hsl(200,70%,40%)',
+      middle: 'hsl(200,70%,40%)',
+      bottom: 'hsl(200,70%,40%)',
+    },
   },
   skyscraper: {
     name: 'Skyscraper',
