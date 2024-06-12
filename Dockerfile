@@ -7,9 +7,6 @@ FROM --platform=linux/amd64 node:${NODE_VERSION}-alpine as base
 ARG PNPM_VERSION=8.15.1
 ARG VERCEL_TOKEN
 
-# Install Git - needed for CI/CD in order to not keep making new images.
-RUN apk update && apk add --no-cache git
-
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
@@ -28,11 +25,11 @@ RUN pnpm i
 # Build all the apps.
 RUN pnpm build-more-mem
 
-# # Go to the portfolio backend directory.
+# Go to the portfolio backend directory.
 WORKDIR /usr/src/app/apps/portfolio/backend
 
-# # Expose the port.
+# Expose the port.
 EXPOSE 3000
 
-# # Start the portfolio backend.
+# Start the portfolio backend.
 ENTRYPOINT ["pnpm", "start"]
