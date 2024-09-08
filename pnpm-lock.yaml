@@ -697,8 +697,8 @@ importers:
   apps/sketches:
     dependencies:
       '@p5-wrapper/react':
-        specifier: ^4.3.4
-        version: 4.4.0(react-dom@18.3.1)(react@18.3.1)
+        specifier: 4.3.4
+        version: 4.3.4(react-dom@18.3.1)(react@18.3.1)
       dread-ui:
         specifier: workspace:*
         version: link:../../packages/dread-ui
@@ -4561,6 +4561,18 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
+
+  /@p5-wrapper/react@4.3.4(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-FPmwK69lp6D2yWbBXX74FBeBAmv0ZlZsnsku5a2ISEThGp1O7+a9ALwHREF+QT3bfuqtY76iUacR8lSeq5wf+Q==}
+    peerDependencies:
+      react: '>= 18.2.0'
+      react-dom: '>= 18.2.0'
+    dependencies:
+      microdiff: 1.4.0
+      p5: 1.9.3
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    dev: false
 
   /@p5-wrapper/react@4.4.0(react-dom@18.3.1)(react@18.3.1):
     resolution: {integrity: sha512-4s6KEVb0of3s959tmmQ0Xc77v8Y1ZDw6sbjKR+E8Qdn5oLMfat7Wah5Az9Cs2AzljK3HQcz7WFhel5qBTKJyuQ==}

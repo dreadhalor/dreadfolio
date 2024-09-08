@@ -20,7 +20,6 @@ import {
   SiCypress,
   SiApollographql,
   SiGraphql,
-  SiDotnet,
   SiPostgresql,
   SiMongodb,
   SiStorybook,
@@ -28,6 +27,7 @@ import {
   SiCircleci,
 } from 'react-icons/si';
 import { MdHttp } from 'react-icons/md';
+import { RiNextjsFill } from 'react-icons/ri';
 
 interface TechnologyItemProps {
   logo: React.FC<{ className: string }>;
@@ -50,10 +50,10 @@ export const Technologies = () => {
       <Card className='grid flex-1 grid-cols-4 gap-y-2'>
         <TechnologyItem logo={FaReact} label='React' />
         <TechnologyItem logo={FaAngular} label='Angular' />
+        <TechnologyItem logo={RiNextjsFill} label='Next.js' />
         <TechnologyItem logo={FaNode} label='Node.js' />
         <TechnologyItem logo={SiExpress} label='Express.js' />
         <TechnologyItem logo={SiRubyonrails} label='Rails' />
-        <TechnologyItem logo={SiDotnet} label='ASP.NET' />
         <TechnologyItem logo={SiJquery} label='jQuery' />
         <TechnologyItem logo={FaAws} label='AWS' />
         <TechnologyItem logo={SiGooglecloud} label='GCP' />
