@@ -13,3 +13,4 @@ export { default as FallcrateIcon } from './fallcrate-icon.svg';
 export { default as HermitcraftHornsIcon } from './hermitcraft-horns-icon.svg';
 export { default as DredgedUpIcon } from './dredged-up-icon.svg';
 export { default as IntroIcon } from './intro-icon.svg';
+export { default as RootBeerReviewsIcon } from './root-beer-reviews-icon.svg';

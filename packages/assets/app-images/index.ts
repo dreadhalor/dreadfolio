@@ -13,3 +13,4 @@ export { default as FallcrateScreenshot } from './fallcrate.webp';
 export { default as HermitcraftHornsScreenshot } from './hermitcraft-horns.webp';
 export { default as DredgedUpScreenshot } from './dredged-up.webp';
 export { default as IntroScreenshot } from './intro.webp';
+export { default as RootBeerReviewsScreenshot } from './root-beer-reviews.webp';
