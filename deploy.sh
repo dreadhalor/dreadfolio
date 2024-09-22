@@ -19,7 +19,7 @@ ssh -i portfolio-key-pair.pem ec2-user@ec2-54-164-173-195.compute-1.amazonaws.co
   docker load < portfolio.tar
 
   # Run the new container
-  docker run -d -p 80:3000 dreadfolio-portfolio:latest
+  docker run -d -p 80:3000 --rm dreadfolio-portfolio:latest
 
   # Clean up the tar file
   rm portfolio.tar
