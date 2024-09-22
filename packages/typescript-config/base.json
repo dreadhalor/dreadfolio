@@ -25,6 +25,7 @@
       "@fallcrate/*": ["../../apps/fallcrate/src/*"],
       "@resume/*": ["../../apps/resume/src/*"],
       "@frontend/*": ["../../apps/portfolio/frontend/src/*"],
+      "@ms/*": ["../../apps/minesweeper/src/*"]
     }
   }
 }
