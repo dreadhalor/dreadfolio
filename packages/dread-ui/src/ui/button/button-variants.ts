@@ -5,6 +5,7 @@ const buttonVariants = cva(
     'caption-1 inline-flex h-12 items-center justify-center rounded-full border border-transparent px-6 transition-colors',
     'focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
+    'cursor-pointer',
   ],
   {
     variants: {
