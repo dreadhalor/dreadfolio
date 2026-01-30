@@ -36,7 +36,7 @@ export class CameraProcessor {
   private freezeframe = false;
   
   // Frame skipping for performance
-  private frameSkipCount = 2; // Process ML every 3rd frame
+  private frameSkipCount = 1; // Process ML every 2nd frame (was: 2 = every 3rd)
   private frameCounter = 0;
   private lastProcessedPixels: [number, number, number, number][][] = [[]];
 
