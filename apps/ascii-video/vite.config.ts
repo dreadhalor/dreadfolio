@@ -1,11 +1,18 @@
 import { defineConfig } from 'vite';
-import basicSsl from '@vitejs/plugin-basic-ssl';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
+import fs from 'fs';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [basicSsl(), tsconfigPaths(), svgr()],
+  plugins: [tsconfigPaths(), svgr()],
   base: '/ascii-video/',
+  server: {
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, '.cert/key.pem')),
+      cert: fs.readFileSync(path.resolve(__dirname, '.cert/cert.pem')),
+    },
+  },
   worker: {
     format: 'es',
   },
