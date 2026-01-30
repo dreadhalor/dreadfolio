@@ -43,7 +43,7 @@ export const sketch = (p5: p5) => {
     video_feed = new CameraProcessor(model);
     const width = window.innerWidth;
     const height = window.innerHeight;
-    canvas = p5.createCanvas(width, height);
+    p5.createCanvas(width, height);
   };
 
   p5.draw = () => {
