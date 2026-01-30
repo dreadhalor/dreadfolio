@@ -106,9 +106,33 @@ export class CameraProcessor {
         // Process every frame - no skipping
         const newPixels = this.getFrame(max_width, max_height);
         
-        // Only update if we got valid pixels (not empty array)
+        // Validate pixels have both structure AND color data
         if (newPixels.length > 0 && newPixels[0]?.length > 0) {
-          this.pixels = newPixels;
+          // Check if pixels have valid COLOR (not just alpha)
+          let validColorCount = 0;
+          const sampleSize = Math.min(50, newPixels.length);
+          
+          for (let i = 0; i < sampleSize; i++) {
+            const x = Math.floor(Math.random() * newPixels.length);
+            const y = Math.floor(Math.random() * newPixels[0].length);
+            const [r, g, b, a] = newPixels[x][y];
+            
+            // Valid pixel: alpha > 0 AND at least one RGB channel > 0
+            if (a > 0 && (r > 0 || g > 0 || b > 0)) {
+              validColorCount++;
+              if (validColorCount >= 3) break; // Found enough valid pixels
+            }
+          }
+          
+          if (validColorCount >= 3) {
+            this.pixels = newPixels;
+          } else {
+            console.warn('🚨 REJECTED FRAME: Pixels have alpha but RGB=0 (black ghosts)', {
+              sampleSize,
+              validColorCount,
+            });
+            // Keep last valid pixels
+          }
         }
         // else: keep last valid pixels to prevent blank frames
       } catch (e) {
