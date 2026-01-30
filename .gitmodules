@@ -4,9 +4,6 @@
 [submodule "apps/shareme"]
 	path = apps/shareme
 	url = https://github.com/Dreadhalor/shareme
-[submodule "apps/portfolio"]
-	path = apps/portfolio
-	url = https://github.com/Dreadhalor/portfolio
 [submodule "apps/fallcrate"]
 	path = apps/fallcrate
 	url = https://github.com/dreadhalor/fallcrate
