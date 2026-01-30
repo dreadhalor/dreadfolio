@@ -58,11 +58,11 @@ export class VideoCamera {
   getCapabilities = () => this.getVideoTrack()?.getCapabilities();
   getSettings = () => this.getVideoTrack()?.getSettings();
   getScaledDimensions(ratio: number) {
-    let { width, height } = this.getSettings();
+    const { width, height } = this.getSettings();
     return { width: Math.floor(width * ratio), height: Math.floor(height * ratio) };
   }
   getMaxDimensionsConstraints = () => {
-    let capabilities = this.getCapabilities();
+    const capabilities = this.getCapabilities();
     return { width: capabilities?.width.max, height: capabilities?.height.max };
   };
 

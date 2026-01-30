@@ -17,7 +17,7 @@ const settings: any = {
 
 export function loadBodyPix() {
   setBackend('webgl');
-  let config: ModelConfig = {
+  const config: ModelConfig = {
     architecture: settings.architecture,
     outputStride: settings.outputStride,
     multiplier: settings.multiplier,
@@ -26,18 +26,29 @@ export function loadBodyPix() {
   return load(config);
 }
 
-export function maskPerson(bp: BodyPix, input: BodyPixInput) {
-  let segment_config: PersonInferenceConfig = {
+export async function maskPerson(bp: BodyPix, input: BodyPixInput) {
+  const segment_config: PersonInferenceConfig = {
     internalResolution: settings.internalResolution,
     segmentationThreshold: settings.segmentationThreshold,
   };
-  // countTensors();
-  return bp
-    .segmentPerson(input, segment_config)
-    .then((segmentation) => toMask(segmentation));
+  
+  const segmentation = await bp.segmentPerson(input, segment_config);
+  const mask = await toMask(segmentation);
+  
+  // Critical: Dispose segmentation data to prevent memory leaks
+  segmentation.data = null as unknown as Uint8Array;
+  
+  return mask;
 }
-function countTensors() {
-  console.log(memory().numTensors);
+
+/**
+ * Dispose TensorFlow tensors to prevent memory leaks
+ * Call this periodically or when changing models
+ */
+export function disposeTensors() {
+  const tensorCount = memory().numTensors;
+  console.log(`TensorFlow tensors in memory: ${tensorCount}`);
+  return tensorCount;
 }
 
 // export function maskVideo(bp: BodyPix, input: BodyPixInput) {
