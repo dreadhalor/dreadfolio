@@ -12,9 +12,9 @@ import { PathList } from '../data-structures/path-list';
 import { getFullEdges, getMazeAdjacencyList } from '../maze-structures';
 
 export const huntAndKill = (grid: Square[][]) => {
-  let params = parseParams(grid);
+  const params = parseParams(grid);
   // don't deconstruct node, it's used in the while loop
-  let {
+  const {
     animation_queue,
     traverseAnimation,
     scanAnimation,
@@ -36,9 +36,9 @@ export const huntAndKill = (grid: Square[][]) => {
       clearScanAnimation(path_set);
     });
     // hoisting!
-    let path_set = new GridSet(getFullEdges(edges.realEntries()).flat(1));
+    const path_set = new GridSet(getFullEdges(edges.realEntries()).flat(1));
   }
-  let result = getFullEdges(edges.realEntries()).flat(1);
+  const result = getFullEdges(edges.realEntries()).flat(1);
   return { result, animations: params.animation_queue };
 };
 
@@ -53,10 +53,10 @@ type HuntParams = {
   scanAnimation: (node: Coordinates) => void;
 };
 const hunt = (params: HuntParams) => {
-  let { adjacency_list, visited, animation_queue, scanAnimation, hunt_refs } =
+  const { adjacency_list, visited, animation_queue, scanAnimation, hunt_refs } =
     params;
 
-  let scanned = new GridSet();
+  const scanned = new GridSet();
   let crossed_empty_cell = false;
   let node = hunt_refs.start || adjacency_list.at(0);
   let prev_scan = null;
@@ -79,12 +79,12 @@ const hunt = (params: HuntParams) => {
         scanAnimation,
       );
     else traverse(node, animation_queue, scanAnimation);
-    let is_visited = visited.has(node);
-    let neighbors = adjacency_list.get(node);
+    const is_visited = visited.has(node);
+    const neighbors = adjacency_list.get(node);
     const unvisited = getRandomUnvisitedNeighbor(node, adjacency_list, visited);
     if (is_visited && unvisited) return node;
 
-    let unscanned_neighbors = neighbors!.filter(
+    const unscanned_neighbors = neighbors!.filter(
       (neighbor) => !(scanned.has(neighbor) || hunt_refs.scanned.has(neighbor)),
     );
     prev_scan = node;
@@ -94,7 +94,7 @@ const hunt = (params: HuntParams) => {
 };
 
 function parseParams(grid: Square[][]) {
-  let params = {
+  const params = {
     node: null as Coordinates | null,
     adjacency_list: getMazeAdjacencyList(grid),
     visited: new GridSet(),

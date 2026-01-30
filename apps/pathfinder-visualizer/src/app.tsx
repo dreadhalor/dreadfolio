@@ -36,9 +36,9 @@ const App: React.FC = () => {
   const { isUnlockable, unlockAchievementById } = useAchievements();
 
   const createNewGrid = (num_rows: number, num_cols: number): Square[][] => {
-    let new_grid: Square[][] = [];
+    const new_grid: Square[][] = [];
     for (let i = 0; i < num_rows; i++) {
-      let row: Square[] = [];
+      const row: Square[] = [];
       for (let j = 0; j < num_cols; j++) {
         row.push({ uuid: uuidv4(), row: i, col: j });
       }
@@ -71,9 +71,9 @@ const App: React.FC = () => {
     val: number,
     reset_override = false,
   ) => {
-    let tile_match = candidate_square.uuid === uuid;
-    let val_match = candidate_square.val === val;
-    let exact_match = tile_match && val_match;
+    const tile_match = candidate_square.uuid === uuid;
+    const val_match = candidate_square.val === val;
+    const exact_match = tile_match && val_match;
     if (exact_match) {
       candidate_square.setVal!(() => 0);
       return 0;
@@ -123,7 +123,7 @@ const App: React.FC = () => {
     if (!rows || !cols || !grid) return null;
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        let possible = setValueCheck(
+        const possible = setValueCheck(
           grid[i]![j]!,
           square_uuid,
           val,
@@ -141,7 +141,7 @@ const App: React.FC = () => {
     if (!rows || !cols || !grid) return;
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        let tile = grid[i]![j];
+        const tile = grid[i]![j];
         if (!tile) continue;
         if (tile.val === val) tile.setVal!(() => 0);
       }
@@ -149,23 +149,23 @@ const App: React.FC = () => {
   };
   useLayoutEffect(() => {
     resetGridSize();
-  }, []); //eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => fullResetStartAndEnd(), [grid]); //eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
+  useEffect(() => fullResetStartAndEnd(), [grid]);  
 
   const fullResetStartAndEnd = () => {
     let potential_start, potential_end;
-    let inset = 3;
+    const inset = 3;
     if (!rows || !cols || !grid) return;
     if (rows <= cols) {
-      let middle_row = Math.floor(rows / 2);
-      let start_row = inset < cols ? inset : cols - 1;
+      const middle_row = Math.floor(rows / 2);
+      const start_row = inset < cols ? inset : cols - 1;
       let end_row = cols - inset - 1;
       end_row = end_row >= 0 ? end_row : 0;
       potential_start = getTile([middle_row, start_row]);
       potential_end = getTile([middle_row, end_row]);
     } else {
-      let middle_col = Math.floor(cols / 2);
-      let start_col = inset < rows ? inset : rows - 1;
+      const middle_col = Math.floor(cols / 2);
+      const start_col = inset < rows ? inset : rows - 1;
       let end_col = rows - inset - 1;
       end_col = end_col >= 0 ? end_col : 0;
       potential_start = getTile([start_col, middle_col]);
@@ -183,7 +183,7 @@ const App: React.FC = () => {
 
   function resetGridSize() {
     if (!gridContainerRef.current) return;
-    let w = gridContainerRef.current.clientWidth,
+    const w = gridContainerRef.current.clientWidth,
       h = gridContainerRef.current.clientHeight;
     squareSize.current = w < 600 ? 20 : 25;
     let new_rows = Math.floor(h / squareSize.current);
@@ -191,7 +191,7 @@ const App: React.FC = () => {
     let new_cols = Math.floor(w / squareSize.current);
     if (new_cols % 2 === 0 && new_cols > 0) new_cols--;
     animatorRef.current.flushAnimationQueue();
-    setRows(() => new_rows); //eslint-disable-line react-hooks/exhaustive-deps
+    setRows(() => new_rows);  
     setCols(() => new_cols); //eslint disable-line exhaustive-deps
     setGrid(() => createNewGrid(new_rows, new_cols)); //eslint disable-line exhaustive-deps
     if (new_rows <= 1 || new_cols <= 1) {
@@ -201,7 +201,7 @@ const App: React.FC = () => {
   useEffect(() => {
     window.addEventListener('resize', resetGridSize);
     return () => window.removeEventListener('resize', resetGridSize);
-  }, []); //eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   const gridStyle = {
     margin: 'auto',
@@ -242,7 +242,7 @@ const App: React.FC = () => {
     old_end: [number, number],
   ) => {
     if (!rows || !cols || !grid) return;
-    let new_grid = grid.map((row) =>
+    const new_grid = grid.map((row) =>
       row.map((square) => {
         if (!square.val) return 0;
         if (square.val === 1 || square.val === 2) return 0;
@@ -250,17 +250,17 @@ const App: React.FC = () => {
       }),
     );
 
-    let start = getClosestPathSquare(new_grid, old_start, 0);
-    let end = getClosestPathSquare(new_grid, old_end, 0);
+    const start = getClosestPathSquare(new_grid, old_start, 0);
+    const end = getClosestPathSquare(new_grid, old_end, 0);
 
     if (start) {
-      let tile = getTile(start);
+      const tile = getTile(start);
       if (!tile?.setVal || !tile?.animate) return;
       tile.setVal(() => 1);
       tile.animate(1);
     }
     if (end) {
-      let tile = getTile(end);
+      const tile = getTile(end);
       if (!tile?.setVal || !tile?.animate) return;
       tile.setVal(() => 2);
       tile.animate(1);
@@ -273,7 +273,7 @@ const App: React.FC = () => {
     if (!rows || !cols || !grid) return;
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        let tile = grid[i]![j];
+        const tile = grid[i]![j];
         if (
           !tile ||
           !tile.setPathVal ||
@@ -306,12 +306,12 @@ const App: React.FC = () => {
     navRef.current.forceRender();
   };
   const resetWalls = (animate_tiles = false) => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     resetPath();
     if (!rows || !cols || !grid) return;
     for (let i = 0; i < rows; i++) {
       for (let j = 0; j < cols; j++) {
-        let tile = grid[i]![j];
+        const tile = grid[i]![j];
         if (!tile || !tile.setVal || !tile.animate) continue;
         if (start && i === start[0] && j === start[1]) {
           tile.setVal(() => 1);
@@ -336,8 +336,8 @@ const App: React.FC = () => {
     );
   };
   const solveBFS = () => {
-    let endpoints = getStartAndEnd();
-    let start = endpoints[0];
+    const endpoints = getStartAndEnd();
+    const start = endpoints[0];
     resetPath();
     if (!grid) return;
     const { end, animations } = bfs({
@@ -364,8 +364,8 @@ const App: React.FC = () => {
     navRef.current.forceRender();
   };
   const solveDFS = () => {
-    let endpoints = getStartAndEnd();
-    let start = endpoints[0];
+    const endpoints = getStartAndEnd();
+    const start = endpoints[0];
     resetPath();
     if (!grid) return;
     const { end, animations } = dfs({
@@ -391,10 +391,10 @@ const App: React.FC = () => {
     navRef.current.forceRender();
   };
   const solveAStar = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     resetPath();
     if (!grid) return;
-    let { end: result, animations } = aStar({
+    const { end: result, animations } = aStar({
       maze: grid,
       start_coords: start,
       end_coords: end,
@@ -418,7 +418,7 @@ const App: React.FC = () => {
   };
 
   const generateKruskals = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     wallifyItAll();
     if (!grid) return;
     kruskals(grid, animatorRef);
@@ -431,7 +431,7 @@ const App: React.FC = () => {
     animatorRef.current.closeOpenQueue(true);
   };
   const generateEllers = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     wallifyItAll();
     if (!grid) return;
     let { animations } = ellers(grid);
@@ -445,7 +445,7 @@ const App: React.FC = () => {
     animatorRef.current.playAnimations(animations, 1, true);
   };
   const generateDFS = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     wallifyItAll();
     if (!grid) return;
     let { animations } = recursiveBacktracking(grid);
@@ -461,7 +461,7 @@ const App: React.FC = () => {
     animatorRef.current.playAnimations(animations, 2, true);
   };
   const generateHuntAndKill = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     wallifyItAll();
     if (!grid) return;
     let { animations } = huntAndKill(grid);
@@ -473,7 +473,7 @@ const App: React.FC = () => {
     animatorRef.current.playAnimations(animations, 2, true);
   };
   const generatePrims = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     wallifyItAll();
     if (!grid) return;
     let { animations } = prims(grid);
@@ -486,7 +486,7 @@ const App: React.FC = () => {
     animatorRef.current.playAnimations(animations, 2, true);
   };
   const generateRecursiveDivision = () => {
-    let [start, end] = getStartAndEnd();
+    const [start, end] = getStartAndEnd();
     resetWalls(false);
 
     if (!grid) return;

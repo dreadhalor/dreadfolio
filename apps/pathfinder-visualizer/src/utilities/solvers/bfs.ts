@@ -28,11 +28,11 @@ export const bfs = ({
   traversal_animation,
   path_animation,
 }: BfsParams) => {
-  let animations = [];
-  let adjacency_list = getSolverAdjacencyList(maze);
-  let pathMap = new PathList();
-  let visited = new GridSet();
-  let queue: Array<Coordinates> = [];
+  const animations = [];
+  const adjacency_list = getSolverAdjacencyList(maze);
+  const pathMap = new PathList();
+  const visited = new GridSet();
+  const queue: Array<Coordinates> = [];
   let end: Coordinates | null = null;
   if (start_coords) {
     queue.push(start_coords);
@@ -43,7 +43,7 @@ export const bfs = ({
   while (queue.length > 0) {
     const next = queue.shift();
     if (!next) continue;
-    let [r, c] = next;
+    const [r, c] = next;
     if (!visited.has(next)) {
       visited.add(next);
       const animCoords = maze[r]?.[c];
@@ -53,10 +53,10 @@ export const bfs = ({
         end = [r, c];
         break;
       }
-      let adjacents = adjacency_list.get(next);
+      const adjacents = adjacency_list.get(next);
       if (!adjacents) continue;
-      let neighbors = adjacents.filter((n) => !visited.has(n));
-      for (let [n_r, n_c] of neighbors) {
+      const neighbors = adjacents.filter((n) => !visited.has(n));
+      for (const [n_r, n_c] of neighbors) {
         queue.push([n_r, n_c]);
         pathMap.set([n_r, n_c], [r, c]);
         const animCoords = maze[n_r]?.[n_c];
@@ -68,9 +68,9 @@ export const bfs = ({
   let path_node = end;
   let child = null;
   while (path_node) {
-    let [r, c] = path_node;
-    let parent = pathMap.get(path_node) ?? null;
-    let direction = getDirection({ node: path_node, child });
+    const [r, c] = path_node;
+    const parent = pathMap.get(path_node) ?? null;
+    const direction = getDirection({ node: path_node, child });
     const animCoords = maze[r]?.[c];
     if (!animCoords) continue;
     animations.push(() => {

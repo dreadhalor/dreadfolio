@@ -113,9 +113,9 @@ const GridSquare = ({
     const floor = [100, 100, 255];
     const ceiling = [255, 255, 255];
 
-    let range = rows;
-    let increment = [];
-    let convenience_multiplier = 2;
+    const range = rows;
+    const increment = [];
+    const convenience_multiplier = 2;
     for (let i = 0; i < floor.length; i++)
       increment.push(
         Math.floor(
@@ -123,7 +123,7 @@ const GridSquare = ({
         ),
       );
 
-    let results = [
+    const results = [
       Math.min(floor[0]! - increment[0]! * displayVal!, 255),
       Math.min(floor[1]! - increment[1]! * displayVal!, 255),
       Math.min(floor[2]! - increment[2]! * displayVal!, 255),
@@ -168,7 +168,7 @@ const GridSquare = ({
   };
 
   const setValMiddleMan = (fxn: () => number) => {
-    let result = fxn();
+    const result = fxn();
     setVal(result);
     if (square) {
       square.val = result;
@@ -184,7 +184,7 @@ const GridSquare = ({
   }, [square]);
 
   useEffect(() => {
-    let div = tileRef.current;
+    const div = tileRef.current;
     if (!div) return;
     div.addEventListener('customPointerEnter', mouseEnter);
     div.addEventListener('customPointerLeave', mouseLeave);
@@ -206,7 +206,7 @@ const GridSquare = ({
   }, [pathVal]);
 
   const animationEnd = (event: React.AnimationEvent<HTMLDivElement>) => {
-    let animation_name = event.animationName;
+    const animation_name = event.animationName;
     const tile = tileRef.current;
     if (!tile) return;
     if (animation_name === 'just_pop') {
@@ -222,7 +222,7 @@ const GridSquare = ({
   };
 
   const clicked = () => {
-    let dragVal = dragValRef.current;
+    const dragVal = dragValRef.current;
     if (dragVal === 1 || dragVal === 2) {
       if ((val === 1 || val === 2) && val !== dragVal) return null;
       if (
@@ -256,7 +256,7 @@ const GridSquare = ({
     toggled.current = false;
   };
   const mouseEnter = (event: any) => {
-    let dragVal = dragValRef.current;
+    const dragVal = dragValRef.current;
     if (event.detail.buttons) {
       if (dragVal === 3) setPathVal(() => 4);
       if (dragVal === val || dragVal === 1 || dragVal === 2) clicked();

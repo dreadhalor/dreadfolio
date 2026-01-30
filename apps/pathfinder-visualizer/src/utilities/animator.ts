@@ -58,13 +58,13 @@ export class Animator {
     this.play_finish = false;
   };
   animationLoop(frames_per_refresh = 1) {
-    let calculated_local_delay =
+    const calculated_local_delay =
       frames_per_refresh < 1 ? Math.floor(1 / frames_per_refresh) : 0;
-    let final_local_delay = this.delay || calculated_local_delay;
-    let fpr = frames_per_refresh >= 1 ? frames_per_refresh : 1;
-    let animations = this.animation_queue.splice(0, fpr);
+    const final_local_delay = this.delay || calculated_local_delay;
+    const fpr = frames_per_refresh >= 1 ? frames_per_refresh : 1;
+    const animations = this.animation_queue.splice(0, fpr);
     if (animations.length > 0) {
-      for (let animation of animations) if (animation) animation();
+      for (const animation of animations) if (animation) animation();
       if (final_local_delay) {
         setTimeout(
           () =>
@@ -76,8 +76,8 @@ export class Animator {
     } else if (this.play_finish) this.complete?.();
   }
   openAnimationLoop(frames_per_refresh = 1) {
-    let animations = this.animation_queue.splice(0, frames_per_refresh);
-    for (let animation of animations) if (animation) animation();
+    const animations = this.animation_queue.splice(0, frames_per_refresh);
+    for (const animation of animations) if (animation) animation();
     if (this.open_queue)
       requestAnimationFrame(() => this.openAnimationLoop(frames_per_refresh));
     else this.animationLoop(frames_per_refresh);

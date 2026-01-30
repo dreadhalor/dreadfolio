@@ -3,17 +3,17 @@ import { GridSet } from './data-structures/grid-set';
 import { getDimensions } from './maze-structures';
 
 export const finishAnimation = (grid: Square[][]) => {
-  let animation_queue = [];
-  let { rows, cols } = getDimensions(grid);
+  const animation_queue = [];
+  const { rows, cols } = getDimensions(grid);
   for (let i = 0; i < rows; i++) {
-    let finish_animation = [];
+    const finish_animation = [];
     for (let j = 0; j < cols; j++) {
-      let tile = grid[i]?.[j];
+      const tile = grid[i]?.[j];
       if (!tile) continue;
       finish_animation.push(() => tile.animate!(2));
     }
     animation_queue.push(() => {
-      for (let animation of finish_animation) animation();
+      for (const animation of finish_animation) animation();
     });
   }
   return animation_queue;
@@ -23,7 +23,7 @@ export const clearScanAnimationGenerator =
   (grid: Square[][]) => (path_set: Set<Coordinates> | GridSet) => {
     for (let i = 0; i < grid.length; i++) {
       for (let j = 0; j < grid[0]!.length; j++) {
-        let tile = grid[i]![j]!;
+        const tile = grid[i]![j]!;
         if (tile.val === 5 || tile.val === 6 || tile.val === 7) {
           if (tile.val === 6 || tile.val === 7) {
             tile.setVal!(() => 0);
@@ -37,7 +37,7 @@ export const clearScanAnimationGenerator =
 export const animationGenerator =
   (grid: Square[][], animation: (tile: Square, params: any) => void) =>
   ([r, c]: Coordinates, params: any | undefined = undefined) => {
-    let tile = grid[r]![c];
+    const tile = grid[r]![c];
     if (!tile) {
       console.error(`Tile at [${r}, ${c}] is undefined.`);
       return;

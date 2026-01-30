@@ -185,9 +185,9 @@ export const aStar = ({
   let path_node = end;
   let child = null;
   while (path_node) {
-    let [r, c] = path_node;
-    let parent = pathMap.get(path_node) ?? null;
-    let direction = getDirection({ node: path_node, child });
+    const [r, c] = path_node;
+    const parent = pathMap.get(path_node) ?? null;
+    const direction = getDirection({ node: path_node, child });
     const animCoords = maze[r]?.[c];
     if (!animCoords) continue;
     animations.push(() => {

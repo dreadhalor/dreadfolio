@@ -11,18 +11,18 @@ import {
 import { coinFlips, pickN } from '../randomizers';
 
 export const ellers = (grid: Square[][]) => {
-  let anim_params = ellersAnimations(grid);
-  let { displayValAnimation } = anim_params;
-  let animations = [];
-  let rows = getPathNodesByRow(grid);
-  let selected_edges: [Coordinates, Coordinates][] = [];
-  let sets = new GridUnionFind();
+  const anim_params = ellersAnimations(grid);
+  const { displayValAnimation } = anim_params;
+  const animations = [];
+  const rows = getPathNodesByRow(grid);
+  const selected_edges: [Coordinates, Coordinates][] = [];
+  const sets = new GridUnionFind();
   for (let i = 0; i < rows.length; i++) {
-    let last_row = i === rows.length - 1;
-    let row = rows[i]!;
+    const last_row = i === rows.length - 1;
+    const row = rows[i]!;
     //add current row for generation (GridUnionFind is coded to ignore duplicates)
     sets.addMultiple(row);
-    let horizontal_edges = horizontals({
+    const horizontal_edges = horizontals({
       row,
       sets,
       edges: selected_edges,
@@ -30,7 +30,7 @@ export const ellers = (grid: Square[][]) => {
       animations,
       anim_params,
     });
-    let vertical_edges = verticals({
+    const vertical_edges = verticals({
       horizontal_edges,
       sets,
       edges: selected_edges,
@@ -38,17 +38,17 @@ export const ellers = (grid: Square[][]) => {
       animations,
       anim_params,
     });
-    let row_edges: [Coordinates, Coordinates] = [row[0]!, row[row.length - 1]!];
-    let full_row = expandEdge(row_edges);
-    let nodes = new GridSet(full_row);
-    for (let [[p_r, p_c], [c_r, c_c]] of vertical_edges)
+    const row_edges: [Coordinates, Coordinates] = [row[0]!, row[row.length - 1]!];
+    const full_row = expandEdge(row_edges);
+    const nodes = new GridSet(full_row);
+    for (const [[p_r, p_c], [c_r, c_c]] of vertical_edges)
       nodes.add([(p_r + c_r) / 2, (p_c + c_c) / 2]);
     animations.push(() => {
-      for (let node of nodes.toArray()) displayValAnimation(node, null);
+      for (const node of nodes.toArray()) displayValAnimation(node, null);
     });
     sets.removeMultiple(row);
   }
-  let result = getFullEdges(selected_edges).flat(1);
+  const result = getFullEdges(selected_edges).flat(1);
   return { result, animations };
 };
 
@@ -68,27 +68,27 @@ const horizontals = ({
   animations: (() => void)[];
   anim_params: any;
 }) => {
-  let { displayValAnimation, connectAnimation } = anim_params;
+  const { displayValAnimation, connectAnimation } = anim_params;
   // let count = 0;
-  let added_edges: [Coordinates, Coordinates][] = [];
-  let sets_copy = new GridUnionFind().transferData(sets.transferData());
+  const added_edges: [Coordinates, Coordinates][] = [];
+  const sets_copy = new GridUnionFind().transferData(sets.transferData());
   for (let j = 0; j < row.length; j++) {
-    let displayVal = sets_copy.find(row[j]!);
+    const displayVal = sets_copy.find(row[j]!);
     traverse(row[j]!, animations, (tile) => {
       displayValAnimation(tile, displayVal);
       connectAnimation(tile);
     });
   }
   for (let j = 0; j < row.length - 1; j++) {
-    let flip = coinFlips(1);
-    let n1 = row[j]!,
+    const flip = coinFlips(1);
+    const n1 = row[j]!,
       n2 = row[j + 1]!;
-    let connected = sets.connected(n1, n2);
+    const connected = sets.connected(n1, n2);
     if (!connected && (last_row || flip)) {
       sets.union(n1, n2);
       edges.push([n1, n2]);
       added_edges.push([n1, n2]);
-      let whatever = sets.find(n1);
+      const whatever = sets.find(n1);
       connectFullEdge(n1, n2, animations, (tile) => {
         displayValAnimation(tile, whatever);
         connectAnimation(tile);
@@ -115,20 +115,20 @@ const verticals = ({
   animations: (() => void)[];
   anim_params: any;
 }) => {
-  let { displayValAnimation, connectAnimation } = anim_params;
+  const { displayValAnimation, connectAnimation } = anim_params;
   // let count = 0;
-  let added_edges: [Coordinates, Coordinates][] = [];
+  const added_edges: [Coordinates, Coordinates][] = [];
   if (last_row) return added_edges;
-  for (let set of sets.sets()) {
-    let flip = coinFlips(set.length);
-    let downpath_parents = pickN(set, flip || 1);
+  for (const set of sets.sets()) {
+    const flip = coinFlips(set.length);
+    const downpath_parents = pickN(set, flip || 1);
 
-    let full_set = new GridSet([...set]);
+    const full_set = new GridSet([...set]);
     let set_id, whatever: number | null;
 
-    for (let parent of downpath_parents) {
-      let [r, c] = parent;
-      let child = [r + 2, c] satisfies Coordinates;
+    for (const parent of downpath_parents) {
+      const [r, c] = parent;
+      const child = [r + 2, c] satisfies Coordinates;
       sets.add(child);
       sets.union(parent, child);
       edges.push([parent, child]);
@@ -136,17 +136,17 @@ const verticals = ({
       whatever = sets.find(parent)!;
       set_id = sets.find(parent);
 
-      let edge = expandEdge([parent, child]);
+      const edge = expandEdge([parent, child]);
       full_set.addMultiple(edge);
 
       // count++;
     }
-    for (let [n1, n2] of horizontal_edges) {
+    for (const [n1, n2] of horizontal_edges) {
       if (JSON.stringify(set).includes(JSON.stringify(n1))) {
-        let expanded = expandEdge([n1, n2]);
+        const expanded = expandEdge([n1, n2]);
         let match = false;
-        for (let node of expanded) {
-          let displayVal = sets.find(node);
+        for (const node of expanded) {
+          const displayVal = sets.find(node);
           if (displayVal !== set_id) match = true;
           if (match) full_set.add(node);
         }
@@ -154,7 +154,7 @@ const verticals = ({
     }
 
     animations.push(() => {
-      for (let node of full_set.toArray()) {
+      for (const node of full_set.toArray()) {
         displayValAnimation(node, whatever);
         connectAnimation(node);
       }

@@ -12,12 +12,12 @@ import { PathList } from '../data-structures/path-list';
 import { getFullEdges, getMazeAdjacencyList } from '../maze-structures';
 
 export const recursiveBacktracking = (grid: Square[][]) => {
-  let params = parseParams(grid);
+  const params = parseParams(grid);
   while (params.node) {
     params.node = walk(params);
     params.node = backtrack(params);
   }
-  let result = getFullEdges(params.edges.realEntries()).flat(1);
+  const result = getFullEdges(params.edges.realEntries()).flat(1);
   return { result, animations: params.animation_queue };
 };
 
@@ -34,9 +34,9 @@ const backtrack = ({
 }: BacktrackParams) => {
   while (node) {
     //check if we can start a new walk
-    let next = getRandomUnvisitedNeighbor(node, adjacency_list, visited);
+    const next = getRandomUnvisitedNeighbor(node, adjacency_list, visited);
     if (next) return node; //can start a new walk
-    let parent = edges.get(node); //attempt to continue backtracking
+    const parent = edges.get(node); //attempt to continue backtracking
     if (parent) {
       //has parent, traverse backwards to their node
       traverseEdgeBackwards(node, parent, animation_queue, backtrackAnimation);
@@ -51,7 +51,7 @@ const backtrack = ({
 };
 
 function parseParams(grid: Square[][]) {
-  let params = {
+  const params = {
     node: null as Coordinates | null,
     animations: [],
     adjacency_list: getMazeAdjacencyList(grid),

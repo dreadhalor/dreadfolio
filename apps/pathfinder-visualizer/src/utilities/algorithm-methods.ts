@@ -27,7 +27,7 @@ export const walk = ({
   while (node) {
     visited.add(node);
     //check for next node in the walk
-    let next = getRandomUnvisitedNeighbor(node, adjacency_list, visited);
+    const next = getRandomUnvisitedNeighbor(node, adjacency_list, visited);
     if (next) {
       //next node exists, let's walk to it
       edges.set(next, node);
@@ -68,7 +68,7 @@ export function traverseEdgeForward(
   animations: (() => void)[],
   animation: (node: Coordinates) => void,
 ) {
-  let edge = expandEdge([n1, n2]);
+  const edge = expandEdge([n1, n2]);
   for (let i = 1; i < edge.length; i++) {
     const next = edge[i];
     if (next === undefined) continue;
@@ -81,7 +81,7 @@ export function traverseEdgeBackwards(
   animations: (() => void)[],
   animation: (node: Coordinates) => void,
 ) {
-  let edge = expandEdge([n1, n2]);
+  const edge = expandEdge([n1, n2]);
   for (let i = 0; i < edge.length - 1; i++) {
     const next = edge[i];
     if (next === undefined) continue;
@@ -94,7 +94,7 @@ export function traverseFullEdge(
   animations: (() => void)[],
   animation: (node: Coordinates) => void,
 ) {
-  let edge = expandEdge([n1, n2]);
+  const edge = expandEdge([n1, n2]);
   for (let i = 0; i < edge.length; i++) {
     const next = edge[i];
     if (next === undefined) continue;
@@ -108,9 +108,9 @@ export const connectFullEdge = (
   animations: (() => void)[],
   connectAnimation: (node: Coordinates) => void,
 ) => {
-  let edge = expandEdge([n1, n2]);
+  const edge = expandEdge([n1, n2]);
   animations.push(() => {
-    for (let node of edge) connectAnimation(node);
+    for (const node of edge) connectAnimation(node);
   });
 };
 export const connectEdgeBackwards = (
@@ -119,7 +119,7 @@ export const connectEdgeBackwards = (
   animations: (() => void)[],
   connectAnimation: (node: Coordinates) => void,
 ) => {
-  let edge = expandEdge([n1, n2]);
+  const edge = expandEdge([n1, n2]);
   animations.push(() => {
     for (let i = 0; i < edge.length - 1; i++) {
       const next = edge[i];
@@ -136,11 +136,11 @@ export const getDirection = ({
   node: Coordinates;
   child: Coordinates | null;
 }) => {
-  let [r, c] = node;
+  const [r, c] = node;
   let node_to_parent = null;
   if (child) {
-    let [c_r, c_c] = child;
-    let diff = [r - c_r, c - c_c];
+    const [c_r, c_c] = child;
+    const diff = [r - c_r, c - c_c];
     if (diff[0] === 1) node_to_parent = '↑';
     else if (diff[0] === -1) node_to_parent = '↓';
     else if (diff[1] === 1) node_to_parent = '←';

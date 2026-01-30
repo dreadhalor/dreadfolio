@@ -10,21 +10,21 @@ import {
 } from '../maze-structures';
 
 export const prims = (grid: Square[][]) => {
-  let animations = new Array<() => void>();
-  let { frontierAnimation, connectAnimation } = primsAnimations(grid);
+  const animations = new Array<() => void>();
+  const { frontierAnimation, connectAnimation } = primsAnimations(grid);
   const adjacency_list = getMazeAdjacencyList(grid);
-  let edges = new PathList();
-  let visited = new GridSet();
-  let frontier = new GridSet().add(adjacency_list.getRandom()!);
+  const edges = new PathList();
+  const visited = new GridSet();
+  const frontier = new GridSet().add(adjacency_list.getRandom()!);
   let next = null;
   let connector = null;
   while (frontier.size() > 0) {
     next = frontier.popRandom();
     if (!next) continue;
     visited.add(next);
-    let neighbors = adjacency_list.get(next);
+    const neighbors = adjacency_list.get(next);
     if (!neighbors) continue;
-    let unvisited = neighbors.filter((node) => !visited.has(node));
+    const unvisited = neighbors.filter((node) => !visited.has(node));
     connector = getRandomVisitedNeighbor(next, adjacency_list, visited);
     if (connector)
       connect(next, connector, edges, animations, connectAnimation);
@@ -40,10 +40,10 @@ function addToFrontier(
   animations: (() => void)[],
   frontierAnimation: (coords: Coordinates) => void,
 ) {
-  let added = frontier.addMultiple(nodes);
+  const added = frontier.addMultiple(nodes);
   if (frontierAnimation)
     animations.push(() => {
-      for (let node of added) frontierAnimation(node);
+      for (const node of added) frontierAnimation(node);
     });
 }
 function connect(
@@ -54,10 +54,10 @@ function connect(
   connectAnimation: (coords: Coordinates) => void,
 ) {
   edges.set(n1, n2);
-  let edge = expandEdge([n1, n2]);
+  const edge = expandEdge([n1, n2]);
   if (connectAnimation) {
     animations.push(() => {
-      for (let node of edge) connectAnimation(node);
+      for (const node of edge) connectAnimation(node);
     });
   }
 }
