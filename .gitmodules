@@ -7,9 +7,6 @@
 [submodule "apps/portfolio"]
 	path = apps/portfolio
 	url = https://github.com/Dreadhalor/portfolio
-[submodule "apps/su-done-ku"]
-	path = apps/su-done-ku
-	url = https://github.com/Dreadhalor/su-done-ku
 [submodule "apps/fallcrate"]
 	path = apps/fallcrate
 	url = https://github.com/dreadhalor/fallcrate
