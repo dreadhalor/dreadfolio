@@ -25,22 +25,22 @@ export function DatePickerCardDemo() {
 
   return (
     <Card>
-      <CardHeader className='space-y-1'>
+      <CardHeader className='flex flex-col gap-1'>
         <CardTitle>Date Filter</CardTitle>
         <CardDescription>Filter your leads by date</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='flex flex-col space-y-4'>
+        <div className='flex flex-col gap-4'>
           <RadioGroup
             className='mb-1 grid grid-cols-2'
             defaultValue={mode}
             onValueChange={updateMode}
           >
-            <div className='flex items-center space-x-2'>
+            <div className='flex items-center gap-2'>
               <RadioGroupItem value='single' id='single' />
               <Label htmlFor='single'>Single date</Label>
             </div>
-            <div className='flex items-center space-x-2'>
+            <div className='flex items-center gap-2'>
               <RadioGroupItem value='range' id='range' />
               <Label htmlFor='range'>Date range</Label>
             </div>

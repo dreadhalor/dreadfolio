@@ -44,14 +44,14 @@ export function NotificationsDemo() {
           {notificationOptions.map(({ icon: Icon, title, description }) => (
             <Label
               className={cn(
-                'hover:bg-accent hover:text-accent-foreground -mx-2 flex cursor-pointer items-start space-x-4 rounded-md p-2 transition-all',
+                'hover:bg-accent hover:text-accent-foreground -mx-2 flex cursor-pointer items-start gap-4 rounded-md p-2 transition-all',
                 '[&:has([data-state=checked])]:bg-accent [&:has([data-state=checked])]:text-accent-foreground',
               )}
               key={title}
             >
               <RadioGroupItem value={title.toLowerCase()} className='sr-only' />
               <Icon className='mt-px h-5 w-5' />
-              <div className='space-y-1'>
+              <div className='flex flex-col gap-1'>
                 <p className='text-sm font-medium leading-none'>{title}</p>
                 <p className='text-muted-foreground text-sm'>{description}</p>
               </div>

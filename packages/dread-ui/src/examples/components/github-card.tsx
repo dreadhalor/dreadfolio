@@ -28,8 +28,8 @@ export function GithubCardDemo() {
   const [inspirationChecked, setInspirationChecked] = useState(true);
   return (
     <Card>
-      <CardHeader className='grid grid-cols-[1fr_110px] items-start gap-4 space-y-0'>
-        <div className='space-y-1'>
+      <CardHeader className='grid grid-cols-[1fr_110px] items-start gap-4 gap-0'>
+        <div className='flex flex-col gap-1'>
           <CardTitle>dread-ui</CardTitle>
           <CardDescription>
             Beautifully designed components built with shadcn/ui, Radix UI &
@@ -86,7 +86,7 @@ export function GithubCardDemo() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className='text-muted-foreground flex space-x-4 text-sm'>
+        <div className='text-muted-foreground flex gap-4 text-sm'>
           <div className='flex items-center'>
             <CircleIcon className='mr-1 h-3 w-3 fill-sky-400 text-sky-400' />
             TypeScript

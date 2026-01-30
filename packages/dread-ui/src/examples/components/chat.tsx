@@ -37,7 +37,7 @@ export function ChatDemo() {
   return (
     <Card>
       <CardHeader className='flex flex-row items-center'>
-        <div className='flex items-center space-x-4'>
+        <div className='flex items-center gap-4'>
           <Avatar>
             <AvatarImage
               src={getRandomAvatar('Taylor Johannson')}
@@ -54,7 +54,7 @@ export function ChatDemo() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className='space-y-4'>
+        <div className='flex flex-col gap-4'>
           {messages.map((message, index) => (
             <div
               key={index}
@@ -85,7 +85,7 @@ export function ChatDemo() {
             ]);
             event.currentTarget.message.value = '';
           }}
-          className='flex w-full items-center space-x-2'
+          className='flex w-full items-center gap-2'
         >
           <Input
             id='message'

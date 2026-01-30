@@ -52,14 +52,14 @@ export function RecentSalesDemo() {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className='space-y-8'>
+      <CardContent className='flex flex-col gap-8'>
         {recentSales.map(({ name, initials, email, amount }) => (
           <div className='flex items-center' key={initials}>
             <Avatar className='h-9 w-9'>
               <AvatarImage src={getRandomAvatar(name)} alt={name} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <div className='ml-4 space-y-1'>
+            <div className='ml-4 flex flex-col gap-1'>
               <p className='text-sm font-medium leading-none'>{name}</p>
               <p className='text-muted-foreground text-sm'>{email}</p>
             </div>

@@ -14,7 +14,7 @@ import {
 export function CreateAccountDemo() {
   return (
     <Card>
-      <CardHeader className='space-y-1'>
+      <CardHeader className='flex flex-col gap-1'>
         <CardTitle>Create an account</CardTitle>
         <CardDescription>
           Enter your email below to create your account

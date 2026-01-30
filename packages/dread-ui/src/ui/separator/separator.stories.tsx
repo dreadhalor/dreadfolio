@@ -20,14 +20,14 @@ type Story = StoryObj<typeof Separator>;
 export const Default: Story = {
   render: (args) => (
     <div className='w-max'>
-      <div className='space-y-1'>
+      <div className='gap-1'>
         <p className='font-medium leading-5'>Radix Primitives</p>
         <p className='text-muted-foreground'>
           An open-source UI component library.
         </p>
       </div>
       <Separator className='my-4' {...args} />
-      <div className='flex h-5 items-center space-x-4'>
+      <div className='flex h-5 items-center gap-4'>
         <p>Blog</p>
         <Separator orientation='vertical' {...args} />
         <p>Docs</p>
@@ -40,7 +40,7 @@ export const Default: Story = {
 
 export const Horizontal: Story = {
   render: (args) => (
-    <div className='flex w-max flex-col items-center space-y-4'>
+    <div className='flex w-max flex-col items-center gap-4'>
       <p>Item 1</p>
       <Separator {...args} />
       <p>Item 2</p>
@@ -52,7 +52,7 @@ export const Horizontal: Story = {
 
 export const Vertical: Story = {
   render: (args) => (
-    <div className='flex h-5 flex-row items-center space-x-4'>
+    <div className='flex h-5 flex-row items-center gap-4'>
       <p>Item 1</p>
       <Separator orientation='vertical' {...args} />
       <p>Item 2</p>

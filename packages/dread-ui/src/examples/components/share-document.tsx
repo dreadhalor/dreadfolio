@@ -27,18 +27,18 @@ export function ShareDocumentDemo() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='flex space-x-2'>
+        <div className='flex gap-2'>
           <Input value='http://example.com/link/to/document' readOnly />
           <Button variant='secondary' className='shrink-0'>
             Copy Link
           </Button>
         </div>
         <Separator className='my-4' />
-        <div className='space-y-4'>
+        <div className='flex flex-col gap-4'>
           <h4 className='text-sm font-medium'>People with access</h4>
           <div className='grid gap-6'>
-            <div className='flex min-w-0 items-center justify-between space-x-4'>
-              <div className='flex min-w-0 items-center space-x-4'>
+            <div className='flex min-w-0 items-center justify-between gap-4'>
+              <div className='flex min-w-0 items-center gap-4'>
                 <Avatar>
                   <AvatarImage
                     src='https://github.com/dreadhalor.png'
@@ -65,8 +65,8 @@ export function ShareDocumentDemo() {
                 </SelectContent>
               </Select>
             </div>
-            <div className='flex items-center justify-between space-x-4'>
-              <div className='flex items-center space-x-4'>
+            <div className='flex items-center justify-between gap-4'>
+              <div className='flex items-center gap-4'>
                 <Avatar>
                   <AvatarImage
                     src='https://github.com/shadcn.png'
@@ -93,8 +93,8 @@ export function ShareDocumentDemo() {
                 </SelectContent>
               </Select>
             </div>
-            <div className='flex items-center justify-between space-x-4'>
-              <div className='flex items-center space-x-4'>
+            <div className='flex items-center justify-between gap-4'>
+              <div className='flex items-center gap-4'>
                 <Avatar>
                   <AvatarImage
                     src='https://github.com/t3dotgg.png'

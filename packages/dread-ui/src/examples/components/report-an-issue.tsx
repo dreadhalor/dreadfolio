@@ -69,7 +69,7 @@ export function ReportAnIssueDemo() {
           />
         </div>
       </CardContent>
-      <CardFooter className='justify-between space-x-2'>
+      <CardFooter className='justify-between gap-2'>
         <Button variant='ghost'>Cancel</Button>
         <Button>Submit</Button>
       </CardFooter>

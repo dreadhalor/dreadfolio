@@ -27,7 +27,7 @@ export const Demo: Story = {
       <PopoverTrigger>Click me!</PopoverTrigger>
       <PopoverContent className='w-[340px]'>
         <div className='grid gap-4'>
-          <div className='space-y-2'>
+          <div className='flex flex-col gap-2'>
             <h4 className='font-medium leading-none'>Dimensions</h4>
             <p className='text-muted-foreground'>
               Set the dimensions for the layer.
@@ -80,7 +80,7 @@ export const CustomTrigger: Story = {
       </PopoverTrigger>
       <PopoverContent className='w-[340px]'>
         <div className='grid gap-4'>
-          <div className='space-y-2'>
+          <div className='flex flex-col gap-2'>
             <h4 className='font-medium leading-none'>Dimensions</h4>
             <p className='text-muted-foreground'>
               Set the dimensions for the layer.

@@ -28,7 +28,7 @@ export const Demo: Story = {
     children: 'Accept terms & conditions',
   },
   render: ({ children }) => (
-    <div className='flex items-center space-x-2'>
+    <div className='flex items-center gap-2'>
       <Checkbox id='terms' />
       <Label htmlFor='terms'>{children}</Label>
     </div>
@@ -52,7 +52,7 @@ export const Disabled: Story = {
     children: 'Accept terms & conditions',
   },
   render: ({ children }) => (
-    <div className='flex items-center space-x-2'>
+    <div className='flex items-center gap-2'>
       <Checkbox id='terms' disabled />
       <Label htmlFor='terms'>{children}</Label>
     </div>

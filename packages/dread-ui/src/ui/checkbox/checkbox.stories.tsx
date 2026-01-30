@@ -21,7 +21,7 @@ type Story = StoryObj<typeof Checkbox>;
 /** A checkbox with some text around it. */
 export const WithText: Story = {
   render: () => (
-    <div className='items-top flex space-x-2'>
+    <div className='items-top flex gap-2'>
       <Checkbox id='terms1' />
       <div className='grid gap-2 leading-none'>
         <Label htmlFor='terms1'>Accept terms & conditions</Label>
@@ -35,7 +35,7 @@ export const WithText: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <div className='flex items-center space-x-2'>
+    <div className='flex items-center gap-2'>
       <Checkbox id='terms2' disabled />
       <Label htmlFor='terms2'>Accept terms & conditions</Label>
     </div>
