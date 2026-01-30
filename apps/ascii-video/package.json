@@ -1,0 +1,30 @@
+{
+  "homepage": "https://dreadhalor.github.io/ascii-video/",
+  "name": "ascii-video",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
+    "dev": "vite",
+    "dev-host": "vite --host",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.179",
+    "@types/p5": "^1.4.0",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "gh-pages": "^5.0.0",
+    "typescript": "^5.3.3",
+    "vite": "^4.3.9"
+  },
+  "dependencies": {
+    "@mediapipe/selfie_segmentation": "^0.1.1675465747",
+    "@tensorflow-models/body-pix": "^2.2.0",
+    "@tensorflow-models/body-segmentation": "^1.0.1",
+    "@tensorflow/tfjs": "^4.7.0",
+    "lodash": "^4.17.21",
+    "p5": "^1.4.1"
+  }
+}

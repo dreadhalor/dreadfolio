@@ -1,0 +1,2 @@
+* when rotated from portrait to clockwise 90 degrees, there's a pretty 50/50 chance that the pixels won't flip. Dunno why, that's some low-level shit
+* look into using webworkers for parallelizing the image processing
