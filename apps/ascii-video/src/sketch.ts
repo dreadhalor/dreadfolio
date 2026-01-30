@@ -15,8 +15,8 @@ const color = true;
 const brighten_amount = 0;
 const greenify = true;
 const pixel_scale = 1.5;
-const draw_raw_feed = true;
-const draw_pixelated_feed = false;
+  const draw_raw_feed = false; // DIAGNOSTIC: Disabled to isolate ASCII rendering
+  const draw_pixelated_feed = false;
 const model = 'body-pix';
 const draw_grid = false;
 const draw_squares = true;
@@ -142,10 +142,17 @@ export const sketch = (p5: p5) => {
         const drawOrder = (window as any).lastDrawOrder || [];
         p5.text(`Draw: ${drawOrder.join(' → ')}`, 10, 50);
         
+        // Show sampled colors to verify we're drawing visible colors
+        if (drawStats.sampledColors && drawStats.sampledColors.length > 0) {
+          const firstColor = drawStats.sampledColors[0];
+          const colorStr = `Color: R${firstColor[0]} G${firstColor[1]} B${firstColor[2]} A${firstColor[3]}`;
+          p5.text(colorStr, 10, 70);
+        }
+        
         // Highlight if very few characters drawn
         if (drawStats.drawn < 100) {
           p5.fill(255, 0, 0); // Red warning
-          p5.text(`⚠️ LOW CHAR COUNT!`, 10, 70);
+          p5.text(`⚠️ LOW CHAR COUNT!`, 10, 90);
         }
       }
     }
@@ -216,6 +223,8 @@ export const sketch = (p5: p5) => {
     
     let drawnCharCount = 0;
     let skippedAlphaZero = 0;
+    const sampledColors: number[][] = [];
+    const sampledFills: number[][] = [];
     
     // Single pass - draw both squares and characters
     for (let x = 0; x < w; x++) {
@@ -243,7 +252,8 @@ export const sketch = (p5: p5) => {
         // Draw ASCII character
         if (draw_chars) {
           const avg = Math.floor((r + g + b) / 3);
-          p5.fill(getFill([r, g, b, a]));
+          const fillColor = getFill([r, g, b, a]);
+          p5.fill(fillColor);
           p5.textSize(scaled_pixel_size);
           p5.textAlign(p5.CENTER, p5.CENTER);
           
@@ -257,6 +267,12 @@ export const sketch = (p5: p5) => {
             start_y + pixel_size * 0.5,
           );
           drawnCharCount++;
+          
+          // Sample first 5 colors for diagnostics
+          if (sampledColors.length < 5) {
+            sampledColors.push([r, g, b, a]);
+            sampledFills.push(Array.isArray(fillColor) ? fillColor : [fillColor, fillColor, fillColor]);
+          }
         }
       }
     }
@@ -271,6 +287,8 @@ export const sketch = (p5: p5) => {
       skipped: skippedAlphaZero,
       total: totalPixels,
       percentage: drawnPercentage.toFixed(1),
+      sampledColors, // Input pixel colors
+      sampledFills, // Actual fill colors used
     };
   }
   function getFill([r, g, b, a]: [number, number, number, number]) {
