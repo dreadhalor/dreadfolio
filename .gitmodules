@@ -1,9 +1,6 @@
 [submodule "apps/pathfinder-visualizer"]
 	path = apps/pathfinder-visualizer
 	url = https://github.com/dreadhalor/pathfinder-visualizer
-[submodule "apps/minesweeper"]
-	path = apps/minesweeper
-	url = https://github.com/Dreadhalor/minesweeper
 [submodule "apps/ascii-video"]
 	path = apps/ascii-video
 	url = https://github.com/Dreadhalor/ascii-video
