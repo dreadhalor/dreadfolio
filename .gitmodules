@@ -4,9 +4,6 @@
 [submodule "apps/minesweeper"]
 	path = apps/minesweeper
 	url = https://github.com/Dreadhalor/minesweeper
-[submodule "apps/enlight"]
-	path = apps/enlight
-	url = https://github.com/Dreadhalor/enlight
 [submodule "apps/ascii-video"]
 	path = apps/ascii-video
 	url = https://github.com/Dreadhalor/ascii-video
