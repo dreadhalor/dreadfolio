@@ -107,7 +107,7 @@ const Minesweeper = () => {
     return () => {
       if (timer) clearInterval(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [status]);
 
   const clickCell = (row: number, col: number) => {
@@ -279,7 +279,7 @@ const Minesweeper = () => {
     return () => {
       window.removeEventListener('pointerup', mouseup);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   return (

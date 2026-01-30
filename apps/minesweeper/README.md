@@ -1,117 +1,347 @@
-# Iiiiit's Minesweeper!
+# Minesweeper
+
+**Classic Windows Minesweeper recreation with authentic retro UI and modern React architecture**
 
 ![App Screenshot](./src/assets/screenshot.webp)
 
-[View Demo](https://scottjhetrick.com/#/minesweeper)
+[View Live Demo](https://scottjhetrick.com/minesweeper/)
 
-Welcome to **Minesweeper**, a sophisticated and feature-rich implementation of the classic Minesweeper game built using React and Vite. This application is an integral part of a larger monorepo, leveraging shared systems such as the **dread-ui** component library and an **Achievements System** to enhance functionality and user engagement.
+Minesweeper is a sophisticated, pixel-perfect recreation of the classic Windows Minesweeper game, built with React, TypeScript, and modern web technologies. Features draggable windows, an achievements system, and an authentic Windows XP-style desktop experience.
 
-## Table of Contents
+---
 
-- [Features](#features)
-- [Architecture](#architecture)
-  - [Component Structure](#component-structure)
-  - [State Management](#state-management)
-  - [Context Providers](#context-providers)
-  - [Integration with Shared Systems](#integration-with-shared-systems)
-- [Technologies](#technologies)
-- [Key Components](#key-components)
-  - [Grid and Cells](#grid-and-cells)
-  - [Score Bar](#score-bar)
-  - [Taskbar](#taskbar)
-  - [Window Management](#window-management)
-  - [Achievements System](#achievements-system)
-- [Best Practices](#best-practices)
+## ✨ Features
 
-## Features
+- **🎮 Classic Gameplay**: Authentic Minesweeper mechanics with mine flagging, timer, and score tracking
+- **🖥️ Windows XP Desktop**: Full desktop environment with taskbar, draggable windows, and start menu
+- **🏆 Achievements System**: Unlock achievements based on gameplay performance
+- **📐 Multiple Difficulty Levels**: Beginner (9x9), Intermediate (16x16), and Expert (30x16)
+- **🪟 Multi-Instance Support**: Open and manage multiple game windows simultaneously
+- **⏱️ Real-Time Timer**: Track your solve time with an authentic 7-segment display
+- **💣 Mine Counter**: Visual mine counter shows remaining mines
+- **🖱️ Drag & Drop**: Fully draggable and resizable game windows
+- **📱 Responsive Design**: Adapts to different screen sizes
+- **🎨 Pixel-Perfect UI**: Authentic Windows Minesweeper visual assets
 
-- **Classic Minesweeper Gameplay**: Engage with the timeless challenge of clearing mines without detonating any.
-- **Responsive Design**: Optimized for various screen sizes and devices to ensure a seamless gaming experience.
-- **Drag-and-Drop Windows**: Manage multiple game instances with draggable and focusable windows for enhanced multitasking.
-- **Achievements System**: Unlock achievements based on your gameplay performance, fostering a sense of accomplishment.
-- **Taskbar Integration**: Easily navigate between open game windows using an intuitive taskbar interface.
-- **Customizable Difficulty**: Choose between Beginner, Intermediate, and Expert levels to match your skill level.
-- **Real-Time Timer and Mine Counter**: Keep track of your progress with a dynamic timer and mine counter.
-- **Interactive UI Components**: Built with the reusable **dread-ui** component library for consistent and maintainable UI elements.
+---
 
-## Architecture
+## 🛠️ Tech Stack
 
-**Minesweeper** is thoughtfully architected to ensure scalability, maintainability, and seamless integration within the monorepo environment. Below is an overview of its architectural components and design principles.
+- **Framework**: React 18
+- **Language**: TypeScript
+- **Build Tool**: Vite 5
+- **Styling**: Tailwind CSS, SCSS
+- **UI Components**: dread-ui (custom component library)
+- **Gesture Handling**: @use-gesture/react (for draggable windows)
+- **UUID Generation**: uuid v9
+- **Linting**: ESLint with TypeScript support
+- **Type Checking**: TypeScript 5.2.2
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js >= 18
+- pnpm >= 8.15.1
+
+### Installation
+
+```bash
+# From the monorepo root
+cd apps/minesweeper
+
+# Install dependencies (or from root: pnpm install)
+pnpm install
+
+# Start development server
+pnpm dev
+```
+
+The app will be available at `http://localhost:5173/minesweeper/`
+
+---
+
+## 📦 Available Scripts
+
+```bash
+# Development
+pnpm dev          # Start dev server with hot reload
+
+# Building
+pnpm build        # Build for production
+
+# Linting
+pnpm lint         # Run ESLint checks
+
+# Preview
+pnpm preview      # Preview production build locally
+```
+
+---
+
+## 🏗️ Project Structure
+
+```
+minesweeper/
+├── src/
+│   ├── components/
+│   │   ├── icon.tsx                      # Desktop icon component
+│   │   ├── minesweeper/
+│   │   │   ├── components/
+│   │   │   │   ├── grid/
+│   │   │   │   │   ├── cell.tsx          # Individual game cell
+│   │   │   │   │   ├── cell.scss         # Cell styles
+│   │   │   │   │   └── grid.tsx          # Game grid container
+│   │   │   │   └── score-bar/
+│   │   │   │       ├── digit-display.tsx # 7-segment display
+│   │   │   │       ├── score-bar.tsx     # Game stats bar
+│   │   │   │       └── smile-button.tsx  # Reset button
+│   │   │   ├── game-menu.tsx             # Game difficulty menu
+│   │   │   ├── minesweeper.tsx           # Main game component
+│   │   │   └── minesweeper.scss          # Game styles
+│   │   ├── taskbar/
+│   │   │   ├── taskbar.tsx               # Windows-style taskbar
+│   │   │   ├── taskbar-window.tsx        # Taskbar window buttons
+│   │   │   ├── taskbar-time.tsx          # Clock display
+│   │   │   └── taskbar.scss              # Taskbar styles
+│   │   └── window/
+│   │       ├── window.tsx                # Draggable window container
+│   │       ├── header.tsx                # Window title bar
+│   │       ├── window.scss               # Window styles
+│   │       └── header.scss               # Header styles
+│   ├── providers/
+│   │   ├── app-provider.tsx              # Global app state
+│   │   └── minesweeper-provider.tsx      # Game state management
+│   ├── assets/
+│   │   └── minesweeper/
+│   │       ├── cell/                     # Cell state images
+│   │       ├── digits/                   # 7-segment digit images
+│   │       ├── smile/                    # Smiley button states
+│   │       └── minesweeper-icon.png      # Desktop icon
+│   ├── app.tsx                           # Main app component
+│   ├── app.scss                          # Global app styles
+│   └── index.scss                        # Root styles
+├── public/
+│   └── icon.svg                          # Favicon
+├── package.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vite.config.ts
+├── tailwind.config.js
+├── postcss.config.js
+├── .eslintrc.cjs
+└── README.md
+```
+
+---
+
+## 🎮 How to Play
+
+### Starting a Game
+1. **Double-click** the Minesweeper desktop icon to open the game
+2. The game starts when you click your first cell
+3. Use the **Game** menu to select difficulty
+
+### Game Controls
+- **Left-click**: Reveal a cell
+- **Right-click**: Place/remove a flag
+- **Both buttons** (or middle-click): Quick reveal adjacent cells if flags match number
+
+### Winning
+- Clear all cells without hitting a mine
+- Flag all mines (optional)
+- Beat your best time!
+
+### Difficulty Levels
+- **Beginner**: 9×9 grid, 10 mines
+- **Intermediate**: 16×16 grid, 40 mines
+- **Expert**: 30×16 grid, 99 mines
+
+---
+
+## 🏛️ Architecture
 
 ### Component Structure
 
-The application follows a modular component-based architecture, breaking down the UI into reusable and manageable pieces. Key components include:
+The application follows a modular, component-based architecture:
 
-- **Grid and Cells**: Represent the Minesweeper grid and individual cells, handling game logic and user interactions.
-- **Score Bar**: Displays the mine counter, game timer, and reset button (smiley face).
-- **Taskbar**: Manages open game windows, allowing users to switch between multiple instances.
-- **Window Management**: Handles the creation, dragging, focusing, minimizing, and closing of game windows.
+- **Grid and Cells**: Core game logic and rendering
+- **Score Bar**: Timer, mine counter, and reset button
+- **Window System**: Draggable windows with focus management
+- **Taskbar**: Desktop-style task management
+- **Desktop**: Icon grid and window positioning
 
 ### State Management
 
-State within the application is managed using React's built-in state hooks and context providers. This ensures a predictable and centralized state flow, making it easier to manage complex interactions and data sharing between components.
+State is managed through React Context providers:
+
+1. **AppProvider**: Global state (open windows, focus, taskbar)
+2. **MinesweeperProvider**: Game state (grid, timer, status, achievements)
 
 ### Context Providers
 
-Two primary context providers are utilized:
+```typescript
+// difficultySettings
+beginner: { rows: 9, cols: 9, bombs: 10 }
+intermediate: { rows: 16, cols: 16, bombs: 40 }
+expert: { rows: 30, cols: 16, bombs: 99 }
 
-1. **AppProvider**: Manages global application state, including open apps, focused app, and taskbar interactions.
-2. **MinesweeperProvider**: Handles game-specific state such as grid data, game status, timer, and achievements.
+// GameStatus
+'new' | 'started' | 'won' | 'lost'
+
+// CellType
+{ val: number, isRevealed: boolean, isFlagged: boolean }
+```
 
 ### Integration with Shared Systems
 
-The application integrates seamlessly with shared systems within the monorepo:
+- **dread-ui**: Shared component library (Card, UserMenu, achievements)
+- **Achievements System**: Unlock achievements for gameplay milestones
+- **@repo/config**: Shared Tailwind configuration
+- **@repo/typescript-config**: Shared TypeScript configuration
 
-- **dread-ui**: A reusable component library that provides consistent UI elements across different applications.
-- **Achievements System**: A centralized system that tracks and unlocks achievements based on user interactions and gameplay milestones.
+---
 
-## Technologies
+## 🔧 Configuration
 
-- **React**: Frontend library for building dynamic user interfaces.
-- **Vite**: Fast and lean development tooling for modern web projects.
-- **TypeScript**: Provides static typing to enhance code quality and developer experience.
-- **ESLint**: Ensures code quality and consistency through linting.
-- **Tailwind CSS**: Utility-first CSS framework for rapid UI development.
-- **dread-ui**: Custom component library for shared UI elements from the parent monorepo.
-- **@use-gesture/react**: Handles complex gesture interactions for draggable windows.
-- **uuid**: Generates unique identifiers for managing multiple app instances.
+### TypeScript Configuration
 
-## Key Components
+The project extends the monorepo's base TypeScript config:
 
-### Grid and Cells
+```json
+{
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler"
+  }
+}
+```
 
-- **Grid (`grid.tsx`)**: Manages the overall Minesweeper grid, rendering individual cells and handling interactions.
-- **Cell (`cell.tsx`)**: Represents each cell in the grid, managing its state (hidden, revealed, flagged) and rendering appropriate visuals based on game status.
+### Vite Configuration
 
-### Score Bar
+```typescript
+export default defineConfig({
+  plugins: [react(), tsconfigPaths(), svgr()],
+  base: '/minesweeper/',
+});
+```
 
-- **DigitDisplay (`digit-display.tsx`)**: Displays numerical values (e.g., mine count, timer) using custom digit images for an authentic Minesweeper feel.
-- **ScoreBar (`score-bar.tsx`)**: Integrates the mine counter, timer, and smiley reset button, providing a central HUD for the game.
+### Tailwind Configuration
 
-### Taskbar
+Extends the shared monorepo Tailwind config for consistency.
 
-- **Taskbar (`taskbar.tsx`)**: Mimics a desktop taskbar, displaying open game windows and providing quick navigation.
-- **TaskbarWindow (`taskbar-window.tsx`)**: Represents individual window entries within the taskbar, handling focus and interaction states.
-- **TaskbarTime (`taskbar-time.tsx`)**: Shows the current system time, maintaining a desktop-like experience.
+---
 
-### Window Management
+## 🎨 Visual Assets
 
-- **Window (`window.tsx`)**: Handles the creation and management of draggable game windows, integrating with the **AppProvider** for state management.
-- **Header (`header.tsx`)**: The window's header bar, including the application icon, title, and control buttons (minimize, close).
+### Authentic Windows UI
 
-### Achievements System
+All visual assets are pixel-perfect recreations of classic Windows Minesweeper:
 
-- **useAchievements Hook**: Interfaces with the shared achievements system, unlocking achievements based on user actions and game outcomes.
-- **Achievements Integration**: Embedded within various components to trigger achievement unlocks (e.g., flagging a mine, winning a game).
+- **Cells**: Unopened, flagged, numbers (1-8), mines, explosions
+- **Digits**: 7-segment display for timer and counter (-999 to 999)
+- **Smiley**: Normal, pressed, "ohh!", win, dead states
+- **Icons**: Desktop icons and taskbar buttons
 
-## Best Practices
+---
 
-To ensure a robust and maintainable codebase, the following best practices are adhered to:
+## 🚀 Deployment
 
-1. **Modular Component Design**: Components are designed to be reusable and self-contained, promoting scalability and ease of testing.
-2. **Type Safety with TypeScript**: Leveraging TypeScript interfaces and types to prevent runtime errors and enhance developer experience.
-3. **Centralized State Management**: Utilizing context providers to manage global and game-specific states, ensuring a predictable state flow.
-4. **Separation of Concerns**: Distinct separation between UI components, game logic, and shared systems to maintain clarity and reduce coupling.
-5. **Responsive and Accessible Design**: Ensuring that the UI is both responsive to different screen sizes and accessible to all users.
-6. **Comprehensive Linting and Formatting**: Implementing ESLint and adhering to consistent coding standards to maintain code quality and readability.
-7. **Efficient Asset Management**: Organizing assets systematically, leveraging tools like SVGR for SVG handling to optimize performance and maintainability.
+Minesweeper is deployed as part of the dreadfolio monorepo:
+
+```bash
+# Build for production
+pnpm build
+
+# Output will be in dist/ directory
+# Configured for /minesweeper/ subdirectory deployment
+```
+
+---
+
+## 🎓 Best Practices
+
+This project demonstrates:
+
+1. **Modular Component Design**: Reusable, self-contained components
+2. **Type Safety**: Full TypeScript coverage with strict mode
+3. **Centralized State**: Context-based state management
+4. **Separation of Concerns**: Clear boundaries between UI, logic, and data
+5. **Responsive Design**: Mobile-friendly with desktop experience
+6. **Code Quality**: ESLint, consistent formatting, zero warnings
+7. **Efficient Asset Management**: Optimized image loading and caching
+8. **Gesture Handling**: Smooth drag-and-drop with `@use-gesture/react`
+
+---
+
+## 🏆 Achievements System
+
+The game integrates with the dreadfolio achievements system:
+
+- **First Game**: Play your first game
+- **First Win**: Complete your first game successfully
+- **Speed Demon**: Win a beginner game in under 10 seconds
+- **Minesweeper Master**: Win an expert game
+- **No Flags Needed**: Win without placing any flags
+- **Perfect Clear**: Clear all cells without flagging
+
+---
+
+## 🐛 Known Limitations
+
+- **Touch Support**: Optimized for mouse, basic touch support
+- **Mobile Performance**: May be slower on older mobile devices
+- **Multiple Windows**: Performance may degrade with many open windows
+- **Browser Compatibility**: Requires modern browser with ES2020 support
+
+---
+
+## 🔮 Future Enhancements
+
+### Planned Features
+- [ ] Custom grid sizes and mine counts
+- [ ] High score leaderboard
+- [ ] Replay system
+- [ ] Hints and tutorial mode
+- [ ] Sound effects and music
+- [ ] Themes (Windows 95, Windows 7, Modern)
+- [ ] Multiplayer competitive mode
+- [ ] Mobile-optimized touch controls
+
+### Technical Improvements
+- [ ] Service Worker for offline play
+- [ ] Progressive Web App (PWA) support
+- [ ] Reduced bundle size with code splitting
+- [ ] Improved accessibility (keyboard navigation)
+- [ ] Unit tests for game logic
+- [ ] E2E tests with Playwright
+
+---
+
+## 📝 License
+
+MIT License - See root LICENSE file for details
+
+---
+
+## 👤 Author
+
+**Scott Hetrick**
+- Portfolio: [scottjhetrick.com](https://scottjhetrick.com)
+- GitHub: [@Dreadhalor](https://github.com/Dreadhalor)
+
+---
+
+## 🙏 Acknowledgments
+
+- Inspired by classic Windows Minesweeper
+- Built as part of the [dreadfolio monorepo](https://github.com/Dreadhalor/dreadfolio)
+- Windows XP Bliss wallpaper used with respect for its iconic design
+- Microsoft for creating the original Minesweeper
+
+---
+
+**Clear the mines, beat the clock, and have fun! 💣⏱️**

@@ -24,7 +24,7 @@ const Icon: React.FC<IconProps> = ({
     return () => {
       document.removeEventListener('pointerdown', mousedown);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const { unlockAchievementById } = useAchievements();
