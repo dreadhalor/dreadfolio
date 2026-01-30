@@ -16,17 +16,15 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
+  define: {
+    'global': 'globalThis',
+  },
   optimizeDeps: {
     include: ['long'],
     esbuildOptions: {
       define: {
         global: 'globalThis',
       },
-    },
-  },
-  resolve: {
-    alias: {
-      'long': 'long/dist/long.js',
     },
   },
 });
