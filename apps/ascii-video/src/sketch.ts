@@ -2,6 +2,7 @@ import p5 from 'p5';
 import { CameraProcessor } from './camera-processor';
 import { draw_margin } from './main';
 import { performanceMetrics } from './performance-metrics';
+import { canvasPool } from './canvas-pool';
 
 const density = '@WÑ$9806532ba4c7?1=~"-;:,. ';
 // const density =
@@ -79,31 +80,27 @@ export const sketch = (p5: p5) => {
       if (hasValidPixels) {
         const [pixels_w, pixels_h] = [pixels.length, pixels[0].length];
         
-        // Check if any pixels have alpha > 0 (visible)
-        let visiblePixelCount = 0;
-        for (let x = 0; x < Math.min(pixels_w, 10); x++) {
-          for (let y = 0; y < Math.min(pixels_h, 10); y++) {
-            if (pixels[x][y][3] > 0) visiblePixelCount++;
-          }
-        }
-        
-        if (visiblePixelCount === 0) {
-          console.warn('⚠️ SKIPPED FRAME: All pixels have alpha=0 (invisible)', {
-            pixelsChecked: Math.min(pixels_w * pixels_h, 100),
-          });
-        }
+        const drawOrder: string[] = [];
         
         if (draw_raw_feed) {
           const cropped = video_feed.getCroppedFrame();
-          if (cropped)
+          if (cropped) {
+            drawOrder.push('RAW_FEED');
+            // CRITICAL: Draw the image immediately before it might get reused by canvas pool
+            const boundingBox = getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h);
             p5.drawingContext.drawImage(
               cropped,
-              ...getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h),
+              ...boundingBox,
             );
+            // Release the canvas back to pool immediately after drawing
+            // This prevents the canvas from being modified while we're using it
+            canvasPool.release(cropped);
+          }
         }
         if (draw_pixelated_feed) {
           try {
             const image = video_feed.getProcessedVideoCanvas(draw_w, draw_h);
+            drawOrder.push('PIXELATED');
             p5.drawingContext.drawImage(
               image,
               ...getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h),
@@ -113,7 +110,12 @@ export const sketch = (p5: p5) => {
           }
         }
 
+        drawOrder.push('ASCII_START');
         drawPixels(p5, pixels);
+        drawOrder.push('ASCII_END');
+        
+        // Store draw order for debugging
+        (window as any).lastDrawOrder = drawOrder;
       }
       
       // Draw FPS counter and diagnostics in top-right
@@ -136,10 +138,14 @@ export const sketch = (p5: p5) => {
         const statsText = `Chars: ${drawStats.drawn}/${drawStats.total} (${drawStats.percentage}%)`;
         p5.text(statsText, 10, 30);
         
+        // Show draw order to detect z-index issues
+        const drawOrder = (window as any).lastDrawOrder || [];
+        p5.text(`Draw: ${drawOrder.join(' → ')}`, 10, 50);
+        
         // Highlight if very few characters drawn
         if (drawStats.drawn < 100) {
           p5.fill(255, 0, 0); // Red warning
-          p5.text(`⚠️ LOW CHAR COUNT!`, 10, 50);
+          p5.text(`⚠️ LOW CHAR COUNT!`, 10, 70);
         }
       }
     }
