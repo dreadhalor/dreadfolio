@@ -189,11 +189,17 @@ export const sketch = (p5: p5) => {
 
     p5.noStroke();
     
+    let drawnCharCount = 0;
+    let skippedAlphaZero = 0;
+    
     // Single pass - draw both squares and characters
     for (let x = 0; x < w; x++) {
       for (let y = 0; y < h; y++) {
         const [r, g, b, a] = pixels[x][y];
-        if (a === 0) continue;
+        if (a === 0) {
+          skippedAlphaZero++;
+          continue;
+        }
 
         const start_x = x * pixel_size + x_translate;
         const start_y = y * pixel_size + y_translate;
@@ -225,8 +231,22 @@ export const sketch = (p5: p5) => {
             start_x + pixel_size * 0.5,
             start_y + pixel_size * 0.5,
           );
+          drawnCharCount++;
         }
       }
+    }
+    
+    // Log if we drew very few characters
+    const totalPixels = w * h;
+    const drawnPercentage = (drawnCharCount / totalPixels) * 100;
+    if (drawnCharCount < 100) {
+      console.warn('🎨 FEW CHARACTERS DRAWN:', {
+        drawn: drawnCharCount,
+        skippedAlphaZero,
+        totalPixels,
+        drawnPercentage: drawnPercentage.toFixed(1) + '%',
+        dimensions: `${w}x${h}`,
+      });
     }
   }
   function getFill([r, g, b, a]: [number, number, number, number]) {
