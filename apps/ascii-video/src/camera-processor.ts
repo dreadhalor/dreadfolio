@@ -93,8 +93,8 @@ export class CameraProcessor {
   }
 
   /**
-   * Frame skipping optimization - process ML every N frames, reuse previous result
-   * This can improve framerate 2-3x while maintaining acceptable visual quality
+   * Get pixelated pixels - processes every frame for accurate FPS display
+   * Frame skipping disabled to match visual framerate with counter
    */
   getPixelatedPixels = (max_width: number, max_height: number) => {
     if (this.camera.getVideoElement() && max_width > 0 && max_height > 0) {
@@ -103,16 +103,8 @@ export class CameraProcessor {
           return this.pixels;
         }
         
-        // Frame skipping logic
-        this.frameCounter++;
-        if (this.frameCounter >= this.frameSkipCount) {
-          this.frameCounter = 0;
-          this.pixels = this.getFrame(max_width, max_height);
-          this.lastProcessedPixels = this.pixels;
-        } else {
-          // Reuse last processed frame
-          this.pixels = this.lastProcessedPixels;
-        }
+        // Process every frame - no skipping
+        this.pixels = this.getFrame(max_width, max_height);
       } catch (e) {
         this.pixels = [[]];
       }
