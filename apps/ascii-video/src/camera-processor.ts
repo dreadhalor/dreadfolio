@@ -149,15 +149,25 @@ export class CameraProcessor {
     this.current_frame = cropped;
     
     let potentially_masked = cropped;
+    const hasMaskData = this.mask_frame && this.mask_image_data;
+    
     if (this.previous_frame && (this.bp || this.ss)) {
       // Trigger async mask processing (doesn't block rendering)
       this.processMask();
       
       // Always try to use last valid mask, even if currently processing
       // This prevents blank ASCII frames during ML computation
-      if (this.mask_frame && this.mask_image_data) {
-        const masked = this.maskCanvas(this.mask_frame);
+      if (hasMaskData) {
+        const masked = this.maskCanvas(this.mask_frame!);
         potentially_masked = masked;
+      } else {
+        console.warn('🔴 NO MASK DATA:', {
+          hasMaskFrame: !!this.mask_frame,
+          hasMaskImageData: !!this.mask_image_data,
+          isProcessing: this.processing,
+          hasPreviousFrame: !!this.previous_frame,
+          hasModel: !!(this.bp || this.ss),
+        });
       }
     }
     return this.finishProcessing(potentially_masked);

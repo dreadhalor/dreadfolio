@@ -68,8 +68,30 @@ export const sketch = (p5: p5) => {
       // Check if we have valid pixels before trying to use dimensions
       const hasValidPixels = pixels.length > 0 && pixels[0] && pixels[0].length > 0;
       
+      if (!hasValidPixels) {
+        console.warn('⚠️ SKIPPED FRAME: Invalid pixels', {
+          pixelsLength: pixels.length,
+          firstArrayExists: !!pixels[0],
+          firstArrayLength: pixels[0]?.length || 0,
+        });
+      }
+      
       if (hasValidPixels) {
         const [pixels_w, pixels_h] = [pixels.length, pixels[0].length];
+        
+        // Check if any pixels have alpha > 0 (visible)
+        let visiblePixelCount = 0;
+        for (let x = 0; x < Math.min(pixels_w, 10); x++) {
+          for (let y = 0; y < Math.min(pixels_h, 10); y++) {
+            if (pixels[x][y][3] > 0) visiblePixelCount++;
+          }
+        }
+        
+        if (visiblePixelCount === 0) {
+          console.warn('⚠️ SKIPPED FRAME: All pixels have alpha=0 (invisible)', {
+            pixelsChecked: Math.min(pixels_w * pixels_h, 100),
+          });
+        }
         
         if (draw_raw_feed) {
           const cropped = video_feed.getCroppedFrame();
