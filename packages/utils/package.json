@@ -15,7 +15,7 @@
       "import": "./index.ts"
     },
     "./firebase": {
-      "import": "./firebase-tools.ts"
+      "import": "./firebase.ts"
     }
   }
 }
