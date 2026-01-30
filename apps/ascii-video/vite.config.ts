@@ -17,6 +17,16 @@ export default defineConfig({
     format: 'es',
   },
   optimizeDeps: {
-    exclude: ['@tensorflow/tfjs'],
+    include: ['long'],
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+    },
+  },
+  resolve: {
+    alias: {
+      'long': 'long/dist/long.js',
+    },
   },
 });
