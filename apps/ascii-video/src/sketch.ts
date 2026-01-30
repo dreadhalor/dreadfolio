@@ -116,13 +116,32 @@ export const sketch = (p5: p5) => {
         drawPixels(p5, pixels);
       }
       
-      // Draw FPS counter in top-right
+      // Draw FPS counter and diagnostics in top-right
       const stats = performanceMetrics.getStats();
       p5.resetMatrix();
       p5.fill(255, 255, 0);
       p5.textSize(16);
       p5.textAlign(p5.RIGHT, p5.TOP);
       p5.text(`FPS: ${stats.avgFPS} (${stats.avgFrameTime}ms)`, w - 10, 10);
+      
+      // Add debug info in top-left
+      p5.textAlign(p5.LEFT, p5.TOP);
+      p5.fill(0, 255, 255); // Cyan for visibility
+      const debugInfo = `Pixels: ${pixels.length}x${pixels[0]?.length || 0} | Valid: ${hasValidPixels}`;
+      p5.text(debugInfo, 10, 10);
+      
+      // Show character drawing stats
+      const drawStats = (window as any).lastDrawStats;
+      if (drawStats) {
+        const statsText = `Chars: ${drawStats.drawn}/${drawStats.total} (${drawStats.percentage}%)`;
+        p5.text(statsText, 10, 30);
+        
+        // Highlight if very few characters drawn
+        if (drawStats.drawn < 100) {
+          p5.fill(255, 0, 0); // Red warning
+          p5.text(`⚠️ LOW CHAR COUNT!`, 10, 50);
+        }
+      }
     }
 
     if (pausable) drawPauseButton(p5);
@@ -236,18 +255,17 @@ export const sketch = (p5: p5) => {
       }
     }
     
-    // Log if we drew very few characters
+    // Return drawing stats for on-screen display
     const totalPixels = w * h;
     const drawnPercentage = (drawnCharCount / totalPixels) * 100;
-    if (drawnCharCount < 100) {
-      console.warn('🎨 FEW CHARACTERS DRAWN:', {
-        drawn: drawnCharCount,
-        skippedAlphaZero,
-        totalPixels,
-        drawnPercentage: drawnPercentage.toFixed(1) + '%',
-        dimensions: `${w}x${h}`,
-      });
-    }
+    
+    // Store stats globally for display
+    (window as any).lastDrawStats = {
+      drawn: drawnCharCount,
+      skipped: skippedAlphaZero,
+      total: totalPixels,
+      percentage: drawnPercentage.toFixed(1),
+    };
   }
   function getFill([r, g, b, a]: [number, number, number, number]) {
     if (gradient) {
