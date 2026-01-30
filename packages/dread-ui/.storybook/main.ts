@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import tailwindcss from '@tailwindcss/vite';
 
 import { join, dirname } from 'path';
 
@@ -22,6 +23,11 @@ const config: StorybookConfig = {
   },
   docs: {
     autodocs: true,
+  },
+  viteFinal: async (config) => {
+    config.plugins = config.plugins || [];
+    config.plugins.push(tailwindcss());
+    return config;
   },
 };
 export default config;
