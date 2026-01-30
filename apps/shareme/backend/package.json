@@ -1,0 +1,27 @@
+{
+  "name": "shareme-backend",
+  "description": "Sanity CMS backend for shareme social media app",
+  "version": "1.0.0",
+  "author": "Scott Hetrick",
+  "license": "MIT",
+  "private": true,
+  "main": "package.json",
+  "scripts": {
+    "start": "sanity start",
+    "build": "sanity build",
+    "dev": "sanity dev"
+  },
+  "keywords": [
+    "sanity"
+  ],
+  "dependencies": {
+    "@sanity/cli": "^3.68.1",
+    "@sanity/vision": "^3.68.1",
+    "eslint": "^8.57.1",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sanity": "^3.68.1",
+    "styled-components": "^6.1.15"
+  }
+}
