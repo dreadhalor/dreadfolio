@@ -16,7 +16,7 @@ import { FaExternalLinkAlt } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
 const getImagePreview = (gif: IGif) => {
-  return gif.images.preview?.mp4 || gif.images.original?.mp4 || '';
+  return gif.images.original_mp4?.mp4 || gif.images.original?.mp4 || '';
 };
 const getDisplayName = (gif: IGif) => {
   return (
