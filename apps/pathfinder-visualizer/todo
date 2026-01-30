@@ -1,0 +1,17 @@
+- flushing the animation queue doesn't actually stop the animating if it's overwritten with a new animation (i.e. generating another maze before the previous generation animation finishes)
+- Fix Eller's algorithm animation horizontal connecting sync
+  - honestly it goes by so fast it deadass looks fine, no one will call me out on that the animation is actually slightly wrong because the actual generated maze is still right
+- Recursive division actively throws errors that you just ignored with an (if !null) qualifier you shouldn't need, fix it
+  - oh man since it still works I'm totally gonna move onto a different project & not fix it aren't I?
+- Kruskal's is set up to directly play animations AS it's solving which will scale WAAAAY better for massive grid sizes, maybe do that for the other algorithms too
+  - but also even at full screen maze generation is pretty instantaneous so maybe it won't be worth it
+
+* Possibly figure out a way to fix Prim's algorithm's animation (a brand new bug introduced by making the background-color transition by default!)
+* The detection for auto-placing start & end tiles is hacky
+  - maybe it's not, fuck you
+* the start & end nodes don't reappear if you interrupt maze generation by clearing the walls (which maybe you shouldn't be allowed to do anyway but fuck it)
+  - it's not a bug, it's a feature! ;)
+* the logic for handling mouse clicks in squares is utter spaghetti code, not gonna fix it though
+* DrawWrapper interpolation destroys the ability to handle multitouch, use interpolation at your own risk
+* Fixed a bug on desktop where pathval was changed to 0 if mouseover occurs on paths with value 1,2,3 (hacky fix, do not let it survive a recode)
+* on eraser mouseover at the edge of boxes sometimes 2 boxes get highlighted - not a huge problem because any interaction bring them back in sync so it still looks pretty slick but it's not intentional so figure that out
