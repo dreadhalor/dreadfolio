@@ -4,16 +4,14 @@ import { App } from './app';
 import './index.scss';
 import 'dread-ui/style.scss';
 import { BoardProvider } from './providers/board-context';
-import { TooltipProvider } from 'dread-ui';
+import { DreadUiProvider } from 'dread-ui';
 
-// Note: Using only TooltipProvider instead of full DreadUiProvider
-// to avoid Firebase initialization (AuthProvider) which caused 20s load time
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <TooltipProvider>
+    <DreadUiProvider>
       <BoardProvider>
         <App />
       </BoardProvider>
-    </TooltipProvider>
+    </DreadUiProvider>
   </React.StrictMode>,
 );
