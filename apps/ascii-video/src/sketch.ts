@@ -15,12 +15,13 @@ const color = true;
 const brighten_amount = 0;
 const greenify = true;
 const pixel_scale = 1.5;
-  const draw_raw_feed = true;
-  const draw_pixelated_feed = false;
+const draw_raw_feed = true;
+const draw_pixelated_feed = false;
 const model = 'body-pix';
 const draw_grid = false;
 const draw_squares = true;
 const draw_chars = true;
+const show_diagnostics = false; // Toggle on-screen debug info
 
 const button_size = 50;
 const button_margin = 10;
@@ -118,41 +119,45 @@ export const sketch = (p5: p5) => {
         (window as any).lastDrawOrder = drawOrder;
       }
       
-      // Draw FPS counter and diagnostics in top-right
-      const stats = performanceMetrics.getStats();
-      p5.resetMatrix();
-      p5.fill(255, 255, 0);
-      p5.textSize(16);
-      p5.textAlign(p5.RIGHT, p5.TOP);
-      p5.text(`FPS: ${stats.avgFPS} (${stats.avgFrameTime}ms)`, w - 10, 10);
-      
-      // Add debug info in top-left
-      p5.textAlign(p5.LEFT, p5.TOP);
-      p5.fill(0, 255, 255); // Cyan for visibility
-      const debugInfo = `Pixels: ${pixels.length}x${pixels[0]?.length || 0} | Valid: ${hasValidPixels}`;
-      p5.text(debugInfo, 10, 10);
-      
-      // Show character drawing stats
-      const drawStats = (window as any).lastDrawStats;
-      if (drawStats) {
-        const statsText = `Chars: ${drawStats.drawn}/${drawStats.total} (${drawStats.percentage}%)`;
-        p5.text(statsText, 10, 30);
+      // Optional diagnostics (toggle with show_diagnostics constant)
+      if (show_diagnostics) {
+        const stats = performanceMetrics.getStats();
+        p5.resetMatrix();
         
-        // Show draw order to detect z-index issues
-        const drawOrder = (window as any).lastDrawOrder || [];
-        p5.text(`Draw: ${drawOrder.join(' → ')}`, 10, 50);
+        // FPS counter in top-right
+        p5.fill(255, 255, 0);
+        p5.textSize(16);
+        p5.textAlign(p5.RIGHT, p5.TOP);
+        p5.text(`FPS: ${stats.avgFPS} (${stats.avgFrameTime}ms)`, w - 10, 10);
         
-        // Show sampled colors to verify we're drawing visible colors
-        if (drawStats.sampledColors && drawStats.sampledColors.length > 0) {
-          const firstColor = drawStats.sampledColors[0];
-          const colorStr = `Color: R${firstColor[0]} G${firstColor[1]} B${firstColor[2]} A${firstColor[3]}`;
-          p5.text(colorStr, 10, 70);
-        }
+        // Debug info in top-left
+        p5.textAlign(p5.LEFT, p5.TOP);
+        p5.fill(0, 255, 255); // Cyan for visibility
+        const debugInfo = `Pixels: ${pixels.length}x${pixels[0]?.length || 0} | Valid: ${hasValidPixels}`;
+        p5.text(debugInfo, 10, 10);
         
-        // Highlight if very few characters drawn
-        if (drawStats.drawn < 100) {
-          p5.fill(255, 0, 0); // Red warning
-          p5.text(`⚠️ LOW CHAR COUNT!`, 10, 90);
+        // Character drawing stats
+        const drawStats = (window as any).lastDrawStats;
+        if (drawStats) {
+          const statsText = `Chars: ${drawStats.drawn}/${drawStats.total} (${drawStats.percentage}%)`;
+          p5.text(statsText, 10, 30);
+          
+          // Draw order
+          const drawOrder = (window as any).lastDrawOrder || [];
+          p5.text(`Draw: ${drawOrder.join(' → ')}`, 10, 50);
+          
+          // Sampled colors
+          if (drawStats.sampledColors && drawStats.sampledColors.length > 0) {
+            const firstColor = drawStats.sampledColors[0];
+            const colorStr = `Color: R${firstColor[0]} G${firstColor[1]} B${firstColor[2]} A${firstColor[3]}`;
+            p5.text(colorStr, 10, 70);
+          }
+          
+          // Low char count warning
+          if (drawStats.drawn < 100) {
+            p5.fill(255, 0, 0);
+            p5.text(`⚠️ LOW CHAR COUNT!`, 10, 90);
+          }
         }
       }
     }
