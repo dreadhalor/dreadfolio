@@ -13,9 +13,6 @@
 [submodule "apps/su-done-ku"]
 	path = apps/su-done-ku
 	url = https://github.com/Dreadhalor/su-done-ku
-[submodule "apps/steering-text"]
-	path = apps/steering-text
-	url = https://github.com/dreadhalor/steering-text
 [submodule "apps/fallcrate"]
 	path = apps/fallcrate
 	url = https://github.com/dreadhalor/fallcrate
