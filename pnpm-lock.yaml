@@ -963,82 +963,6 @@ importers:
         specifier: ^2.1.5
         version: 2.1.9(@types/node@24.10.9)(jsdom@27.4.0(canvas@3.2.1))(lightningcss@1.30.2)(sass@1.75.0)
 
-  apps/test-tailwind:
-    dependencies:
-      dread-ui:
-        specifier: workspace:*
-        version: link:../../packages/dread-ui
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      react:
-        specifier: ^18.2.0
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.2.0
-        version: 18.3.1(react@18.3.1)
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
-    devDependencies:
-      '@repo/config':
-        specifier: workspace:*
-        version: link:../../packages/config
-      '@tailwindcss/vite':
-        specifier: ^4.1.18
-        version: 4.1.18(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))
-      '@types/lodash':
-        specifier: ^4.17.0
-        version: 4.17.0
-      '@types/node':
-        specifier: ^20.10.3
-        version: 20.12.7
-      '@types/react':
-        specifier: ^18.2.66
-        version: 18.3.27
-      '@types/react-dom':
-        specifier: ^18.2.22
-        version: 18.3.7(@types/react@18.3.27)
-      '@types/uuid':
-        specifier: ^9.0.7
-        version: 9.0.8
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^6.21.0
-        version: 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1)(typescript@5.9.3)
-      '@typescript-eslint/parser':
-        specifier: ^6.21.0
-        version: 6.21.0(eslint@8.57.1)(typescript@5.9.3)
-      '@vitejs/plugin-react':
-        specifier: ^4.2.1
-        version: 4.7.0(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))
-      eslint:
-        specifier: ^8.57.0
-        version: 8.57.1
-      eslint-plugin-react:
-        specifier: ^7.33.2
-        version: 7.34.1(eslint@8.57.1)
-      eslint-plugin-react-hooks:
-        specifier: ^4.6.0
-        version: 4.6.2(eslint@8.57.1)
-      eslint-plugin-react-refresh:
-        specifier: ^0.4.5
-        version: 0.4.26(eslint@8.57.1)
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.1.18
-      typescript:
-        specifier: ^5.2.2
-        version: 5.9.3
-      vite:
-        specifier: ^7.3.1
-        version: 7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
-      vite-plugin-svgr:
-        specifier: ^4.2.0
-        version: 4.5.0(rollup@4.57.1)(typescript@5.9.3)(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))
-      vite-tsconfig-paths:
-        specifier: ^4.3.1
-        version: 4.3.2(typescript@5.9.3)(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))
-
   packages/assets: {}
 
   packages/config: {}
@@ -17534,13 +17458,6 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.1.18
       '@tailwindcss/oxide-win32-x64-msvc': 4.1.18
 
-  '@tailwindcss/vite@4.1.18(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))':
-    dependencies:
-      '@tailwindcss/node': 4.1.18
-      '@tailwindcss/oxide': 4.1.18
-      tailwindcss: 4.1.18
-      vite: 7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
-
   '@tailwindcss/vite@4.1.18(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))':
     dependencies:
       '@tailwindcss/node': 4.1.18
@@ -18377,18 +18294,6 @@ snapshots:
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
       vite: 6.4.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitejs/plugin-react@4.7.0(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2))':
-    dependencies:
-      '@babel/core': 7.28.6
-      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.6)
-      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.28.6)
-      '@rolldown/pluginutils': 1.0.0-beta.27
-      '@types/babel__core': 7.20.5
-      react-refresh: 0.17.0
-      vite: 7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -20227,28 +20132,6 @@ snapshots:
       doctrine: 2.1.0
       es-iterator-helpers: 1.0.19
       eslint: 8.57.0
-      estraverse: 5.3.0
-      jsx-ast-utils: 3.3.5
-      minimatch: 3.1.2
-      object.entries: 1.1.8
-      object.fromentries: 2.0.8
-      object.hasown: 1.1.4
-      object.values: 1.2.0
-      prop-types: 15.8.1
-      resolve: 2.0.0-next.5
-      semver: 6.3.1
-      string.prototype.matchall: 4.0.11
-
-  eslint-plugin-react@7.34.1(eslint@8.57.1):
-    dependencies:
-      array-includes: 3.1.8
-      array.prototype.findlast: 1.2.5
-      array.prototype.flatmap: 1.3.2
-      array.prototype.toreversed: 1.1.2
-      array.prototype.tosorted: 1.1.3
-      doctrine: 2.1.0
-      es-iterator-helpers: 1.0.19
-      eslint: 8.57.1
       estraverse: 5.3.0
       jsx-ast-utils: 3.3.5
       minimatch: 3.1.2
@@ -26030,17 +25913,6 @@ snapshots:
       - supports-color
       - typescript
 
-  vite-plugin-svgr@4.5.0(rollup@4.57.1)(typescript@5.9.3)(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)):
-    dependencies:
-      '@rollup/pluginutils': 5.3.0(rollup@4.57.1)
-      '@svgr/core': 8.1.0(typescript@5.9.3)
-      '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0(typescript@5.9.3))
-      vite: 7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
-    transitivePeerDependencies:
-      - rollup
-      - supports-color
-      - typescript
-
   vite-plugin-svgr@4.5.0(rollup@4.57.1)(typescript@5.9.3)(vite@7.3.1(@types/node@24.10.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)):
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.57.1)
@@ -26057,17 +25929,6 @@ snapshots:
       debug: 4.3.4
       globrex: 0.1.2
       tsconfck: 3.0.3(typescript@5.4.5)
-    optionalDependencies:
-      vite: 7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-
-  vite-tsconfig-paths@4.3.2(typescript@5.9.3)(vite@7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)):
-    dependencies:
-      debug: 4.3.4
-      globrex: 0.1.2
-      tsconfck: 3.0.3(typescript@5.9.3)
     optionalDependencies:
       vite: 7.3.1(@types/node@20.12.7)(jiti@2.6.1)(lightningcss@1.30.2)(sass@1.75.0)(yaml@2.8.2)
     transitivePeerDependencies:
