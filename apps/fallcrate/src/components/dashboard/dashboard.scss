@@ -1,0 +1,33 @@
+@use 'sass:math';
+
+$width-drag: 2px;
+$width-hover: 2px;
+
+@mixin border-highlight($color, $width: 1px) {
+  &::after {
+    content: '';
+    position: absolute;
+    user-select: none;
+    top: 0;
+    bottom: 0;
+    width: $width;
+    left: calc(50% - math.div($width, 2));
+    background-color: $color;
+  }
+}
+
+.resize-right-handle {
+  &.drag-highlight {
+    @include border-highlight(darken(#e0e0e0, 10%), $width-drag);
+  }
+  &.hover-highlight {
+    @include border-highlight(#e0e0e0, $width-hover);
+  }
+}
+
+.collapse-button {
+  transition: opacity 0.2s ease-in-out, border-width 0.2s ease-in-out;
+  &__icon {
+    transition: transform 0.2s ease-in-out;
+  }
+}

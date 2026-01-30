@@ -1,0 +1,45 @@
+{
+  "name": "fallcrate",
+  "description": "Cloud-based file storage and management application",
+  "version": "1.0.0",
+  "author": "Scott Hetrick",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenv -e ../../.env vite",
+    "build": "tsc && dotenv -e ../../.env vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "antd": "^5.22.5",
+    "dread-ui": "workspace:*",
+    "jszip": "^3.10.1",
+    "pretty-bytes": "^6.1.1",
+    "re-resizable": "^6.10.1",
+    "react": "^18.3.1",
+    "react-collapse": "^5.1.1",
+    "react-contexify": "^6.0.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.4.0",
+    "react-pdf": "^9.2.1",
+    "react-spinners": "^0.15.0",
+    "react-tooltip": "^5.28.0",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@repo/config": "workspace:*",
+    "@types/react": "^18.3.12",
+    "@types/react-collapse": "^5.0.4",
+    "@types/react-dom": "^18.3.1",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react-swc": "^3.7.1",
+    "eslint": "^8.57.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
