@@ -1,11 +1,12 @@
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import svgr from 'vite-plugin-svgr';
+import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), svgr()],
+  plugins: [tailwindcss(), tsconfigPaths(), svgr()],
   base: '/ascii-video/',
   server: {
     https: {
