@@ -10,7 +10,7 @@ export function drawPolygon(
   ctx.beginPath();
   ctx.moveTo(polygon[0].x, polygon[0].y);
   for (let i = 1; i < polygon.length; i++) {
-    let intersect = polygon[i];
+    const intersect = polygon[i];
     ctx.lineTo(intersect.x, intersect.y);
   }
   ctx.fill();
@@ -21,7 +21,7 @@ export function getPrimaryGradient(
   mouseover: Point,
   ctx: CanvasRenderingContext2D
 ) {
-  let gradient = ctx.createRadialGradient(
+  const gradient = ctx.createRadialGradient(
     mouseover.x,
     mouseover.y,
     0,
@@ -40,7 +40,7 @@ export function getFuzzyGradient(
   dots: number,
   ctx: CanvasRenderingContext2D
 ) {
-  let gradient = ctx.createRadialGradient(
+  const gradient = ctx.createRadialGradient(
     mouseover.x,
     mouseover.y,
     0,
@@ -61,7 +61,7 @@ export function drawOutlines(
 ) {
   ctx.strokeStyle = '#999';
   for (let i = 0; i < segments.length; i++) {
-    let seg = segments[i];
+    const seg = segments[i];
     ctx.beginPath();
     ctx.moveTo(seg.a.x, seg.a.y);
     ctx.lineTo(seg.b.x, seg.b.y);
@@ -78,8 +78,8 @@ export function drawFuzzyLightOrbs(
   // Draw red dots
   ctx.fillStyle = '#dd3838';
   for (let angle = 0; angle < Math.PI * 2; angle += (Math.PI * 2) / dots) {
-    let dx = Math.cos(angle) * radius;
-    let dy = Math.sin(angle) * radius;
+    const dx = Math.cos(angle) * radius;
+    const dy = Math.sin(angle) * radius;
     ctx.beginPath();
     ctx.arc(mouseover.x + dx, mouseover.y + dy, 2, 0, 2 * Math.PI, false);
     ctx.fill();
@@ -93,14 +93,14 @@ export function drawFuzzyLights(
   ctx: CanvasRenderingContext2D,
   fillStyle: string | CanvasGradient | CanvasPattern
 ) {
-  let shadows: any[] = [];
+  const shadows: Point[][] = [];
   for (let angle = 0; angle < Math.PI * 2; angle += (Math.PI * 2) / dots) {
-    let dx = Math.cos(angle) * radius;
-    let dy = Math.sin(angle) * radius;
+    const dx = Math.cos(angle) * radius;
+    const dy = Math.sin(angle) * radius;
     shadows.push(getSightPolygon(mouseover.x + dx, mouseover.y + dy, segments));
   }
   // DRAW AS A GIANT POLYGON
-  for (let shadow of shadows) {
+  for (const shadow of shadows) {
     drawPolygon(shadow, ctx, fillStyle);
   }
 }
@@ -121,7 +121,7 @@ export function drawPrimaryLight(
   ctx: CanvasRenderingContext2D,
   fillStyle: string | CanvasGradient | CanvasPattern
 ) {
-  let shadow = getSightPolygon(mouseover.x, mouseover.y, segments);
+  const shadow = getSightPolygon(mouseover.x, mouseover.y, segments);
   drawPolygon(shadow, ctx, fillStyle);
 }
 
@@ -131,7 +131,7 @@ export function drawDebugPoints(
 ) {
   ctx.fillStyle = 'white';
   for (let i = 0; i < segments.length; i++) {
-    let seg = segments[i];
+    const seg = segments[i];
     ctx.beginPath();
     ctx.arc(seg.a.x, seg.a.y, 5, 0, 2 * Math.PI);
     ctx.arc(seg.b.x, seg.b.y, 5, 0, 2 * Math.PI);
@@ -147,9 +147,9 @@ export function drawActivePoints(
   ctx: CanvasRenderingContext2D
 ) {
   ctx.fillStyle = '#dd3838';
-  for (let point of points) {
+  for (const point of points) {
     ctx.beginPath();
-    let radius =
+    const radius =
       point !== selected_point ? point_radius : selected_point_radius;
     ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
     ctx.fill();

@@ -3,8 +3,8 @@ import { Point, Segment } from './interfaces';
 
 //subdivide all segments in segments array with all other segments in segments array using the subdivide function
 export function subdivideAll(segments: Segment[]) {
-  let subdivided = subdivideSegments(segments);
-  let result = filterIdenticalSegments(subdivided);
+  const subdivided = subdivideSegments(segments);
+  const result = filterIdenticalSegments(subdivided);
   return result;
 }
 
@@ -38,17 +38,17 @@ function filterIdenticalSegments(segments: Segment[]) {
 
 //define a function that takes 2 line segments as arguments and returns an array of line segments that represent the input segments subdivided into smaller segments based on their intersection
 function subdivide(seg1: Segment, seg2: Segment) {
-  let seg1_a = seg1.a;
-  let seg1_b = seg1.b;
-  let seg2_a = seg2.a;
-  let seg2_b = seg2.b;
+  const seg1_a = seg1.a;
+  const seg1_b = seg1.b;
+  const seg2_a = seg2.a;
+  const seg2_b = seg2.b;
 
   //find the intersection of the two segments
-  let intersect = getIntersection(seg1_a, seg1_b, seg2_a, seg2_b);
+  const intersect = getIntersection(seg1_a, seg1_b, seg2_a, seg2_b);
 
   //if the segments intersect, return an array of line segments that represent the input segments subdivided into smaller segments based on their intersection
   if (intersect) {
-    let result = [
+    const result = [
       { a: seg1_a, b: intersect },
       { a: intersect, b: seg1_b },
       { a: seg2_a, b: intersect },
@@ -73,24 +73,24 @@ export function getIntersection(
   seg2_a: Point,
   seg2_b: Point
 ) {
-  let x1 = seg1_a.x;
-  let y1 = seg1_a.y;
-  let x2 = seg1_b.x;
-  let y2 = seg1_b.y;
-  let x3 = seg2_a.x;
-  let y3 = seg2_a.y;
-  let x4 = seg2_b.x;
-  let y4 = seg2_b.y;
+  const x1 = seg1_a.x;
+  const y1 = seg1_a.y;
+  const x2 = seg1_b.x;
+  const y2 = seg1_b.y;
+  const x3 = seg2_a.x;
+  const y3 = seg2_a.y;
+  const x4 = seg2_b.x;
+  const y4 = seg2_b.y;
 
-  let den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+  const den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
   //if the segments are parallel, return false
   if (den == 0) {
     return null;
   }
 
-  let t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
-  let u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
+  const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
+  const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
   //if the intersection is on the segment, return an object with the intersection coordinates
   if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
@@ -105,13 +105,13 @@ export function getIntersection(
 // create a function which determines whether or not a point is inside a polygon
 export function isPointInPolygon(polygon: Polygon, point: Point) {
   let inside = false;
-  let points = polygon.getPoints();
+  const points = polygon.getPoints();
   for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-    let xi = points[i].x,
+    const xi = points[i].x,
       yi = points[i].y;
-    let xj = points[j].x,
+    const xj = points[j].x,
       yj = points[j].y;
-    let intersect =
+    const intersect =
       yi > point.y != yj > point.y &&
       point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
     if (intersect) inside = !inside;
@@ -135,10 +135,10 @@ export function isPointInRadius(
 
 //create a function which calculates the area of a concave polygon
 export function getArea(polygon: Polygon) {
-  let points = polygon.getPoints();
+  const points = polygon.getPoints();
   let area = 0;
   for (let i = 0; i < points.length; i++) {
-    let j = (i + 1) % points.length;
+    const j = (i + 1) % points.length;
     area += points[i].x * points[j].y;
     area -= points[i].y * points[j].x;
   }
@@ -149,9 +149,9 @@ export function getArea(polygon: Polygon) {
 //create a function which returns the length of a line segment
 export function getLength(segment?: Segment) {
   if (!segment) return 0;
-  let x1 = segment.a.x;
-  let y1 = segment.a.y;
-  let x2 = segment.b.x;
-  let y2 = segment.b.y;
+  const x1 = segment.a.x;
+  const y1 = segment.a.y;
+  const x2 = segment.b.x;
+  const y2 = segment.b.y;
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }

@@ -19,8 +19,8 @@ export class Polygon {
   getSegments() {
     const segments = [];
     for (let i = 0; i < this.points.length; i++) {
-      let a = this.points[i];
-      let b = this.points[(i + 1) % this.points.length];
+      const a = this.points[i];
+      const b = this.points[(i + 1) % this.points.length];
       segments.push({ a, b });
     }
     return segments;
@@ -90,7 +90,7 @@ export function createRandomPolygon(center: Point) {
   }
 
   //find the center of the polygon
-  let polygon_center = { x: 0, y: 0 };
+  const polygon_center = { x: 0, y: 0 };
   for (let i = 0; i < points.length; i++) {
     polygon_center.x += points[i].x;
     polygon_center.y += points[i].y;
@@ -109,8 +109,8 @@ export function createRandomPolygon(center: Point) {
 
 export function getCenter(polygon?: Polygon) {
   if (!polygon) return { x: 0, y: 0 };
-  let center = { x: 0, y: 0 };
-  let points = polygon.getPoints();
+  const center = { x: 0, y: 0 };
+  const points = polygon.getPoints();
   for (let i = 0; i < points.length; i++) {
     center.x += points[i].x;
     center.y += points[i].y;

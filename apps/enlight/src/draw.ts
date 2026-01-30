@@ -150,7 +150,7 @@ function drawBackground(
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    let message =
+    const message =
       state === State.MouseoverMe ? 'Mouse over me!' : 'Explore me!';
     ctx.fillText(
       message,

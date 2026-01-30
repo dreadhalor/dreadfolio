@@ -1,22 +1,29 @@
 {
-  "homepage": "https://dreadhalor.github.io/enlight/",
   "name": "enlight",
+  "description": "Interactive canvas-based light and shadow visualization demonstrating ray casting and polygon interactions",
+  "version": "1.0.0",
+  "author": "Scott Hetrick",
+  "license": "MIT",
   "private": true,
-  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
     "dev": "vite",
     "dev-host": "vite --host",
-    "build": "tsc && vite build",
+    "build": "vite build",
+    "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
-  },
-  "devDependencies": {
-    "gh-pages": "^5.0.0",
-    "typescript": "^5.3.3",
-    "vite": "^5.1.1"
   },
   "dependencies": {
     "fontfaceobserver-es": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.3",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.10",
+    "vite-plugin-svgr": "^4.2.0",
+    "vite-tsconfig-paths": "^4.3.1"
   }
 }

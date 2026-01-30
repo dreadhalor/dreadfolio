@@ -86,14 +86,14 @@ const point_radius = 20;
 let updateCanvas = true;
 let updateMove = true;
 
-let borders: Polygon[] = [];
+const borders: Polygon[] = [];
 const border_margin = 2;
 
 const setBorders = (borders: Polygon[]) => {
   while (borders.pop());
-  let width = canvas.width;
-  let height = canvas.height;
-  let center = { x: width / 2, y: height / 2 };
+  const width = canvas.width;
+  const height = canvas.height;
+  const center = { x: width / 2, y: height / 2 };
   borders.push(
     createRectangle(center, width + border_margin, height + border_margin),
     createRectangle(center, width + fuzzyRadius * 4, height + fuzzyRadius * 4)
@@ -103,8 +103,8 @@ const setBorders = (borders: Polygon[]) => {
 
 let prev_canvas_dimensions = { width: 0, height: 0 };
 const checkBorders = () => {
-  let width = canvas.width;
-  let height = canvas.height;
+  const width = canvas.width;
+  const height = canvas.height;
   if (
     prev_canvas_dimensions.width !== width ||
     prev_canvas_dimensions.height !== height
@@ -145,7 +145,7 @@ const polygons: Polygon[] = [
 let selected_polygons: Polygon[] = [];
 let selected_point: Point | null = null;
 
-let segments: Segment[] = [
+const segments: Segment[] = [
   // { a: { x: 700, y: 150 }, b: { x: 900, y: 150 } },
   // { a: { x: 800, y: 50 }, b: { x: 800, y: 250 } },
   // { a: { x: 0, y: 0 }, b: { x: 640, y: 360 } },
@@ -242,7 +242,7 @@ function drawLoop() {
   }
   qmark.style.left = `${question_mark_location.x - question_mark_size / 2}px`;
   qmark.style.top = `${question_mark_location.y - question_mark_size / 2}px`;
-  let rect = qmark.getBoundingClientRect();
+  const rect = qmark.getBoundingClientRect();
   if (updateCanvas || updateMove) {
     draw(
       state,
@@ -319,16 +319,16 @@ function click(event: PointerEvent) {
 function onDblClick(event: PointerEvent) {
   justDblClicked = true;
   let in_selected = false;
-  for (let polygon of getIntersectingPolygons(event, polygons)) {
-    let polygon_index = polygons.indexOf(polygon);
-    let selected_index = selected_polygons.indexOf(polygon);
+  for (const polygon of getIntersectingPolygons(event, polygons)) {
+    const polygon_index = polygons.indexOf(polygon);
+    const selected_index = selected_polygons.indexOf(polygon);
     if (polygon_index > -1 && selected_index > -1) {
       polygons.splice(polygon_index, 1);
       in_selected = true;
     }
   }
   if (!in_selected) {
-    let random_polygon = createRandomPolygon({
+    const random_polygon = createRandomPolygon({
       x: event.clientX,
       y: event.clientY,
     });
@@ -393,8 +393,8 @@ const pointermove = (event: PointerEvent) => {
   if (updateMove) {
     // update selected_point's position
     if (selected_point) {
-      for (let polygon of selected_polygons) {
-        let point = polygon.getPoint(selected_point.x, selected_point.y);
+      for (const polygon of selected_polygons) {
+        const point = polygon.getPoint(selected_point.x, selected_point.y);
         if (point) {
           point.x = event.clientX;
           point.y = event.clientY;
@@ -405,7 +405,7 @@ const pointermove = (event: PointerEvent) => {
       updateVisiblePoints();
     } else {
       // update all selected_polygons' positions
-      for (let polygon of selected_polygons) {
+      for (const polygon of selected_polygons) {
         if (!updateMove) updateMove = true;
         polygon.move(...getMovement());
       }
@@ -431,7 +431,7 @@ const pointerdown = (event: PointerEvent) => {
   setMousedown(event);
   let in_point = false;
   //loop through each point in the visible_points array and check if the mouse is within the radius of the point
-  for (let point of visible_points) {
+  for (const point of visible_points) {
     if (isPointInRadius(point, mousedown, point_radius)) {
       in_point = true;
       selected_point = point;
@@ -441,7 +441,7 @@ const pointerdown = (event: PointerEvent) => {
   if (!in_point) selected_point = null;
   if (!selected_point) {
     let in_selected = false;
-    for (let polygon of selected_polygons) {
+    for (const polygon of selected_polygons) {
       //if the mouse is inside of the polygon, set in_selected to true
       if (isPointInPolygon(polygon, { x: event.clientX, y: event.clientY })) {
         in_selected = true;
@@ -452,7 +452,7 @@ const pointerdown = (event: PointerEvent) => {
       selected_polygons = [];
     } else {
       // click each polygon in selected_polygons
-      for (let polygon of selected_polygons) {
+      for (const polygon of selected_polygons) {
         polygon.click();
       }
     }
@@ -467,12 +467,12 @@ overlay.onpointerdown = pointerdown;
 const pointerup = (event: PointerEvent) => {
   if (!selected_point) {
     // for each polygon in selected_polygons, unclick()
-    for (let polygon of selected_polygons) {
+    for (const polygon of selected_polygons) {
       polygon.unclick();
     }
   }
-  let clicked = checkClick(event);
-  let dblClick = checkDblClick(event);
+  const clicked = checkClick(event);
+  const dblClick = checkDblClick(event);
   if (dblClick) onDblClick(event);
   else if (clicked) click(event);
   selected_point = null;
@@ -486,7 +486,7 @@ const mouseleave = () => {
   setMousedown(null);
   setMouseover(null);
   //unclick all selected_polygons
-  for (let polygon of selected_polygons) {
+  for (const polygon of selected_polygons) {
     polygon.unclick();
   }
   selected_point = null;
@@ -496,8 +496,8 @@ const mouseleave = () => {
 overlay.onmouseleave = mouseleave;
 
 // disable typescript linting for the next line
-// @ts-ignore
+// @ts-expect-error - Adding debug method to window object
 window.exportPolygons = function () {
-  let result = polygons.map((polygon) => polygon.getPointsCoords());
+  const result = polygons.map((polygon) => polygon.getPointsCoords());
   console.log(result);
 };
