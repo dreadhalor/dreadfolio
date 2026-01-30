@@ -1,4 +1,4 @@
-import './taskbar.scss';
+import './taskbar.css';
 import TaskbarTime from './taskbar-time';
 import TaskbarWindow from './taskbar-window';
 import Start from '@ms/assets/start.png';

@@ -1,5 +1,4 @@
 @import './assets/typekit.css';
-
 @import "tailwindcss";
 
 @layer base {
@@ -89,10 +88,11 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
@@ -155,6 +155,8 @@
 }
 
 /* to make the sonner content fill the width of the toast */
-[data-sonner-toast] [data-content] {
-  @apply flex-1;
+@layer components {
+  [data-sonner-toast] [data-content] {
+    flex: 1 1 0%;
+  }
 }

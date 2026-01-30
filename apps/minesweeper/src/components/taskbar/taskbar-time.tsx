@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './taskbar.scss';
+import './taskbar.css';
 
 const TaskbarTime: React.FC = () => {
   const getTime = () => {

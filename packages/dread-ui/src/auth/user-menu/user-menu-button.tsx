@@ -29,7 +29,7 @@ const UserMenuButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       (achievement) => achievement.state === 'newly_unlocked',
     );
 
-    const svg = avatar.toDataUriSync();
+    const svg = avatar.toDataUri();
 
     return (
       <Button

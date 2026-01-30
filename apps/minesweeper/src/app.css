@@ -1,26 +1,24 @@
 .menu-bar-gradient2 {
   /* bg-[#3B77BC] */
-  $base-color: #0855dd;
-  background: $base-color;
+  background: #0855dd;
   background: linear-gradient(
     0deg,
-    darken($base-color, 50%) 0%,
-    darken($base-color, 10%) 3%,
-    $base-color 20%,
-    $base-color 80%,
-    lighten($base-color, 15%) 97%,
-    lighten($base-color, 20%) 100%
+    #000011 0%,
+    #06439c 3%,
+    #0855dd 20%,
+    #0855dd 80%,
+    #3c7dff 97%,
+    #5494ff 100%
   );
 }
 .vertical-xp-gradient {
-  $base-color: #0855dd;
-  background: $base-color;
+  background: #0855dd;
   background: linear-gradient(
     0deg,
-    $base-color 0%,
-    $base-color 80%,
-    lighten($base-color, 15%) 97%,
-    lighten($base-color, 20%) 100%
+    #0855dd 0%,
+    #0855dd 80%,
+    #3c7dff 97%,
+    #5494ff 100%
   );
 }
 

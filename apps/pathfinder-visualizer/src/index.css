@@ -6,7 +6,6 @@ body,
   height: 100%;
   width: 100%;
   overflow: hidden;
-  @extend .site-bg-empty;
 }
 
 body {
@@ -25,6 +24,9 @@ code {
   box-sizing: border-box;
 }
 
-.site-bg-empty {
+.site-bg-empty,
+html,
+body,
+#root {
   background-color: rgb(108, 117, 125);
 }

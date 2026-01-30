@@ -14,7 +14,7 @@ import {
   mine_death,
   misflagged,
 } from '@ms/assets/minesweeper/cell';
-import './cell.scss';
+import './cell.css';
 
 interface CellProps {
   row: number;

@@ -16,26 +16,35 @@ const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app);
+let db: ReturnType<typeof getFirestore>;
+let auth: ReturnType<typeof getAuth>;
+let storage: ReturnType<typeof getStorage>;
 
-// Connect to Firebase auth emulator if the host is localhost
-if (location.hostname === 'localhost') {
-  connectAuthEmulator(auth, 'http://localhost:9099', {
-    disableWarnings: true,
-  });
-}
+try {
+  db = getFirestore(app);
+  auth = getAuth(app);
+  storage = getStorage(app);
 
-// Connect to Firestore emulator if the host is localhost
-if (location.hostname === 'localhost') {
-  connectFirestoreEmulator(db, 'localhost', 8080);
-}
+  // Connect to Firebase auth emulator if the host is localhost
+  if (location.hostname === 'localhost') {
+    connectAuthEmulator(auth, 'http://localhost:9099', {
+      disableWarnings: true,
+    });
+  }
 
-// Connect to Firebase storage emulator if the host is localhost
-if (location.hostname === 'localhost') {
-  // Point to the emulators running on localhost.
-  connectStorageEmulator(storage, 'localhost', 9199);
+  // Connect to Firestore emulator if the host is localhost
+  if (location.hostname === 'localhost') {
+    connectFirestoreEmulator(db, 'localhost', 8080);
+  }
+
+  // Connect to Firebase storage emulator if the host is localhost
+  if (location.hostname === 'localhost') {
+    // Point to the emulators running on localhost.
+    connectStorageEmulator(storage, 'localhost', 9199);
+  }
+} catch (error) {
+  console.warn('Firebase services not available:', error);
+  // Services will be undefined, consuming code should handle this
 }
 
 export { auth, db, storage };

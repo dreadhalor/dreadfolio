@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../minesweeper.scss';
+import '../../minesweeper.css';
 import DigitDisplay from './digit-display';
 import SmileButton from './smile-button';
 import { difficultySettings } from '@ms/providers/minesweeper-provider';

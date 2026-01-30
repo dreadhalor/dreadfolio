@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import './app.scss';
+import './app.css';
 import { v4 as uuidv4 } from 'uuid';
 import GridSquare from './components/grid-square';
 import TopNav from './components/top-nav';

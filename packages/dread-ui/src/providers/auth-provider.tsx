@@ -35,6 +35,23 @@ export const AuthProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    // If auth is not available (Firebase not initialized), skip auth state changes
+    if (!auth) {
+      const localUid = localStorage.getItem('localUid');
+      if (localUid) {
+        setUid(localUid);
+        setDisplayName('');
+      } else {
+        const id = uuidv4();
+        setUid(id);
+        setDisplayName('');
+        localStorage.setItem('localUid', id);
+      }
+      setSignedIn(false);
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
         setUid(authUser.uid);

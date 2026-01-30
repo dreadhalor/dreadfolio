@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app';
-import './index.scss';
-import 'dread-ui/style.scss';
+import './index.css';
+import 'dread-ui/style.css';
 import { BoardProvider } from './providers/board-context';
 import { DreadUiProvider } from 'dread-ui';
 

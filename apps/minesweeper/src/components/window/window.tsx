@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useDrag } from '@use-gesture/react';
 import Header from './header';
-import './window.scss';
+import './window.css';
 import { AppType, useApp } from '@ms/providers/app-provider';
 
 interface WindowProps {

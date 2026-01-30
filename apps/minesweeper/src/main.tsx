@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './app';
 import { DreadUiProvider } from 'dread-ui';
 import { AppProvider } from '@ms/providers/app-provider';
-import 'dread-ui/style.scss';
-import './index.scss';
+import 'dread-ui/style.css';
+import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

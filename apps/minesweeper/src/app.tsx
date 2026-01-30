@@ -1,5 +1,5 @@
 import React from 'react';
-import './app.scss';
+import './app.css';
 import Icon from './components/icon';
 import Window from './components/window/window';
 import Minesweeper from './components/minesweeper/minesweeper';

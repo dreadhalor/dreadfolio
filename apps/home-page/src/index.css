@@ -9,7 +9,7 @@
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  // font-family: LigaSans, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* font-family: LigaSans, system-ui, Avenir, Helvetica, Arial, sans-serif; */
   line-height: 1.5;
   font-weight: 400;
 
@@ -35,6 +35,10 @@ body,
 
 @layer components {
   h3 {
-    @apply text-xs font-bold uppercase tracking-widest;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 }

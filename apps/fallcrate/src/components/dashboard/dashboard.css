@@ -1,0 +1,34 @@
+:root {
+  --width-drag: 2px;
+  --width-hover: 2px;
+}
+
+.resize-right-handle.drag-highlight::after {
+  content: '';
+  position: absolute;
+  user-select: none;
+  top: 0;
+  bottom: 0;
+  width: var(--width-drag);
+  left: calc(50% - var(--width-drag) / 2);
+  background-color: #c7c7c7; /* darken(#e0e0e0, 10%) */
+}
+
+.resize-right-handle.hover-highlight::after {
+  content: '';
+  position: absolute;
+  user-select: none;
+  top: 0;
+  bottom: 0;
+  width: var(--width-hover);
+  left: calc(50% - var(--width-hover) / 2);
+  background-color: #e0e0e0;
+}
+
+.collapse-button {
+  transition: opacity 0.2s ease-in-out, border-width 0.2s ease-in-out;
+}
+
+.collapse-button__icon {
+  transition: transform 0.2s ease-in-out;
+}

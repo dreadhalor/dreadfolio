@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './app.tsx';
-import 'dread-ui/built-style.css';
-import './index.scss';
+import 'dread-ui/style.css';
+import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Lists } from './routes/lists.tsx';
 import { Home } from './routes/home.tsx';

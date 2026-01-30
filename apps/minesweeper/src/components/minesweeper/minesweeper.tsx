@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Grid from './components/grid/grid';
 import ScoreBar from './components/score-bar/score-bar';
-import './minesweeper.scss';
+import './minesweeper.css';
 import { GameMenu } from './game-menu';
 import { useAchievements } from 'dread-ui';
 import {

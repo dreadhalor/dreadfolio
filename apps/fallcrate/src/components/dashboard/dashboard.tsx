@@ -3,7 +3,7 @@ import { Resizable } from 're-resizable';
 import { MainContent } from '../main-content/main-content';
 import { useRef, useState } from 'react';
 
-import './dashboard.scss';
+import './dashboard.css';
 import { useAchievements } from 'dread-ui';
 import { FaChevronLeft } from 'react-icons/fa';
 import { MouseEvent } from 'react';

@@ -6,6 +6,6 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), tsconfigPaths(), svgr()],
+  plugins: [tsconfigPaths(), svgr(), react(), tailwindcss()],
   base: '/pathfinder-visualizer/',
 });

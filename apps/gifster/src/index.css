@@ -15,7 +15,7 @@
     --blueish: 227 27% 52%;
     --danger: 0 62% 50%;
 
-    // theme colors
+    /* theme colors */
     --background: 0 0% 100%;
     --foreground: var(--ash);
     --muted: var(--ash-lighter);
@@ -27,15 +27,15 @@
     --card: 0 0% 100%;
     --card-foreground: var(--ash);
     --primary: var(--blueish);
-    --primary-foreground: 0 0% 100%; // white
+    --primary-foreground: 0 0% 100%; /* white */
     --secondary: var(--ash-lighter);
     --secondary-foreground: 222.2 47.4% 11.2%;
     --accent: 210 40% 96.1%;
     --accent-foreground: var(--ash);
     --destructive: var(--danger);
-    --destructive-foreground: 0 0% 100%; // white
+    --destructive-foreground: 0 0% 100%; /* white */
     --success: var(--beryl);
-    --success-foreground: 0 0% 0%; // white
+    --success-foreground: 0 0% 0%; /* white */
     --ring: var(--blueish);
     --radius: 0.5em;
   }
@@ -73,11 +73,12 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 
   h1 {

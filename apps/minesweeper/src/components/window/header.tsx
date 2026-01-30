@@ -1,6 +1,6 @@
 import React from 'react';
-import './window.scss';
-import './header.scss';
+import './window.css';
+import './header.css';
 import { AppType, useApp } from '@ms/providers/app-provider';
 
 interface HeaderProps {

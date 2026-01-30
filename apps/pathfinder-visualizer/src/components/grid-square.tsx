@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './grid-square.scss';
+import './grid-square.css';
 import { SetValueProps } from '../app';
 
 interface GridSquareProps {
