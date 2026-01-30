@@ -94,7 +94,7 @@ export class CameraProcessor {
 
   /**
    * Get pixelated pixels - processes every frame for accurate FPS display
-   * Frame skipping disabled to match visual framerate with counter
+   * Maintains last valid pixels to prevent blank frames during processing
    */
   getPixelatedPixels = (max_width: number, max_height: number) => {
     if (this.camera.getVideoElement() && max_width > 0 && max_height > 0) {
@@ -104,11 +104,19 @@ export class CameraProcessor {
         }
         
         // Process every frame - no skipping
-        this.pixels = this.getFrame(max_width, max_height);
+        const newPixels = this.getFrame(max_width, max_height);
+        
+        // Only update if we got valid pixels (not empty array)
+        if (newPixels.length > 0 && newPixels[0]?.length > 0) {
+          this.pixels = newPixels;
+        }
+        // else: keep last valid pixels to prevent blank frames
       } catch (e) {
-        this.pixels = [[]];
+        // Keep last valid pixels on error
+        console.warn('Error getting frame:', e);
       }
-    } else this.pixels = [[]];
+    }
+    // Always return current pixels (either new or last valid)
     return this.pixels;
   };
   getFrame(max_width: number, max_height: number) {

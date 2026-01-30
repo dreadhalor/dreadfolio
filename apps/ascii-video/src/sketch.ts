@@ -14,7 +14,7 @@ const color = true;
 const brighten_amount = 0;
 const greenify = true;
 const pixel_scale = 1.5;
-const draw_raw_feed = false; // Disabled: only show ASCII, not the raw masked feed
+const draw_raw_feed = true;
 const draw_pixelated_feed = false;
 const model = 'body-pix';
 const draw_grid = false;
@@ -64,28 +64,35 @@ export const sketch = (p5: p5) => {
       p5.fill(fillColor);
       const [draw_w, draw_h] = [w - draw_margin[0] * 2, h - draw_margin[1] * 2];
       const pixels = video_feed.getPixelatedPixels(draw_w, draw_h);
-      const [pixels_w, pixels_h] = [pixels.length, pixels[0].length];
-      if (draw_raw_feed) {
-        const cropped = video_feed.getCroppedFrame();
-        if (cropped)
-          p5.drawingContext.drawImage(
-            cropped,
-            ...getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h),
-          );
-      }
-      if (draw_pixelated_feed) {
-        try {
-          const image = video_feed.getProcessedVideoCanvas(draw_w, draw_h);
-          p5.drawingContext.drawImage(
-            image,
-            ...getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h),
-          );
-        } catch {
-          // Ignore drawing errors during initial setup
+      
+      // Check if we have valid pixels before trying to use dimensions
+      const hasValidPixels = pixels.length > 0 && pixels[0] && pixels[0].length > 0;
+      
+      if (hasValidPixels) {
+        const [pixels_w, pixels_h] = [pixels.length, pixels[0].length];
+        
+        if (draw_raw_feed) {
+          const cropped = video_feed.getCroppedFrame();
+          if (cropped)
+            p5.drawingContext.drawImage(
+              cropped,
+              ...getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h),
+            );
         }
-      }
+        if (draw_pixelated_feed) {
+          try {
+            const image = video_feed.getProcessedVideoCanvas(draw_w, draw_h);
+            p5.drawingContext.drawImage(
+              image,
+              ...getPixelBoundingBox(pixels_w, pixels_h, draw_w, draw_h),
+            );
+          } catch {
+            // Ignore drawing errors during initial setup
+          }
+        }
 
-      if (pixels[0].length > 0) drawPixels(p5, pixels);
+        drawPixels(p5, pixels);
+      }
       
       // Draw FPS counter in top-right
       const stats = performanceMetrics.getStats();
