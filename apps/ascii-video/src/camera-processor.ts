@@ -150,8 +150,12 @@ export class CameraProcessor {
     
     let potentially_masked = cropped;
     if (this.previous_frame && (this.bp || this.ss)) {
+      // Trigger async mask processing (doesn't block rendering)
       this.processMask();
-      if (this.mask_frame) {
+      
+      // Always try to use last valid mask, even if currently processing
+      // This prevents blank ASCII frames during ML computation
+      if (this.mask_frame && this.mask_image_data) {
         const masked = this.maskCanvas(this.mask_frame);
         potentially_masked = masked;
       }
