@@ -1,21 +1,27 @@
+import { useMemo } from 'react';
 import { RoomStructureProps } from '../../types/props';
+import { createTileTexture } from '../../utils/TextureGenerator';
 
 /**
- * Room Structure Component
- * Renders the basic room geometry (floor, ceiling, walls)
+ * Room Structure Component - Enhanced with Textures
+ * Renders the basic room geometry with procedural textures
  * 
  * Performance optimizations:
- * - Uses meshBasicMaterial (no lighting calculations)
- * - Simple plane geometries
- * - No shadows
+ * - Procedural textures (no file loading)
+ * - Seamless tiling (small texture size)
+ * - Cached textures via useMemo
+ * - meshBasicMaterial only (no lighting overhead)
  */
 export function RoomStructure({ offsetX, colors, isFirst, isLast }: RoomStructureProps) {
+  // Generate textures once per room (cached)
+  const floorTexture = useMemo(() => createTileTexture(512, colors.floor, colors.floor), [colors.floor]);
+  
   return (
     <>
-      {/* Floor */}
+      {/* Floor with tiled texture */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshBasicMaterial color={colors.floor} />
+        <meshBasicMaterial map={floorTexture} />
       </mesh>
       
       {/* Ceiling */}

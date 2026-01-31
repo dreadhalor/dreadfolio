@@ -112,7 +112,7 @@ export default function RoomGallery() {
           fov: CAMERA_FOV,
         }}
         shadows={false} // Shadows completely disabled for performance
-        frameloop="demand" // On-demand rendering (only when camera moves)
+        frameloop="always" // Always render for animations/particles
         gl={{ 
           antialias: false, // Disabled for 20-30% performance gain
           powerPreference: "high-performance",

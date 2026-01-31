@@ -1,20 +1,20 @@
 /**
- * Optimized Scene Lighting
+ * Enhanced Scene Lighting
  * 
  * Performance optimizations:
- * - Only 2 lights total (ambient + directional)
- * - No shadows (major performance killer)
- * - High ambient intensity reduces need for multiple lights
+ * - Only 2 lights (ambient + directional)
+ * - No shadows (major performance saver)
+ * - Works with both Basic and Standard materials
  */
 export function SceneLighting() {
   return (
     <>
-      {/* Strong ambient light - no shadows needed for small scene */}
-      <ambientLight intensity={1.2} />
+      {/* Strong ambient light for overall visibility */}
+      <ambientLight intensity={1} />
       
-      {/* Single directional light for depth and definition */}
+      {/* Directional light for depth and metallic reflections */}
       <directionalLight
-        position={[50, 20, 10]}
+        position={[10, 10, 5]}
         intensity={0.8}
         castShadow={false}
       />
