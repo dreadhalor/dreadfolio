@@ -83,7 +83,7 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
       <div
         onClick={handleCellClick}
         className={cn(
-          'relative h-10 w-10 items-center justify-center border border-slate-300 bg-white transition-all sm:h-12 sm:w-12 md:h-14 md:w-14',
+          'relative h-10 w-10 items-center justify-center border border-slate-200 bg-white transition-all duration-150 sm:h-12 sm:w-12 md:h-14 md:w-14',
           value ? 'text-base font-semibold text-slate-900 sm:text-lg' : 'text-[8px] text-slate-400 sm:text-[9px] md:text-xs',
           value ? 'flex' : 'grid grid-cols-3 grid-rows-3 place-items-center gap-0.5 p-0.5',
           rowIndex % 3 === 2 && rowIndex < 8 && 'border-b-2 border-b-slate-400',
@@ -95,7 +95,7 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
           isErrored && 'bg-red-500 text-white shadow-[inset_0_0_0_2px_rgb(220_38_38)]',
           isSolved && 'pointer-events-none bg-green-50',
           isEditing && 'flex',
-          !value && !isEditing && 'hover:bg-slate-50 cursor-pointer active:bg-slate-100',
+          !value && !isEditing && 'hover:bg-slate-50 cursor-pointer',
         )}
       >
       {isEditing ? (
@@ -131,7 +131,8 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
                   key={hintValue}
                   variant='ghost'
                   className={cn(
-                    'h-3 w-3 rounded p-0 text-[7px] font-medium transition-colors hover:bg-slate-200 sm:h-3.5 sm:w-3.5 sm:text-[8px] md:h-4 md:w-4 md:text-[10px]',
+                    'h-3 w-3 rounded p-0 text-[7px] font-medium transition-colors sm:h-3.5 sm:w-3.5 sm:text-[8px] md:h-4 md:w-4 md:text-[10px]',
+                    'hover:bg-slate-200',
                     isEliminated && 'bg-red-500 text-white hover:bg-red-600',
                     isReferenced &&
                       isPresent &&

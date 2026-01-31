@@ -140,7 +140,7 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
   }, [isEditing, step]);
 
   useLayoutEffect(() => {
-    setSliderValue(steps.length);
+    setSliderValue(steps.length - 1);
   }, [steps]);
 
   useEffect(() => {

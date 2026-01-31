@@ -9,6 +9,7 @@ import { HistorySlider } from './components/history-slider';
 import { GeneratePuzzleButton } from './components/generate-puzzle-button';
 import { ImportPuzzleButton } from './components/import-puzzle-button';
 import { StepDescriptionPanel } from './components/step-description-panel';
+import { SuccessCelebration } from './components/success-celebration';
 
 // create a sudoku board with a 9x9 grid of cells, where each cell is a 3x3 grid of cells containing numbers 1-9
 function App() {
@@ -25,9 +26,9 @@ function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className='flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 to-slate-100'>
+    <div className='flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-100'>
       {/* Top Toolbar */}
-      <div className='border-b bg-white/80 shadow-sm backdrop-blur-sm'>
+      <div className='border-b bg-white/95 shadow-sm'>
         <div className='mx-auto flex max-w-[1600px] items-center justify-between px-4 py-4 sm:px-6'>
           <div className='flex items-center gap-2 sm:gap-3'>
             <div className='text-xl font-bold text-blue-600 sm:text-2xl'>Su-Done-Ku</div>
@@ -123,6 +124,9 @@ function App() {
           </Card>
         </div>
       </div>
+      
+      {/* Success Celebration */}
+      <SuccessCelebration />
     </div>
   );
 }

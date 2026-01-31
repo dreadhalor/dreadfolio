@@ -52,7 +52,7 @@ const CellGrid = () => {
     (showPreview ? step?.boardSnapshot : executeStep(step!)) || [];
 
   return (
-    <div className='flex flex-col overflow-hidden rounded-lg shadow-xl ring-1 ring-slate-300'>
+    <div className='flex flex-col overflow-hidden rounded-xl shadow-xl ring-1 ring-slate-300'>
         <GridTopAndBottom />
         {boardToShow.map((row, rowIndex) => (
           <div key={rowIndex} className='flex flex-nowrap'>

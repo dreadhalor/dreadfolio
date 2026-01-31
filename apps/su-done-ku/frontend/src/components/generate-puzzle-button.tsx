@@ -12,9 +12,13 @@ const GeneratePuzzleButton = () => {
   const { generatePuzzleWithApi } = useBoard();
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button className='w-full rounded-lg shadow-sm' variant='outline'>
+        <Button 
+          type="button" 
+          className='w-full rounded-lg shadow-sm' 
+          variant='outline'
+        >
           <Sparkles className='mr-2 h-4 w-4' />
           Generate
           <ChevronDown className='ml-2 h-4 w-4' />
@@ -22,23 +26,17 @@ const GeneratePuzzleButton = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-full'>
         <DropdownMenuItem
-          onClick={() => {
-            generatePuzzleWithApi('easy');
-          }}
+          onSelect={() => generatePuzzleWithApi('easy')}
         >
           <span className='font-medium'>Easy</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => {
-            generatePuzzleWithApi('medium');
-          }}
+          onSelect={() => generatePuzzleWithApi('medium')}
         >
           <span className='font-medium'>Medium</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => {
-            generatePuzzleWithApi('hard');
-          }}
+          onSelect={() => generatePuzzleWithApi('hard')}
         >
           <span className='font-medium'>Hard</span>
         </DropdownMenuItem>
