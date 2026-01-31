@@ -27,3 +27,4 @@ export const DOORWAY_HEIGHT = 3;
 // FPS tracking
 export const FPS_SAMPLE_SIZE = 60;
 export const FPS_UPDATE_INTERVAL = 10; // Calculate FPS every N frames
+export const FPS_COUNTER_UPDATE_FREQUENCY = 30; // Update every 30 frames for lower overhead

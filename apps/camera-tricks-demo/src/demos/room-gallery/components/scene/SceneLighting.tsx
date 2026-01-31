@@ -1,31 +1,23 @@
+/**
+ * Optimized Scene Lighting
+ * 
+ * Performance optimizations:
+ * - Only 2 lights total (ambient + directional)
+ * - No shadows (major performance killer)
+ * - High ambient intensity reduces need for multiple lights
+ */
 export function SceneLighting() {
   return (
     <>
-      {/* Ambient light for base illumination */}
-      <ambientLight intensity={0.3} />
+      {/* Strong ambient light - no shadows needed for small scene */}
+      <ambientLight intensity={1.2} />
       
-      {/* Single shadow-casting light for global shadows */}
+      {/* Single directional light for depth and definition */}
       <directionalLight
-        position={[50, 15, 10]}
-        intensity={0.5}
-        castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
-        shadow-camera-left={-60}
-        shadow-camera-right={60}
-        shadow-camera-top={15}
-        shadow-camera-bottom={-5}
-        shadow-camera-near={0.5}
-        shadow-camera-far={50}
+        position={[50, 20, 10]}
+        intensity={0.8}
+        castShadow={false}
       />
-      
-      {/* Non-shadow-casting directional lights for ambient illumination per room */}
-      <directionalLight position={[5, 10, 5]} intensity={0.4} />
-      <directionalLight position={[25, 10, 5]} intensity={0.4} />
-      <directionalLight position={[45, 10, 5]} intensity={0.4} />
-      <directionalLight position={[65, 10, 5]} intensity={0.4} />
-      <directionalLight position={[85, 10, 5]} intensity={0.4} />
-      <directionalLight position={[105, 10, 5]} intensity={0.4} />
     </>
   );
 }

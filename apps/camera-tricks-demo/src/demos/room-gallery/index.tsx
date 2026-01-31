@@ -1,126 +1,87 @@
-import { Canvas, useThree } from '@react-three/fiber';
-import { useState, useCallback, startTransition } from 'react';
-import { AdaptiveDpr, AdaptiveEvents, BakeShadows, PerformanceMonitor } from '@react-three/drei';
-
-// Hooks
-import { useCameraControl } from './hooks/useCameraControl';
-import { useRoomVisibility } from './hooks/useRoomVisibility';
-import { useRoomNavigation } from './hooks/useRoomNavigation';
+import { Canvas } from '@react-three/fiber';
+import { useState, useRef, useCallback } from 'react';
 
 // Configuration
-import { ROOMS, getDividingWallColors } from './config/rooms';
-import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV } from './config/constants';
+import { ROOMS } from './config/rooms';
+import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, CAMERA_MIN_X, CAMERA_MAX_X, DRAG_SENSITIVITY } from './config/constants';
 
-// Scene Components
-import { CameraController } from './components/scene/CameraController';
-import { SceneLighting } from './components/scene/SceneLighting';
-import { Room } from './components/scene/Room';
-import { DividingWall } from './components/scene/DividingWall';
-
-// Performance Helpers
-import { MovementRegression } from './performance/PerformanceHelpers';
-
-// UI Components
-import { FPSCounter } from './components/ui/FPSCounter';
+// Components
+import { Scene } from './components/scene/Scene';
 import { FPSDisplay } from './components/ui/FPSDisplay';
+import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { RoomHeader } from './components/ui/RoomHeader';
 import { RoomMinimap } from './components/ui/RoomMinimap';
 
-function Scene({ 
-  cameraX, 
-  isDragging, 
-  onFpsUpdate 
-}: { 
-  cameraX: number; 
-  isDragging: boolean;
-  onFpsUpdate: (fps: number) => void;
-}) {
-  const { isRoomVisible, isDividingWallVisible } = useRoomVisibility(cameraX);
-
-  return (
-    <>
-      <CameraController cameraX={cameraX} />
-      <FPSCounter onFpsUpdate={onFpsUpdate} />
-      
-      {/* Performance Optimizations */}
-      <AdaptiveDpr pixelated />
-      <AdaptiveEvents />
-      <BakeShadows />
-      <MovementRegression isDragging={isDragging} />
-      
-      <SceneLighting />
-
-      {/* Rooms - only render visible ones */}
-      {ROOMS.map((room, index) => 
-        isRoomVisible(room.offsetX) && (
-          <Room 
-            key={room.offsetX}
-            offsetX={room.offsetX} 
-            theme={room.theme}
-            isFirst={index === 0}
-            isLast={index === ROOMS.length - 1}
-          />
-        )
-      )}
-      
-      {/* Dividing walls between rooms - only render visible ones */}
-      {ROOMS.slice(0, -1).map((room, index) => {
-        const nextRoom = ROOMS[index + 1];
-        const wallPosition = (room.offsetX + nextRoom.offsetX) / 2;
-        const wallColors = getDividingWallColors(index);
-        
-        return isDividingWallVisible(room.offsetX, nextRoom.offsetX) && wallColors && (
-          <DividingWall 
-            key={wallPosition}
-            position={[wallPosition, 0, 0]} 
-            warmColor={wallColors.warmColor}
-            coolColor={wallColors.coolColor}
-          />
-        );
-      })}
-    </>
-  );
-}
-
+/**
+ * Room Gallery - Optimized Edition
+ * 
+ * A 3D room gallery with smooth camera movement and 60 FPS performance
+ * 
+ * Architecture:
+ * - Single source of truth (this file replaces old index.tsx and index-optimized.tsx)
+ * - Type-safe props throughout
+ * - Automatic room-component mapping via registry
+ * - Performance optimizations: merged geometry, instanced meshes, minimal lights
+ * 
+ * Performance targets:
+ * - 60 FPS steady
+ * - < 50 draw calls
+ * - < 16.67ms frame time
+ */
 export default function RoomGallery() {
+  // Performance monitoring
   const [fps, setFps] = useState(60);
-  const [dpr, setDpr] = useState(1.5);
+  const [drawCalls, setDrawCalls] = useState(0);
+  
+  // Camera state
+  const [cameraX, setCameraX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  // Refs for performance (avoid React re-renders)
+  const targetXRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, startCameraX: 0 });
 
-  // Performance degradation callback
-  const handleDecline = useCallback(() => {
-    setDpr((prev) => Math.max(0.5, prev - 0.5));
+  // Drag handlers - optimized for performance
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX, startCameraX: targetXRef.current };
   }, []);
 
-  // Performance improvement callback
-  const handleIncline = useCallback(() => {
-    setDpr((prev) => Math.min(2, prev + 0.5));
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    
+    const deltaX = e.clientX - dragStartRef.current.x;
+    const newCameraX = dragStartRef.current.startCameraX - deltaX * DRAG_SENSITIVITY;
+    const clampedX = Math.max(CAMERA_MIN_X, Math.min(CAMERA_MAX_X, newCameraX));
+    
+    // Update ref for CameraController (no React overhead)
+    targetXRef.current = clampedX;
+    
+    // Update React state for UI (minimap, header)
+    setCameraX(clampedX);
   }, []);
 
-  // Fallback for severe performance issues
-  const handleFallback = useCallback(() => {
-    setDpr(0.5);
+  const handlePointerUp = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
   }, []);
 
-  // Camera control with performance hooks
-  const {
-    cameraX,
-    isDragging,
-    handlePointerDown,
-    handlePointerMove,
-    handlePointerUp,
-    moveTo,
-  } = useCameraControl();
+  // Fast travel to specific room
+  const moveTo = useCallback((x: number) => {
+    targetXRef.current = x;
+    setCameraX(x);
+  }, []);
 
-  // Room navigation
-  const { getCurrentRoom } = useRoomNavigation(cameraX);
+  // Get current room based on camera position
+  const getCurrentRoom = useCallback(() => {
+    return ROOMS.reduce((prev, curr) => 
+      Math.abs(curr.offsetX - cameraX) < Math.abs(prev.offsetX - cameraX) ? curr : prev
+    );
+  }, [cameraX]);
+
   const currentRoom = getCurrentRoom();
-
-  // Room navigation with React 18 transition
-  const handleRoomClick = useCallback((offsetX: number) => {
-    startTransition(() => {
-      moveTo(offsetX);
-    });
-  }, [moveTo]);
 
   return (
     <div 
@@ -141,28 +102,30 @@ export default function RoomGallery() {
           position: [0, CAMERA_HEIGHT, CAMERA_Z_POSITION],
           fov: CAMERA_FOV,
         }}
-        shadows
-        dpr={dpr}
-        performance={{ min: 0.5 }}
-        frameloop="demand" // On-demand rendering
+        shadows={false} // Shadows completely disabled for performance
+        frameloop="demand" // On-demand rendering (only when camera moves)
+        gl={{ 
+          antialias: false, // Disabled for 20-30% performance gain
+          powerPreference: "high-performance",
+        }}
+        dpr={[1, 2]} // Adaptive DPR based on device
       >
-        <PerformanceMonitor
-          onIncline={handleIncline}
-          onDecline={handleDecline}
-          onFallback={handleFallback}
-          flipflops={3}
-        >
-          <Scene cameraX={cameraX} isDragging={isDragging} onFpsUpdate={setFps} />
-        </PerformanceMonitor>
+        <Scene 
+          targetXRef={targetXRef}
+          cameraX={cameraX}
+          onFpsUpdate={setFps}
+          onDrawCallsUpdate={setDrawCalls}
+        />
       </Canvas>
 
       {/* UI Overlays */}
       <RoomHeader currentRoom={currentRoom} />
       <FPSDisplay fps={fps} />
+      <DrawCallDisplay calls={drawCalls} />
       <RoomMinimap 
         rooms={ROOMS} 
         currentRoom={currentRoom} 
-        onRoomClick={handleRoomClick}
+        onRoomClick={moveTo}
       />
     </div>
   );
