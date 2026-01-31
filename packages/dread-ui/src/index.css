@@ -1,6 +1,7 @@
 @import './assets/typekit.css';
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "react-day-picker/style.css";
 
 :root {
   --font-sans: filson-pro, sans-serif;
