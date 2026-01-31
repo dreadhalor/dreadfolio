@@ -44,6 +44,9 @@ export default function RoomGallery() {
 
   // Drag handlers - optimized for performance
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    // Prevent default touch behavior (scrolling) on mobile
+    e.preventDefault();
+    
     isDraggingRef.current = true;
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX, startCameraX: targetXRef.current };
@@ -51,6 +54,9 @@ export default function RoomGallery() {
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDraggingRef.current) return;
+    
+    // Prevent default touch behavior (scrolling) on mobile
+    e.preventDefault();
     
     const deltaX = e.clientX - dragStartRef.current.x;
     const newCameraX = dragStartRef.current.startCameraX - deltaX * DRAG_SENSITIVITY;
@@ -91,6 +97,9 @@ export default function RoomGallery() {
         background: '#000',
         cursor: isDragging ? 'grabbing' : 'grab',
         userSelect: 'none',
+        touchAction: 'none', // Disable native touch scrolling/zooming
+        WebkitUserSelect: 'none', // Disable text selection on iOS
+        WebkitTouchCallout: 'none', // Disable callout on iOS
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
