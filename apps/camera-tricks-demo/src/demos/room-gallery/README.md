@@ -87,12 +87,31 @@ room-gallery/
 1. Create component in `components/decorations/shared/`
 2. Use it in any room decoration file
 
-## 🎮 Performance Notes
+## 🎮 Performance Optimizations
 
-- Frustum culling active (only renders 1-2 visible rooms)
-- Shared resources ready for implementation (geometries/materials)
-- Instanced rendering utilities available
-- Single shadow-casting light for performance
+### Active Optimizations:
+- ✅ **On-Demand Rendering** - Only renders when scene changes (frameloop="demand")
+- ✅ **Frustum Culling** - Only renders visible rooms (1-2 at a time)
+- ✅ **AdaptiveDpr** - Automatically reduces resolution during performance drops
+- ✅ **BakeShadows** - Freezes shadow maps after first render
+- ✅ **PerformanceMonitor** - Auto-adjusts DPR based on device capability
+- ✅ **Movement Regression** - Temporarily reduces quality during camera drag
+- ✅ **Object Reuse** - Reuses Vector3 objects in render loop (no GC pressure)
+- ✅ **React 18 Transitions** - Defers expensive room navigation operations
+- ✅ **Shared Resources** - Geometries/materials pooled for reuse
+- ✅ **Single Shadow Light** - One shadow-casting light for all rooms
+- ✅ **AdaptiveEvents** - Optimizes pointer event handling
+
+### Performance Scaling:
+The app automatically adjusts quality based on device performance:
+- **High Performance** (60+ FPS): DPR up to 2.0, full effects
+- **Medium Performance** (30-60 FPS): DPR 1.0-1.5
+- **Low Performance** (<30 FPS): DPR 0.5, minimal effects
+- **Critical Fallback**: DPR 0.5 locked if performance degrades repeatedly
+
+### Future Optimizations Available:
+- Instanced rendering for repeated decorations (utilities ready)
+- Level of Detail (LOD) for distant objects
 
 ## 🧪 Testing
 
