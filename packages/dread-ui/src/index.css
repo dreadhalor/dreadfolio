@@ -3,6 +3,36 @@
 @import "tw-animate-css";
 @import "react-day-picker/style.css";
 
+/* Prevent hover effect from overriding selected day styles */
+.rdp-selected .rdp-day_button:hover {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Fix range middle date text visibility and prevent hover turning them black */
+td.rdp-range_middle button {
+  color: hsl(var(--foreground)) !important;
+  background-color: transparent !important;
+}
+
+td.rdp-range_middle button:hover {
+  color: hsl(var(--foreground)) !important;
+  background-color: transparent !important;
+}
+
+/* Fix range start/end cell backgrounds to be transparent */
+td.rdp-day-range-start[aria-selected="true"],
+td.rdp-day-range-end[aria-selected="true"] {
+  background-color: transparent !important;
+}
+
+/* Ensure range start/end buttons show primary background */
+td.rdp-day-range-start button,
+td.rdp-day-range-end button {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
 :root {
   --font-sans: filson-pro, sans-serif;
   --font-serif: moret, serif;

@@ -36,26 +36,33 @@ function Calendar({
         weekday: 'caption-1 text-muted-foreground w-8 text-center font-normal',
         week: 'flex w-full mt-2',
         day: cn(
-          '[&:has([aria-selected])]:bg-accent relative p-0 text-center focus-within:relative focus-within:z-20',
+          '[&[aria-selected]]:bg-accent relative p-0 text-center focus-within:relative focus-within:z-20',
+          '[&:not([aria-selected])]:hover:bg-accent [&:not([aria-selected])]:hover:text-accent-foreground [&:not([aria-selected])]:hover:rounded-full',
           props.mode === 'range'
-            ? '[&:has(>.day-range-end)]:rounded-r-full [&:has(>.day-range-start)]:rounded-l-full first:[&:has([aria-selected])]:rounded-l-full last:[&:has([aria-selected])]:rounded-r-full'
-            : '[&:has([aria-selected])]:rounded-full',
+            ? '[&.day-range-end]:rounded-r-full [&.day-range-start]:rounded-l-full first:[&[aria-selected]]:rounded-l-full last:[&[aria-selected]]:rounded-r-full'
+            : '[&[aria-selected]]:rounded-full',
         ),
-        day_button:
-          'h-8 w-8 rounded-full p-0 font-normal text-sm aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground',
+        day_button: 'h-8 w-8 rounded-full p-0 font-normal text-sm aria-selected:opacity-100',
         selected: cn(
-          'bg-primary text-primary-foreground rounded-full',
-          'hover:bg-primary hover:text-primary-foreground',
-          'focus:bg-primary focus:text-primary-foreground',
+          '[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:rounded-full',
+          '[&>button]:hover:bg-primary [&>button]:hover:text-primary-foreground',
+          '[&>button]:focus:bg-primary [&>button]:focus:text-primary-foreground',
         ),
-        today: cn('bg-accent text-accent-foreground rounded-full'),
-        outside: 'text-muted-foreground opacity-50',
-        disabled: 'text-muted-foreground opacity-50',
+        today: cn('[&>button]:bg-accent [&>button]:text-accent-foreground [&>button]:rounded-full'),
+        outside: '[&>button]:text-muted-foreground [&>button]:opacity-50',
+        disabled: '[&>button]:text-muted-foreground [&>button]:opacity-50',
         range_middle: cn(
-          'aria-selected:text-accent-foreground aria-selected:bg-transparent',
+          '[&>button]:!text-foreground [&>button]:!bg-transparent [&>button]:rounded-full',
+          '[&>button:hover]:!bg-transparent [&>button:hover]:!text-foreground',
         ),
-        range_start: 'day-range-start',
-        range_end: 'day-range-end',
+        range_start: cn(
+          'day-range-start !rounded-l-full',
+          '[&>button]:!bg-primary [&>button]:!text-primary-foreground [&>button]:rounded-full',
+        ),
+        range_end: cn(
+          'day-range-end !rounded-r-full',
+          '[&>button]:!bg-primary [&>button]:!text-primary-foreground [&>button]:rounded-full',
+        ),
         hidden: 'invisible',
         ...classNames,
       }}
