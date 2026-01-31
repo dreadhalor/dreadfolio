@@ -124,12 +124,17 @@ const TabsList = React.forwardRef<
           sliderRef.current.style.transform = `translateY(${activeTabElement.offsetTop}px)`;
           sliderRef.current.style.height = `${activeTabElement.offsetHeight}px`;
         }
-        // after updating the slider position, set isFirstRender to false
-        setIsFirstRender(false);
       }
     }
 
     updateSlider();
+    
+    // Enable transitions after two animation frames to ensure browser has painted
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsFirstRender(false);
+      });
+    });
 
     const observer = new MutationObserver(updateSlider);
     observer.observe((ref as React.MutableRefObject<HTMLDivElement>).current, {

@@ -2,6 +2,8 @@ import { cn } from '@repo/utils';
 import { Addition, Cell, CellValue, Elimination } from '../utils';
 import { Button, Input } from 'dread-ui';
 import { useBoard } from '../providers/board-context';
+import { useState } from 'react';
+import { CellFocusModal } from './cell-focus-modal';
 
 type CellProps = {
   cell: Cell;
@@ -19,6 +21,14 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
     setEditingPuzzle,
   } = useBoard();
   const isErrored = cell.hintValues.length === 0;
+  const [focusedCell, setFocusedCell] = useState<typeof cell | null>(null);
+
+  const handleCellClick = () => {
+    // Only open modal on touch devices and when not in editing mode
+    if ('ontouchstart' in window && !isEditing && !isSolved && !value) {
+      setFocusedCell(cell);
+    }
+  };
 
   const relevantEliminations = eliminations
     .filter((elimination) =>
@@ -69,23 +79,25 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
       : null;
 
   return (
-    <div
-      className={cn(
-        'relative h-10 w-10 items-center justify-center border border-slate-300 bg-white transition-all sm:h-12 sm:w-12 md:h-14 md:w-14',
-        value ? 'text-base font-semibold text-slate-900 sm:text-lg' : 'text-[8px] text-slate-400 sm:text-[9px] md:text-xs',
-        value ? 'flex' : 'grid grid-cols-3 grid-rows-3 place-items-center gap-0.5 p-0.5',
-        rowIndex % 3 === 2 && rowIndex < 8 && 'border-b-2 border-b-slate-400',
-        columnIndex % 3 === 2 && columnIndex < 8 && 'border-r-2 border-r-slate-400',
-        relevantEliminations.length > 0 && 'bg-red-100 shadow-[inset_0_0_0_2px_rgb(252_165_165)]',
-        relevantEliminationReferences.length > 0 &&
-          showPreview &&
-          'bg-green-100 shadow-[inset_0_0_0_2px_rgb(134_239_172)]',
-        isErrored && 'bg-red-500 text-white shadow-[inset_0_0_0_2px_rgb(220_38_38)]',
-        isSolved && 'pointer-events-none bg-green-50',
-        isEditing && 'flex',
-        !value && !isEditing && 'hover:bg-slate-50',
-      )}
-    >
+    <>
+      <div
+        onClick={handleCellClick}
+        className={cn(
+          'relative h-10 w-10 items-center justify-center border border-slate-300 bg-white transition-all sm:h-12 sm:w-12 md:h-14 md:w-14',
+          value ? 'text-base font-semibold text-slate-900 sm:text-lg' : 'text-[8px] text-slate-400 sm:text-[9px] md:text-xs',
+          value ? 'flex' : 'grid grid-cols-3 grid-rows-3 place-items-center gap-0.5 p-0.5',
+          rowIndex % 3 === 2 && rowIndex < 8 && 'border-b-2 border-b-slate-400',
+          columnIndex % 3 === 2 && columnIndex < 8 && 'border-r-2 border-r-slate-400',
+          relevantEliminations.length > 0 && 'bg-red-100 shadow-[inset_0_0_0_2px_rgb(252_165_165)]',
+          relevantEliminationReferences.length > 0 &&
+            showPreview &&
+            'bg-green-100 shadow-[inset_0_0_0_2px_rgb(134_239_172)]',
+          isErrored && 'bg-red-500 text-white shadow-[inset_0_0_0_2px_rgb(220_38_38)]',
+          isSolved && 'pointer-events-none bg-green-50',
+          isEditing && 'flex',
+          !value && !isEditing && 'hover:bg-slate-50 cursor-pointer active:bg-slate-100',
+        )}
+      >
       {isEditing ? (
         <Input
           className='h-full w-full items-center rounded-none border-0 p-0 text-center text-base font-semibold text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-400 sm:text-lg'
@@ -138,6 +150,8 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
         </>
       )}
     </div>
+    <CellFocusModal cell={focusedCell} onClose={() => setFocusedCell(null)} />
+    </>
   );
 };
 export { CellComponent as Cell };

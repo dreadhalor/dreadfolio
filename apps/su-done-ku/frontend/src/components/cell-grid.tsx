@@ -53,22 +53,22 @@ const CellGrid = () => {
 
   return (
     <div className='flex flex-col overflow-hidden rounded-lg shadow-xl ring-1 ring-slate-300'>
-      <GridTopAndBottom />
-      {boardToShow.map((row, rowIndex) => (
-        <div key={rowIndex} className='flex flex-nowrap'>
-          <GridLeftAndRight index={rowIndex} />
-          {row.map((cell, cellIndex) => (
-            <Cell
-              key={cellIndex}
-              cell={cell}
-              eliminations={eliminations}
-              additions={additions}
-            />
-          ))}
-          <GridLeftAndRight index={rowIndex} />
-        </div>
-      ))}
-      <GridTopAndBottom />
+        <GridTopAndBottom />
+        {boardToShow.map((row, rowIndex) => (
+          <div key={rowIndex} className='flex flex-nowrap'>
+            <GridLeftAndRight index={rowIndex} />
+            {row.map((cell, cellIndex) => (
+              <Cell
+                key={cellIndex}
+                cell={cell}
+                eliminations={eliminations}
+                additions={additions}
+              />
+            ))}
+            <GridLeftAndRight index={rowIndex} />
+          </div>
+        ))}
+        <GridTopAndBottom />
     </div>
   );
 };

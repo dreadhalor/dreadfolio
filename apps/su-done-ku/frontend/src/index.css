@@ -25,11 +25,11 @@ html {
 }
 
 /* Add transform/width/height transitions only to specific elements that need them */
-[role="tablist"] > div:first-child,
+[role="tablist"] > div:first-child:not(.transition-none),
 .history-slider-tick {
-  transition-property: background-color, border-color, color, fill, stroke, transform, width, height, opacity !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-  transition-duration: 300ms !important;
+  transition-property: background-color, border-color, color, fill, stroke, transform, width, height, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 /* Remove transitions for button clicks to feel snappy */
