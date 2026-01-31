@@ -54,7 +54,7 @@ const sliderVariants = cva(
 
 const tabTriggerVariants = cva(
   [
-    'caption-1 ring-offset-background inline-flex min-h-0 items-center justify-center whitespace-nowrap px-3 py-0 transition-all',
+    'caption-1 ring-offset-background inline-flex min-h-0 items-center justify-center whitespace-nowrap px-3 py-0 transition-all cursor-pointer',
     'focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
   ],

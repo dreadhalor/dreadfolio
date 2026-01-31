@@ -71,23 +71,24 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
   return (
     <div
       className={cn(
-        'bg-background relative h-12 w-12 items-center justify-center border border-black',
-        value ? 'text-black' : 'text-gray-400',
-        value ? 'flex' : 'grid grid-cols-3 grid-rows-3 place-items-center',
-        rowIndex % 3 === 2 && rowIndex < 8 && 'border-b-4',
-        columnIndex % 3 === 2 && columnIndex < 8 && 'border-r-4',
-        relevantEliminations.length > 0 && 'bg-red-200',
+        'relative h-10 w-10 items-center justify-center border border-slate-300 bg-white transition-all sm:h-12 sm:w-12 md:h-14 md:w-14',
+        value ? 'text-base font-semibold text-slate-900 sm:text-lg' : 'text-[8px] text-slate-400 sm:text-[9px] md:text-xs',
+        value ? 'flex' : 'grid grid-cols-3 grid-rows-3 place-items-center gap-0.5 p-0.5',
+        rowIndex % 3 === 2 && rowIndex < 8 && 'border-b-2 border-b-slate-400',
+        columnIndex % 3 === 2 && columnIndex < 8 && 'border-r-2 border-r-slate-400',
+        relevantEliminations.length > 0 && 'bg-red-100 shadow-[inset_0_0_0_2px_rgb(252_165_165)]',
         relevantEliminationReferences.length > 0 &&
           showPreview &&
-          'bg-green-200',
-        isErrored && 'bg-red-500',
-        isSolved && 'pointer-events-none',
+          'bg-green-100 shadow-[inset_0_0_0_2px_rgb(134_239_172)]',
+        isErrored && 'bg-red-500 text-white shadow-[inset_0_0_0_2px_rgb(220_38_38)]',
+        isSolved && 'pointer-events-none bg-green-50',
         isEditing && 'flex',
+        !value && !isEditing && 'hover:bg-slate-50',
       )}
     >
       {isEditing ? (
         <Input
-          className='text-primary h-full w-full items-center rounded-none p-0 text-center'
+          className='h-full w-full items-center rounded-none border-0 p-0 text-center text-base font-semibold text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-400 sm:text-lg'
           value={editingPuzzle?.[rowIndex]?.[columnIndex] || ''}
           onChange={(e) => {
             // get the last character of the input
@@ -118,13 +119,13 @@ const CellComponent = ({ cell, eliminations, additions = [] }: CellProps) => {
                   key={hintValue}
                   variant='ghost'
                   className={cn(
-                    'h-[14px] w-[14px] rounded-sm p-0 text-xs font-normal transition-none',
-                    isEliminated && 'bg-red-500 text-white',
+                    'h-3 w-3 rounded p-0 text-[7px] font-medium transition-colors hover:bg-slate-200 sm:h-3.5 sm:w-3.5 sm:text-[8px] md:h-4 md:w-4 md:text-[10px]',
+                    isEliminated && 'bg-red-500 text-white hover:bg-red-600',
                     isReferenced &&
                       isPresent &&
                       showPreview &&
-                      'bg-green-500 text-white',
-                    isAdded && showPreview && 'bg-blue-400 text-white',
+                      'bg-green-500 text-white hover:bg-green-600',
+                    isAdded && showPreview && 'bg-blue-500 text-white hover:bg-blue-600',
                   )}
                   onClick={() => {
                     editCell(cell, hintValue, isEliminated || !isPresent);

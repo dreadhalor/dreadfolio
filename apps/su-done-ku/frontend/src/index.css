@@ -6,10 +6,31 @@ body,
   width: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+}
+
+html {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 #root {
-  color: white;
-  background-color: #242424;
+  min-height: 100vh;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, transform, width, height, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Remove transitions for button clicks to feel snappy */
+button:active,
+[role="button"]:active {
+  transition-duration: 0ms;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }

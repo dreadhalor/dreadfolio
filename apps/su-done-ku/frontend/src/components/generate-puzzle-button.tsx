@@ -1,44 +1,46 @@
 import {
   Button,
-  ChevronDown,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from 'dread-ui';
 import { useBoard } from '../providers/board-context';
+import { Sparkles, ChevronDown } from 'lucide-react';
+
 const GeneratePuzzleButton = () => {
   const { generatePuzzleWithApi } = useBoard();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className='w-full rounded-lg'>
-          <span className='ml-auto'>Generate Puzzle</span>
-          <ChevronDown className='ml-auto' />
+        <Button className='w-full rounded-lg shadow-sm' variant='outline'>
+          <Sparkles className='mr-2 h-4 w-4' />
+          Generate
+          <ChevronDown className='ml-2 h-4 w-4' />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className='dropdown-menu-content'>
+      <DropdownMenuContent className='w-full'>
         <DropdownMenuItem
           onClick={() => {
             generatePuzzleWithApi('easy');
           }}
         >
-          Easy
+          <span className='font-medium'>Easy</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             generatePuzzleWithApi('medium');
           }}
         >
-          Medium
+          <span className='font-medium'>Medium</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
             generatePuzzleWithApi('hard');
           }}
         >
-          Hard
+          <span className='font-medium'>Hard</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

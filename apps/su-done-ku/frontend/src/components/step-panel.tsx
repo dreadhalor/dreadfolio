@@ -9,8 +9,13 @@ import {
   Button,
   Card,
   CardContent,
+  CardHeader,
   Checkbox,
   Label,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
   useAchievements,
 } from 'dread-ui';
 import { useBoard } from '../providers/board-context';
@@ -18,33 +23,98 @@ import { executeStep, strategies } from '../utils';
 import { useState } from 'react';
 import { cn } from '@repo/utils';
 import { Strategy } from '../utils/algorithms';
+import { HelpCircle } from 'lucide-react';
+
+type TechniqueInfo = {
+  name: string;
+  description: string;
+  difficulty: 'basic' | 'intermediate' | 'advanced';
+};
+
+const techniqueInfo: Record<Strategy, TechniqueInfo> = {
+  crosshatch: {
+    name: 'Crosshatch',
+    description: 'Look for cells where only one number can go by scanning rows, columns, and boxes.',
+    difficulty: 'basic',
+  },
+  hiddenSingles: {
+    name: 'Hidden Singles',
+    description: 'Find numbers that can only appear in one cell within a row, column, or box.',
+    difficulty: 'basic',
+  },
+  nakedPairs: {
+    name: 'Naked Pairs',
+    description: 'Two cells with only the same two candidates can eliminate those candidates from other cells.',
+    difficulty: 'intermediate',
+  },
+  nakedTriples: {
+    name: 'Naked Triples',
+    description: 'Three cells with only the same three candidates eliminate those candidates from others.',
+    difficulty: 'intermediate',
+  },
+  hiddenPairs: {
+    name: 'Hidden Pairs',
+    description: 'Find pairs of numbers that can only appear in two cells, eliminating other candidates.',
+    difficulty: 'intermediate',
+  },
+  hiddenTriples: {
+    name: 'Hidden Triples',
+    description: 'Find triples of numbers that can only appear in three cells.',
+    difficulty: 'intermediate',
+  },
+  nakedQuads: {
+    name: 'Naked Quads',
+    description: 'Four cells with only the same four candidates eliminate those from other cells.',
+    difficulty: 'advanced',
+  },
+  hiddenQuads: {
+    name: 'Hidden Quads',
+    description: 'Find quads of numbers that can only appear in four cells.',
+    difficulty: 'advanced',
+  },
+  pointingPairs: {
+    name: 'Pointing Pairs',
+    description: 'If a candidate appears only twice in a box and they\'re in the same row/column, eliminate from that line.',
+    difficulty: 'advanced',
+  },
+  pointingTriples: {
+    name: 'Pointing Triples',
+    description: 'Like pointing pairs but with three candidates in a line within a box.',
+    difficulty: 'advanced',
+  },
+  boxLineReduction: {
+    name: 'Box/Line Reduction',
+    description: 'If a candidate in a row/column only appears within one box, eliminate from rest of box.',
+    difficulty: 'advanced',
+  },
+};
 
 type StepControlProps = {
-  id: string;
+  id: Strategy;
   checked: boolean;
-  name: string;
   onCheckedChange: (checked: boolean) => void;
 };
 const StepControl = ({
   id,
   checked,
-  name,
   onCheckedChange,
 }: StepControlProps) => {
   const { step } = useBoard();
-  const failed = step?.failedStrategies?.includes(id as Strategy);
-  const skipped = step?.skippedStrategies?.includes(id as Strategy);
+  const failed = step?.failedStrategies?.includes(id);
+  const skipped = step?.skippedStrategies?.includes(id);
   const variant: BadgeVariants = failed
     ? 'destructive'
     : skipped
       ? 'caution'
       : 'default';
+  
+  const info = techniqueInfo[id];
 
   return (
     <div
       className={cn(
-        'flex h-8 flex-nowrap items-center gap-2 px-2',
-        step?.type === id && 'bg-yellow-200',
+        'group flex h-9 flex-nowrap items-center gap-2 rounded-md px-3 transition-colors hover:bg-slate-50',
+        step?.type === id && 'bg-blue-50 ring-1 ring-blue-200',
       )}
     >
       <Checkbox
@@ -56,10 +126,24 @@ const StepControl = ({
           }
         }}
       />
-      <Label htmlFor={id}>{name}</Label>
+      <Label htmlFor={id} className='flex-1 cursor-pointer text-sm'>
+        {info.name}
+      </Label>
+      <TooltipProvider>
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <button className='opacity-0 transition-opacity group-hover:opacity-60'>
+              <HelpCircle className='h-3.5 w-3.5 text-slate-400' />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side='left' className='max-w-[240px] bg-slate-800 text-white'>
+            <p className='text-xs leading-relaxed'>{info.description}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <div className='ml-auto'>
         {(skipped || failed) && (
-          <Badge variant={variant}>
+          <Badge variant={variant} className='text-xs'>
             {failed && 'failed'}
             {skipped && 'skipped'}
           </Badge>
@@ -89,7 +173,7 @@ const StepPanel = () => {
     strategy === 'nakedPairs' ||
     strategy === 'nakedTriples' ||
     strategy === 'nakedQuads';
-  const handleStrategyChange = (strategy: string) => (checked: boolean) => {
+  const handleStrategyChange = (strategy: Strategy) => (checked: boolean) => {
     setStrategyStates((prev) => ({ ...prev, [strategy]: checked }));
     if (isNakedLockedSet(strategy) && !checked)
       unlockAchievementById('uncheck_naked_pairs', 'su-done-ku');
@@ -147,32 +231,81 @@ const StepPanel = () => {
     unlockAchievementById('stump_solver', 'su-done-ku');
   };
 
+  const basicTechniques: Strategy[] = ['crosshatch', 'hiddenSingles'];
+  const intermediateTechniques: Strategy[] = ['nakedPairs', 'nakedTriples', 'hiddenPairs', 'hiddenTriples'];
+  const advancedTechniques: Strategy[] = ['nakedQuads', 'hiddenQuads', 'pointingPairs', 'pointingTriples', 'boxLineReduction'];
+
   return (
-    <Card className='w-[250px] select-none'>
-      <CardContent noHeader className='flex flex-col justify-center p-1'>
-        <Accordion type='single' defaultValue='strategies' collapsible>
-          <AccordionItem value='strategies' className='border-none'>
-            <AccordionHeader className='flex w-full flex-nowrap'>
-              <Button
-                className={cn(
-                  'flex-1 rounded-lg',
-                  isSolved && 'bg-green-500',
-                  isErrored && 'bg-red-500',
-                )}
-                onClick={() => advanceStep()}
-                disabled={isSolved || isErrored || isEditing}
-              >
-                {isSolved ? 'Solved!' : isErrored ? 'Error!' : 'Take Step'}
-              </Button>
-              <AccordionTrigger className='flex-grow-0 p-1' />
+    <Card className='w-full shadow-lg'>
+      <CardHeader className='text-sm font-semibold text-slate-700'>
+        Solving Techniques
+      </CardHeader>
+      <CardContent className='space-y-4'>
+        {/* Take Step Button */}
+        <Button
+          className={cn(
+            'w-full rounded-lg text-base font-semibold shadow-sm transition-all',
+            isSolved && 'bg-green-500 hover:bg-green-600',
+            isErrored && 'bg-red-500 hover:bg-red-600',
+            !isSolved && !isErrored && 'bg-blue-600 hover:bg-blue-700',
+          )}
+          onClick={() => advanceStep()}
+          disabled={isSolved || isErrored || isEditing}
+          size='lg'
+        >
+          {isSolved ? '✓ Solved!' : isErrored ? '✗ Error!' : 'Take Step →'}
+        </Button>
+
+        {/* Grouped Techniques */}
+        <Accordion type='multiple' defaultValue={['basic', 'intermediate', 'advanced']} className='space-y-2'>
+          <AccordionItem value='basic' className='rounded-lg border'>
+            <AccordionHeader>
+              <AccordionTrigger className='px-3 py-2 text-sm font-medium text-slate-700 hover:no-underline'>
+                Basic Techniques
+              </AccordionTrigger>
             </AccordionHeader>
-            <AccordionContent className='py-1'>
-              {Object.entries(strategyStates).map(([strategy, checked]) => (
+            <AccordionContent className='space-y-1 px-2 pb-2'>
+              {basicTechniques.map((strategy) => (
                 <StepControl
                   key={strategy}
                   id={strategy}
-                  checked={checked}
-                  name={strategy}
+                  checked={strategyStates[strategy]}
+                  onCheckedChange={handleStrategyChange(strategy)}
+                />
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value='intermediate' className='rounded-lg border'>
+            <AccordionHeader>
+              <AccordionTrigger className='px-3 py-2 text-sm font-medium text-slate-700 hover:no-underline'>
+                Intermediate Techniques
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className='space-y-1 px-2 pb-2'>
+              {intermediateTechniques.map((strategy) => (
+                <StepControl
+                  key={strategy}
+                  id={strategy}
+                  checked={strategyStates[strategy]}
+                  onCheckedChange={handleStrategyChange(strategy)}
+                />
+              ))}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value='advanced' className='rounded-lg border'>
+            <AccordionHeader>
+              <AccordionTrigger className='px-3 py-2 text-sm font-medium text-slate-700 hover:no-underline'>
+                Advanced Techniques
+              </AccordionTrigger>
+            </AccordionHeader>
+            <AccordionContent className='space-y-1 px-2 pb-2'>
+              {advancedTechniques.map((strategy) => (
+                <StepControl
+                  key={strategy}
+                  id={strategy}
+                  checked={strategyStates[strategy]}
                   onCheckedChange={handleStrategyChange(strategy)}
                 />
               ))}
