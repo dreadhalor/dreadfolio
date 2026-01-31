@@ -111,7 +111,6 @@ const TabsList = React.forwardRef<
   const [isFirstRender, setIsFirstRender] = useState(true);
 
   useLayoutEffect(() => {
-    // technically doesn't run on window resize, but we're ignoring that
     function updateSlider() {
       const container = ref.current;
       const activeTab = container?.querySelector('[data-state="active"]');
@@ -136,12 +135,32 @@ const TabsList = React.forwardRef<
       });
     });
 
+    // Throttle resize updates to once per animation frame (60fps max)
+    let resizeTimeout: number | null = null;
+    const handleResize = () => {
+      if (resizeTimeout === null) {
+        resizeTimeout = requestAnimationFrame(() => {
+          updateSlider();
+          resizeTimeout = null;
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     const observer = new MutationObserver(updateSlider);
     observer.observe((ref as React.MutableRefObject<HTMLDivElement>).current, {
       attributes: true,
       subtree: true,
     });
-    return () => observer.disconnect();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimeout !== null) {
+        cancelAnimationFrame(resizeTimeout);
+      }
+      observer.disconnect();
+    };
   }, [ref, orientation]);
 
   return (
