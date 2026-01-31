@@ -1,28 +1,32 @@
 import { ROOMS, getDividingWallColors } from '../../config/rooms';
 import { getThemeColors } from '../../config/themes';
 import { getRoomComponent } from '../../config/registry';
-import { SceneProps } from '../../types/props';
 
-import { CameraController } from './CameraController';
 import { SceneLighting } from './SceneLighting';
 import { RoomStructure } from './RoomStructure';
 import { DividingWall } from './DividingWall';
 import { FPSCounter } from '../ui/FPSCounter';
 import { DrawCallMonitor } from '../../performance/DrawCallMonitor';
 
+interface SceneProps {
+  onFpsUpdate: (fps: number) => void;
+  onDrawCallsUpdate: (calls: number) => void;
+}
+
 /**
  * Scene Component
- * Orchestrates all 3D elements: camera, lighting, rooms, walls
+ * Orchestrates all 3D elements: lighting, rooms, walls
+ * 
+ * Camera control moved to SplitCameraRenderer for split-screen rendering
  * 
  * Performance considerations:
- * - Renders all rooms (frustum culling removed for simplicity with 6 rooms)
+ * - Renders all rooms (6 total)
  * - Uses optimized room components (merged geometry, instanced meshes)
- * - Minimal React overhead with ref-based camera control
+ * - Scene rendered twice per frame (once for each camera viewport)
  */
-export function Scene({ targetXRef, cameraX, onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
+export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
   return (
     <>
-      <CameraController targetXRef={targetXRef} />
       <FPSCounter onFpsUpdate={onFpsUpdate} />
       <DrawCallMonitor onUpdate={onDrawCallsUpdate} />
       

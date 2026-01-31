@@ -7,25 +7,27 @@ import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, CAMERA_MIN_X, CAMERA_MAX_
 
 // Components
 import { Scene } from './components/scene/Scene';
+import { SplitCameraRenderer } from './components/scene/SplitCameraRenderer';
 import { FPSDisplay } from './components/ui/FPSDisplay';
 import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { RoomHeader } from './components/ui/RoomHeader';
 import { RoomMinimap } from './components/ui/RoomMinimap';
 
 /**
- * Room Gallery - Optimized Edition
+ * Room Gallery - Split Camera Edition
  * 
- * A 3D room gallery with smooth camera movement and 60 FPS performance
+ * A 3D room gallery with split-screen view of adjacent rooms and 60 FPS performance
  * 
  * Architecture:
- * - Single source of truth (this file replaces old index.tsx and index-optimized.tsx)
+ * - Split-camera rendering: left half shows left 50% of left camera, right half shows right 50% of right camera
+ * - Two cameras positioned one ROOM_WIDTH apart, moving in tandem
  * - Type-safe props throughout
  * - Automatic room-component mapping via registry
  * - Performance optimizations: merged geometry, instanced meshes, minimal lights
  * 
  * Performance targets:
- * - 60 FPS steady
- * - < 50 draw calls
+ * - 60 FPS steady (even with dual rendering)
+ * - < 50 draw calls per viewport
  * - < 16.67ms frame time
  */
 export default function RoomGallery() {
@@ -107,23 +109,23 @@ export default function RoomGallery() {
       onPointerLeave={handlePointerUp}
     >
       <Canvas
-        camera={{ 
-          position: [0, CAMERA_HEIGHT, CAMERA_Z_POSITION],
-          fov: CAMERA_FOV,
-        }}
+        camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
         frameloop="always" // Always render for animations/particles
         gl={{ 
           antialias: false, // Disabled for 20-30% performance gain
           powerPreference: "high-performance",
+          autoClear: false, // We manually clear in SplitCameraRenderer
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
       >
         <Scene 
-          targetXRef={targetXRef}
-          cameraX={cameraX}
           onFpsUpdate={setFps}
           onDrawCallsUpdate={setDrawCalls}
+        />
+        <SplitCameraRenderer 
+          targetXRef={targetXRef}
+          onCameraUpdate={setCameraX}
         />
       </Canvas>
 
