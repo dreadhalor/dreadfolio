@@ -37,7 +37,7 @@ const HistorySlider = () => {
             <Fragment key={index}>
               <div
                 className={cn(
-                  'absolute left-0 top-0 h-full rounded-full transition-all',
+                  'history-slider-tick absolute left-0 top-0 h-full rounded-full',
                   type === 'manual' ? 'bg-blue-400' : 'bg-slate-300',
                   index === sliderValue && 'scale-125 bg-blue-500',
                 )}

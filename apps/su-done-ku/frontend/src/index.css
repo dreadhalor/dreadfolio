@@ -19,9 +19,17 @@ html {
 
 /* Smooth transitions for all interactive elements */
 * {
-  transition-property: background-color, border-color, color, fill, stroke, transform, width, height, opacity;
+  transition-property: background-color, border-color, color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+/* Add transform/width/height transitions only to specific elements that need them */
+[role="tablist"] > div:first-child,
+.history-slider-tick {
+  transition-property: background-color, border-color, color, fill, stroke, transform, width, height, opacity !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-duration: 300ms !important;
 }
 
 /* Remove transitions for button clicks to feel snappy */
