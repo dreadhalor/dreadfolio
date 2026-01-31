@@ -48,8 +48,9 @@ const CellGrid = () => {
   const { step, showPreview } = useBoard();
   const { eliminations, additions } = step || { eliminations: [] };
 
-  const boardToShow =
-    (showPreview ? step?.boardSnapshot : executeStep(step!)) || [];
+  const boardToShow = step
+    ? (showPreview ? step.boardSnapshot : executeStep(step))
+    : [];
 
   return (
     <div className='flex flex-col overflow-hidden rounded-xl shadow-xl ring-1 ring-slate-300'>

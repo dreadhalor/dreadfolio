@@ -130,19 +130,26 @@ export const parseBoard = (board: number[][]) =>
     row.map(
       (value, columnIndex) =>
         ({
-          hintValues: value === 0 ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : [value], // I don't think type checking is working here
+          hintValues: value === 0 ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : [value],
           rowIndex,
           columnIndex,
           boxIndex: Math.floor(rowIndex / 3) * 3 + Math.floor(columnIndex / 3),
-        }) as Cell,
+        }) as Cell, // Type assertion needed: value is runtime number, not compile-time CellValue
     ),
   );
 
 // an 81-character string that represents a sudoku board, where 0 represents an empty cell
-export const parseBoardString = (board: string) =>
-  chunk(
+export const parseBoardString = (board: string) => {
+  if (board.length !== 81) {
+    throw new Error(`Invalid puzzle string: expected 81 characters, got ${board.length}`);
+  }
+  
+  return chunk(
     board.split('').map((char, i) => {
       const value = Number(char);
+      if (isNaN(value) || value < 0 || value > 9) {
+        throw new Error(`Invalid puzzle character at position ${i}: ${char}`);
+      }
       return {
         hintValues: value === 0 ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : [value],
         rowIndex: Math.floor(i / 9),
@@ -153,13 +160,10 @@ export const parseBoardString = (board: string) =>
     }),
     9,
   );
+};
 // parse results of our API call
 export const parseAPIBoard = (res: ApiResponseBody) =>
   parseBoardString(res.puzzle.puzzle);
-
-// we're not actually using this anymore
-export const sortCells = (a: Cell, b: Cell | undefined) =>
-  b ? 10 * (a.rowIndex - b.rowIndex) + (a.columnIndex - b.columnIndex) : -1;
 
 export type HintCounts = {
   hint: CellValue;
@@ -290,17 +294,27 @@ export const createEmptyBoard = () =>
 export const createEmptyEditingPuzzle = () =>
   Array.from({ length: 9 }).map(() => Array.from({ length: 9 }).map(() => ''));
 
-export const parseEditingPuzzle = (editingPuzzle: string[][]) =>
-  editingPuzzle.map((row, rowIndex) =>
+export const parseEditingPuzzle = (editingPuzzle: string[][]) => {
+  if (editingPuzzle.length !== 9 || editingPuzzle.some(row => row.length !== 9)) {
+    throw new Error('Invalid puzzle dimensions: must be 9x9');
+  }
+  
+  return editingPuzzle.map((row, rowIndex) =>
     row.map(
-      (value, columnIndex) =>
-        ({
-          hintValues: value
-            ? [parseInt(value) as CellValue]
-            : [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      (value, columnIndex) => {
+        const parsed = value ? parseInt(value) : 0;
+        if (value && (isNaN(parsed) || parsed < 1 || parsed > 9)) {
+          throw new Error(`Invalid cell value at (${rowIndex}, ${columnIndex}): ${value}`);
+        }
+        return {
+          hintValues: parsed === 0
+            ? [1, 2, 3, 4, 5, 6, 7, 8, 9]
+            : [parsed as CellValue],
           rowIndex,
           columnIndex,
           boxIndex: Math.floor(rowIndex / 3) * 3 + Math.floor(columnIndex / 3),
-        }) as Cell,
+        } as Cell;
+      },
     ),
   );
+};

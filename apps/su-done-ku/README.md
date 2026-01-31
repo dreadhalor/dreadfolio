@@ -11,11 +11,14 @@ su-done-ku is an educational Sudoku solver that visualizes how various solving a
 ## ✨ Features
 
 - **🎯 Interactive Sudoku Grid** - Click cells to edit, input numbers manually
-- **🤖 10 Solving Algorithms** - Implements all major human-solving techniques
+- **📱 Mobile-Optimized** - Touch-friendly cell modal for easier candidate toggling on mobile
+- **🤖 11 Solving Algorithms** - Implements all major human-solving techniques
 - **📽️ Step-by-Step Visualization** - Watch the solver explain each logical move
 - **⏮️ History Slider** - Scrub through solving steps backwards and forwards
-- **📊 Algorithm Breakdown** - See which algorithms were used and when
+- **📊 Algorithm Breakdown** - See which algorithms were used and when with success badges
 - **🎲 Random Puzzle Generator** - Get fresh puzzles at easy, medium, or hard difficulty
+- **🔔 Toast Notifications** - User-friendly feedback for actions and errors
+- **💾 Loading States** - Clear feedback when generating puzzles
 - **📥 Import/Export** - Load external puzzles or share your own
 - **🧪 Comprehensive Tests** - Vitest test suite ensures algorithm correctness
 
@@ -43,8 +46,9 @@ su-done-ku is an educational Sudoku solver that visualizes how various solving a
 - **Language**: TypeScript (strict mode)
 - **Framework**: React 18.3
 - **Build Tool**: Vite 5.4
-- **Styling**: Tailwind CSS + custom SCSS
-- **UI Components**: dread-ui (workspace package)
+- **Styling**: Tailwind CSS 4 + custom CSS
+- **UI Components**: dread-ui (workspace package) with Radix UI primitives
+- **Notifications**: Sonner toast library
 - **Testing**: Vitest 2.1
 - **Linting**: ESLint extending @repo/config
 
@@ -134,23 +138,23 @@ su-done-ku/
 ## 🎮 How to Use
 
 1. **Load a Puzzle**
-   - Click "Generate Puzzle" and select difficulty
-   - Or "Import Puzzle" to paste a Sudoku string
-   - Or "Load Example" to use a built-in puzzle
+   - Click "Generate Puzzle" and select difficulty (Easy, Medium, or Hard)
+   - Or click "Edit" to manually enter your own puzzle
 
 2. **Manual Solving**
-   - Click any cell to select it
-   - Type a number (1-9) to fill
-   - Use backspace/delete to clear
+   - Click any cell to toggle candidate numbers
+   - On mobile, cells open a modal with larger tap targets
+   - Watch for red highlights showing eliminations and green for references
 
 3. **Watch the Solver**
-   - Let the algorithms solve step-by-step
-   - Read the description panel to understand each move
-   - Use the history slider to review past steps
+   - Enable/disable specific solving techniques in the accordion
+   - Click "Take Step" to apply the next logical deduction
+   - Read the "Last Step" card to understand the logic
+   - Use the history slider to review and navigate through all steps
 
 4. **Preview Mode**
-   - Toggle to see all candidate numbers in cells
-   - Helps visualize algorithm logic
+   - Toggle "Show Preview" to see candidates before/after elimination
+   - Helps visualize algorithm logic and cell interactions
 
 ---
 
@@ -256,7 +260,6 @@ pnpm start
 
 - **Solver Coverage**: Implements human-logic algorithms only (no brute-force)
 - **Very Hard Puzzles**: Some expert-level puzzles require advanced techniques not yet implemented (X-Wing, Swordfish, etc.)
-- **Mobile UX**: Optimized for desktop, mobile experience could be improved
 
 ---
 
@@ -266,9 +269,9 @@ pnpm start
 - [ ] Hint system for manual solving
 - [ ] Timer and scoring system
 - [ ] User puzzle upload and saving
-- [ ] Mobile-optimized UI
 - [ ] Dark mode
 - [ ] Puzzle difficulty rating system
+- [ ] Undo/redo for manual edits
 
 ---
 

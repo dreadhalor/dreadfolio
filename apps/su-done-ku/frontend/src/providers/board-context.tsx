@@ -34,12 +34,13 @@ type BoardContextType = {
   editCell: (cell: Cell, hintValue: CellValue, enabled: boolean) => void;
   isSolved: boolean;
   isErrored: boolean;
-  generatePuzzleWithApi: (difficulty?: string) => void;
+  generatePuzzleWithApi: (difficulty?: string) => Promise<void>;
   isEditing: boolean;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   editingPuzzle: string[][];
   setEditingPuzzle: React.Dispatch<React.SetStateAction<string[][]>>;
   loadEditingPuzzle: () => void;
+  isGenerating: boolean;
 };
 
 export const BoardContext = createContext<BoardContextType>(
@@ -70,6 +71,7 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
   const [isSolved, setIsSolved] = useState<boolean>(false);
   const [isErrored, setIsErrored] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [editingPuzzle, setEditingPuzzle] = useState<string[][]>(
     createEmptyEditingPuzzle(),
   );
@@ -165,7 +167,9 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
   };
 
   const editCell = (cell: Cell, hintValue: CellValue, enabled: boolean) => {
-    const _step = _editCell(executeStep(step!), cell, hintValue, enabled);
+    if (!step) return;
+    
+    const _step = _editCell(executeStep(step), cell, hintValue, enabled);
     const additions = _step.additions?.length ?? 0;
     const eliminations = _step.eliminations?.length ?? 0;
     if (additions || eliminations) {
@@ -178,13 +182,21 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
 
   const generatePuzzleWithApi = async (difficulty?: string) => {
     const base = getBackendBaseUrl(import.meta.env.PROD);
+    setIsGenerating(true);
+    
     try {
-      const response = (await fetch(
+      const response = await fetch(
         `${base}/su-done-ku/api/random${
           difficulty ? `?difficulty=${difficulty}` : ''
         }`,
-      ).then((res) => res.json())) as ApiResponseBody;
-      const puzzle = parseAPIBoard(response);
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Failed to generate puzzle: ${response.statusText}`);
+      }
+      
+      const data = (await response.json()) as ApiResponseBody;
+      const puzzle = parseAPIBoard(data);
       const initStep: Step = {
         type: 'start',
         boardSnapshot: JSON.parse(JSON.stringify(puzzle)),
@@ -192,6 +204,11 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
       };
       resetSteps();
       addStep(initStep);
+      
+      // Note: Using dynamic import to avoid bundling toast in provider
+      const { toast } = await import('sonner');
+      toast.success(`${difficulty ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1) : 'Random'} puzzle loaded!`);
+      
       switch (difficulty) {
         case 'easy':
           unlockAchievementById('generate_easy_puzzle', 'su-done-ku');
@@ -206,7 +223,11 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
           break;
       }
     } catch (e) {
-      console.error(e);
+      console.error('Failed to generate puzzle:', e);
+      const { toast } = await import('sonner');
+      toast.error('Failed to generate puzzle. Please try again.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -232,6 +253,7 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
         editingPuzzle,
         setEditingPuzzle,
         loadEditingPuzzle,
+        isGenerating,
       }}
     >
       {children}

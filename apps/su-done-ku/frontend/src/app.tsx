@@ -16,6 +16,7 @@ function App() {
   const { resetSteps, addStep } = useBoard();
 
   useEffect(() => {
+    // Initialize empty board on mount (intentionally run once)
     const initStep: Step = {
       type: 'start',
       boardSnapshot: JSON.parse(JSON.stringify(createEmptyBoard())),
@@ -23,7 +24,7 @@ function App() {
     };
     resetSteps();
     addStep(initStep);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- Only run on mount to initialize board
 
   return (
     <div className='flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-100'>

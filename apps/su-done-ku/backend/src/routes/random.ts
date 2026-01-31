@@ -16,9 +16,16 @@ const getRandomPuzzle = (filePath: string): Promise<Puzzle> => {
       const lines = data.trim().split('\n');
       const randomLine = lines[Math.floor(Math.random() * lines.length)];
       if (randomLine) {
-        const [sha, puzzle, rating] = randomLine
+        const parts = randomLine
           .split(' ')
-          .filter((predicate) => predicate !== '') as [string, string, string];
+          .filter((predicate) => predicate !== '');
+        
+        if (parts.length !== 3) {
+          reject(new Error(`Invalid puzzle format: expected 3 parts, got ${parts.length}`));
+          return;
+        }
+        
+        const [sha, puzzle, rating] = parts as [string, string, string];
         resolve({ sha, rating, puzzle });
       } else {
         reject(new Error('No random line found.'));

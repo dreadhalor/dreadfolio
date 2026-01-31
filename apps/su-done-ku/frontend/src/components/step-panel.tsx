@@ -278,7 +278,7 @@ const StepPanel = () => {
                 Basic Techniques
               </AccordionTrigger>
             </AccordionHeader>
-            <AccordionContent className='space-y-2 px-2 pb-2'>
+            <AccordionContent className='space-y-2 p-2'>
               {basicTechniques.map((strategy) => (
                 <StepControl
                   key={strategy}
@@ -296,7 +296,7 @@ const StepPanel = () => {
                 Intermediate Techniques
               </AccordionTrigger>
             </AccordionHeader>
-            <AccordionContent className='space-y-2 px-2 pb-2'>
+            <AccordionContent className='space-y-2 p-2'>
               {intermediateTechniques.map((strategy) => (
                 <StepControl
                   key={strategy}
@@ -314,7 +314,7 @@ const StepPanel = () => {
                 Advanced Techniques
               </AccordionTrigger>
             </AccordionHeader>
-            <AccordionContent className='space-y-2 px-2 pb-2'>
+            <AccordionContent className='space-y-2 p-2'>
               {advancedTechniques.map((strategy) => (
                 <StepControl
                   key={strategy}

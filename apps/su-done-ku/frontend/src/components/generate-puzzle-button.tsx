@@ -6,10 +6,11 @@ import {
   DropdownMenuTrigger,
 } from 'dread-ui';
 import { useBoard } from '../providers/board-context';
-import { Sparkles, ChevronDown } from 'lucide-react';
+import { Sparkles, ChevronDown, Loader2 } from 'lucide-react';
+import { cn } from '@repo/utils';
 
 const GeneratePuzzleButton = () => {
-  const { generatePuzzleWithApi } = useBoard();
+  const { generatePuzzleWithApi, isGenerating } = useBoard();
 
   return (
     <DropdownMenu modal={false}>
@@ -18,10 +19,20 @@ const GeneratePuzzleButton = () => {
           type="button" 
           className='w-full rounded-lg shadow-sm' 
           variant='outline'
+          disabled={isGenerating}
         >
-          <Sparkles className='mr-2 h-4 w-4' />
-          Generate
-          <ChevronDown className='ml-2 h-4 w-4' />
+          {isGenerating ? (
+            <>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles className='mr-2 h-4 w-4' />
+              Generate
+              <ChevronDown className='ml-2 h-4 w-4' />
+            </>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-full'>
