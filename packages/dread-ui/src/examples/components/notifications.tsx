@@ -50,7 +50,7 @@ export function NotificationsDemo() {
               key={title}
             >
               <RadioGroupItem value={title.toLowerCase()} className='sr-only' />
-              <Icon className='mt-px h-5 w-5' />
+              <Icon className='ml-4 mt-px h-5 w-5' />
               <div className='flex flex-col gap-1'>
                 <p className='text-sm font-medium leading-none'>{title}</p>
                 <p className='text-muted-foreground text-sm'>{description}</p>
