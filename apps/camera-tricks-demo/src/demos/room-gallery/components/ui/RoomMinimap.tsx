@@ -1,5 +1,5 @@
 import { RoomData } from '../../types';
-import { ROOM_WIDTH, NUM_ROOMS } from '../../config/constants';
+import { CAMERA_SPACING, NUM_ROOMS } from '../../config/constants';
 import { calculateAllCameraPositions } from '../../utils/cameraCalculations';
 import { worldToMinimapX, MINIMAP_CONFIG, getRoomCardSpacing } from '../../utils/minimapMapping';
 
@@ -17,7 +17,7 @@ export function RoomMinimap({
   onRoomClick,
 }: RoomMinimapProps) {
   // Calculate camera positions using centralized utility
-  const cameraPositions = calculateAllCameraPositions(NUM_ROOMS, roomProgress, ROOM_WIDTH);
+  const cameraPositions = calculateAllCameraPositions(NUM_ROOMS, roomProgress, CAMERA_SPACING);
   return (
     <>
       <div
@@ -81,7 +81,10 @@ export function RoomMinimap({
           {/* Camera position markers */}
           {cameraPositions.map((cameraX, index) => {
             // Use centralized mapping utility
-            const minimapX = worldToMinimapX(cameraX, NUM_ROOMS, ROOM_WIDTH);
+            // Note: worldToMinimapX expects roomSpacing (distance between room centers)
+            // We need to pass the room spacing from the rooms array
+            const roomSpacing = rooms.length > 1 ? rooms[1].offsetX - rooms[0].offsetX : 100;
+            const minimapX = worldToMinimapX(cameraX, NUM_ROOMS, roomSpacing);
             
             return (
               <div

@@ -202,14 +202,22 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
     taskbar.applyMatrix4(tempObject.matrix);
     geometries.push(taskbar);
     
-    // Wood paneling on walls
+    // Wood paneling on walls (moved to side walls for visibility)
     for (let i = 0; i < 6; i++) {
       const panel = new THREE.BoxGeometry(3, 0.8, 0.08);
-      tempObject.position.set(offsetX - 7.5 + i * 3, 1 + (i % 2) * 0.2, 9.8);
+      const isLeft = i < 3;
+      tempObject.position.set(
+        offsetX + (isLeft ? -14 : 14), 
+        2 + (i % 3) * 1.5, 
+        -6 + (i % 3) * 6
+      );
+      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
       tempObject.updateMatrix();
       panel.applyMatrix4(tempObject.matrix);
       geometries.push(panel);
     }
+    
+    tempObject.rotation.y = 0;
     
     // Power strip under desk
     const powerStrip = new THREE.BoxGeometry(0.8, 0.08, 0.15);

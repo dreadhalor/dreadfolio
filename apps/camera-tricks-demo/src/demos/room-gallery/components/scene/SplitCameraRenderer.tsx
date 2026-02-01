@@ -1,7 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, ROOM_WIDTH, CAMERA_LERP_SPEED, NUM_ROOMS } from '../../config/constants';
+import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, CAMERA_SPACING, CAMERA_LERP_SPEED, NUM_ROOMS } from '../../config/constants';
 import { calculateCameraPosition } from '../../utils/cameraCalculations';
 
 interface SplitCameraRendererProps {
@@ -82,8 +82,8 @@ export function SplitCameraRenderer({ targetRoomProgressRef, onRoomProgressUpdat
           CAMERA_FAR_PLANE
         );
         // Initialize at starting positions (consistent with runtime formula)
-        // At roomProgress=0: camera[0]=0, camera[1]=10, camera[2]=20, etc.
-        const initialX = calculateCameraPosition(i, 0, ROOM_WIDTH);
+        // At roomProgress=0: camera[0]=0, camera[1]=CAMERA_SPACING, camera[2]=CAMERA_SPACING*2, etc.
+        const initialX = calculateCameraPosition(i, 0, CAMERA_SPACING);
         camera.position.set(initialX, CAMERA_HEIGHT, CAMERA_Z_POSITION);
         return camera;
       });
@@ -117,8 +117,9 @@ export function SplitCameraRenderer({ targetRoomProgressRef, onRoomProgressUpdat
     
     // UPDATE ALL CAMERA POSITIONS based on roomProgress
     // Uses centralized calculation utility for consistency
+    // Cameras spaced CAMERA_SPACING apart, offset by roomProgress * CAMERA_SPACING
     for (let i = 0; i < cameras.length; i++) {
-      cameras[i].position.x = calculateCameraPosition(i, currentProgress, ROOM_WIDTH);
+      cameras[i].position.x = calculateCameraPosition(i, currentProgress, CAMERA_SPACING);
     }
     
     // DERIVED VALUES from roomProgress:

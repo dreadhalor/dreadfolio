@@ -77,9 +77,9 @@ export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
       geometries.push(swatch);
     }
     
-    // Grid frame (design grid reference)
+    // Grid frame (design grid reference - moved to back wall)
     const gridFrame = new THREE.BoxGeometry(4, 3, 0.1);
-    tempObject.position.set(offsetX + 5, 3, 9.8);
+    tempObject.position.set(offsetX, 4, -14);
     tempObject.updateMatrix();
     gridFrame.applyMatrix4(tempObject.matrix);
     geometries.push(gridFrame);

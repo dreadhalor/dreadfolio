@@ -116,10 +116,10 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
     
     tempObject.rotation.z = 0;
     
-    // Film strip decoration panels on walls
+    // Film strip decoration panels on walls (moved to back wall)
     for (let i = 0; i < 4; i++) {
       const strip = new THREE.BoxGeometry(0.6, 2, 0.1);
-      tempObject.position.set(offsetX - 7 + i * 2, 2.5, 9.8);
+      tempObject.position.set(offsetX - 3 + i * 2, 4 + i * 0.5, -14);
       tempObject.updateMatrix();
       strip.applyMatrix4(tempObject.matrix);
       geometries.push(strip);
@@ -128,9 +128,9 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
       for (let j = 0; j < 8; j++) {
         const hole = new THREE.BoxGeometry(0.15, 0.15, 0.12);
         tempObject.position.set(
-          offsetX - 7 + i * 2,
-          1.5 + j * 0.25,
-          9.82
+          offsetX - 3 + i * 2,
+          3.5 + i * 0.5 + j * 0.25,
+          -13.98
         );
         tempObject.updateMatrix();
         hole.applyMatrix4(tempObject.matrix);

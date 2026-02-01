@@ -1,5 +1,5 @@
 import { RoomData, RoomTheme } from '../types';
-import { ROOM_WIDTH } from './constants';
+import { ROOM_SPACING } from './constants';
 import { PORTFOLIO_APPS } from './apps';
 
 // Map app IDs to their specific room themes
@@ -22,10 +22,10 @@ const APP_THEME_MAP: Record<string, RoomTheme> = {
 };
 
 // Generate rooms dynamically from portfolio apps
-// Each app gets its own themed room at 20-unit intervals
+// Each app gets its own themed room at ROOM_SPACING intervals
 export const ROOMS: RoomData[] = PORTFOLIO_APPS.map((app, index) => ({
   name: app.name,
-  offsetX: ROOM_WIDTH * index,
+  offsetX: ROOM_SPACING * index, // Rooms spaced by ROOM_SPACING (e.g., 0, 100, 200, 300...)
   theme: APP_THEME_MAP[app.id] || 'warm', // Use specific theme for each app
   color: app.color,
   appId: app.id,

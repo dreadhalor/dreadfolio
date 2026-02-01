@@ -91,15 +91,15 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     tempObject.rotation.x = 0;
     
-    // Anchor
+    // Anchor (moved away from camera)
     const anchorShaft = new THREE.CylinderGeometry(0.12, 0.12, 2, 8);
-    tempObject.position.set(offsetX + 7, 1.5, 6);
+    tempObject.position.set(offsetX + 7, 1.5, -6);
     tempObject.updateMatrix();
     anchorShaft.applyMatrix4(tempObject.matrix);
     geometries.push(anchorShaft);
     
     const anchorCrossbar = new THREE.BoxGeometry(1.2, 0.15, 0.15);
-    tempObject.position.set(offsetX + 7, 0.8, 6);
+    tempObject.position.set(offsetX + 7, 0.8, -6);
     tempObject.updateMatrix();
     anchorCrossbar.applyMatrix4(tempObject.matrix);
     geometries.push(anchorCrossbar);
@@ -107,7 +107,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     // Anchor flukes
     for (let i = 0; i < 2; i++) {
       const fluke = new THREE.ConeGeometry(0.3, 0.6, 4);
-      tempObject.position.set(offsetX + 7 + (i === 0 ? -0.6 : 0.6), 0.3, 6);
+      tempObject.position.set(offsetX + 7 + (i === 0 ? -0.6 : 0.6), 0.3, -6);
       tempObject.rotation.x = Math.PI / 2;
       tempObject.rotation.z = i === 0 ? -Math.PI / 4 : Math.PI / 4;
       tempObject.updateMatrix();
@@ -144,10 +144,10 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
       }
     }
     
-    // Porthole frames (circular windows)
+    // Porthole frames (circular windows - moved to side wall)
     for (let i = 0; i < 3; i++) {
       const portholeRim = new THREE.TorusGeometry(0.5, 0.08, 8, 16);
-      tempObject.position.set(offsetX - 2 + i * 2, 3, 9.8);
+      tempObject.position.set(offsetX + 14, 3 + i * 1.5, -5 + i * 5);
       tempObject.rotation.y = Math.PI / 2;
       tempObject.updateMatrix();
       portholeRim.applyMatrix4(tempObject.matrix);
@@ -156,10 +156,10 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     tempObject.rotation.y = 0;
     
-    // Fishing net bundles
+    // Fishing net bundles (moved away from camera)
     for (let i = 0; i < 3; i++) {
       const net = new THREE.BoxGeometry(0.6, 0.8, 0.4);
-      tempObject.position.set(offsetX + 2 + i * 1.5, 0.4, 7);
+      tempObject.position.set(offsetX + 2 + i * 1.5, 0.4, -7);
       tempObject.rotation.y = (Math.random() - 0.5) * 0.5;
       tempObject.updateMatrix();
       net.applyMatrix4(tempObject.matrix);
@@ -170,29 +170,29 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     // Navigation map table
     const mapTable = new THREE.BoxGeometry(1.5, 0.1, 1.2);
-    tempObject.position.set(offsetX - 4, 0.8, 4);
+    tempObject.position.set(offsetX - 4, 0.8, -4);
     tempObject.updateMatrix();
     mapTable.applyMatrix4(tempObject.matrix);
     geometries.push(mapTable);
     
     // Compass on map table
     const compassBase = new THREE.CylinderGeometry(0.08, 0.08, 0.03, 16);
-    tempObject.position.set(offsetX - 4, 0.85, 4);
+    tempObject.position.set(offsetX - 4, 0.85, -4);
     tempObject.updateMatrix();
     compassBase.applyMatrix4(tempObject.matrix);
     geometries.push(compassBase);
     
     // Compass needle
     const needle = new THREE.BoxGeometry(0.02, 0.15, 0.02);
-    tempObject.position.set(offsetX - 4, 0.93, 4);
+    tempObject.position.set(offsetX - 4, 0.93, -4);
     tempObject.updateMatrix();
     needle.applyMatrix4(tempObject.matrix);
     geometries.push(needle);
     
-    // Fishing rods leaning in corner
+    // Fishing rods leaning in corner (moved to side wall)
     for (let i = 0; i < 3; i++) {
       const rod = new THREE.CylinderGeometry(0.02, 0.02, 3, 6);
-      tempObject.position.set(offsetX - 8 + i * 0.15, 1.5, 9);
+      tempObject.position.set(offsetX + 14, 1.5, -8 + i * 2);
       tempObject.rotation.z = Math.PI / 6;
       tempObject.updateMatrix();
       rod.applyMatrix4(tempObject.matrix);
@@ -215,21 +215,21 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     clasp.applyMatrix4(tempObject.matrix);
     geometries.push(clasp);
     
-    // Lantern on hook
+    // Lantern on hook (moved away from camera)
     const lanternTop = new THREE.ConeGeometry(0.15, 0.2, 8);
-    tempObject.position.set(offsetX + 7, 3, 8);
+    tempObject.position.set(offsetX + 7, 3, -8);
     tempObject.updateMatrix();
     lanternTop.applyMatrix4(tempObject.matrix);
     geometries.push(lanternTop);
     
     const lanternBody = new THREE.CylinderGeometry(0.12, 0.12, 0.3, 8);
-    tempObject.position.set(offsetX + 7, 2.65, 8);
+    tempObject.position.set(offsetX + 7, 2.65, -8);
     tempObject.updateMatrix();
     lanternBody.applyMatrix4(tempObject.matrix);
     geometries.push(lanternBody);
     
     const lanternBase = new THREE.ConeGeometry(0.15, 0.15, 8);
-    tempObject.position.set(offsetX + 7, 2.4, 8);
+    tempObject.position.set(offsetX + 7, 2.4, -8);
     tempObject.rotation.x = Math.PI;
     tempObject.updateMatrix();
     lanternBase.applyMatrix4(tempObject.matrix);
@@ -239,7 +239,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     // Hook for lantern
     const hook = new THREE.TorusGeometry(0.08, 0.02, 8, 16, Math.PI);
-    tempObject.position.set(offsetX + 7, 3.2, 8);
+    tempObject.position.set(offsetX + 7, 3.2, -8);
     tempObject.rotation.z = Math.PI / 2;
     tempObject.updateMatrix();
     hook.applyMatrix4(tempObject.matrix);
@@ -247,10 +247,10 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     tempObject.rotation.z = 0;
     
-    // Rope coils on floor
+    // Rope coils on floor (moved away from camera)
     for (let i = 0; i < 3; i++) {
       const coil = new THREE.TorusGeometry(0.4, 0.08, 8, 16);
-      tempObject.position.set(offsetX - 6 + i * 2, 0.08, 6);
+      tempObject.position.set(offsetX - 6 + i * 2, 0.08, -6);
       tempObject.rotation.x = Math.PI / 2;
       tempObject.updateMatrix();
       coil.applyMatrix4(tempObject.matrix);
@@ -259,22 +259,22 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     tempObject.rotation.x = 0;
     
-    // Life preserver on wall
+    // Life preserver on wall (moved to side wall)
     const preserver = new THREE.TorusGeometry(0.6, 0.12, 8, 16);
-    tempObject.position.set(offsetX + 6, 2.5, 9.8);
+    tempObject.position.set(offsetX - 14, 4, 0);
     tempObject.rotation.y = Math.PI / 2;
     tempObject.updateMatrix();
     preserver.applyMatrix4(tempObject.matrix);
     geometries.push(preserver);
     
-    // Preserver cross straps
+    // Preserver cross straps (moved with preserver to side wall)
     for (let i = 0; i < 4; i++) {
       const strap = new THREE.BoxGeometry(0.05, 0.6, 0.05);
       const angle = (i / 4) * Math.PI * 2;
       tempObject.position.set(
-        offsetX + 6 + Math.cos(angle) * 0.3,
-        2.5 + Math.sin(angle) * 0.3,
-        9.8
+        offsetX - 14,
+        4 + Math.cos(angle) * 0.3,
+        Math.sin(angle) * 0.3
       );
       tempObject.rotation.y = Math.PI / 2;
       tempObject.rotation.z = angle;
@@ -350,9 +350,9 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
         </group>
       ))}
       
-      {/* Porthole glass (underwater blue tint) */}
+      {/* Porthole glass (underwater blue tint) - moved to side wall */}
       {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[offsetX - 2 + i * 2, 3, 9.7]}>
+        <mesh key={i} position={[offsetX - 14, 3 + i * 1.5, 0 + i * 2]} rotation={[0, Math.PI / 2, 0]}>
           <circleGeometry args={[0.5, 16]} />
           <meshMatcapMaterial matcap={matcap} color="#1a4d2e" transparent opacity={0.7} />
         </mesh>
@@ -362,13 +362,13 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
       <InstancedCrates offsetX={offsetX} count={12} color="#5a4a3a" />
       
       {/* Navigation map on table */}
-      <mesh position={[offsetX - 4, 0.85, 4]}>
+      <mesh position={[offsetX - 4, 0.85, -4]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[1.4, 1.1]} />
         <meshMatcapMaterial matcap={matcap} color="#d4c4a8" />
       </mesh>
       
       {/* Map grid lines */}
-      <group position={[offsetX - 4, 0.86, 4]} rotation={[-Math.PI / 2, 0, 0]}>
+      <group position={[offsetX - 4, 0.86, -4]} rotation={[-Math.PI / 2, 0, 0]}>
         {Array.from({ length: 7 }, (_, i) => {
           const pos = -0.6 + i * 0.2;
           return (

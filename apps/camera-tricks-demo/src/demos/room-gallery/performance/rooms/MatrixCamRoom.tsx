@@ -154,12 +154,15 @@ export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
     can.applyMatrix4(tempObject.matrix);
     geometries.push(can);
     
-    // Hacker manifesto poster frame
+    // Hacker manifesto poster frame (moved to side wall)
     const posterFrame = new THREE.BoxGeometry(1.5, 2, 0.08);
-    tempObject.position.set(offsetX - 6, 2.5, 9.8);
+    tempObject.position.set(offsetX - 14, 4, 0);
+    tempObject.rotation.y = Math.PI / 2;
     tempObject.updateMatrix();
     posterFrame.applyMatrix4(tempObject.matrix);
     geometries.push(posterFrame);
+    
+    tempObject.rotation.y = 0;
     
     // Floor cable trays
     for (let i = 0; i < 5; i++) {

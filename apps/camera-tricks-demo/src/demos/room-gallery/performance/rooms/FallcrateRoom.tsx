@@ -85,9 +85,9 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       }
     }
     
-    // Modern desk
+    // Modern desk (moved away from camera)
     const desk = new THREE.BoxGeometry(3, 0.15, 1.8);
-    tempObject.position.set(offsetX - 3, 1, 5);
+    tempObject.position.set(offsetX - 3, 1, -3);
     tempObject.updateMatrix();
     desk.applyMatrix4(tempObject.matrix);
     geometries.push(desk);
@@ -97,7 +97,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       const leg = new THREE.BoxGeometry(0.1, 1, 0.1);
       const xOff = i % 2 === 0 ? -1.4 : 1.4;
       const zOff = i < 2 ? -0.8 : 0.8;
-      tempObject.position.set(offsetX - 3 + xOff, 0.5, 5 + zOff);
+      tempObject.position.set(offsetX - 3 + xOff, 0.5, -3 + zOff);
       tempObject.updateMatrix();
       leg.applyMatrix4(tempObject.matrix);
       geometries.push(leg);
@@ -105,56 +105,56 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
     
     // Monitor on desk
     const monitor = new THREE.BoxGeometry(1.5, 1, 0.1);
-    tempObject.position.set(offsetX - 3, 1.6, 5);
+    tempObject.position.set(offsetX - 3, 1.6, -3);
     tempObject.updateMatrix();
     monitor.applyMatrix4(tempObject.matrix);
     geometries.push(monitor);
     
     // Monitor stand
     const stand = new THREE.CylinderGeometry(0.15, 0.2, 0.3, 8);
-    tempObject.position.set(offsetX - 3, 1.2, 5);
+    tempObject.position.set(offsetX - 3, 1.2, -3);
     tempObject.updateMatrix();
     stand.applyMatrix4(tempObject.matrix);
     geometries.push(stand);
     
-    // Storage organization board
+    // Storage organization board (moved to back wall)
     const orgBoard = new THREE.BoxGeometry(3, 2.5, 0.1);
-    tempObject.position.set(offsetX, 2.5, 9.8);
+    tempObject.position.set(offsetX, 4, -14);
     tempObject.updateMatrix();
     orgBoard.applyMatrix4(tempObject.matrix);
     geometries.push(orgBoard);
     
     // Keyboard on desk
     const keyboard = new THREE.BoxGeometry(0.9, 0.03, 0.3);
-    tempObject.position.set(offsetX - 3, 1.09, 4.5);
+    tempObject.position.set(offsetX - 3, 1.09, -3.5);
     tempObject.updateMatrix();
     keyboard.applyMatrix4(tempObject.matrix);
     geometries.push(keyboard);
     
     // Mouse
     const mouse = new THREE.BoxGeometry(0.1, 0.04, 0.14);
-    tempObject.position.set(offsetX - 2, 1.09, 4.5);
+    tempObject.position.set(offsetX - 2, 1.09, -3.5);
     tempObject.updateMatrix();
     mouse.applyMatrix4(tempObject.matrix);
     geometries.push(mouse);
     
     // Mouse pad
     const mousePad = new THREE.BoxGeometry(0.5, 0.01, 0.4);
-    tempObject.position.set(offsetX - 2, 1.08, 4.5);
+    tempObject.position.set(offsetX - 2, 1.08, -3.5);
     tempObject.updateMatrix();
     mousePad.applyMatrix4(tempObject.matrix);
     geometries.push(mousePad);
     
     // Coffee mug
     const mug = new THREE.CylinderGeometry(0.1, 0.08, 0.25, 16);
-    tempObject.position.set(offsetX - 4, 1.23, 5);
+    tempObject.position.set(offsetX - 4, 1.23, -3);
     tempObject.updateMatrix();
     mug.applyMatrix4(tempObject.matrix);
     geometries.push(mug);
     
     // Desk organizer
     const organizer = new THREE.BoxGeometry(0.5, 0.2, 0.4);
-    tempObject.position.set(offsetX - 3.5, 1.2, 5.5);
+    tempObject.position.set(offsetX - 3.5, 1.2, -2.5);
     tempObject.updateMatrix();
     organizer.applyMatrix4(tempObject.matrix);
     geometries.push(organizer);
@@ -187,7 +187,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
     
     // Label maker on desk
     const labelMaker = new THREE.BoxGeometry(0.3, 0.15, 0.2);
-    tempObject.position.set(offsetX - 2.5, 1.15, 5.7);
+    tempObject.position.set(offsetX - 2.5, 1.15, -2.3);
     tempObject.updateMatrix();
     labelMaker.applyMatrix4(tempObject.matrix);
     geometries.push(labelMaker);
@@ -203,7 +203,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
     
     // Backup drive on desk
     const drive = new THREE.BoxGeometry(0.2, 0.08, 0.3);
-    tempObject.position.set(offsetX - 3.5, 1.12, 4.2);
+    tempObject.position.set(offsetX - 3.5, 1.12, -3.8);
     tempObject.updateMatrix();
     drive.applyMatrix4(tempObject.matrix);
     geometries.push(drive);
@@ -211,7 +211,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
     // USB cables
     for (let i = 0; i < 3; i++) {
       const cable = new THREE.BoxGeometry(0.02, 0.02, 0.4);
-      tempObject.position.set(offsetX - 3.5 + i * 0.1, 1.08, 4);
+      tempObject.position.set(offsetX - 3.5 + i * 0.1, 1.08, -4);
       tempObject.updateMatrix();
       cable.applyMatrix4(tempObject.matrix);
       geometries.push(cable);
@@ -226,11 +226,11 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       geometries.push(mount);
     }
     
-    // Archive boxes in corner
+    // Archive boxes in corner (moved away from camera)
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 2; j++) {
         const box = new THREE.BoxGeometry(0.6, 0.6, 0.6);
-        tempObject.position.set(offsetX + 7 + i * 0.7, 0.3 + j * 0.65, 7);
+        tempObject.position.set(offsetX + 7 + i * 0.7, 0.3 + j * 0.65, -7);
         tempObject.updateMatrix();
         box.applyMatrix4(tempObject.matrix);
         geometries.push(box);
@@ -307,13 +307,13 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       </group>
       
       {/* Monitor screen showing file browser */}
-      <mesh position={[offsetX - 3, 1.6, 5.05]}>
+      <mesh position={[offsetX - 3, 1.6, -2.95]}>
         <planeGeometry args={[1.4, 0.9]} />
         <meshMatcapMaterial matcap={matcap} color="#1a1a1a" />
       </mesh>
       
       {/* File icons on screen (simple grid) */}
-      <group position={[offsetX - 3, 1.6, 5.06]}>
+      <group position={[offsetX - 3, 1.6, -2.94]}>
         {Array.from({ length: 12 }, (_, i) => {
           const col = i % 4;
           const row = Math.floor(i / 4);
@@ -329,14 +329,14 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
         })}
       </group>
       
-      {/* Organization board with folder structure */}
-      <mesh position={[offsetX, 2.5, 9.75]}>
+      {/* Organization board with folder structure (moved to back wall) */}
+      <mesh position={[offsetX, 4, -13.9]}>
         <planeGeometry args={[2.9, 2.4]} />
         <meshMatcapMaterial matcap={matcap} color="#f9fafb" />
       </mesh>
       
       {/* Folder tree visualization */}
-      <group position={[offsetX, 2.5, 9.76]}>
+      <group position={[offsetX, 4, -13.89]}>
         {Array.from({ length: 8 }, (_, i) => {
           const indent = (i % 3) * 0.2;
           const y = 0.9 - i * 0.25;

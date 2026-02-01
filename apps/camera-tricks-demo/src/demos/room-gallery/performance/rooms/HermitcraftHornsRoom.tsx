@@ -155,10 +155,10 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
     mouse.applyMatrix4(tempObject.matrix);
     geometries.push(mouse);
     
-    // Minecraft-style posters on walls
+    // Minecraft-style posters on walls (moved to back wall to avoid camera collision)
     for (let i = 0; i < 4; i++) {
       const poster = new THREE.BoxGeometry(1.2, 1.5, 0.05);
-      tempObject.position.set(offsetX - 7 + i * 2.5, 2.5, 9.8);
+      tempObject.position.set(offsetX - 7 + i * 2.5, 5, -9.8); // Moved to back wall, higher up
       tempObject.updateMatrix();
       poster.applyMatrix4(tempObject.matrix);
       geometries.push(poster);
@@ -220,8 +220,8 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
       {/* Gaming monitors */}
       <InstancedMonitors offsetX={offsetX} count={2} color="#1a1a1a" />
       
-      {/* Audio waveform visualization (simple bars) */}
-      <group position={[offsetX, 2.5, 8]}>
+      {/* Audio waveform visualization (simple bars) - moved to side wall */}
+      <group position={[offsetX - 8, 5, 0]} rotation={[0, Math.PI / 2, 0]}>
         {Array.from({ length: 10 }, (_, i) => {
           const height = 0.5 + Math.sin(i * 0.5) * 0.3;
           return (

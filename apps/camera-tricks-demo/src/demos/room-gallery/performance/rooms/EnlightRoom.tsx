@@ -183,10 +183,10 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
     lightMeter.applyMatrix4(tempObject.matrix);
     geometries.push(lightMeter);
     
-    // Color calibration targets
+    // Color calibration targets (moved to back wall for visibility)
     for (let i = 0; i < 3; i++) {
       const target = new THREE.BoxGeometry(0.4, 0.4, 0.02);
-      tempObject.position.set(offsetX + 6 + i * 1.5, 2, 9.8);
+      tempObject.position.set(offsetX - 3 + i * 1.5, 4, -14);
       tempObject.updateMatrix();
       target.applyMatrix4(tempObject.matrix);
       geometries.push(target);

@@ -5,6 +5,7 @@ import { getRoomComponent } from '../../config/registry';
 import { SceneLighting } from './SceneLighting';
 import { RoomStructure } from './RoomStructure';
 import { DividingWall } from './DividingWall';
+import { AtmosphericFog } from './AtmosphericFog';
 import { FPSCounter } from '../ui/FPSCounter';
 import { DrawCallMonitor } from '../../performance/DrawCallMonitor';
 
@@ -16,9 +17,9 @@ interface SceneProps {
 /**
  * Scene Component
  * Orchestrates all 3D elements: lighting, rooms, walls
- * 
+ *
  * Camera control moved to SplitCameraRenderer for split-screen rendering
- * 
+ *
  * Performance considerations:
  * - Renders all app rooms (15 total for portfolio)
  * - Uses optimized room components (merged geometry, instanced meshes)
@@ -32,18 +33,19 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
       <DrawCallMonitor onUpdate={onDrawCallsUpdate} />
       
       <SceneLighting />
+      <AtmosphericFog />
 
       {/* Render all rooms */}
       {ROOMS.map((room, index) => {
         // Get room decorations component for the theme
         const RoomDecorations = getRoomComponent(room.theme);
-        
+
         // Get theme colors (works for both original and app-specific themes)
         const colors = getThemeColors(room.theme);
-        
+
         return (
           <group key={room.offsetX}>
-            <RoomStructure 
+            <RoomStructure
               offsetX={room.offsetX}
               colors={colors}
               isFirst={index === 0}
@@ -55,20 +57,22 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
           </group>
         );
       })}
-      
+
       {/* Dividing walls between rooms */}
       {ROOMS.slice(0, -1).map((room, index) => {
         const nextRoom = ROOMS[index + 1];
         const wallPosition = (room.offsetX + nextRoom.offsetX) / 2;
         const wallColors = getDividingWallColors(index);
-        
-        return wallColors && (
-          <DividingWall 
-            key={wallPosition}
-            position={[wallPosition, 0, 0]} 
-            warmColor={wallColors.warmColor}
-            coolColor={wallColors.coolColor}
-          />
+
+        return (
+          wallColors && (
+            <DividingWall
+              key={wallPosition}
+              position={[wallPosition, 0, 0]}
+              warmColor={wallColors.warmColor}
+              coolColor={wallColors.coolColor}
+            />
+          )
         );
       })}
     </>
