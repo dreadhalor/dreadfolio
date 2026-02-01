@@ -116,12 +116,24 @@ export default function RoomGallery() {
     setCameraX(clampedTarget);
   }, []);
 
-  // Get current room - just find the closest one!
+  // Get current room based on dominant camera in viewport
   const getCurrentRoom = useCallback(() => {
+    if (!debugInfo) return ROOMS[0]; // Fallback during initialization
+    
+    // Determine which camera has more viewport space
+    const dominantCameraIdx = debugInfo.viewportSplit.left > 50 
+      ? debugInfo.leftCameraIdx 
+      : debugInfo.rightCameraIdx;
+    
+    // Get that camera's actual world position
+    const dominantCameraPos = debugInfo.cameraPositions[dominantCameraIdx];
+    
+    // Find the room closest to that position
     return ROOMS.reduce((prev, curr) => 
-      Math.abs(curr.offsetX - cameraX) < Math.abs(prev.offsetX - cameraX) ? curr : prev
+      Math.abs(curr.offsetX - dominantCameraPos) < Math.abs(prev.offsetX - dominantCameraPos) 
+        ? curr : prev
     );
-  }, [cameraX]);
+  }, [debugInfo]);
 
   const currentRoom = getCurrentRoom();
 

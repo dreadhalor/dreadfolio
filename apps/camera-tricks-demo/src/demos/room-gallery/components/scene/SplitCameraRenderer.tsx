@@ -117,12 +117,9 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate, onDebugUpdate 
     
     // UPDATE ALL CAMERA POSITIONS - THEY MOVE WITH CURRENTX!
     // Camera spacing: 10 units apart (ROOM_WIDTH / 2) for smooth parallax between 20-unit rooms
-    cameras[0].position.x = currentXRef.current;                    // Camera 0
-    cameras[1].position.x = currentXRef.current + cameraOffset;     // Camera 1 (+10)
-    cameras[2].position.x = currentXRef.current + cameraOffset * 2; // Camera 2 (+20)
-    cameras[3].position.x = currentXRef.current + cameraOffset * 3; // Camera 3 (+30)
-    cameras[4].position.x = currentXRef.current + cameraOffset * 4; // Camera 4 (+40)
-    cameras[5].position.x = currentXRef.current + cameraOffset * 5; // Camera 5 (+50)
+    for (let i = 0; i < cameras.length; i++) {
+      cameras[i].position.x = currentXRef.current + (cameraOffset * i);
+    }
     
     // Notify parent of camera position for UI updates
     onCameraUpdate(currentXRef.current);
@@ -134,14 +131,15 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate, onDebugUpdate 
     // Calculate progress within this segment (0 to 1)
     const localProgress = Math.max(0, Math.min(1, (currentXRef.current - segmentStart) / cameraOffset));
     
-    // Determine which two cameras to show (with wrapping for infinite coverage)
+    // Determine which two cameras to show (clamp to valid range)
     // Segment 0 (x=0-10): cameras[0] ↔ cameras[1]
     // Segment 1 (x=10-20): cameras[1] ↔ cameras[2]
-    // ...
-    // Segment 5 (x=50-60): cameras[5] ↔ cameras[0] (wraps)
-    // Segment 6 (x=60-70): cameras[0] ↔ cameras[1] (pattern repeats)
-    const leftCameraIndex = ((segmentIndex % 6) + 6) % 6;
-    const rightCameraIndex = ((segmentIndex + 1) % 6 + 6) % 6;
+    // Segment 2 (x=20-30): cameras[2] ↔ cameras[3]
+    // Segment 3 (x=30-40): cameras[3] ↔ cameras[4]
+    // Segment 4 (x=40-50): cameras[4] ↔ cameras[5]
+    // Segment 5 (x=50-60): cameras[5] ↔ cameras[5] (last camera only)
+    const leftCameraIndex = Math.max(0, Math.min(5, segmentIndex));
+    const rightCameraIndex = Math.max(0, Math.min(5, segmentIndex + 1));
     
     const leftCamera = cameras[leftCameraIndex];
     const rightCamera = cameras[rightCameraIndex];
