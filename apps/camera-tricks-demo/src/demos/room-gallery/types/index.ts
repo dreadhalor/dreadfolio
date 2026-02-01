@@ -18,6 +18,7 @@ export interface RoomData {
   offsetX: number;
   theme: RoomTheme;
   color: string;
+  controlsCamera: 'A' | 'B' | 'C' | 'D'; // Which camera centers on this room
 }
 
 export interface CameraState {

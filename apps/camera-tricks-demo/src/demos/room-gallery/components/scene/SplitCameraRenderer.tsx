@@ -13,16 +13,18 @@ const CAMERA_NEAR_PLANE = 0.1;
 const CAMERA_FAR_PLANE = 1000;
 
 /**
- * Helper: Configure view offset for split-screen rendering
+ * Helper: Configure view offset for dynamic split-screen rendering
  * @param camera - Camera to configure
  * @param screenWidth - Full screen width
  * @param screenHeight - Full screen height
- * @param xOffset - Horizontal offset (0 for left, screenWidth/2 for right)
+ * @param viewportWidth - Width of this camera's viewport
+ * @param xOffset - Horizontal offset for view offset
  */
-function setViewOffsetForSplitScreen(
+function setViewOffsetForDynamicSplit(
   camera: THREE.PerspectiveCamera,
   screenWidth: number,
   screenHeight: number,
+  viewportWidth: number,
   xOffset: number
 ) {
   camera.setViewOffset(
@@ -30,24 +32,30 @@ function setViewOffsetForSplitScreen(
     screenHeight,         // full height
     xOffset,              // x offset
     0,                    // y offset
-    screenWidth / 2,      // viewport width (half screen)
+    viewportWidth,        // viewport width (dynamic)
     screenHeight          // viewport height
   );
 }
 
 /**
- * Split Camera Renderer
+ * Split Camera Renderer - Four Camera Moving Window (WORKING VERSION)
  * 
- * Renders two adjacent rooms simultaneously using split-screen technique:
- * - Left half of screen: Shows left 50% of left camera's view
- * - Right half of screen: Shows right 50% of right camera's view
+ * Four cameras (A, B, C, D) move together, 10 units apart:
+ * - All cameras move with currentXRef
+ * - Cameras at: currentX, currentX+10, currentX+20, currentX+30
+ * - Show two adjacent cameras based on 10-unit segments
  * 
- * Technical approach:
- * 1. Create two cameras positioned one ROOM_WIDTH apart
- * 2. Use setViewport() and setScissor() to render to specific screen regions
- * 3. Adjust camera view offset to show left/right halves respectively
+ * Segment to Camera mapping (with wrapping):
+ * - Segment 0 (x=0-10):   cameras[0] ↔ cameras[1]
+ * - Segment 1 (x=10-20):  cameras[1] ↔ cameras[2]
+ * - Segment 2 (x=20-30):  cameras[2] ↔ cameras[3]
+ * - Segment 3 (x=30-40):  cameras[3] ↔ cameras[0] (wrapping)
+ * - Segment 4 (x=40-50):  cameras[0] ↔ cameras[1] (pattern repeats)
+ * - ... continues infinitely
  * 
- * Visual effect: Seamless split view of two adjacent rooms
+ * Rooms at x=0, 20, 40, 60... get full single-camera views
+ * 
+ * Visual effect: Seamless infinite transitions through all rooms
  * 
  * Performance: Scene rendered twice per frame (~2x draw calls)
  */
@@ -55,93 +63,131 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate }: SplitCameraR
   const { gl, scene, size } = useThree();
   const currentXRef = useRef(0);
   
-  // Create cameras once (memoized)
+  // Create FOUR cameras once (memoized)
   const cameras = useMemo(() => {
     try {
-      const aspect = (size.width / 2) / size.height; // Each camera renders to half width
+      const aspect = (size.width / 2) / size.height;
+      const cameraOffset = ROOM_WIDTH / 2; // 10 units apart
       
-      // Left camera
-      const left = new THREE.PerspectiveCamera(
+      // Camera A (index 0)
+      const cameraA = new THREE.PerspectiveCamera(
         CAMERA_FOV,
         aspect,
         CAMERA_NEAR_PLANE,
         CAMERA_FAR_PLANE
       );
-      left.position.set(0, CAMERA_HEIGHT, CAMERA_Z_POSITION);
+      cameraA.position.set(0, CAMERA_HEIGHT, CAMERA_Z_POSITION);
       
-      // Right camera (positioned one room width to the right)
-      const right = new THREE.PerspectiveCamera(
+      // Camera B (index 1) - 10 units ahead
+      const cameraB = new THREE.PerspectiveCamera(
         CAMERA_FOV,
         aspect,
         CAMERA_NEAR_PLANE,
         CAMERA_FAR_PLANE
       );
-      right.position.set(ROOM_WIDTH, CAMERA_HEIGHT, CAMERA_Z_POSITION);
+      cameraB.position.set(cameraOffset, CAMERA_HEIGHT, CAMERA_Z_POSITION);
       
-      return { left, right };
+      // Camera C (index 2) - 20 units ahead
+      const cameraC = new THREE.PerspectiveCamera(
+        CAMERA_FOV,
+        aspect,
+        CAMERA_NEAR_PLANE,
+        CAMERA_FAR_PLANE
+      );
+      cameraC.position.set(cameraOffset * 2, CAMERA_HEIGHT, CAMERA_Z_POSITION);
+      
+      // Camera D (index 3) - 30 units ahead
+      const cameraD = new THREE.PerspectiveCamera(
+        CAMERA_FOV,
+        aspect,
+        CAMERA_NEAR_PLANE,
+        CAMERA_FAR_PLANE
+      );
+      cameraD.position.set(cameraOffset * 3, CAMERA_HEIGHT, CAMERA_Z_POSITION);
+      
+      return [cameraA, cameraB, cameraC, cameraD];
     } catch (error) {
-      console.error('Failed to create split cameras:', error);
+      console.error('Failed to create cameras:', error);
       throw error; // Re-throw to trigger error boundary
     }
   }, []); // Create once on mount
   
-  // Initialize and update view offsets on size change
-  useEffect(() => {
-    const { left, right } = cameras;
-    const aspect = (size.width / 2) / size.height;
-    
-    // Update aspect ratio
-    left.aspect = aspect;
-    right.aspect = aspect;
-    
-    // Update projection matrices
-    left.updateProjectionMatrix();
-    right.updateProjectionMatrix();
-    
-    // Set up view offsets for split-screen
-    setViewOffsetForSplitScreen(left, size.width, size.height, 0); // Left half
-    setViewOffsetForSplitScreen(right, size.width, size.height, size.width / 2); // Right half
-  }, [size.width, size.height, cameras]);
+  // Note: Aspect ratio and view offsets are now calculated per-frame
+  // since they depend on the dynamic split ratio
   
   // Cleanup cameras on unmount
   useEffect(() => {
     return () => {
-      // Dispose of cameras to prevent memory leaks
-      cameras.left.clear();
-      cameras.right.clear();
+      // Dispose of all cameras to prevent memory leaks
+      cameras.forEach(cam => cam.clear());
     };
   }, [cameras]);
   
-  // Animation loop: smooth camera movement and split rendering
+  // Animation loop: smooth camera movement with 4-camera system
   useFrame(() => {
-    const { left, right } = cameras;
     const targetX = targetXRef.current ?? 0;
+    const cameraOffset = ROOM_WIDTH / 2; // 10 units between cameras
     
     // Smooth lerp to target position
     currentXRef.current += (targetX - currentXRef.current) * CAMERA_LERP_SPEED;
     
-    // Update camera positions (maintaining ROOM_WIDTH distance)
-    left.position.x = currentXRef.current;
-    right.position.x = currentXRef.current + ROOM_WIDTH;
+    // Update all four camera positions (maintaining 10-unit spacing)
+    cameras[0].position.x = currentXRef.current;                    // Camera A
+    cameras[1].position.x = currentXRef.current + cameraOffset;     // Camera B (+10)
+    cameras[2].position.x = currentXRef.current + cameraOffset * 2; // Camera C (+20)
+    cameras[3].position.x = currentXRef.current + cameraOffset * 3; // Camera D (+30)
     
     // Notify parent of camera position for UI updates
     onCameraUpdate(currentXRef.current);
+    
+    // Determine which segment we're in (0-based: 0, 1, 2, 3, 4, 5...)
+    const segmentIndex = Math.floor(currentXRef.current / 10);
+    const segmentStart = segmentIndex * 10;
+    
+    // Calculate progress within this segment (0 to 1)
+    const localProgress = Math.max(0, Math.min(1, (currentXRef.current - segmentStart) / 10));
+    
+    // Determine which two cameras to show (cycling through 4 cameras)
+    // Segment 0: cameras[0] and cameras[1]
+    // Segment 1: cameras[1] and cameras[2]
+    // Segment 2: cameras[2] and cameras[3]
+    // Segment 3: cameras[3] and cameras[0] (wrapping)
+    // Segment 4: cameras[0] and cameras[1] (pattern repeats)
+    // FIX: Handle negative segmentIndex properly with modulo
+    const leftCameraIndex = ((segmentIndex % 4) + 4) % 4;
+    const rightCameraIndex = ((segmentIndex + 1) % 4 + 4) % 4;
+    
+    const leftCamera = cameras[leftCameraIndex];
+    const rightCamera = cameras[rightCameraIndex];
+    
+    // Calculate dynamic viewport widths based on transition progress
+    const leftWidth = (1 - localProgress) * size.width;
+    const rightWidth = localProgress * size.width;
+    
+    // Update camera aspects based on dynamic widths
+    leftCamera.aspect = leftWidth / size.height;
+    rightCamera.aspect = rightWidth / size.height;
+    leftCamera.updateProjectionMatrix();
+    rightCamera.updateProjectionMatrix();
+    
+    // Update view offsets for dynamic split
+    setViewOffsetForDynamicSplit(leftCamera, size.width, size.height, leftWidth, 0);
+    setViewOffsetForDynamicSplit(rightCamera, size.width, size.height, rightWidth, size.width - rightWidth);
     
     // Clear and prepare for split rendering
     gl.setScissorTest(true);
     gl.autoClear = false;
     gl.clear();
     
-    // Render left half (left camera to left viewport)
-    const halfWidth = size.width / 2;
-    gl.setViewport(0, 0, halfWidth, size.height);
-    gl.setScissor(0, 0, halfWidth, size.height);
-    gl.render(scene, left);
+    // Render left viewport
+    gl.setViewport(0, 0, leftWidth, size.height);
+    gl.setScissor(0, 0, leftWidth, size.height);
+    gl.render(scene, leftCamera);
     
-    // Render right half (right camera to right viewport)
-    gl.setViewport(halfWidth, 0, halfWidth, size.height);
-    gl.setScissor(halfWidth, 0, halfWidth, size.height);
-    gl.render(scene, right);
+    // Render right viewport
+    gl.setViewport(leftWidth, 0, rightWidth, size.height);
+    gl.setScissor(leftWidth, 0, rightWidth, size.height);
+    gl.render(scene, rightCamera);
     
     // Reset scissor test
     gl.setScissorTest(false);

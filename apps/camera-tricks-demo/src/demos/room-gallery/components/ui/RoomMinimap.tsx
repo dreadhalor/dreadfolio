@@ -3,10 +3,14 @@ import { RoomData } from '../../types';
 interface RoomMinimapProps {
   rooms: RoomData[];
   currentRoom: RoomData;
-  onRoomClick: (offsetX: number) => void;
+  onRoomClick: (room: RoomData) => void;
 }
 
-export function RoomMinimap({ rooms, currentRoom, onRoomClick }: RoomMinimapProps) {
+export function RoomMinimap({
+  rooms,
+  currentRoom,
+  onRoomClick,
+}: RoomMinimapProps) {
   return (
     <>
       <div
@@ -26,11 +30,11 @@ export function RoomMinimap({ rooms, currentRoom, onRoomClick }: RoomMinimapProp
       >
         {rooms.map((room, index) => {
           const isActive = currentRoom.offsetX === room.offsetX;
-          
+
           return (
             <div
               key={room.offsetX}
-              onClick={() => onRoomClick(room.offsetX)}
+              onClick={() => onRoomClick(room)}
               style={{
                 width: '80px',
                 height: '80px',
@@ -39,9 +43,11 @@ export function RoomMinimap({ rooms, currentRoom, onRoomClick }: RoomMinimapProp
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 transform: isActive ? 'scale(1.15)' : 'scale(1)',
-                border: isActive ? '3px solid white' : '2px solid rgba(255, 255, 255, 0.3)',
-                boxShadow: isActive 
-                  ? `0 0 20px ${room.color}, 0 0 40px ${room.color}` 
+                border: isActive
+                  ? '3px solid white'
+                  : '2px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: isActive
+                  ? `0 0 20px ${room.color}, 0 0 40px ${room.color}`
                   : '0 4px 8px rgba(0, 0, 0, 0.3)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -59,7 +65,8 @@ export function RoomMinimap({ rooms, currentRoom, onRoomClick }: RoomMinimapProp
               onMouseLeave={(e) => {
                 if (!isActive) {
                   e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.3)';
+                  e.currentTarget.style.boxShadow =
+                    '0 4px 8px rgba(0, 0, 0, 0.3)';
                 }
               }}
             >
@@ -77,7 +84,7 @@ export function RoomMinimap({ rooms, currentRoom, onRoomClick }: RoomMinimapProp
               >
                 {index + 1}
               </div>
-              
+
               {/* Room name */}
               <div
                 style={{
@@ -91,7 +98,25 @@ export function RoomMinimap({ rooms, currentRoom, onRoomClick }: RoomMinimapProp
               >
                 {room.name}
               </div>
-              
+
+              {/* Camera indicator */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '0.25rem',
+                  right: '0.25rem',
+                  fontSize: '0.6rem',
+                  fontWeight: 'bold',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontFamily: 'monospace',
+                  background: 'rgba(0, 0, 0, 0.5)',
+                  padding: '2px 4px',
+                  borderRadius: '3px',
+                }}
+              >
+                📷{room.controlsCamera}
+              </div>
+
               {/* Active indicator pulse */}
               {isActive && (
                 <div
