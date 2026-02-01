@@ -1,9 +1,9 @@
 import { Canvas } from '@react-three/fiber';
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Configuration
 import { ROOMS } from './config/rooms';
-import { ROOM_WIDTH, CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, CAMERA_MIN_X, CAMERA_MAX_X, DRAG_SENSITIVITY } from './config/constants';
+import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, MIN_ROOM_PROGRESS, MAX_ROOM_PROGRESS, DRAG_SENSITIVITY } from './config/constants';
 
 // Components
 import { Scene } from './components/scene/Scene';
@@ -42,96 +42,70 @@ export default function RoomGallery() {
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
   
-  // Camera state
-  const [cameraX, setCameraX] = useState(0);
+  // PRIMARY STATE: Room progress (0.0 to 14.0)
+  const [roomProgress, setRoomProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   
   // Debug state
   const [debugInfo, setDebugInfo] = useState<{
-    cameraPositions: number[];
-    viewportSplit: { left: number; right: number };
+    roomProgress: number;
+    currentRoom: number;
+    transitionProgress: number;
     leftCameraIdx: number;
     rightCameraIdx: number;
-    currentX: number;
-    targetX: number;
-    segmentIndex: number;
-    localProgress: number;
+    viewportSplit: { left: number; right: number };
   } | null>(null);
   
-  // Refs for performance (avoid React re-renders)
-  const targetXRef = useRef(0);
-  const isDraggingRef = useRef(false);
-  const dragStartRef = useRef({ x: 0, startCameraX: 0 });
+  // Refs for smooth updates
+  const targetRoomProgressRef = useRef(0);
+  const lastMouseXRef = useRef(0);
 
-  // Drag handlers - optimized for performance
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    // Prevent default touch behavior (scrolling) on mobile
-    e.preventDefault();
-    
-    isDraggingRef.current = true;
+  // Drag handlers (room-space)
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
-    dragStartRef.current = { x: e.clientX, startCameraX: targetXRef.current };
+    lastMouseXRef.current = e.clientX;
   }, []);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging) return;
     
-    // Prevent default touch behavior (scrolling) on mobile
-    e.preventDefault();
+    const deltaX = e.clientX - lastMouseXRef.current;
+    lastMouseXRef.current = e.clientX;
     
-    const deltaX = e.clientX - dragStartRef.current.x;
-    const newCameraX = dragStartRef.current.startCameraX - deltaX * DRAG_SENSITIVITY;
-    const clampedX = Math.max(CAMERA_MIN_X, Math.min(CAMERA_MAX_X, newCameraX));
+    // Update room progress (negative because dragging right moves left)
+    const newProgress = targetRoomProgressRef.current - (deltaX * DRAG_SENSITIVITY);
+    const clampedProgress = Math.max(MIN_ROOM_PROGRESS, Math.min(MAX_ROOM_PROGRESS, newProgress));
     
-    // Update ref for CameraController (no React overhead)
-    targetXRef.current = clampedX;
-    
-    // Update React state for UI (minimap, header)
-    setCameraX(clampedX);
-  }, []);
+    targetRoomProgressRef.current = clampedProgress;
+    setRoomProgress(clampedProgress);
+  }, [isDragging]);
 
-  const handlePointerUp = useCallback(() => {
-    isDraggingRef.current = false;
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Fast travel to specific room
+  // Attach mouse event listeners
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
+
+  // Fast travel to specific room (simple!)
   const moveTo = useCallback((room: RoomData) => {
-    // Find which room index this is (0-5)
     const roomIndex = ROOMS.indexOf(room);
     
-    // Calculate currentX so that camera[roomIndex] is at room.offsetX
-    // Camera[N] is at position: currentX + (N * 10)
-    // We want: currentX + (roomIndex * 10) = room.offsetX
-    // So: currentX = room.offsetX - (roomIndex * 10)
-    const targetForCurrentX = room.offsetX - (roomIndex * (ROOM_WIDTH / 2));
-    
-    const clampedTarget = Math.max(CAMERA_MIN_X, Math.min(CAMERA_MAX_X, targetForCurrentX));
-    
-    targetXRef.current = clampedTarget;
-    setCameraX(clampedTarget);
+    // Just set room progress to the room index
+    targetRoomProgressRef.current = roomIndex;
+    setRoomProgress(roomIndex);
   }, []);
 
-  // Get current room based on dominant camera in viewport
-  const getCurrentRoom = useCallback(() => {
-    if (!debugInfo) return ROOMS[0]; // Fallback during initialization
-    
-    // Determine which camera has more viewport space
-    const dominantCameraIdx = debugInfo.viewportSplit.left > 50 
-      ? debugInfo.leftCameraIdx 
-      : debugInfo.rightCameraIdx;
-    
-    // Get that camera's actual world position
-    const dominantCameraPos = debugInfo.cameraPositions[dominantCameraIdx];
-    
-    // Find the room closest to that position
-    return ROOMS.reduce((prev, curr) => 
-      Math.abs(curr.offsetX - dominantCameraPos) < Math.abs(prev.offsetX - dominantCameraPos) 
-        ? curr : prev
-    );
-  }, [debugInfo]);
-
-  const currentRoom = getCurrentRoom();
+  // Determine current room from roomProgress (simple!)
+  const currentRoom = ROOMS[Math.round(roomProgress)] || ROOMS[0];
 
   return (
     <div 
@@ -145,10 +119,7 @@ export default function RoomGallery() {
         WebkitUserSelect: 'none', // Disable text selection on iOS
         WebkitTouchCallout: 'none', // Disable callout on iOS
       }}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
+      onMouseDown={handleMouseDown}
     >
       <Canvas
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
@@ -166,8 +137,8 @@ export default function RoomGallery() {
           onDrawCallsUpdate={setDrawCalls}
         />
         <SplitCameraRenderer 
-          targetXRef={targetXRef}
-          onCameraUpdate={setCameraX}
+          targetRoomProgressRef={targetRoomProgressRef}
+          onRoomProgressUpdate={setRoomProgress}
           onDebugUpdate={setDebugInfo}
         />
       </Canvas>
@@ -178,7 +149,8 @@ export default function RoomGallery() {
       <DrawCallDisplay calls={drawCalls} />
       <RoomMinimap 
         rooms={ROOMS} 
-        currentRoom={currentRoom} 
+        currentRoom={currentRoom}
+        roomProgress={roomProgress}
         onRoomClick={moveTo}
       />
       
@@ -201,37 +173,20 @@ export default function RoomGallery() {
         }}>
           <div style={{ color: '#ff0', marginBottom: '8px' }}><strong>🔍 DEBUG INFO</strong></div>
           
-          <div style={{ marginTop: '8px' }}><strong>Current State:</strong></div>
-          <div>currentX: {debugInfo.currentX.toFixed(6)}</div>
-          <div>targetX: {debugInfo.targetX.toFixed(2)}</div>
-          <div>floor(currentX/10): {Math.floor(debugInfo.currentX / 10)}</div>
-          <div style={{ color: debugInfo.currentX === debugInfo.targetX ? '#0f0' : '#ff0' }}>
-            {debugInfo.currentX === debugInfo.targetX ? '✓ SETTLED' : '⟳ LERPING'}
+          <div style={{ marginTop: '8px' }}><strong>Room Progress:</strong></div>
+          <div style={{ color: '#0ff', fontSize: '16px' }}>
+            <strong>{debugInfo.roomProgress.toFixed(3)}</strong> / 14.0
           </div>
-          
-          <div style={{ marginTop: '8px' }}><strong>Segment Info:</strong></div>
-          <div>segment: {debugInfo.segmentIndex}</div>
-          <div>progress: {debugInfo.localProgress.toFixed(4)}</div>
-          <div>segmentStart: {debugInfo.segmentIndex * 10}</div>
-          
-          <div style={{ marginTop: '8px' }}><strong>Camera Positions:</strong></div>
-          {debugInfo.cameraPositions.map((pos, i) => (
-            <div key={i} style={{ color: debugInfo.leftCameraIdx === i || debugInfo.rightCameraIdx === i ? '#ff0' : '#0f0' }}>
-              Camera {i}: {pos.toFixed(2)}
-            </div>
-          ))}
+          <div>currentRoom: {debugInfo.currentRoom}</div>
+          <div>transitionProgress: {(debugInfo.transitionProgress * 100).toFixed(1)}%</div>
           
           <div style={{ marginTop: '8px' }}><strong>Viewport Split:</strong></div>
           <div style={{ color: '#ff0' }}>
-            Left (Cam {debugInfo.leftCameraIdx}): {debugInfo.viewportSplit.left.toFixed(1)}%
+            Left: Camera {debugInfo.leftCameraIdx} ({(debugInfo.viewportSplit.left * 100).toFixed(1)}%)
           </div>
           <div style={{ color: '#f0f' }}>
-            Right (Cam {debugInfo.rightCameraIdx}): {debugInfo.viewportSplit.right.toFixed(1)}%
+            Right: Camera {debugInfo.rightCameraIdx} ({(debugInfo.viewportSplit.right * 100).toFixed(1)}%)
           </div>
-          
-          <div style={{ marginTop: '8px' }}><strong>Camera Indices:</strong></div>
-          <div>leftCameraIndex: {debugInfo.leftCameraIdx}</div>
-          <div>rightCameraIndex: {debugInfo.rightCameraIdx}</div>
         </div>
       )}
     </div>

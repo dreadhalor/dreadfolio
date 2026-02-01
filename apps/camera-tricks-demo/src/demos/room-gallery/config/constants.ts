@@ -3,20 +3,21 @@ export const ROOM_WIDTH = 20;
 export const ROOM_HEIGHT = 10;
 export const ROOM_DEPTH = 20;
 
+// Number of rooms (portfolio apps)
+export const NUM_ROOMS = 15;
+
 // Camera settings
 export const CAMERA_HEIGHT = 5;
 export const CAMERA_Z_POSITION = 10;
 export const CAMERA_FOV = 60;
 export const CAMERA_LERP_SPEED = 0.1;
 
-// Camera bounds (slightly inside first and last walls)
-// With 15 apps: currentX ranges from 0 (first app) to 140 (last app at index 14)
-// Add buffer for smooth edge behavior
-export const CAMERA_MIN_X = -8;
-export const CAMERA_MAX_X = 145; // For 15 apps (14 * 10 + buffer)
+// Room progress bounds (normalized 0-14 for 15 rooms)
+export const MIN_ROOM_PROGRESS = 0;
+export const MAX_ROOM_PROGRESS = NUM_ROOMS - 1; // 14
 
-// Drag control
-export const DRAG_SENSITIVITY = 0.05;
+// Drag control (sensitivity in room-space units per pixel)
+export const DRAG_SENSITIVITY = 0.01; // 100 pixels = move 1 room
 
 // Visibility/Culling
 export const VISIBILITY_THRESHOLD = 30; // Only render rooms within this distance
