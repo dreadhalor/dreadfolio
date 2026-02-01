@@ -48,20 +48,16 @@ function setViewOffsetForDynamicSplit(
 }
 
 /**
- * Split Camera Renderer - 6-Camera Moving Window
+ * Split Camera Renderer - 15-Camera System (One Per App)
  * 
- * Six cameras moving together, 10 units apart:
+ * Fifteen cameras moving together, 10 units apart:
  * - All cameras move with currentX
- * - Camera spacing: currentX, currentX+10, currentX+20, currentX+30, currentX+40, currentX+50
- * - Rooms at fixed positions: 0, 20, 40, 60, 80, 100
+ * - Camera spacing: currentX, currentX+10, currentX+20, ... currentX+140
+ * - Rooms at fixed positions: 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280
  * 
  * Room to currentX mapping (for 100% viewport):
- * - Library (x=0): currentX=0, Camera 0 at x=0
- * - Gallery (x=20): currentX=10, Camera 1 at x=20
- * - Greenhouse (x=40): currentX=20, Camera 2 at x=40
- * - Lounge (x=60): currentX=30, Camera 3 at x=60
- * - Office (x=80): currentX=40, Camera 4 at x=80
- * - Observatory (x=100): currentX=50, Camera 5 at x=100
+ * - Each room at index i gets camera i at 100% when currentX = i * 10
+ * - Simple, straightforward, no wrapping tricks
  * 
  * Segment logic (10-unit segments for smooth transitions):
  * - Shows two adjacent cameras based on currentX position
@@ -73,13 +69,14 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate, onDebugUpdate 
   const { gl, scene, size } = useThree();
   const currentXRef = useRef(0);
   
-  // Create SIX cameras once (memoized) - one for each room
+  // Create FIFTEEN cameras once (memoized) - one for each app room
   const cameras = useMemo(() => {
     try {
       const aspect = (size.width / 2) / size.height;
+      const NUM_CAMERAS = 15; // Match number of portfolio apps
       
-      // Create 6 cameras with 10-unit spacing (will be updated in useFrame)
-      return Array.from({ length: 6 }, (_, i) => {
+      // Create 15 cameras with 10-unit spacing (will be updated in useFrame)
+      return Array.from({ length: NUM_CAMERAS }, (_, i) => {
         const camera = new THREE.PerspectiveCamera(
           CAMERA_FOV,
           aspect,
@@ -107,17 +104,18 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate, onDebugUpdate 
     };
   }, [cameras]);
   
-  // Animation loop: smooth camera movement with 6-camera system
+  // Animation loop: smooth camera movement with 15-camera system
   useFrame(() => {
     const targetX = targetXRef.current ?? 0;
     const cameraOffset = ROOM_WIDTH / 2; // 10 units between cameras for parallax
+    const NUM_CAMERAS = cameras.length; // 15 cameras
     
     // Smooth lerp to target position
     currentXRef.current += (targetX - currentXRef.current) * CAMERA_LERP_SPEED;
     
     // UPDATE ALL CAMERA POSITIONS - THEY MOVE WITH CURRENTX!
     // Camera spacing: 10 units apart (ROOM_WIDTH / 2) for smooth parallax between 20-unit rooms
-    for (let i = 0; i < cameras.length; i++) {
+    for (let i = 0; i < NUM_CAMERAS; i++) {
       cameras[i].position.x = currentXRef.current + (cameraOffset * i);
     }
     
@@ -131,15 +129,15 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate, onDebugUpdate 
     // Calculate progress within this segment (0 to 1)
     const localProgress = Math.max(0, Math.min(1, (currentXRef.current - segmentStart) / cameraOffset));
     
-    // Determine which two cameras to show (clamp to valid range)
+    // Determine which two cameras to show (clamp to valid range, no wrapping)
+    // With 15 cameras and 15 rooms, it's straightforward:
     // Segment 0 (x=0-10): cameras[0] ↔ cameras[1]
     // Segment 1 (x=10-20): cameras[1] ↔ cameras[2]
-    // Segment 2 (x=20-30): cameras[2] ↔ cameras[3]
-    // Segment 3 (x=30-40): cameras[3] ↔ cameras[4]
-    // Segment 4 (x=40-50): cameras[4] ↔ cameras[5]
-    // Segment 5 (x=50-60): cameras[5] ↔ cameras[5] (last camera only)
-    const leftCameraIndex = Math.max(0, Math.min(5, segmentIndex));
-    const rightCameraIndex = Math.max(0, Math.min(5, segmentIndex + 1));
+    // ...
+    // Segment 13 (x=130-140): cameras[13] ↔ cameras[14]
+    // Segment 14 (x=140+): cameras[14] only (clamped)
+    const leftCameraIndex = Math.max(0, Math.min(NUM_CAMERAS - 1, segmentIndex));
+    const rightCameraIndex = Math.max(0, Math.min(NUM_CAMERAS - 1, segmentIndex + 1));
     
     const leftCamera = cameras[leftCameraIndex];
     const rightCamera = cameras[rightCameraIndex];

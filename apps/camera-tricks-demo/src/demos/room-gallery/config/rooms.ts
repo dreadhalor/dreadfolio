@@ -1,15 +1,37 @@
-import { RoomData } from '../types';
+import { RoomData, RoomTheme } from '../types';
 import { ROOM_WIDTH } from './constants';
+import { PORTFOLIO_APPS } from './apps';
 
-// Rooms at 20-unit intervals, each with its own camera
-export const ROOMS: RoomData[] = [
-  { name: 'Library', offsetX: 0, theme: 'warm', color: '#d4a574' },                        // Camera 0
-  { name: 'Gallery', offsetX: ROOM_WIDTH * 1, theme: 'cool', color: '#74a5d4' },           // Camera 1
-  { name: 'Greenhouse', offsetX: ROOM_WIDTH * 2, theme: 'nature', color: '#7a9b6c' },      // Camera 2
-  { name: 'Lounge', offsetX: ROOM_WIDTH * 3, theme: 'sunset', color: '#d4895f' },          // Camera 3
-  { name: 'Office', offsetX: ROOM_WIDTH * 4, theme: 'monochrome', color: '#808080' },      // Camera 4
-  { name: 'Observatory', offsetX: ROOM_WIDTH * 5, theme: 'cosmic', color: '#4a2c6d' },     // Camera 5
-];
+// Map app IDs to their specific room themes
+const APP_THEME_MAP: Record<string, RoomTheme> = {
+  'home': 'home',
+  'hermitcraft-horns': 'hermitcraft-horns',
+  'enlight': 'enlight',
+  'dredged-up': 'dredged-up',
+  'minesweeper': 'minesweeper',
+  'root-beer-reviews': 'root-beer-reviews',
+  'pathfinder-visualizer': 'pathfinder-visualizer',
+  'ascii-video': 'ascii-video',
+  'shareme': 'shareme',
+  'fallcrate': 'fallcrate',
+  'dread-ui': 'dread-ui',
+  'sketches': 'sketches',
+  'su-done-ku': 'su-done-ku',
+  'steering-text': 'steering-text',
+  'gifster': 'gifster',
+};
+
+// Generate rooms dynamically from portfolio apps
+// Each app gets its own themed room at 20-unit intervals
+export const ROOMS: RoomData[] = PORTFOLIO_APPS.map((app, index) => ({
+  name: app.name,
+  offsetX: ROOM_WIDTH * index,
+  theme: APP_THEME_MAP[app.id] || 'warm', // Use specific theme for each app
+  color: app.color,
+  appId: app.id,
+  appUrl: app.url,
+  description: app.description,
+}));
 
 // Helper to get dividing wall colors between two adjacent rooms
 export const getDividingWallColors = (roomIndex: number): { warmColor: string; coolColor: string } | null => {

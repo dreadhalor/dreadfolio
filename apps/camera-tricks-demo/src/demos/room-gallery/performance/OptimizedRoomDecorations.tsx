@@ -24,13 +24,30 @@
  * - /rooms/ObservatoryRoom.tsx - Stargazing room
  */
 
-// Re-export all rooms
+// Re-export all rooms (original 6)
 export { LibraryRoom as OptimizedLibraryRoom } from './rooms/LibraryRoom';
 export { GalleryRoom as OptimizedGalleryRoom } from './rooms/GalleryRoom';
 export { GreenhouseRoom as OptimizedGreenhouseRoom } from './rooms/GreenhouseRoom';
 export { LoungeRoom as OptimizedLoungeRoom } from './rooms/LoungeRoom';
 export { OfficeRoom as OptimizedOfficeRoom } from './rooms/OfficeRoom';
 export { ObservatoryRoom as OptimizedObservatoryRoom } from './rooms/ObservatoryRoom';
+
+// Re-export app-specific rooms (new 15)
+export { HomepageRoom as OptimizedHomepageRoom } from './rooms/HomepageRoom';
+export { HermitcraftHornsRoom as OptimizedHermitcraftHornsRoom } from './rooms/HermitcraftHornsRoom';
+export { EnlightRoom as OptimizedEnlightRoom } from './rooms/EnlightRoom';
+export { DredgedUpRoom as OptimizedDredgedUpRoom } from './rooms/DredgedUpRoom';
+export { MinesweeperRoom as OptimizedMinesweeperRoom } from './rooms/MinesweeperRoom';
+export { RootBeerReviewsRoom as OptimizedRootBeerReviewsRoom } from './rooms/RootBeerReviewsRoom';
+export { PathfinderRoom as OptimizedPathfinderRoom } from './rooms/PathfinderRoom';
+export { MatrixCamRoom as OptimizedMatrixCamRoom } from './rooms/MatrixCamRoom';
+export { ShareMeRoom as OptimizedShareMeRoom } from './rooms/ShareMeRoom';
+export { FallcrateRoom as OptimizedFallcrateRoom } from './rooms/FallcrateRoom';
+export { DreadUIRoom as OptimizedDreadUIRoom } from './rooms/DreadUIRoom';
+export { SketchesRoom as OptimizedSketchesRoom } from './rooms/SketchesRoom';
+export { SuDoneKuRoom as OptimizedSuDoneKuRoom } from './rooms/SuDoneKuRoom';
+export { SteeringTextRoom as OptimizedSteeringTextRoom } from './rooms/SteeringTextRoom';
+export { GifsterRoom as OptimizedGifsterRoom } from './rooms/GifsterRoom';
 
 // Re-export shared components for external use if needed
 export {
@@ -39,4 +56,10 @@ export {
   InstancedFrames,
   InstancedLamps,
   RotatingPlanets,
+  InstancedMonitors,
+  InstancedBottles,
+  InstancedCrates,
+  InstancedGridCubes,
+  InstancedFloatingParticles,
+  InstancedNumberBlocks,
 } from './shared/InstancedComponents';

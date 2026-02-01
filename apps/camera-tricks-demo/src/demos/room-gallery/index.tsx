@@ -22,16 +22,12 @@ import { RoomData } from './types';
  * A 3D room gallery with split-screen view and independent camera control for 60 FPS performance
  * 
  * Architecture:
- * - Six cameras moving together, spaced 10 units apart
- * - Rooms at fixed positions: 0, 20, 40, 60, 80, 100 (ROOM_WIDTH = 20)
- * - Camera alignment (when room has 100% viewport):
- *   - Library (x=0): Camera 0, currentX=0
- *   - Gallery (x=20): Camera 1, currentX=10
- *   - Greenhouse (x=40): Camera 2, currentX=20
- *   - Lounge (x=60): Camera 3, currentX=30
- *   - Office (x=80): Camera 4, currentX=40
- *   - Observatory (x=100): Camera 5, currentX=50
- * - Smooth parallax transitions between all rooms
+ * - Fifteen cameras moving together, spaced 10 units apart (one per app)
+ * - 15 app-themed rooms at 20-unit intervals (0, 20, 40, ... 280)
+ * - No camera wrapping - straightforward 1:1 mapping
+ * - Each room themed with vibrant colors from portfolio apps
+ * - Simple camera system: camera[i] covers room[i]
+ * - Smooth parallax transitions between all apps
  * - Type-safe props throughout
  * - Automatic room-component mapping via registry
  * - Performance optimizations: merged geometry, instanced meshes, minimal lights

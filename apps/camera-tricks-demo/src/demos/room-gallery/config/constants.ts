@@ -10,8 +10,10 @@ export const CAMERA_FOV = 60;
 export const CAMERA_LERP_SPEED = 0.1;
 
 // Camera bounds (slightly inside first and last walls)
+// With 15 apps: currentX ranges from 0 (first app) to 140 (last app at index 14)
+// Add buffer for smooth edge behavior
 export const CAMERA_MIN_X = -8;
-export const CAMERA_MAX_X = 55; // currentX goes from 0 (Library) to 50 (Observatory), plus small buffer
+export const CAMERA_MAX_X = 145; // For 15 apps (14 * 10 + buffer)
 
 // Drag control
 export const DRAG_SENSITIVITY = 0.05;

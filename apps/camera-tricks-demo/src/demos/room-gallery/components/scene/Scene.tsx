@@ -20,9 +20,10 @@ interface SceneProps {
  * Camera control moved to SplitCameraRenderer for split-screen rendering
  * 
  * Performance considerations:
- * - Renders all rooms (6 total)
+ * - Renders all app rooms (15 total for portfolio)
  * - Uses optimized room components (merged geometry, instanced meshes)
  * - Scene rendered twice per frame (once for each camera viewport)
+ * - Procedurally generates vibrant colors from app themes
  */
 export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
   return (
@@ -34,7 +35,10 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
 
       {/* Render all rooms */}
       {ROOMS.map((room, index) => {
+        // Get room decorations component for the theme
         const RoomDecorations = getRoomComponent(room.theme);
+        
+        // Get theme colors (works for both original and app-specific themes)
         const colors = getThemeColors(room.theme);
         
         return (
