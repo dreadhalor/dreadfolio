@@ -28,6 +28,9 @@ export function FloatingParticles({
   const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
+  // Reuse object to prevent GC pauses
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  
   const particleData = useMemo(() => {
     return Array.from({ length: count }, () => ({
       x: (Math.random() - 0.5) * spread.x,
@@ -43,7 +46,6 @@ export function FloatingParticles({
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime * speed;
-    const tempObject = new THREE.Object3D();
     
     for (let i = 0; i < count; i++) {
       const data = particleData[i];
@@ -85,6 +87,9 @@ export function DataStreams({ offsetX, color = '#00ff41', count = 30 }: Particle
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matcap = useMatcap();
   
+  // Reuse object to prevent GC pauses
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  
   const streamData = useMemo(() => {
     return Array.from({ length: count }, () => ({
       x: (Math.random() - 0.5) * 14,
@@ -98,7 +103,6 @@ export function DataStreams({ offsetX, color = '#00ff41', count = 30 }: Particle
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
-    const tempObject = new THREE.Object3D();
     
     for (let i = 0; i < count; i++) {
       const data = streamData[i];
@@ -128,6 +132,9 @@ export function Bubbles({ offsetX, color, count = 25 }: ParticleSystemProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matcap = useMatcap();
   
+  // Reuse object to prevent GC pauses
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  
   const bubbleData = useMemo(() => {
     return Array.from({ length: count }, () => ({
       x: (Math.random() - 0.5) * 12,
@@ -141,7 +148,6 @@ export function Bubbles({ offsetX, color, count = 25 }: ParticleSystemProps) {
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
-    const tempObject = new THREE.Object3D();
     
     for (let i = 0; i < count; i++) {
       const data = bubbleData[i];
@@ -188,6 +194,9 @@ export function Embers({ offsetX, color = '#ff6347', count = 30 }: ParticleSyste
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matcap = useMatcap();
   
+  // Reuse object to prevent GC pauses
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  
   const emberData = useMemo(() => {
     return Array.from({ length: count }, () => ({
       x: (Math.random() - 0.5) * 10,
@@ -201,7 +210,6 @@ export function Embers({ offsetX, color = '#ff6347', count = 30 }: ParticleSyste
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
-    const tempObject = new THREE.Object3D();
     
     for (let i = 0; i < count; i++) {
       const data = emberData[i];
@@ -232,6 +240,9 @@ export function Snow({ offsetX, color = '#ffffff', count = 50 }: ParticleSystemP
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matcap = useMatcap();
   
+  // Reuse object to prevent GC pauses
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  
   const snowData = useMemo(() => {
     return Array.from({ length: count }, () => ({
       x: (Math.random() - 0.5) * 14,
@@ -245,7 +256,6 @@ export function Snow({ offsetX, color = '#ffffff', count = 50 }: ParticleSystemP
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
-    const tempObject = new THREE.Object3D();
     
     for (let i = 0; i < count; i++) {
       const data = snowData[i];
@@ -276,6 +286,10 @@ export function Confetti({ offsetX, count = 40 }: { offsetX: number; count?: num
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matcap = useMatcap();
   
+  // Reuse objects to prevent GC pauses
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  const tempColor = useMemo(() => new THREE.Color(), []);
+  
   const confettiData = useMemo(() => {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#ee5a6f'];
     return Array.from({ length: count }, () => ({
@@ -290,8 +304,6 @@ export function Confetti({ offsetX, count = 40 }: { offsetX: number; count?: num
   useFrame((state) => {
     if (!meshRef.current) return;
     const time = state.clock.elapsedTime;
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
     
     for (let i = 0; i < count; i++) {
       const data = confettiData[i];
