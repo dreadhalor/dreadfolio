@@ -1,10 +1,8 @@
+/**
+ * Room themes corresponding to portfolio apps
+ * Each app gets its own uniquely themed room
+ */
 export type RoomTheme = 
-  | 'warm' 
-  | 'cool' 
-  | 'nature' 
-  | 'sunset' 
-  | 'monochrome' 
-  | 'cosmic'
   | 'home'
   | 'hermitcraft-horns'
   | 'enlight'

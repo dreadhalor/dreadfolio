@@ -3,12 +3,6 @@ import type { RoomDecorationProps } from '../types/props';
 
 // Direct ES6 imports - simple and reliable
 import {
-  OptimizedLibraryRoom,
-  OptimizedGalleryRoom,
-  OptimizedGreenhouseRoom,
-  OptimizedLoungeRoom,
-  OptimizedOfficeRoom,
-  OptimizedObservatoryRoom,
   OptimizedHomepageRoom,
   OptimizedHermitcraftHornsRoom,
   OptimizedEnlightRoom,
@@ -35,19 +29,13 @@ import {
  * 2. Export from performance/OptimizedRoomDecorations.tsx
  * 3. Import it above
  * 4. Add to registry below - that's it!
+ * 
+ * All 15 portfolio apps have dedicated themed rooms.
  */
 export const roomComponentRegistry: Record<
   RoomTheme, 
   React.ComponentType<RoomDecorationProps>
 > = {
-  // Original demo rooms
-  warm: OptimizedLibraryRoom,
-  cool: OptimizedGalleryRoom,
-  nature: OptimizedGreenhouseRoom,
-  sunset: OptimizedLoungeRoom,
-  monochrome: OptimizedOfficeRoom,
-  cosmic: OptimizedObservatoryRoom,
-  
   // Portfolio app rooms
   'home': OptimizedHomepageRoom,
   'hermitcraft-horns': OptimizedHermitcraftHornsRoom,

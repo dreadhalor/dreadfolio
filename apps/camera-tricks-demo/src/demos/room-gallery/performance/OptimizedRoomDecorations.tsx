@@ -1,38 +1,20 @@
 /**
- * REFACTORED: Room Decorations
+ * Room Decorations Hub
  * 
- * This file now serves as a re-export hub for all room components.
- * Each room has been extracted into its own file for better maintainability:
- * 
- * Before: 1 file × 719 lines = Hard to navigate, large git diffs
- * After: 7 files × ~100 lines each = Easy to find, clear changes
- * 
- * Benefits:
- * - Easier to find and modify individual rooms
- * - Clearer git diffs (changes isolated to specific rooms)
- * - Better code organization and separation of concerns
- * - Reduced cognitive load when working on any single room
- * - Shared components centralized in /shared/
+ * Central re-export hub for all app-specific room components.
+ * Each room has been extracted into its own file for better maintainability.
  * 
  * Architecture:
  * - /shared/InstancedComponents.tsx - Reusable instanced meshes
- * - /rooms/LibraryRoom.tsx - Cozy reading room
- * - /rooms/GalleryRoom.tsx - Art gallery with pedestals
- * - /rooms/GreenhouseRoom.tsx - Botanical garden
- * - /rooms/LoungeRoom.tsx - Relaxation area with bar
- * - /rooms/OfficeRoom.tsx - Professional workspace
- * - /rooms/ObservatoryRoom.tsx - Stargazing room
+ * - /rooms/[AppName]Room.tsx - Individual app-themed rooms
+ * 
+ * All 15 portfolio apps have dedicated room themes:
+ * - Homepage, HermitCraft Horns, Enlight, DredgedUp, Minesweeper
+ * - Root Beer Reviews, Pathfinder Visualizer, Matrix-Cam, ShareMe
+ * - Fallcrate, DreadUI, Sketches, Su-Done-Ku, Steering Text, Gifster
  */
 
-// Re-export all rooms (original 6)
-export { LibraryRoom as OptimizedLibraryRoom } from './rooms/LibraryRoom';
-export { GalleryRoom as OptimizedGalleryRoom } from './rooms/GalleryRoom';
-export { GreenhouseRoom as OptimizedGreenhouseRoom } from './rooms/GreenhouseRoom';
-export { LoungeRoom as OptimizedLoungeRoom } from './rooms/LoungeRoom';
-export { OfficeRoom as OptimizedOfficeRoom } from './rooms/OfficeRoom';
-export { ObservatoryRoom as OptimizedObservatoryRoom } from './rooms/ObservatoryRoom';
-
-// Re-export app-specific rooms (new 15)
+// Re-export all app-specific rooms
 export { HomepageRoom as OptimizedHomepageRoom } from './rooms/HomepageRoom';
 export { HermitcraftHornsRoom as OptimizedHermitcraftHornsRoom } from './rooms/HermitcraftHornsRoom';
 export { EnlightRoom as OptimizedEnlightRoom } from './rooms/EnlightRoom';

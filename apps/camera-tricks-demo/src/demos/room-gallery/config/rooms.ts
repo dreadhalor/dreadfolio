@@ -25,20 +25,26 @@ const APP_THEME_MAP: Record<string, RoomTheme> = {
 // Each app gets its own themed room at ROOM_SPACING intervals
 export const ROOMS: RoomData[] = PORTFOLIO_APPS.map((app, index) => ({
   name: app.name,
-  offsetX: ROOM_SPACING * index, // Rooms spaced by ROOM_SPACING (e.g., 0, 100, 200, 300...)
-  theme: APP_THEME_MAP[app.id] || 'warm', // Use specific theme for each app
+  offsetX: ROOM_SPACING * index, // Rooms spaced by ROOM_SPACING (e.g., 0, 30, 60, 90...)
+  theme: APP_THEME_MAP[app.id],
   color: app.color,
   appId: app.id,
   appUrl: app.url,
   description: app.description,
 }));
 
-// Helper to get dividing wall colors between two adjacent rooms
-export const getDividingWallColors = (roomIndex: number): { warmColor: string; coolColor: string } | null => {
+/**
+ * Get dividing wall colors between two adjacent rooms
+ * Returns the colors for the left and right sides of the wall
+ * 
+ * @param roomIndex - Index of the left room (0-13 for 15 rooms with 14 dividing walls)
+ * @returns Object with leftRoomColor and rightRoomColor, or null if invalid index
+ */
+export const getDividingWallColors = (roomIndex: number): { leftRoomColor: string; rightRoomColor: string } | null => {
   if (roomIndex < 0 || roomIndex >= ROOMS.length - 1) return null;
   
   return {
-    warmColor: ROOMS[roomIndex].color,
-    coolColor: ROOMS[roomIndex + 1].color,
+    leftRoomColor: ROOMS[roomIndex].color,
+    rightRoomColor: ROOMS[roomIndex + 1].color,
   };
 };

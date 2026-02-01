@@ -69,8 +69,8 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
             <DividingWall
               key={wallPosition}
               position={[wallPosition, 0, 0]}
-              warmColor={wallColors.warmColor}
-              coolColor={wallColors.coolColor}
+              leftRoomColor={wallColors.leftRoomColor}
+              rightRoomColor={wallColors.rightRoomColor}
             />
           )
         );

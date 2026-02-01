@@ -29,8 +29,8 @@ export interface RoomStructureProps {
 // Dividing wall props
 export interface DividingWallProps {
   position: [number, number, number];
-  warmColor: string;
-  coolColor: string;
+  leftRoomColor: string;
+  rightRoomColor: string;
 }
 
 // Room decoration props
