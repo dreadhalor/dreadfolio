@@ -2,6 +2,7 @@ import { useRef, useEffect, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, ROOM_WIDTH, CAMERA_LERP_SPEED, NUM_ROOMS } from '../../config/constants';
+import { calculateCameraPosition } from '../../utils/cameraCalculations';
 
 interface SplitCameraRendererProps {
   targetRoomProgressRef: React.RefObject<number>;
@@ -80,8 +81,10 @@ export function SplitCameraRenderer({ targetRoomProgressRef, onRoomProgressUpdat
           CAMERA_NEAR_PLANE,
           CAMERA_FAR_PLANE
         );
-        // Initialize at room positions (20 units apart: 0, 20, 40, 60...)
-        camera.position.set(i * ROOM_WIDTH, CAMERA_HEIGHT, CAMERA_Z_POSITION);
+        // Initialize at starting positions (consistent with runtime formula)
+        // At roomProgress=0: camera[0]=0, camera[1]=10, camera[2]=20, etc.
+        const initialX = calculateCameraPosition(i, 0, ROOM_WIDTH);
+        camera.position.set(initialX, CAMERA_HEIGHT, CAMERA_Z_POSITION);
         return camera;
       });
     } catch (error) {
@@ -113,12 +116,9 @@ export function SplitCameraRenderer({ targetRoomProgressRef, onRoomProgressUpdat
     onRoomProgressUpdate(currentProgress);
     
     // UPDATE ALL CAMERA POSITIONS based on roomProgress
-    // Goal: Camera[i] should be centered on Room[i] when roomProgress = i
-    // Cameras are spaced ROOM_WIDTH/2 apart
-    // Formula: camera[i] = (i * ROOM_WIDTH/2) + (roomProgress * ROOM_WIDTH/2)
-    const cameraOffset = currentProgress * (ROOM_WIDTH / 2); // How far all cameras have moved
+    // Uses centralized calculation utility for consistency
     for (let i = 0; i < cameras.length; i++) {
-      cameras[i].position.x = (i * (ROOM_WIDTH / 2)) + cameraOffset;
+      cameras[i].position.x = calculateCameraPosition(i, currentProgress, ROOM_WIDTH);
     }
     
     // DERIVED VALUES from roomProgress:

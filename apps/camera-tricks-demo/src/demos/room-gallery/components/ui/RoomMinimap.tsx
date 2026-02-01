@@ -1,5 +1,7 @@
 import { RoomData } from '../../types';
 import { ROOM_WIDTH, NUM_ROOMS } from '../../config/constants';
+import { calculateAllCameraPositions } from '../../utils/cameraCalculations';
+import { worldToMinimapX, MINIMAP_CONFIG, getRoomCardSpacing } from '../../utils/minimapMapping';
 
 interface RoomMinimapProps {
   rooms: RoomData[];
@@ -14,13 +16,8 @@ export function RoomMinimap({
   roomProgress,
   onRoomClick,
 }: RoomMinimapProps) {
-  // Calculate camera positions in world space
-  // Camera[i] = (i * ROOM_WIDTH/2) + (roomProgress * ROOM_WIDTH/2)
-  // This ensures Camera[i] is centered on Room[i] when roomProgress = i
-  const cameraOffset = roomProgress * (ROOM_WIDTH / 2);
-  const cameraPositions = Array.from({ length: NUM_ROOMS }, (_, i) => 
-    (i * (ROOM_WIDTH / 2)) + cameraOffset
-  );
+  // Calculate camera positions using centralized utility
+  const cameraPositions = calculateAllCameraPositions(NUM_ROOMS, roomProgress, ROOM_WIDTH);
   return (
     <>
       <div
@@ -42,57 +39,49 @@ export function RoomMinimap({
         {/* Camera position visualization */}
         <div style={{
           position: 'relative',
-          height: '60px',
-          width: '1260px', // 15 rooms * 80px + 14 gaps * 8px
+          height: `${MINIMAP_CONFIG.VISUALIZATION_HEIGHT}px`,
+          width: `${NUM_ROOMS * MINIMAP_CONFIG.ROOM_CARD_WIDTH + (NUM_ROOMS - 1) * MINIMAP_CONFIG.ROOM_CARD_GAP}px`,
           background: 'rgba(255, 255, 255, 0.05)',
           borderRadius: '4px',
           overflow: 'visible',
-          paddingTop: '25px', // Room for room labels
+          paddingTop: `${MINIMAP_CONFIG.VISUALIZATION_PADDING}px`,
         }}>
           {/* Room position markers */}
-          {rooms.map((room, index) => (
-            <div
-              key={`room-marker-${index}`}
-              style={{
-                position: 'absolute',
-                left: `${index * 88}px`, // 80px room + 8px gap
-                width: '80px',
-                height: 'calc(100% - 25px)',
-                top: '25px',
-                borderLeft: '2px solid rgba(255, 255, 255, 0.2)',
-                pointerEvents: 'none',
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: '-20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                fontSize: '9px',
-                color: 'rgba(255, 255, 255, 0.5)',
-                fontFamily: 'monospace',
-                whiteSpace: 'nowrap',
-              }}>
-                R{index} ({room.offsetX})
+          {rooms.map((room, index) => {
+            const cardSpacing = getRoomCardSpacing();
+            return (
+              <div
+                key={`room-marker-${index}`}
+                style={{
+                  position: 'absolute',
+                  left: `${index * cardSpacing}px`,
+                  width: `${MINIMAP_CONFIG.ROOM_CARD_WIDTH}px`,
+                  height: `calc(100% - ${MINIMAP_CONFIG.VISUALIZATION_PADDING}px)`,
+                  top: `${MINIMAP_CONFIG.VISUALIZATION_PADDING}px`,
+                  borderLeft: '2px solid rgba(255, 255, 255, 0.2)',
+                  pointerEvents: 'none',
+                }}
+              >
+                <div style={{
+                  position: 'absolute',
+                  top: '-20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  fontSize: '9px',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  fontFamily: 'monospace',
+                  whiteSpace: 'nowrap',
+                }}>
+                  R{index} ({room.offsetX})
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           
           {/* Camera position markers */}
           {cameraPositions.map((cameraX, index) => {
-            // Map camera world position to minimap pixel position
-            // Room cards: 80px wide with 8px gaps (88px spacing)
-            // Room 0 center at 40px, Room 14 center at 40 + (14 * 88) = 1272px
-            // World: Room 0 at x=0, Room 14 at x=280
-            // Linear mapping: minimapX = 40 + (worldX / 280) * 1232
-            const ROOM_CARD_WIDTH = 80;
-            const ROOM_CARD_GAP = 8;
-            const ROOM_CARD_SPACING = ROOM_CARD_WIDTH + ROOM_CARD_GAP;
-            const FIRST_ROOM_CENTER = ROOM_CARD_WIDTH / 2;
-            const MAX_WORLD_X = (NUM_ROOMS - 1) * ROOM_WIDTH; // 280
-            const MINIMAP_SPAN = (NUM_ROOMS - 1) * ROOM_CARD_SPACING; // 1232
-            
-            const minimapX = FIRST_ROOM_CENTER + (cameraX / MAX_WORLD_X) * MINIMAP_SPAN;
+            // Use centralized mapping utility
+            const minimapX = worldToMinimapX(cameraX, NUM_ROOMS, ROOM_WIDTH);
             
             return (
               <div
@@ -100,10 +89,10 @@ export function RoomMinimap({
                 style={{
                   position: 'absolute',
                   left: `${minimapX}px`,
-                  top: 'calc(50% + 12.5px)', // Account for padding
+                  top: `calc(50% + ${MINIMAP_CONFIG.VISUALIZATION_PADDING / 2}px)`,
                   transform: 'translate(-50%, -50%)',
-                  width: '16px',
-                  height: '16px',
+                  width: `${MINIMAP_CONFIG.CAMERA_DOT_SIZE}px`,
+                  height: `${MINIMAP_CONFIG.CAMERA_DOT_SIZE}px`,
                   background: '#0ff',
                   border: '2px solid #fff',
                   borderRadius: '50%',
@@ -135,7 +124,7 @@ export function RoomMinimap({
         {/* Room cards */}
         <div style={{
           display: 'flex',
-          gap: '0.5rem',
+          gap: `${MINIMAP_CONFIG.ROOM_CARD_GAP}px`,
         }}>
           {rooms.map((room, index) => {
             const isActive = currentRoom.offsetX === room.offsetX;
@@ -145,8 +134,8 @@ export function RoomMinimap({
                 key={room.offsetX}
                 onClick={() => onRoomClick(room)}
                 style={{
-                  width: '80px',
-                  height: '80px',
+                  width: `${MINIMAP_CONFIG.ROOM_CARD_WIDTH}px`,
+                  height: `${MINIMAP_CONFIG.ROOM_CARD_HEIGHT}px`,
                   background: room.color,
                   borderRadius: '0.5rem',
                   cursor: 'pointer',

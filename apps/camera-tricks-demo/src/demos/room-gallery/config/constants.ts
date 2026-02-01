@@ -19,9 +19,6 @@ export const MAX_ROOM_PROGRESS = NUM_ROOMS - 1; // 14
 // Drag control (sensitivity in room-space units per pixel)
 export const DRAG_SENSITIVITY = 0.01; // 100 pixels = move 1 room
 
-// Visibility/Culling
-export const VISIBILITY_THRESHOLD = 30; // Only render rooms within this distance
-
 // Dividing wall dimensions
 export const WALL_THICKNESS = 0.3;
 export const DOORWAY_WIDTH = 3;

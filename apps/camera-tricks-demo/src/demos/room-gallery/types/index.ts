@@ -44,13 +44,3 @@ export interface RoomData {
   appUrl?: string;
   description?: string;
 }
-
-export interface CameraState {
-  x: number;
-  isDragging: boolean;
-}
-
-export interface DragState {
-  x: number;
-  startCameraX: number;
-}
