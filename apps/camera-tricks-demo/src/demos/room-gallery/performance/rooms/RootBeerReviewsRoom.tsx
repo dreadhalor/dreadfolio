@@ -140,6 +140,123 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
     shelf.applyMatrix4(tempObject.matrix);
     geometries.push(shelf);
     
+    // Vintage cash register on bar
+    const cashRegister = new THREE.BoxGeometry(0.5, 0.4, 0.5);
+    tempObject.position.set(offsetX - 2.5, 1.5, -7);
+    tempObject.updateMatrix();
+    cashRegister.applyMatrix4(tempObject.matrix);
+    geometries.push(cashRegister);
+    
+    // Cash register display
+    const display = new THREE.BoxGeometry(0.3, 0.15, 0.05);
+    tempObject.position.set(offsetX - 2.5, 1.75, -6.8);
+    tempObject.rotation.x = -Math.PI / 6;
+    tempObject.updateMatrix();
+    display.applyMatrix4(tempObject.matrix);
+    geometries.push(display);
+    
+    tempObject.rotation.x = 0;
+    
+    // Vintage root beer signs on walls
+    for (let i = 0; i < 3; i++) {
+      const sign = new THREE.BoxGeometry(1.5, 0.8, 0.05);
+      tempObject.position.set(offsetX - 4 + i * 4, 3.5, -9.8);
+      tempObject.updateMatrix();
+      sign.applyMatrix4(tempObject.matrix);
+      geometries.push(sign);
+    }
+    
+    // Napkin dispenser on bar
+    const napkinHolder = new THREE.BoxGeometry(0.25, 0.15, 0.2);
+    tempObject.position.set(offsetX + 2.5, 1.42, -7);
+    tempObject.updateMatrix();
+    napkinHolder.applyMatrix4(tempObject.matrix);
+    geometries.push(napkinHolder);
+    
+    // Straw dispenser
+    const strawHolder = new THREE.CylinderGeometry(0.08, 0.08, 0.3, 8);
+    tempObject.position.set(offsetX + 2, 1.5, -6.5);
+    tempObject.updateMatrix();
+    strawHolder.applyMatrix4(tempObject.matrix);
+    geometries.push(strawHolder);
+    
+    // Ice cream scooper on counter
+    const scoop = new THREE.SphereGeometry(0.08, 8, 8);
+    tempObject.position.set(offsetX - 1.5, 1.4, -7);
+    tempObject.updateMatrix();
+    scoop.applyMatrix4(tempObject.matrix);
+    geometries.push(scoop);
+    
+    const scoopHandle = new THREE.CylinderGeometry(0.02, 0.02, 0.35, 6);
+    tempObject.position.set(offsetX - 1.5, 1.55, -7);
+    tempObject.rotation.z = Math.PI / 4;
+    tempObject.updateMatrix();
+    scoopHandle.applyMatrix4(tempObject.matrix);
+    geometries.push(scoopHandle);
+    
+    tempObject.rotation.z = 0;
+    
+    // Glasses rack above bar
+    const glassRack = new THREE.BoxGeometry(3, 0.05, 0.4);
+    tempObject.position.set(offsetX, 2.5, -8);
+    tempObject.updateMatrix();
+    glassRack.applyMatrix4(tempObject.matrix);
+    geometries.push(glassRack);
+    
+    // Hanging glasses
+    for (let i = 0; i < 8; i++) {
+      const glass = new THREE.CylinderGeometry(0.08, 0.06, 0.25, 8);
+      tempObject.position.set(offsetX - 1.5 + i * 0.4, 2.3, -8);
+      tempObject.updateMatrix();
+      glass.applyMatrix4(tempObject.matrix);
+      geometries.push(glass);
+    }
+    
+    // Coasters on bar
+    for (let i = 0; i < 6; i++) {
+      const coaster = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 16);
+      tempObject.position.set(offsetX - 2 + i * 0.8, 1.36, -7);
+      tempObject.rotation.x = Math.PI / 2;
+      tempObject.updateMatrix();
+      coaster.applyMatrix4(tempObject.matrix);
+      geometries.push(coaster);
+    }
+    
+    tempObject.rotation.x = 0;
+    
+    // Vintage pendant lights above bar
+    for (let i = 0; i < 3; i++) {
+      const pendant = new THREE.ConeGeometry(0.25, 0.5, 8);
+      tempObject.position.set(offsetX - 2 + i * 2, 3.5, -5);
+      tempObject.rotation.x = Math.PI;
+      tempObject.updateMatrix();
+      pendant.applyMatrix4(tempObject.matrix);
+      geometries.push(pendant);
+      
+      // Pendant cord
+      const cord = new THREE.CylinderGeometry(0.01, 0.01, 1, 6);
+      tempObject.position.set(offsetX - 2 + i * 2, 4.5, -5);
+      tempObject.updateMatrix();
+      cord.applyMatrix4(tempObject.matrix);
+      geometries.push(cord);
+    }
+    
+    tempObject.rotation.x = 0;
+    
+    // Menu chalkboard on wall
+    const chalkboard = new THREE.BoxGeometry(1.5, 2, 0.08);
+    tempObject.position.set(offsetX + 7, 2.5, -9.8);
+    tempObject.updateMatrix();
+    chalkboard.applyMatrix4(tempObject.matrix);
+    geometries.push(chalkboard);
+    
+    // Chalkboard frame
+    const chalkFrame = new THREE.BoxGeometry(1.7, 2.2, 0.05);
+    tempObject.position.set(offsetX + 7, 2.5, -9.75);
+    tempObject.updateMatrix();
+    chalkFrame.applyMatrix4(tempObject.matrix);
+    geometries.push(chalkFrame);
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

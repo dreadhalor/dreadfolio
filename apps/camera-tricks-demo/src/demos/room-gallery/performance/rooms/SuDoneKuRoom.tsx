@@ -122,6 +122,112 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
       geometries.push(pedestal);
     }
     
+    // Puzzle books on table
+    for (let i = 0; i < 5; i++) {
+      const book = new THREE.BoxGeometry(0.3, 0.05, 0.4);
+      tempObject.position.set(
+        offsetX + 4.5 + i * 0.35,
+        1.08 + i * 0.06,
+        5
+      );
+      tempObject.rotation.y = (Math.random() - 0.5) * 0.3;
+      tempObject.updateMatrix();
+      book.applyMatrix4(tempObject.matrix);
+      geometries.push(book);
+    }
+    
+    tempObject.rotation.y = 0;
+    
+    // Pencil holder on table
+    const pencilHolder = new THREE.CylinderGeometry(0.08, 0.08, 0.2, 8);
+    tempObject.position.set(offsetX + 6, 1.2, 5);
+    tempObject.updateMatrix();
+    pencilHolder.applyMatrix4(tempObject.matrix);
+    geometries.push(pencilHolder);
+    
+    // Pencils in holder
+    for (let i = 0; i < 6; i++) {
+      const pencil = new THREE.CylinderGeometry(0.01, 0.01, 0.35, 6);
+      const angle = (i / 6) * Math.PI * 2;
+      tempObject.position.set(
+        offsetX + 6 + Math.cos(angle) * 0.03,
+        1.38,
+        5 + Math.sin(angle) * 0.03
+      );
+      tempObject.updateMatrix();
+      pencil.applyMatrix4(tempObject.matrix);
+      geometries.push(pencil);
+    }
+    
+    // Eraser on table
+    const eraser = new THREE.BoxGeometry(0.12, 0.05, 0.08);
+    tempObject.position.set(offsetX + 5.5, 1.08, 5.5);
+    tempObject.updateMatrix();
+    eraser.applyMatrix4(tempObject.matrix);
+    geometries.push(eraser);
+    
+    // Ruler on table
+    const ruler = new THREE.BoxGeometry(0.8, 0.01, 0.08);
+    tempObject.position.set(offsetX + 5, 1.08, 5.7);
+    tempObject.updateMatrix();
+    ruler.applyMatrix4(tempObject.matrix);
+    geometries.push(ruler);
+    
+    // Marker tray below whiteboard
+    const tray = new THREE.BoxGeometry(1, 0.1, 0.15);
+    tempObject.position.set(offsetX, 1.5, -9.7);
+    tempObject.updateMatrix();
+    tray.applyMatrix4(tempObject.matrix);
+    geometries.push(tray);
+    
+    // Markers in tray
+    for (let i = 0; i < 6; i++) {
+      const marker = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
+      tempObject.position.set(offsetX - 0.4 + i * 0.16, 1.55, -9.7);
+      tempObject.rotation.z = Math.PI / 2;
+      tempObject.updateMatrix();
+      marker.applyMatrix4(tempObject.matrix);
+      geometries.push(marker);
+    }
+    
+    tempObject.rotation.z = 0;
+    
+    // Chair for table
+    const chairSeat = new THREE.BoxGeometry(0.8, 0.1, 0.8);
+    tempObject.position.set(offsetX + 5, 0.6, 4);
+    tempObject.updateMatrix();
+    chairSeat.applyMatrix4(tempObject.matrix);
+    geometries.push(chairSeat);
+    
+    const chairBack = new THREE.BoxGeometry(0.8, 0.8, 0.1);
+    tempObject.position.set(offsetX + 5, 1.2, 4.35);
+    tempObject.updateMatrix();
+    chairBack.applyMatrix4(tempObject.matrix);
+    geometries.push(chairBack);
+    
+    // Chair legs
+    for (let i = 0; i < 4; i++) {
+      const leg = new THREE.CylinderGeometry(0.04, 0.04, 0.6, 8);
+      const xOff = i % 2 === 0 ? -0.35 : 0.35;
+      const zOff = i < 2 ? -0.35 : 0.35;
+      tempObject.position.set(offsetX + 5 + xOff, 0.3, 4 + zOff);
+      tempObject.updateMatrix();
+      leg.applyMatrix4(tempObject.matrix);
+      geometries.push(leg);
+    }
+    
+    // Sudoku strategy posters on side wall
+    for (let i = 0; i < 3; i++) {
+      const poster = new THREE.BoxGeometry(1, 1.2, 0.05);
+      tempObject.position.set(offsetX + 9.8, 2.5 + i * 0.5, -6 + i * 3);
+      tempObject.rotation.y = Math.PI / 2;
+      tempObject.updateMatrix();
+      poster.applyMatrix4(tempObject.matrix);
+      geometries.push(poster);
+    }
+    
+    tempObject.rotation.y = 0;
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

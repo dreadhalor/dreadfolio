@@ -87,6 +87,105 @@ export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
     silhouetteHead.applyMatrix4(tempObject.matrix);
     geometries.push(silhouetteHead);
     
+    // Network cables along floor and walls
+    for (let i = 0; i < 15; i++) {
+      const cable = new THREE.CylinderGeometry(0.04, 0.04, 0.5, 6);
+      const angle = (i / 15) * Math.PI * 2;
+      tempObject.position.set(
+        offsetX + Math.cos(angle) * 7,
+        0.1 + (i % 3) * 0.3,
+        Math.sin(angle) * 7
+      );
+      tempObject.rotation.z = Math.PI / 2 + angle;
+      tempObject.updateMatrix();
+      cable.applyMatrix4(tempObject.matrix);
+      geometries.push(cable);
+    }
+    
+    tempObject.rotation.z = 0;
+    
+    // Server LED indicators (small boxes)
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 3; j++) {
+        const led = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+        tempObject.position.set(offsetX + 6.6, 0.5 + i * 0.5, -7 + (j - 1) * 0.3);
+        tempObject.updateMatrix();
+        led.applyMatrix4(tempObject.matrix);
+        geometries.push(led);
+      }
+    }
+    
+    // Keyboard on desk
+    const keyboard = new THREE.BoxGeometry(1, 0.04, 0.35);
+    tempObject.position.set(offsetX - 2, 1.12, -4.5);
+    tempObject.updateMatrix();
+    keyboard.applyMatrix4(tempObject.matrix);
+    geometries.push(keyboard);
+    
+    // Keys on keyboard (small grid)
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 10; col++) {
+        const key = new THREE.BoxGeometry(0.07, 0.02, 0.07);
+        tempObject.position.set(
+          offsetX - 2 - 0.4 + col * 0.09,
+          1.15,
+          -4.6 + row * 0.08
+        );
+        tempObject.updateMatrix();
+        key.applyMatrix4(tempObject.matrix);
+        geometries.push(key);
+      }
+    }
+    
+    // Mouse
+    const mouse = new THREE.BoxGeometry(0.12, 0.05, 0.18);
+    tempObject.position.set(offsetX - 1, 1.12, -4.5);
+    tempObject.updateMatrix();
+    mouse.applyMatrix4(tempObject.matrix);
+    geometries.push(mouse);
+    
+    // Coffee/energy drink can
+    const can = new THREE.CylinderGeometry(0.08, 0.08, 0.3, 16);
+    tempObject.position.set(offsetX - 3.5, 1.25, -5);
+    tempObject.updateMatrix();
+    can.applyMatrix4(tempObject.matrix);
+    geometries.push(can);
+    
+    // Hacker manifesto poster frame
+    const posterFrame = new THREE.BoxGeometry(1.5, 2, 0.08);
+    tempObject.position.set(offsetX - 6, 2.5, 9.8);
+    tempObject.updateMatrix();
+    posterFrame.applyMatrix4(tempObject.matrix);
+    geometries.push(posterFrame);
+    
+    // Floor cable trays
+    for (let i = 0; i < 5; i++) {
+      const tray = new THREE.BoxGeometry(0.2, 0.05, 3);
+      tempObject.position.set(offsetX - 4 + i * 2, 0.03, 0);
+      tempObject.updateMatrix();
+      tray.applyMatrix4(tempObject.matrix);
+      geometries.push(tray);
+    }
+    
+    // Router/modem on floor
+    const router = new THREE.BoxGeometry(0.4, 0.1, 0.6);
+    tempObject.position.set(offsetX + 5, 0.05, 6);
+    tempObject.updateMatrix();
+    router.applyMatrix4(tempObject.matrix);
+    geometries.push(router);
+    
+    // Router antennas
+    for (let i = 0; i < 3; i++) {
+      const antenna = new THREE.CylinderGeometry(0.02, 0.02, 0.4, 6);
+      tempObject.position.set(offsetX + 5 + (i - 1) * 0.15, 0.3, 6);
+      tempObject.rotation.z = (Math.random() - 0.5) * 0.5;
+      tempObject.updateMatrix();
+      antenna.applyMatrix4(tempObject.matrix);
+      geometries.push(antenna);
+    }
+    
+    tempObject.rotation.z = 0;
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

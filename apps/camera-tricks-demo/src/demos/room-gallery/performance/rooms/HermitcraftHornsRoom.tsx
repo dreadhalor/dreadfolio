@@ -96,6 +96,114 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
       geometries.push(shelfClone);
     }
     
+    // Audio mixer on desk (blocky, Minecraft style)
+    const mixer = new THREE.BoxGeometry(1.2, 0.15, 0.8);
+    tempObject.position.set(offsetX + 0.5, 1.2, -6);
+    tempObject.updateMatrix();
+    mixer.applyMatrix4(tempObject.matrix);
+    geometries.push(mixer);
+    
+    // Mixer knobs (small cubes)
+    for (let i = 0; i < 12; i++) {
+      const knob = new THREE.BoxGeometry(0.08, 0.08, 0.08);
+      const row = Math.floor(i / 4);
+      const col = i % 4;
+      tempObject.position.set(
+        offsetX + 0.1 + col * 0.25,
+        1.28,
+        -6.2 + row * 0.25
+      );
+      tempObject.updateMatrix();
+      knob.applyMatrix4(tempObject.matrix);
+      geometries.push(knob);
+    }
+    
+    // Gaming chair (blocky)
+    const chairSeat = new THREE.BoxGeometry(0.8, 0.15, 0.8);
+    tempObject.position.set(offsetX, 0.7, -4);
+    tempObject.updateMatrix();
+    chairSeat.applyMatrix4(tempObject.matrix);
+    geometries.push(chairSeat);
+    
+    const chairBack = new THREE.BoxGeometry(0.8, 1, 0.15);
+    tempObject.position.set(offsetX, 1.3, -4.3);
+    tempObject.updateMatrix();
+    chairBack.applyMatrix4(tempObject.matrix);
+    geometries.push(chairBack);
+    
+    // Chair pole
+    const chairPole = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8);
+    tempObject.position.set(offsetX, 0.4, -4);
+    tempObject.updateMatrix();
+    chairPole.applyMatrix4(tempObject.matrix);
+    geometries.push(chairPole);
+    
+    // Keyboard on desk
+    const keyboard = new THREE.BoxGeometry(0.8, 0.04, 0.3);
+    tempObject.position.set(offsetX - 1, 1.17, -5.5);
+    tempObject.updateMatrix();
+    keyboard.applyMatrix4(tempObject.matrix);
+    geometries.push(keyboard);
+    
+    // Mouse
+    const mouse = new THREE.BoxGeometry(0.1, 0.05, 0.15);
+    tempObject.position.set(offsetX - 0.3, 1.17, -5.5);
+    tempObject.updateMatrix();
+    mouse.applyMatrix4(tempObject.matrix);
+    geometries.push(mouse);
+    
+    // Minecraft-style posters on walls
+    for (let i = 0; i < 4; i++) {
+      const poster = new THREE.BoxGeometry(1.2, 1.5, 0.05);
+      tempObject.position.set(offsetX - 7 + i * 2.5, 2.5, 9.8);
+      tempObject.updateMatrix();
+      poster.applyMatrix4(tempObject.matrix);
+      geometries.push(poster);
+    }
+    
+    // Pop filter (ring in front of mic)
+    const popFilter = new THREE.TorusGeometry(0.25, 0.02, 8, 16);
+    tempObject.position.set(offsetX - 1, 3, -6.3);
+    tempObject.rotation.x = Math.PI / 6;
+    tempObject.updateMatrix();
+    popFilter.applyMatrix4(tempObject.matrix);
+    geometries.push(popFilter);
+    
+    tempObject.rotation.x = 0;
+    
+    // Cable management (blocky cables along desk edge)
+    for (let i = 0; i < 8; i++) {
+      const cable = new THREE.BoxGeometry(0.05, 0.05, 0.3);
+      tempObject.position.set(offsetX - 1.5 + i * 0.4, 0.9, -6.5);
+      tempObject.updateMatrix();
+      cable.applyMatrix4(tempObject.matrix);
+      geometries.push(cable);
+    }
+    
+    // Studio lights (blocky)
+    for (let i = 0; i < 3; i++) {
+      const light = new THREE.BoxGeometry(0.4, 0.3, 0.4);
+      tempObject.position.set(offsetX - 4 + i * 4, 4.5, -5);
+      tempObject.updateMatrix();
+      light.applyMatrix4(tempObject.matrix);
+      geometries.push(light);
+    }
+    
+    // Shelf items (game cases/collectibles)
+    for (let shelf = 0; shelf < 3; shelf++) {
+      for (let item = 0; item < 5; item++) {
+        const case_ = new THREE.BoxGeometry(0.15, 0.5, 0.1);
+        tempObject.position.set(
+          offsetX + 5.5 + item * 0.2,
+          1.6 + shelf * 1.5,
+          -7
+        );
+        tempObject.updateMatrix();
+        case_.applyMatrix4(tempObject.matrix);
+        geometries.push(case_);
+      }
+    }
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

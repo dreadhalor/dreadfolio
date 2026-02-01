@@ -87,6 +87,111 @@ export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
     
     tempObject.rotation.y = 0;
     
+    // Keyboard on desk
+    const keyboard = new THREE.BoxGeometry(0.9, 0.03, 0.3);
+    tempObject.position.set(offsetX + 6, 1.12, -5.5);
+    tempObject.updateMatrix();
+    keyboard.applyMatrix4(tempObject.matrix);
+    geometries.push(keyboard);
+    
+    // Mouse
+    const mouse = new THREE.BoxGeometry(0.1, 0.04, 0.15);
+    tempObject.position.set(offsetX + 7, 1.12, -5.5);
+    tempObject.updateMatrix();
+    mouse.applyMatrix4(tempObject.matrix);
+    geometries.push(mouse);
+    
+    // Coffee mug
+    const mug = new THREE.CylinderGeometry(0.1, 0.08, 0.25, 16);
+    tempObject.position.set(offsetX + 6.5, 1.23, -6.5);
+    tempObject.updateMatrix();
+    mug.applyMatrix4(tempObject.matrix);
+    geometries.push(mug);
+    
+    // Mug handle
+    const handle = new THREE.TorusGeometry(0.08, 0.02, 8, 16, Math.PI);
+    tempObject.position.set(offsetX + 6.6, 1.23, -6.5);
+    tempObject.rotation.y = Math.PI / 2;
+    tempObject.updateMatrix();
+    handle.applyMatrix4(tempObject.matrix);
+    geometries.push(handle);
+    
+    tempObject.rotation.y = 0;
+    
+    // Sketchbook/notebooks scattered
+    for (let i = 0; i < 8; i++) {
+      const notebook = new THREE.BoxGeometry(0.5, 0.03, 0.6);
+      tempObject.position.set(
+        offsetX - 3 + (i % 4) * 1.5,
+        0.02 + Math.floor(i / 4) * 0.04,
+        -2 + Math.floor(i / 4) * 0.8
+      );
+      tempObject.rotation.y = (Math.random() - 0.5) * 0.6;
+      tempObject.updateMatrix();
+      notebook.applyMatrix4(tempObject.matrix);
+      geometries.push(notebook);
+    }
+    
+    tempObject.rotation.y = 0;
+    
+    // p5.js reference books on shelf
+    const bookshelf = new THREE.BoxGeometry(1.5, 2, 0.3);
+    tempObject.position.set(offsetX - 7, 1.5, -7);
+    tempObject.updateMatrix();
+    bookshelf.applyMatrix4(tempObject.matrix);
+    geometries.push(bookshelf);
+    
+    // Books on shelf
+    for (let i = 0; i < 10; i++) {
+      const book = new THREE.BoxGeometry(0.08, 0.5, 0.25);
+      tempObject.position.set(offsetX - 7.5 + i * 0.15, 1.5 + (i % 3) * 0.2, -7);
+      tempObject.rotation.y = (Math.random() - 0.5) * 0.2;
+      tempObject.updateMatrix();
+      book.applyMatrix4(tempObject.matrix);
+      geometries.push(book);
+    }
+    
+    tempObject.rotation.y = 0;
+    
+    // Wacom tablet on desk
+    const tablet = new THREE.BoxGeometry(0.8, 0.02, 1);
+    tempObject.position.set(offsetX + 5, 1.11, -6);
+    tempObject.updateMatrix();
+    tablet.applyMatrix4(tempObject.matrix);
+    geometries.push(tablet);
+    
+    // Stylus holder
+    const stylusHolder = new THREE.CylinderGeometry(0.03, 0.03, 0.15, 8);
+    tempObject.position.set(offsetX + 5.5, 1.18, -6);
+    tempObject.updateMatrix();
+    stylusHolder.applyMatrix4(tempObject.matrix);
+    geometries.push(stylusHolder);
+    
+    // Desk lamp
+    const lampBase = new THREE.CylinderGeometry(0.12, 0.12, 0.05, 16);
+    tempObject.position.set(offsetX + 7, 1.13, -6.5);
+    tempObject.updateMatrix();
+    lampBase.applyMatrix4(tempObject.matrix);
+    geometries.push(lampBase);
+    
+    const lampArm = new THREE.CylinderGeometry(0.03, 0.03, 0.8, 8);
+    tempObject.position.set(offsetX + 7, 1.5, -6.5);
+    tempObject.rotation.z = Math.PI / 4;
+    tempObject.updateMatrix();
+    lampArm.applyMatrix4(tempObject.matrix);
+    geometries.push(lampArm);
+    
+    tempObject.rotation.z = 0;
+    
+    const lampHead = new THREE.ConeGeometry(0.15, 0.25, 8);
+    tempObject.position.set(offsetX + 7.4, 1.8, -6.5);
+    tempObject.rotation.z = -Math.PI / 2;
+    tempObject.updateMatrix();
+    lampHead.applyMatrix4(tempObject.matrix);
+    geometries.push(lampHead);
+    
+    tempObject.rotation.z = 0;
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

@@ -125,6 +125,105 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
     xpBox.applyMatrix4(tempObject.matrix);
     geometries.push(xpBox);
     
+    // Speakers on desk (retro style)
+    for (let i = 0; i < 2; i++) {
+      const speaker = new THREE.BoxGeometry(0.3, 0.4, 0.3);
+      tempObject.position.set(offsetX + (i === 0 ? -1.3 : 1.3), 1.3, -6.5);
+      tempObject.updateMatrix();
+      speaker.applyMatrix4(tempObject.matrix);
+      geometries.push(speaker);
+      
+      // Speaker cone
+      const cone = new THREE.CylinderGeometry(0.08, 0.08, 0.02, 16);
+      tempObject.position.set(offsetX + (i === 0 ? -1.3 : 1.3), 1.3, -6.35);
+      tempObject.rotation.x = Math.PI / 2;
+      tempObject.updateMatrix();
+      cone.applyMatrix4(tempObject.matrix);
+      geometries.push(cone);
+    }
+    
+    tempObject.rotation.x = 0;
+    
+    // Retro gaming posters on walls
+    for (let i = 0; i < 4; i++) {
+      const poster = new THREE.BoxGeometry(1, 1.3, 0.05);
+      tempObject.position.set(offsetX - 7 + i * 4.5, 2.5, -9.8);
+      tempObject.updateMatrix();
+      poster.applyMatrix4(tempObject.matrix);
+      geometries.push(poster);
+    }
+    
+    // More floppy disks in disk holder
+    const diskHolder = new THREE.BoxGeometry(0.3, 0.3, 0.15);
+    tempObject.position.set(offsetX + 1.3, 1.25, -6.5);
+    tempObject.updateMatrix();
+    diskHolder.applyMatrix4(tempObject.matrix);
+    geometries.push(diskHolder);
+    
+    for (let i = 0; i < 8; i++) {
+      const disk = new THREE.BoxGeometry(0.02, 0.25, 0.25);
+      tempObject.position.set(offsetX + 1.3 + i * 0.025, 1.25, -6.5);
+      tempObject.updateMatrix();
+      disk.applyMatrix4(tempObject.matrix);
+      geometries.push(disk);
+    }
+    
+    // CD jewel cases stack
+    for (let i = 0; i < 10; i++) {
+      const jewelCase = new THREE.BoxGeometry(0.3, 0.02, 0.3);
+      tempObject.position.set(offsetX - 1.3, 1.12 + i * 0.025, -6.5);
+      tempObject.updateMatrix();
+      jewelCase.applyMatrix4(tempObject.matrix);
+      geometries.push(jewelCase);
+    }
+    
+    // Desktop icons (small colorful squares on "desktop")
+    for (let i = 0; i < 8; i++) {
+      const icon = new THREE.BoxGeometry(0.1, 0.1, 0.02);
+      const row = i % 2;
+      const col = Math.floor(i / 2);
+      tempObject.position.set(
+        offsetX - 0.4 + col * 0.15,
+        1.6 + row * 0.12,
+        -5.59
+      );
+      tempObject.updateMatrix();
+      icon.applyMatrix4(tempObject.matrix);
+      geometries.push(icon);
+    }
+    
+    // Taskbar at bottom of screen
+    const taskbar = new THREE.BoxGeometry(1, 0.05, 0.02);
+    tempObject.position.set(offsetX, 1.2, -5.59);
+    tempObject.updateMatrix();
+    taskbar.applyMatrix4(tempObject.matrix);
+    geometries.push(taskbar);
+    
+    // Wood paneling on walls
+    for (let i = 0; i < 6; i++) {
+      const panel = new THREE.BoxGeometry(3, 0.8, 0.08);
+      tempObject.position.set(offsetX - 7.5 + i * 3, 1 + (i % 2) * 0.2, 9.8);
+      tempObject.updateMatrix();
+      panel.applyMatrix4(tempObject.matrix);
+      geometries.push(panel);
+    }
+    
+    // Power strip under desk
+    const powerStrip = new THREE.BoxGeometry(0.8, 0.08, 0.15);
+    tempObject.position.set(offsetX, 0.15, -6.5);
+    tempObject.updateMatrix();
+    powerStrip.applyMatrix4(tempObject.matrix);
+    geometries.push(powerStrip);
+    
+    // Plug outlets on power strip
+    for (let i = 0; i < 6; i++) {
+      const outlet = new THREE.BoxGeometry(0.08, 0.05, 0.02);
+      tempObject.position.set(offsetX - 0.35 + i * 0.14, 0.15, -6.43);
+      tempObject.updateMatrix();
+      outlet.applyMatrix4(tempObject.matrix);
+      geometries.push(outlet);
+    }
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

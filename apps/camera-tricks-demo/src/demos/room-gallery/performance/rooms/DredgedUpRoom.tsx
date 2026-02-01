@@ -172,6 +172,136 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     mapTable.applyMatrix4(tempObject.matrix);
     geometries.push(mapTable);
     
+    // Compass on map table
+    const compassBase = new THREE.CylinderGeometry(0.08, 0.08, 0.03, 16);
+    tempObject.position.set(offsetX - 4, 0.85, 4);
+    tempObject.updateMatrix();
+    compassBase.applyMatrix4(tempObject.matrix);
+    geometries.push(compassBase);
+    
+    // Compass needle
+    const needle = new THREE.BoxGeometry(0.02, 0.15, 0.02);
+    tempObject.position.set(offsetX - 4, 0.93, 4);
+    tempObject.updateMatrix();
+    needle.applyMatrix4(tempObject.matrix);
+    geometries.push(needle);
+    
+    // Fishing rods leaning in corner
+    for (let i = 0; i < 3; i++) {
+      const rod = new THREE.CylinderGeometry(0.02, 0.02, 3, 6);
+      tempObject.position.set(offsetX - 8 + i * 0.15, 1.5, 9);
+      tempObject.rotation.z = Math.PI / 6;
+      tempObject.updateMatrix();
+      rod.applyMatrix4(tempObject.matrix);
+      geometries.push(rod);
+    }
+    
+    tempObject.rotation.z = 0;
+    
+    // Tackle box on desk
+    const tackleBox = new THREE.BoxGeometry(0.6, 0.3, 0.4);
+    tempObject.position.set(offsetX + 5.5, 1.25, -6);
+    tempObject.updateMatrix();
+    tackleBox.applyMatrix4(tempObject.matrix);
+    geometries.push(tackleBox);
+    
+    // Tackle box clasp
+    const clasp = new THREE.BoxGeometry(0.05, 0.08, 0.05);
+    tempObject.position.set(offsetX + 5.5, 1.4, -5.8);
+    tempObject.updateMatrix();
+    clasp.applyMatrix4(tempObject.matrix);
+    geometries.push(clasp);
+    
+    // Lantern on hook
+    const lanternTop = new THREE.ConeGeometry(0.15, 0.2, 8);
+    tempObject.position.set(offsetX + 7, 3, 8);
+    tempObject.updateMatrix();
+    lanternTop.applyMatrix4(tempObject.matrix);
+    geometries.push(lanternTop);
+    
+    const lanternBody = new THREE.CylinderGeometry(0.12, 0.12, 0.3, 8);
+    tempObject.position.set(offsetX + 7, 2.65, 8);
+    tempObject.updateMatrix();
+    lanternBody.applyMatrix4(tempObject.matrix);
+    geometries.push(lanternBody);
+    
+    const lanternBase = new THREE.ConeGeometry(0.15, 0.15, 8);
+    tempObject.position.set(offsetX + 7, 2.4, 8);
+    tempObject.rotation.x = Math.PI;
+    tempObject.updateMatrix();
+    lanternBase.applyMatrix4(tempObject.matrix);
+    geometries.push(lanternBase);
+    
+    tempObject.rotation.x = 0;
+    
+    // Hook for lantern
+    const hook = new THREE.TorusGeometry(0.08, 0.02, 8, 16, Math.PI);
+    tempObject.position.set(offsetX + 7, 3.2, 8);
+    tempObject.rotation.z = Math.PI / 2;
+    tempObject.updateMatrix();
+    hook.applyMatrix4(tempObject.matrix);
+    geometries.push(hook);
+    
+    tempObject.rotation.z = 0;
+    
+    // Rope coils on floor
+    for (let i = 0; i < 3; i++) {
+      const coil = new THREE.TorusGeometry(0.4, 0.08, 8, 16);
+      tempObject.position.set(offsetX - 6 + i * 2, 0.08, 6);
+      tempObject.rotation.x = Math.PI / 2;
+      tempObject.updateMatrix();
+      coil.applyMatrix4(tempObject.matrix);
+      geometries.push(coil);
+    }
+    
+    tempObject.rotation.x = 0;
+    
+    // Life preserver on wall
+    const preserver = new THREE.TorusGeometry(0.6, 0.12, 8, 16);
+    tempObject.position.set(offsetX + 6, 2.5, 9.8);
+    tempObject.rotation.y = Math.PI / 2;
+    tempObject.updateMatrix();
+    preserver.applyMatrix4(tempObject.matrix);
+    geometries.push(preserver);
+    
+    // Preserver cross straps
+    for (let i = 0; i < 4; i++) {
+      const strap = new THREE.BoxGeometry(0.05, 0.6, 0.05);
+      const angle = (i / 4) * Math.PI * 2;
+      tempObject.position.set(
+        offsetX + 6 + Math.cos(angle) * 0.3,
+        2.5 + Math.sin(angle) * 0.3,
+        9.8
+      );
+      tempObject.rotation.y = Math.PI / 2;
+      tempObject.rotation.z = angle;
+      tempObject.updateMatrix();
+      strap.applyMatrix4(tempObject.matrix);
+      geometries.push(strap);
+    }
+    
+    tempObject.rotation.y = 0;
+    tempObject.rotation.z = 0;
+    
+    // Wooden barrel in corner
+    const barrel = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+    tempObject.position.set(offsetX - 7, 0.5, -7);
+    tempObject.updateMatrix();
+    barrel.applyMatrix4(tempObject.matrix);
+    geometries.push(barrel);
+    
+    // Barrel bands
+    for (let i = 0; i < 3; i++) {
+      const band = new THREE.TorusGeometry(0.52, 0.03, 8, 16);
+      tempObject.position.set(offsetX - 7, 0.2 + i * 0.3, -7);
+      tempObject.rotation.x = Math.PI / 2;
+      tempObject.updateMatrix();
+      band.applyMatrix4(tempObject.matrix);
+      geometries.push(band);
+    }
+    
+    tempObject.rotation.x = 0;
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

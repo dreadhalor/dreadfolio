@@ -121,6 +121,119 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
     orgBoard.applyMatrix4(tempObject.matrix);
     geometries.push(orgBoard);
     
+    // Keyboard on desk
+    const keyboard = new THREE.BoxGeometry(0.9, 0.03, 0.3);
+    tempObject.position.set(offsetX - 3, 1.09, 4.5);
+    tempObject.updateMatrix();
+    keyboard.applyMatrix4(tempObject.matrix);
+    geometries.push(keyboard);
+    
+    // Mouse
+    const mouse = new THREE.BoxGeometry(0.1, 0.04, 0.14);
+    tempObject.position.set(offsetX - 2, 1.09, 4.5);
+    tempObject.updateMatrix();
+    mouse.applyMatrix4(tempObject.matrix);
+    geometries.push(mouse);
+    
+    // Mouse pad
+    const mousePad = new THREE.BoxGeometry(0.5, 0.01, 0.4);
+    tempObject.position.set(offsetX - 2, 1.08, 4.5);
+    tempObject.updateMatrix();
+    mousePad.applyMatrix4(tempObject.matrix);
+    geometries.push(mousePad);
+    
+    // Coffee mug
+    const mug = new THREE.CylinderGeometry(0.1, 0.08, 0.25, 16);
+    tempObject.position.set(offsetX - 4, 1.23, 5);
+    tempObject.updateMatrix();
+    mug.applyMatrix4(tempObject.matrix);
+    geometries.push(mug);
+    
+    // Desk organizer
+    const organizer = new THREE.BoxGeometry(0.5, 0.2, 0.4);
+    tempObject.position.set(offsetX - 3.5, 1.2, 5.5);
+    tempObject.updateMatrix();
+    organizer.applyMatrix4(tempObject.matrix);
+    geometries.push(organizer);
+    
+    // Pens in organizer
+    for (let i = 0; i < 6; i++) {
+      const pen = new THREE.CylinderGeometry(0.01, 0.01, 0.3, 6);
+      tempObject.position.set(
+        offsetX - 3.7 + i * 0.08,
+        1.35,
+        5.5
+      );
+      tempObject.updateMatrix();
+      pen.applyMatrix4(tempObject.matrix);
+      geometries.push(pen);
+    }
+    
+    // Sticky notes on desk
+    for (let i = 0; i < 5; i++) {
+      const note = new THREE.BoxGeometry(0.15, 0.01, 0.15);
+      tempObject.position.set(
+        offsetX - 3.5 + i * 0.2,
+        1.08,
+        6
+      );
+      tempObject.updateMatrix();
+      note.applyMatrix4(tempObject.matrix);
+      geometries.push(note);
+    }
+    
+    // Label maker on desk
+    const labelMaker = new THREE.BoxGeometry(0.3, 0.15, 0.2);
+    tempObject.position.set(offsetX - 2.5, 1.15, 5.7);
+    tempObject.updateMatrix();
+    labelMaker.applyMatrix4(tempObject.matrix);
+    geometries.push(labelMaker);
+    
+    // File boxes on floor
+    for (let i = 0; i < 4; i++) {
+      const fileBox = new THREE.BoxGeometry(0.8, 0.5, 0.6);
+      tempObject.position.set(offsetX - 6 + i * 1, 0.25, 6);
+      tempObject.updateMatrix();
+      fileBox.applyMatrix4(tempObject.matrix);
+      geometries.push(fileBox);
+    }
+    
+    // Backup drive on desk
+    const drive = new THREE.BoxGeometry(0.2, 0.08, 0.3);
+    tempObject.position.set(offsetX - 3.5, 1.12, 4.2);
+    tempObject.updateMatrix();
+    drive.applyMatrix4(tempObject.matrix);
+    geometries.push(drive);
+    
+    // USB cables
+    for (let i = 0; i < 3; i++) {
+      const cable = new THREE.BoxGeometry(0.02, 0.02, 0.4);
+      tempObject.position.set(offsetX - 3.5 + i * 0.1, 1.08, 4);
+      tempObject.updateMatrix();
+      cable.applyMatrix4(tempObject.matrix);
+      geometries.push(cable);
+    }
+    
+    // Ceiling mounted cloud fixtures (structural only, actual clouds animate)
+    for (let i = 0; i < 3; i++) {
+      const mount = new THREE.CylinderGeometry(0.05, 0.05, 0.3, 8);
+      tempObject.position.set(offsetX + (i % 2 === 0 ? -5 : 5), 4.7, -2 + i * 2);
+      tempObject.updateMatrix();
+      mount.applyMatrix4(tempObject.matrix);
+      geometries.push(mount);
+    }
+    
+    // Archive boxes in corner
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 2; j++) {
+        const box = new THREE.BoxGeometry(0.6, 0.6, 0.6);
+        tempObject.position.set(offsetX + 7 + i * 0.7, 0.3 + j * 0.65, 7);
+        tempObject.updateMatrix();
+        box.applyMatrix4(tempObject.matrix);
+        geometries.push(box);
+      }
+    }
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

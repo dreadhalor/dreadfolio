@@ -144,6 +144,103 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
       geometries.push(shelf);
     }
     
+    // Remote control on couch arm
+    const remote = new THREE.BoxGeometry(0.12, 0.04, 0.25);
+    tempObject.position.set(offsetX - 4.5, 1.1, 5);
+    tempObject.updateMatrix();
+    remote.applyMatrix4(tempObject.matrix);
+    geometries.push(remote);
+    
+    // Throw pillows on couch
+    for (let i = 0; i < 3; i++) {
+      const pillow = new THREE.BoxGeometry(0.5, 0.3, 0.5);
+      tempObject.position.set(offsetX - 3.5 + i * 0.8, 0.8, 5);
+      tempObject.rotation.y = (Math.random() - 0.5) * 0.5;
+      tempObject.updateMatrix();
+      pillow.applyMatrix4(tempObject.matrix);
+      geometries.push(pillow);
+    }
+    
+    tempObject.rotation.y = 0;
+    
+    // Popcorn buckets on TV stand
+    for (let i = 0; i < 2; i++) {
+      const bucket = new THREE.CylinderGeometry(0.15, 0.12, 0.3, 8);
+      tempObject.position.set(offsetX + 2 + (i - 0.5) * 0.8, 0.95, -8);
+      tempObject.updateMatrix();
+      bucket.applyMatrix4(tempObject.matrix);
+      geometries.push(bucket);
+    }
+    
+    // DVD/VHS cases on entertainment center
+    for (let shelf = 0; shelf < 3; shelf++) {
+      for (let item = 0; item < 8; item++) {
+        const case_ = new THREE.BoxGeometry(0.04, 0.4, 0.25);
+        tempObject.position.set(
+          offsetX - 7 + item * 0.3,
+          0.54 + shelf * 0.6,
+          -8
+        );
+        tempObject.updateMatrix();
+        case_.applyMatrix4(tempObject.matrix);
+        geometries.push(case_);
+      }
+    }
+    
+    // Ceiling disco ball holder
+    const discoMount = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 8);
+    tempObject.position.set(offsetX, 4.5, 0);
+    tempObject.updateMatrix();
+    discoMount.applyMatrix4(tempObject.matrix);
+    geometries.push(discoMount);
+    
+    // Disco ball
+    const discoBall = new THREE.SphereGeometry(0.4, 8, 8);
+    tempObject.position.set(offsetX, 4, 0);
+    tempObject.updateMatrix();
+    discoBall.applyMatrix4(tempObject.matrix);
+    geometries.push(discoBall);
+    
+    // Carpet edge trim
+    for (let i = 0; i < 10; i++) {
+      const trim = new THREE.BoxGeometry(1, 0.02, 0.05);
+      tempObject.position.set(offsetX - 5 + i, 0.015, -4);
+      tempObject.updateMatrix();
+      trim.applyMatrix4(tempObject.matrix);
+      geometries.push(trim);
+    }
+    
+    // Curtain rods on sides
+    for (let i = 0; i < 2; i++) {
+      const rod = new THREE.CylinderGeometry(0.03, 0.03, 3, 8);
+      tempObject.position.set(offsetX + (i === 0 ? -9 : 9), 3.5, 0);
+      tempObject.rotation.z = Math.PI / 2;
+      tempObject.updateMatrix();
+      rod.applyMatrix4(tempObject.matrix);
+      geometries.push(rod);
+    }
+    
+    tempObject.rotation.z = 0;
+    
+    // Magazine rack by couch
+    const magRack = new THREE.BoxGeometry(0.6, 0.8, 0.3);
+    tempObject.position.set(offsetX - 5.5, 0.4, 5);
+    tempObject.updateMatrix();
+    magRack.applyMatrix4(tempObject.matrix);
+    geometries.push(magRack);
+    
+    // Magazines in rack
+    for (let i = 0; i < 5; i++) {
+      const mag = new THREE.BoxGeometry(0.5, 0.02, 0.25);
+      tempObject.position.set(offsetX - 5.5, 0.5 + i * 0.08, 5);
+      tempObject.rotation.x = Math.PI / 8;
+      tempObject.updateMatrix();
+      mag.applyMatrix4(tempObject.matrix);
+      geometries.push(mag);
+    }
+    
+    tempObject.rotation.x = 0;
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

@@ -81,6 +81,112 @@ export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
     gridFrame.applyMatrix4(tempObject.matrix);
     geometries.push(gridFrame);
     
+    // Design tools on desk
+    const pencilHolder = new THREE.CylinderGeometry(0.12, 0.12, 0.25, 8);
+    tempObject.position.set(offsetX + 6.8, 1.2, 6);
+    tempObject.updateMatrix();
+    pencilHolder.applyMatrix4(tempObject.matrix);
+    geometries.push(pencilHolder);
+    
+    // Pencils/pens in holder
+    for (let i = 0; i < 8; i++) {
+      const pencil = new THREE.CylinderGeometry(0.015, 0.015, 0.4, 6);
+      const angle = (i / 8) * Math.PI * 2;
+      tempObject.position.set(
+        offsetX + 6.8 + Math.cos(angle) * 0.05,
+        1.45,
+        6 + Math.sin(angle) * 0.05
+      );
+      tempObject.updateMatrix();
+      pencil.applyMatrix4(tempObject.matrix);
+      geometries.push(pencil);
+    }
+    
+    // Tablet/drawing pad on desk
+    const tablet = new THREE.BoxGeometry(0.8, 0.02, 1);
+    tempObject.position.set(offsetX + 5.5, 1.11, 6);
+    tempObject.updateMatrix();
+    tablet.applyMatrix4(tempObject.matrix);
+    geometries.push(tablet);
+    
+    // Stylus
+    const stylus = new THREE.CylinderGeometry(0.015, 0.015, 0.3, 6);
+    tempObject.position.set(offsetX + 5.5, 1.13, 6.4);
+    tempObject.rotation.z = Math.PI / 2;
+    tempObject.updateMatrix();
+    stylus.applyMatrix4(tempObject.matrix);
+    geometries.push(stylus);
+    
+    tempObject.rotation.z = 0;
+    
+    // Typography specimens on wall
+    for (let i = 0; i < 8; i++) {
+      const specimen = new THREE.BoxGeometry(0.6, 0.4, 0.05);
+      const row = Math.floor(i / 4);
+      const col = i % 4;
+      tempObject.position.set(
+        offsetX + 2 + col * 1.5,
+        2.5 + row,
+        -9.8
+      );
+      tempObject.updateMatrix();
+      specimen.applyMatrix4(tempObject.matrix);
+      geometries.push(specimen);
+    }
+    
+    // Component library books on pedestals
+    pedestalPositions.forEach((pos, idx) => {
+      if (idx % 2 === 0) {
+        const book = new THREE.BoxGeometry(0.3, 0.05, 0.4);
+        tempObject.position.set(offsetX + pos.x, 1.52, pos.z);
+        tempObject.rotation.y = (Math.random() - 0.5) * 0.5;
+        tempObject.updateMatrix();
+        book.applyMatrix4(tempObject.matrix);
+        geometries.push(book);
+      }
+    });
+    
+    tempObject.rotation.y = 0;
+    
+    // Monitor on desk
+    const monitor = new THREE.BoxGeometry(1.2, 0.8, 0.1);
+    tempObject.position.set(offsetX + 6, 1.6, 5.5);
+    tempObject.rotation.y = -Math.PI / 6;
+    tempObject.updateMatrix();
+    monitor.applyMatrix4(tempObject.matrix);
+    geometries.push(monitor);
+    
+    // Monitor stand
+    const monitorStand = new THREE.CylinderGeometry(0.1, 0.15, 0.25, 8);
+    tempObject.position.set(offsetX + 6, 1.2, 5.5);
+    tempObject.updateMatrix();
+    monitorStand.applyMatrix4(tempObject.matrix);
+    geometries.push(monitorStand);
+    
+    tempObject.rotation.y = 0;
+    
+    // Design ruler on desk
+    const ruler = new THREE.BoxGeometry(0.8, 0.01, 0.1);
+    tempObject.position.set(offsetX + 7, 1.11, 6.5);
+    tempObject.updateMatrix();
+    ruler.applyMatrix4(tempObject.matrix);
+    geometries.push(ruler);
+    
+    // Ceiling track lighting
+    const track = new THREE.BoxGeometry(8, 0.08, 0.08);
+    tempObject.position.set(offsetX, 4.8, 0);
+    tempObject.updateMatrix();
+    track.applyMatrix4(tempObject.matrix);
+    geometries.push(track);
+    
+    for (let i = 0; i < 5; i++) {
+      const trackLight = new THREE.CylinderGeometry(0.12, 0.15, 0.3, 8);
+      tempObject.position.set(offsetX - 3 + i * 1.5, 4.6, 0);
+      tempObject.updateMatrix();
+      trackLight.applyMatrix4(tempObject.matrix);
+      geometries.push(trackLight);
+    }
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   

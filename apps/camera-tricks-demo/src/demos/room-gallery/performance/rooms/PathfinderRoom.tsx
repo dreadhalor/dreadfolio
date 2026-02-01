@@ -87,6 +87,97 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
     
     tempObject.rotation.y = 0;
     
+    // CS textbooks on bookstand
+    for (let i = 0; i < 6; i++) {
+      const book = new THREE.BoxGeometry(0.08, 0.5, 0.35);
+      tempObject.position.set(offsetX - 7.3 + i * 0.12, 0.6 + (i % 2) * 0.1, -6);
+      tempObject.rotation.y = Math.PI / 6 + (Math.random() - 0.5) * 0.1;
+      tempObject.updateMatrix();
+      book.applyMatrix4(tempObject.matrix);
+      geometries.push(book);
+    }
+    
+    tempObject.rotation.y = 0;
+    
+    // Keyboard on desk
+    const keyboard = new THREE.BoxGeometry(0.9, 0.03, 0.35);
+    tempObject.position.set(offsetX + 5, 1.12, -5.5);
+    tempObject.updateMatrix();
+    keyboard.applyMatrix4(tempObject.matrix);
+    geometries.push(keyboard);
+    
+    // Mouse
+    const mouse = new THREE.BoxGeometry(0.1, 0.04, 0.15);
+    tempObject.position.set(offsetX + 6, 1.12, -5.5);
+    tempObject.updateMatrix();
+    mouse.applyMatrix4(tempObject.matrix);
+    geometries.push(mouse);
+    
+    // Coffee mug
+    const mug = new THREE.CylinderGeometry(0.1, 0.08, 0.22, 16);
+    tempObject.position.set(offsetX + 4, 1.21, -6.5);
+    tempObject.updateMatrix();
+    mug.applyMatrix4(tempObject.matrix);
+    geometries.push(mug);
+    
+    // Notepad
+    const notepad = new THREE.BoxGeometry(0.4, 0.02, 0.5);
+    tempObject.position.set(offsetX + 5.5, 1.11, -6.5);
+    tempObject.updateMatrix();
+    notepad.applyMatrix4(tempObject.matrix);
+    geometries.push(notepad);
+    
+    // Algorithm complexity chart on side wall
+    const chart = new THREE.BoxGeometry(2, 2.5, 0.08);
+    tempObject.position.set(offsetX + 9.8, 2.5, 0);
+    tempObject.rotation.y = Math.PI / 2;
+    tempObject.updateMatrix();
+    chart.applyMatrix4(tempObject.matrix);
+    geometries.push(chart);
+    
+    tempObject.rotation.y = 0;
+    
+    // Trash bin
+    const bin = new THREE.CylinderGeometry(0.25, 0.3, 0.6, 16);
+    tempObject.position.set(offsetX + 6.5, 0.3, -4);
+    tempObject.updateMatrix();
+    bin.applyMatrix4(tempObject.matrix);
+    geometries.push(bin);
+    
+    // Crumpled paper balls around bin
+    for (let i = 0; i < 5; i++) {
+      const paper = new THREE.SphereGeometry(0.08, 8, 8);
+      const angle = (i / 5) * Math.PI * 2;
+      tempObject.position.set(
+        offsetX + 6.5 + Math.cos(angle) * 0.4,
+        0.08,
+        -4 + Math.sin(angle) * 0.4
+      );
+      tempObject.updateMatrix();
+      paper.applyMatrix4(tempObject.matrix);
+      geometries.push(paper);
+    }
+    
+    // Chair
+    const chairSeat = new THREE.BoxGeometry(0.8, 0.1, 0.8);
+    tempObject.position.set(offsetX + 5, 0.6, -4.5);
+    tempObject.updateMatrix();
+    chairSeat.applyMatrix4(tempObject.matrix);
+    geometries.push(chairSeat);
+    
+    const chairBack = new THREE.BoxGeometry(0.8, 0.8, 0.1);
+    tempObject.position.set(offsetX + 5, 1.2, -4.85);
+    tempObject.updateMatrix();
+    chairBack.applyMatrix4(tempObject.matrix);
+    geometries.push(chairBack);
+    
+    // Chair pole
+    const chairPole = new THREE.CylinderGeometry(0.06, 0.06, 0.4, 8);
+    tempObject.position.set(offsetX + 5, 0.4, -4.5);
+    tempObject.updateMatrix();
+    chairPole.applyMatrix4(tempObject.matrix);
+    geometries.push(chairPole);
+    
     return mergeGeometries(geometries);
   }, [offsetX]);
   
