@@ -6,6 +6,16 @@ import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, ROOM_WIDTH, CAMERA_LERP_S
 interface SplitCameraRendererProps {
   targetXRef: React.RefObject<number>;
   onCameraUpdate: (x: number) => void;
+  onDebugUpdate?: (info: {
+    cameraPositions: number[];
+    viewportSplit: { left: number; right: number };
+    leftCameraIdx: number;
+    rightCameraIdx: number;
+    currentX: number;
+    targetX: number;
+    segmentIndex: number;
+    localProgress: number;
+  }) => void;
 }
 
 // Camera projection constants
@@ -38,74 +48,48 @@ function setViewOffsetForDynamicSplit(
 }
 
 /**
- * Split Camera Renderer - Four Camera Moving Window (WORKING VERSION)
+ * Split Camera Renderer - 6-Camera Moving Window
  * 
- * Four cameras (A, B, C, D) move together, 10 units apart:
- * - All cameras move with currentXRef
- * - Cameras at: currentX, currentX+10, currentX+20, currentX+30
- * - Show two adjacent cameras based on 10-unit segments
+ * Six cameras moving together, 10 units apart:
+ * - All cameras move with currentX
+ * - Camera spacing: currentX, currentX+10, currentX+20, currentX+30, currentX+40, currentX+50
+ * - Rooms at fixed positions: 0, 20, 40, 60, 80, 100
  * 
- * Segment to Camera mapping (with wrapping):
- * - Segment 0 (x=0-10):   cameras[0] ↔ cameras[1]
- * - Segment 1 (x=10-20):  cameras[1] ↔ cameras[2]
- * - Segment 2 (x=20-30):  cameras[2] ↔ cameras[3]
- * - Segment 3 (x=30-40):  cameras[3] ↔ cameras[0] (wrapping)
- * - Segment 4 (x=40-50):  cameras[0] ↔ cameras[1] (pattern repeats)
- * - ... continues infinitely
+ * Room to currentX mapping (for 100% viewport):
+ * - Library (x=0): currentX=0, Camera 0 at x=0
+ * - Gallery (x=20): currentX=10, Camera 1 at x=20
+ * - Greenhouse (x=40): currentX=20, Camera 2 at x=40
+ * - Lounge (x=60): currentX=30, Camera 3 at x=60
+ * - Office (x=80): currentX=40, Camera 4 at x=80
+ * - Observatory (x=100): currentX=50, Camera 5 at x=100
  * 
- * Rooms at x=0, 20, 40, 60... get full single-camera views
- * 
- * Visual effect: Seamless infinite transitions through all rooms
+ * Segment logic (10-unit segments for smooth transitions):
+ * - Shows two adjacent cameras based on currentX position
+ * - Viewport dynamically splits based on progress within segment
  * 
  * Performance: Scene rendered twice per frame (~2x draw calls)
  */
-export function SplitCameraRenderer({ targetXRef, onCameraUpdate }: SplitCameraRendererProps) {
+export function SplitCameraRenderer({ targetXRef, onCameraUpdate, onDebugUpdate }: SplitCameraRendererProps) {
   const { gl, scene, size } = useThree();
   const currentXRef = useRef(0);
   
-  // Create FOUR cameras once (memoized)
+  // Create SIX cameras once (memoized) - one for each room
   const cameras = useMemo(() => {
     try {
       const aspect = (size.width / 2) / size.height;
-      const cameraOffset = ROOM_WIDTH / 2; // 10 units apart
       
-      // Camera A (index 0)
-      const cameraA = new THREE.PerspectiveCamera(
-        CAMERA_FOV,
-        aspect,
-        CAMERA_NEAR_PLANE,
-        CAMERA_FAR_PLANE
-      );
-      cameraA.position.set(0, CAMERA_HEIGHT, CAMERA_Z_POSITION);
-      
-      // Camera B (index 1) - 10 units ahead
-      const cameraB = new THREE.PerspectiveCamera(
-        CAMERA_FOV,
-        aspect,
-        CAMERA_NEAR_PLANE,
-        CAMERA_FAR_PLANE
-      );
-      cameraB.position.set(cameraOffset, CAMERA_HEIGHT, CAMERA_Z_POSITION);
-      
-      // Camera C (index 2) - 20 units ahead
-      const cameraC = new THREE.PerspectiveCamera(
-        CAMERA_FOV,
-        aspect,
-        CAMERA_NEAR_PLANE,
-        CAMERA_FAR_PLANE
-      );
-      cameraC.position.set(cameraOffset * 2, CAMERA_HEIGHT, CAMERA_Z_POSITION);
-      
-      // Camera D (index 3) - 30 units ahead
-      const cameraD = new THREE.PerspectiveCamera(
-        CAMERA_FOV,
-        aspect,
-        CAMERA_NEAR_PLANE,
-        CAMERA_FAR_PLANE
-      );
-      cameraD.position.set(cameraOffset * 3, CAMERA_HEIGHT, CAMERA_Z_POSITION);
-      
-      return [cameraA, cameraB, cameraC, cameraD];
+      // Create 6 cameras with 10-unit spacing (will be updated in useFrame)
+      return Array.from({ length: 6 }, (_, i) => {
+        const camera = new THREE.PerspectiveCamera(
+          CAMERA_FOV,
+          aspect,
+          CAMERA_NEAR_PLANE,
+          CAMERA_FAR_PLANE
+        );
+        // Initialize at correct spacing (10 units apart)
+        camera.position.set(i * (ROOM_WIDTH / 2), CAMERA_HEIGHT, CAMERA_Z_POSITION);
+        return camera;
+      });
     } catch (error) {
       console.error('Failed to create cameras:', error);
       throw error; // Re-throw to trigger error boundary
@@ -123,39 +107,41 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate }: SplitCameraR
     };
   }, [cameras]);
   
-  // Animation loop: smooth camera movement with 4-camera system
+  // Animation loop: smooth camera movement with 6-camera system
   useFrame(() => {
     const targetX = targetXRef.current ?? 0;
-    const cameraOffset = ROOM_WIDTH / 2; // 10 units between cameras
+    const cameraOffset = ROOM_WIDTH / 2; // 10 units between cameras for parallax
     
     // Smooth lerp to target position
     currentXRef.current += (targetX - currentXRef.current) * CAMERA_LERP_SPEED;
     
-    // Update all four camera positions (maintaining 10-unit spacing)
-    cameras[0].position.x = currentXRef.current;                    // Camera A
-    cameras[1].position.x = currentXRef.current + cameraOffset;     // Camera B (+10)
-    cameras[2].position.x = currentXRef.current + cameraOffset * 2; // Camera C (+20)
-    cameras[3].position.x = currentXRef.current + cameraOffset * 3; // Camera D (+30)
+    // UPDATE ALL CAMERA POSITIONS - THEY MOVE WITH CURRENTX!
+    // Camera spacing: 10 units apart (ROOM_WIDTH / 2) for smooth parallax between 20-unit rooms
+    cameras[0].position.x = currentXRef.current;                    // Camera 0
+    cameras[1].position.x = currentXRef.current + cameraOffset;     // Camera 1 (+10)
+    cameras[2].position.x = currentXRef.current + cameraOffset * 2; // Camera 2 (+20)
+    cameras[3].position.x = currentXRef.current + cameraOffset * 3; // Camera 3 (+30)
+    cameras[4].position.x = currentXRef.current + cameraOffset * 4; // Camera 4 (+40)
+    cameras[5].position.x = currentXRef.current + cameraOffset * 5; // Camera 5 (+50)
     
     // Notify parent of camera position for UI updates
     onCameraUpdate(currentXRef.current);
     
-    // Determine which segment we're in (0-based: 0, 1, 2, 3, 4, 5...)
-    const segmentIndex = Math.floor(currentXRef.current / 10);
-    const segmentStart = segmentIndex * 10;
+    // Determine which segment we're in (10-unit segments for smooth transitions)
+    const segmentIndex = Math.floor(currentXRef.current / cameraOffset);
+    const segmentStart = segmentIndex * cameraOffset;
     
     // Calculate progress within this segment (0 to 1)
-    const localProgress = Math.max(0, Math.min(1, (currentXRef.current - segmentStart) / 10));
+    const localProgress = Math.max(0, Math.min(1, (currentXRef.current - segmentStart) / cameraOffset));
     
-    // Determine which two cameras to show (cycling through 4 cameras)
-    // Segment 0: cameras[0] and cameras[1]
-    // Segment 1: cameras[1] and cameras[2]
-    // Segment 2: cameras[2] and cameras[3]
-    // Segment 3: cameras[3] and cameras[0] (wrapping)
-    // Segment 4: cameras[0] and cameras[1] (pattern repeats)
-    // FIX: Handle negative segmentIndex properly with modulo
-    const leftCameraIndex = ((segmentIndex % 4) + 4) % 4;
-    const rightCameraIndex = ((segmentIndex + 1) % 4 + 4) % 4;
+    // Determine which two cameras to show (with wrapping for infinite coverage)
+    // Segment 0 (x=0-10): cameras[0] ↔ cameras[1]
+    // Segment 1 (x=10-20): cameras[1] ↔ cameras[2]
+    // ...
+    // Segment 5 (x=50-60): cameras[5] ↔ cameras[0] (wraps)
+    // Segment 6 (x=60-70): cameras[0] ↔ cameras[1] (pattern repeats)
+    const leftCameraIndex = ((segmentIndex % 6) + 6) % 6;
+    const rightCameraIndex = ((segmentIndex + 1) % 6 + 6) % 6;
     
     const leftCamera = cameras[leftCameraIndex];
     const rightCamera = cameras[rightCameraIndex];
@@ -163,6 +149,23 @@ export function SplitCameraRenderer({ targetXRef, onCameraUpdate }: SplitCameraR
     // Calculate dynamic viewport widths based on transition progress
     const leftWidth = (1 - localProgress) * size.width;
     const rightWidth = localProgress * size.width;
+    
+    // Send debug info to parent
+    if (onDebugUpdate) {
+      onDebugUpdate({
+        cameraPositions: cameras.map(c => c.position.x),
+        viewportSplit: { 
+          left: (1 - localProgress) * 100, 
+          right: localProgress * 100 
+        },
+        leftCameraIdx: leftCameraIndex,
+        rightCameraIdx: rightCameraIndex,
+        currentX: currentXRef.current,
+        targetX,
+        segmentIndex,
+        localProgress,
+      });
+    }
     
     // Update camera aspects based on dynamic widths
     leftCamera.aspect = leftWidth / size.height;

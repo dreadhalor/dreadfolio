@@ -22,17 +22,16 @@ import { RoomData } from './types';
  * A 3D room gallery with split-screen view and independent camera control for 60 FPS performance
  * 
  * Architecture:
- * - Four cameras (A, B, C, D) moving together, 10 units apart
- * - Rooms positioned at 20-unit intervals (ROOM_WIDTH spacing)
- * - Each room shows one camera at 100% viewport when centered
- * - Camera cycle with wrapping:
- *   - Library (x=0) → Camera A (currentX=0)
- *   - Gallery (x=20) → Camera B (currentX=10)
- *   - Greenhouse (x=40) → Camera C (currentX=20)
- *   - Lounge (x=60) → Camera D (currentX=30)
- *   - Office (x=80) → Camera A (currentX=80, wraps)
- *   - Observatory (x=100) → Camera B (currentX=90, wraps)
- * - Pattern continues infinitely: A → B → C → D → A → B → ...
+ * - Six cameras moving together, spaced 10 units apart
+ * - Rooms at fixed positions: 0, 20, 40, 60, 80, 100 (ROOM_WIDTH = 20)
+ * - Camera alignment (when room has 100% viewport):
+ *   - Library (x=0): Camera 0, currentX=0
+ *   - Gallery (x=20): Camera 1, currentX=10
+ *   - Greenhouse (x=40): Camera 2, currentX=20
+ *   - Lounge (x=60): Camera 3, currentX=30
+ *   - Office (x=80): Camera 4, currentX=40
+ *   - Observatory (x=100): Camera 5, currentX=50
+ * - Smooth parallax transitions between all rooms
  * - Type-safe props throughout
  * - Automatic room-component mapping via registry
  * - Performance optimizations: merged geometry, instanced meshes, minimal lights
@@ -50,6 +49,18 @@ export default function RoomGallery() {
   // Camera state
   const [cameraX, setCameraX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Debug state
+  const [debugInfo, setDebugInfo] = useState<{
+    cameraPositions: number[];
+    viewportSplit: { left: number; right: number };
+    leftCameraIdx: number;
+    rightCameraIdx: number;
+    currentX: number;
+    targetX: number;
+    segmentIndex: number;
+    localProgress: number;
+  } | null>(null);
   
   // Refs for performance (avoid React re-renders)
   const targetXRef = useRef(0);
@@ -88,58 +99,27 @@ export default function RoomGallery() {
     setIsDragging(false);
   }, []);
 
-  // Fast travel to specific room with correct camera positioning
+  // Fast travel to specific room
   const moveTo = useCallback((room: RoomData) => {
-    // Calculate currentX so that the specified camera is centered on the room
-    // Camera positions: A=currentX, B=currentX+10, C=currentX+20, D=currentX+30
-    // We want camera X at room.offsetX, so: currentX + offset = room.offsetX
-    const CAMERA_OFFSET = ROOM_WIDTH / 2; // 10 units
+    // Find which room index this is (0-5)
+    const roomIndex = ROOMS.indexOf(room);
     
-    let targetForCurrentX: number;
-    switch (room.controlsCamera) {
-      case 'A':
-        targetForCurrentX = room.offsetX; // Camera A at currentX
-        break;
-      case 'B':
-        targetForCurrentX = room.offsetX - CAMERA_OFFSET; // Camera B at currentX+10
-        break;
-      case 'C':
-        targetForCurrentX = room.offsetX - (CAMERA_OFFSET * 2); // Camera C at currentX+20
-        break;
-      case 'D':
-        targetForCurrentX = room.offsetX - (CAMERA_OFFSET * 3); // Camera D at currentX+30
-        break;
-    }
+    // Calculate currentX so that camera[roomIndex] is at room.offsetX
+    // Camera[N] is at position: currentX + (N * 10)
+    // We want: currentX + (roomIndex * 10) = room.offsetX
+    // So: currentX = room.offsetX - (roomIndex * 10)
+    const targetForCurrentX = room.offsetX - (roomIndex * (ROOM_WIDTH / 2));
     
-    // FIX: Clamp to valid camera bounds
     const clampedTarget = Math.max(CAMERA_MIN_X, Math.min(CAMERA_MAX_X, targetForCurrentX));
     
     targetXRef.current = clampedTarget;
     setCameraX(clampedTarget);
   }, []);
 
-  // Get current room based on which camera is dominant in the viewport
+  // Get current room - just find the closest one!
   const getCurrentRoom = useCallback(() => {
-    // Determine which segment we're in and which camera is dominant
-    const segmentIndex = Math.floor(cameraX / 10);
-    const segmentStart = segmentIndex * 10;
-    const localProgress = Math.max(0, Math.min(1, (cameraX - segmentStart) / 10));
-    
-    // Calculate which two cameras are currently showing
-    const leftCameraIndex = ((segmentIndex % 4) + 4) % 4;
-    const rightCameraIndex = ((segmentIndex + 1) % 4 + 4) % 4;
-    
-    // Calculate actual positions of these cameras
-    const CAMERA_OFFSET = ROOM_WIDTH / 2; // 10 units
-    const leftCameraPos = cameraX + (leftCameraIndex * CAMERA_OFFSET);
-    const rightCameraPos = cameraX + (rightCameraIndex * CAMERA_OFFSET);
-    
-    // Determine which camera is dominant (has more viewport)
-    const dominantCameraPos = localProgress < 0.5 ? leftCameraPos : rightCameraPos;
-    
-    // FIX: Find the room closest to the dominant camera's position
     return ROOMS.reduce((prev, curr) => 
-      Math.abs(curr.offsetX - dominantCameraPos) < Math.abs(prev.offsetX - dominantCameraPos) ? curr : prev
+      Math.abs(curr.offsetX - cameraX) < Math.abs(prev.offsetX - cameraX) ? curr : prev
     );
   }, [cameraX]);
 
@@ -180,6 +160,7 @@ export default function RoomGallery() {
         <SplitCameraRenderer 
           targetXRef={targetXRef}
           onCameraUpdate={setCameraX}
+          onDebugUpdate={setDebugInfo}
         />
       </Canvas>
 
@@ -192,6 +173,59 @@ export default function RoomGallery() {
         currentRoom={currentRoom} 
         onRoomClick={moveTo}
       />
+      
+      {/* Debug Overlay */}
+      {debugInfo && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          background: 'rgba(0, 0, 0, 0.85)',
+          color: '#0f0',
+          padding: '16px',
+          fontFamily: 'monospace',
+          fontSize: '13px',
+          lineHeight: '1.7',
+          borderRadius: '6px',
+          pointerEvents: 'none',
+          zIndex: 1000,
+          border: '2px solid #0f0',
+        }}>
+          <div style={{ color: '#ff0', marginBottom: '8px' }}><strong>🔍 DEBUG INFO</strong></div>
+          
+          <div style={{ marginTop: '8px' }}><strong>Current State:</strong></div>
+          <div>currentX: {debugInfo.currentX.toFixed(6)}</div>
+          <div>targetX: {debugInfo.targetX.toFixed(2)}</div>
+          <div>floor(currentX/10): {Math.floor(debugInfo.currentX / 10)}</div>
+          <div style={{ color: debugInfo.currentX === debugInfo.targetX ? '#0f0' : '#ff0' }}>
+            {debugInfo.currentX === debugInfo.targetX ? '✓ SETTLED' : '⟳ LERPING'}
+          </div>
+          
+          <div style={{ marginTop: '8px' }}><strong>Segment Info:</strong></div>
+          <div>segment: {debugInfo.segmentIndex}</div>
+          <div>progress: {debugInfo.localProgress.toFixed(4)}</div>
+          <div>segmentStart: {debugInfo.segmentIndex * 10}</div>
+          
+          <div style={{ marginTop: '8px' }}><strong>Camera Positions:</strong></div>
+          {debugInfo.cameraPositions.map((pos, i) => (
+            <div key={i} style={{ color: debugInfo.leftCameraIdx === i || debugInfo.rightCameraIdx === i ? '#ff0' : '#0f0' }}>
+              Camera {i}: {pos.toFixed(2)}
+            </div>
+          ))}
+          
+          <div style={{ marginTop: '8px' }}><strong>Viewport Split:</strong></div>
+          <div style={{ color: '#ff0' }}>
+            Left (Cam {debugInfo.leftCameraIdx}): {debugInfo.viewportSplit.left.toFixed(1)}%
+          </div>
+          <div style={{ color: '#f0f' }}>
+            Right (Cam {debugInfo.rightCameraIdx}): {debugInfo.viewportSplit.right.toFixed(1)}%
+          </div>
+          
+          <div style={{ marginTop: '8px' }}><strong>Camera Indices:</strong></div>
+          <div>leftCameraIndex: {debugInfo.leftCameraIdx}</div>
+          <div>rightCameraIndex: {debugInfo.rightCameraIdx}</div>
+        </div>
+      )}
     </div>
   );
 }

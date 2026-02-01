@@ -114,7 +114,7 @@ export function RoomMinimap({
                   borderRadius: '3px',
                 }}
               >
-                📷{room.controlsCamera}
+                📷{index}
               </div>
 
               {/* Active indicator pulse */}

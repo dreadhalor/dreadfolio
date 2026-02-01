@@ -11,7 +11,7 @@ export const CAMERA_LERP_SPEED = 0.1;
 
 // Camera bounds (slightly inside first and last walls)
 export const CAMERA_MIN_X = -8;
-export const CAMERA_MAX_X = 108; // For 6 rooms
+export const CAMERA_MAX_X = 55; // currentX goes from 0 (Library) to 50 (Observatory), plus small buffer
 
 // Drag control
 export const DRAG_SENSITIVITY = 0.05;
