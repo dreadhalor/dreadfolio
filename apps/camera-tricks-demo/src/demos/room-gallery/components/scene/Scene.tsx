@@ -1,7 +1,8 @@
-import * as THREE from 'three';
+import { useMemo } from 'react';
 import { ROOMS, getDividingWallColors } from '../../config/rooms';
 import { getThemeColors } from '../../config/themes';
 import { getRoomComponent } from '../../config/registry';
+import { calculateFogColor } from '../../utils/fogColorCalculator';
 
 import { SceneLighting } from './SceneLighting';
 import { RoomStructure } from './RoomStructure';
@@ -34,16 +35,12 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: ScenePro
   const currentRoom = ROOMS[Math.max(0, Math.min(currentRoomIndex, ROOMS.length - 1))];
   const currentColors = getThemeColors(currentRoom.theme);
   
-  // Create fog color: keep room color's hue but make it darker and less saturated
-  const fogColor = (() => {
-    const color = new THREE.Color(currentColors.wall);
-    const hsl = { h: 0, s: 0, l: 0 };
-    color.getHSL(hsl);
-    // Keep the hue for room identity, reduce saturation for subtlety
-    // Most importantly: use darker lightness so fog doesn't brighten distant objects
-    color.setHSL(hsl.h, hsl.s * 0.4, hsl.l * 0.6); // Multiply lightness by 0.6 to darken
-    return '#' + color.getHexString();
-  })();
+  // Calculate fog color based on current room's wall color
+  // Memoized to avoid recalculation on every render
+  const fogColor = useMemo(
+    () => calculateFogColor(currentColors.wall),
+    [currentColors.wall]
+  );
   
   return (
     <>
