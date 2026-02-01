@@ -3,7 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Configuration
 import { ROOMS } from './config/rooms';
-import { CAMERA_HEIGHT, CAMERA_Z_POSITION, CAMERA_FOV, MIN_ROOM_PROGRESS, MAX_ROOM_PROGRESS, DRAG_SENSITIVITY } from './config/constants';
+import { MIN_ROOM_PROGRESS, MAX_ROOM_PROGRESS, DRAG_SENSITIVITY } from './config/constants';
 
 // Components
 import { Scene } from './components/scene/Scene';
@@ -135,6 +135,7 @@ export default function RoomGallery() {
         <Scene 
           onFpsUpdate={setFps}
           onDrawCallsUpdate={setDrawCalls}
+          roomProgress={roomProgress}
         />
         <SplitCameraRenderer 
           targetRoomProgressRef={targetRoomProgressRef}

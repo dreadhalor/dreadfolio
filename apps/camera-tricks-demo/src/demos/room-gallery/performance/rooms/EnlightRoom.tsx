@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { useMatcap } from '../shared/useMatcap';
+import { Fireflies } from '../shared/RoomParticles';
 
 interface EnlightRoomProps {
   colors: RoomColors;
@@ -71,10 +72,10 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
     pole.applyMatrix4(tempObject.matrix);
     geometries.push(pole);
     
-    // Reflector panels (photography equipment)
+    // Reflector panels (photography equipment) - moved much closer
     for (let i = 0; i < 3; i++) {
       const reflector = new THREE.BoxGeometry(1.5, 2, 0.1);
-      tempObject.position.set(offsetX - 6 + i * 3, 2, -8);
+      tempObject.position.set(offsetX - 6 + i * 3, 2, 0); // Moved to z=0 (10 units from camera, much more visible)
       tempObject.updateMatrix();
       reflector.applyMatrix4(tempObject.matrix);
       geometries.push(reflector);
@@ -183,14 +184,19 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
     lightMeter.applyMatrix4(tempObject.matrix);
     geometries.push(lightMeter);
     
-    // Color calibration targets (moved to back wall for visibility)
+    // Color calibration targets - moved to side walls closer to camera
     for (let i = 0; i < 3; i++) {
       const target = new THREE.BoxGeometry(0.4, 0.4, 0.02);
-      tempObject.position.set(offsetX - 3 + i * 1.5, 4, -14);
+      const isLeft = i === 0;
+      const xPos = isLeft ? -13 : 13; // Side walls
+      const zPos = -2 + (i > 0 ? (i - 1) * 3 : 0); // Spread along wall
+      tempObject.position.set(offsetX + xPos, 4, zPos);
+      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
       tempObject.updateMatrix();
       target.applyMatrix4(tempObject.matrix);
       geometries.push(target);
     }
+    tempObject.rotation.y = 0;
     
     return mergeGeometries(geometries);
   }, [offsetX]);
@@ -247,6 +253,23 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
         <planeGeometry args={[10, 8]} />
         <meshMatcapMaterial matcap={matcap} color="#0a0a0a" />
       </mesh>
+      
+      {/* Light particles - fireflies of enlightenment */}
+      <Fireflies offsetX={offsetX} color="#ff6b9d" count={40} />
+      
+      {/* Hanging light fixtures */}
+      {[-5, 0, 5].map((x, i) => (
+        <group key={i} position={[offsetX + x, 8, -2 + i * 2]}>
+          <mesh position={[0, 0, 0]}>
+            <coneGeometry args={[0.4, 0.6, 8]} />
+            <meshMatcapMaterial matcap={matcap} color={colors.light} transparent opacity={0.8} />
+          </mesh>
+          <mesh position={[0, -0.5, 0]}>
+            <sphereGeometry args={[0.15, 8, 8]} />
+            <meshMatcapMaterial matcap={matcap} color={colors.accent} />
+          </mesh>
+        </group>
+      ))}
     </>
   );
 }

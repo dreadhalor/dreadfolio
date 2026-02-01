@@ -4,26 +4,32 @@ import * as THREE from 'three';
 
 /**
  * Atmospheric Fog Component
- * Adds depth perception through subtle fog effect
+ * Adds depth perception through fog effect that matches room colors
  * Makes spaces feel more expansive without increasing physical size
  */
-export function AtmosphericFog() {
+interface AtmosphericFogProps {
+  color: string; // Hex color string for the fog
+}
+
+export function AtmosphericFog({ color }: AtmosphericFogProps) {
   const { scene } = useThree();
 
   useEffect(() => {
-    // Add very subtle fog for depth illusion
-    // Fog starts farther away for more visible space
+    // Add visible fog for depth perception
+    // Camera is at z=10, back wall at z=-15 (25 units away)
+    // Start fog close enough to see, but not too close to obscure near objects
+    const fogColor = new THREE.Color(color);
     scene.fog = new THREE.Fog(
-      0x87ceeb, // Light blue sky color
-      20,       // Near distance (fog starts farther)
-      60        // Far distance (fully fogged - much farther)
+      fogColor, // Use room's theme color
+      8,        // Near distance (starts 8 units from camera - just past most decorations)
+      25        // Far distance (fully fogged at back wall)
     );
 
     return () => {
       // Cleanup fog on unmount
       scene.fog = null;
     };
-  }, [scene]);
+  }, [scene, color]);
 
   return null;
 }

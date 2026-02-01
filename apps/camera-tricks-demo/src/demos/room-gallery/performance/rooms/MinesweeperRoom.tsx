@@ -4,6 +4,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoomColors } from '../../types';
 import { useMatcap } from '../shared/useMatcap';
 import { InstancedNumberBlocks } from '../shared/InstancedComponents';
+import { FloatingParticles } from '../shared/RoomParticles';
 
 interface MinesweeperRoomProps {
   colors: RoomColors;
@@ -106,16 +107,16 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
     
     tempObject.rotation.y = 0;
     
-    // CD cases on shelf
+    // CD cases on shelf - moved closer
     const shelf = new THREE.BoxGeometry(2, 0.1, 0.6);
-    tempObject.position.set(offsetX + 5, 2, -8);
+    tempObject.position.set(offsetX + 5, 2, -2); // Moved to z=-2 (12 units from camera)
     tempObject.updateMatrix();
     shelf.applyMatrix4(tempObject.matrix);
     geometries.push(shelf);
     
     for (let i = 0; i < 8; i++) {
       const cd = new THREE.BoxGeometry(0.2, 0.3, 0.02);
-      tempObject.position.set(offsetX + 4 + i * 0.25, 2.2, -8);
+      tempObject.position.set(offsetX + 4 + i * 0.25, 2.2, -2); // Moved closer
       tempObject.updateMatrix();
       cd.applyMatrix4(tempObject.matrix);
       geometries.push(cd);
@@ -147,14 +148,19 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
     
     tempObject.rotation.x = 0;
     
-    // Retro gaming posters on walls
+    // Retro gaming posters - moved to side walls closer to camera
     for (let i = 0; i < 4; i++) {
       const poster = new THREE.BoxGeometry(1, 1.3, 0.05);
-      tempObject.position.set(offsetX - 7 + i * 4.5, 2.5, -9.8);
+      const isLeft = i < 2;
+      const xPos = isLeft ? -13 : 13; // Side walls
+      const zPos = -1 + (i % 2) * 3; // Two per wall
+      tempObject.position.set(offsetX + xPos, 2.5, zPos);
+      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
       tempObject.updateMatrix();
       poster.applyMatrix4(tempObject.matrix);
       geometries.push(poster);
     }
+    tempObject.rotation.y = 0;
     
     // More floppy disks in disk holder
     const diskHolder = new THREE.BoxGeometry(0.3, 0.3, 0.15);
@@ -287,6 +293,26 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
         <planeGeometry args={[10, 8]} />
         <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
+      
+      {/* Numeric particles - like numbers floating around */}
+      <FloatingParticles offsetX={offsetX} color="#1f2f86" count={35} size={0.12} />
+      
+      {/* Hanging mines (like the game) */}
+      {[{ x: -5, z: 0 }, { x: 0, z: -3 }, { x: 5, z: 1 }].map((pos, i) => (
+        <group key={i} position={[offsetX + pos.x, 7, pos.z]}>
+          <mesh>
+            <sphereGeometry args={[0.3, 8, 8]} />
+            <meshMatcapMaterial matcap={matcap} color="#333333" />
+          </mesh>
+          {/* Spikes on the mine */}
+          {Array.from({ length: 8 }, (_, j) => (
+            <mesh key={j} position={[Math.cos(j * Math.PI / 4) * 0.35, 0, Math.sin(j * Math.PI / 4) * 0.35]} rotation={[0, j * Math.PI / 4, 0]}>
+              <coneGeometry args={[0.08, 0.2, 4]} />
+              <meshMatcapMaterial matcap={matcap} color="#333333" />
+            </mesh>
+          ))}
+        </group>
+      ))}
     </>
   );
 }

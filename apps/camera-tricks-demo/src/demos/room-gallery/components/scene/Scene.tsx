@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { ROOMS, getDividingWallColors } from '../../config/rooms';
 import { getThemeColors } from '../../config/themes';
 import { getRoomComponent } from '../../config/registry';
@@ -12,6 +13,7 @@ import { DrawCallMonitor } from '../../performance/DrawCallMonitor';
 interface SceneProps {
   onFpsUpdate: (fps: number) => void;
   onDrawCallsUpdate: (calls: number) => void;
+  roomProgress: number;
 }
 
 /**
@@ -26,14 +28,30 @@ interface SceneProps {
  * - Scene rendered twice per frame (once for each camera viewport)
  * - Procedurally generates vibrant colors from app themes
  */
-export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
+export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: SceneProps) {
+  // Determine current room for fog color
+  const currentRoomIndex = Math.round(roomProgress);
+  const currentRoom = ROOMS[Math.max(0, Math.min(currentRoomIndex, ROOMS.length - 1))];
+  const currentColors = getThemeColors(currentRoom.theme);
+  
+  // Create fog color: keep room color's hue but make it darker and less saturated
+  const fogColor = (() => {
+    const color = new THREE.Color(currentColors.wall);
+    const hsl = { h: 0, s: 0, l: 0 };
+    color.getHSL(hsl);
+    // Keep the hue for room identity, reduce saturation for subtlety
+    // Most importantly: use darker lightness so fog doesn't brighten distant objects
+    color.setHSL(hsl.h, hsl.s * 0.4, hsl.l * 0.6); // Multiply lightness by 0.6 to darken
+    return '#' + color.getHexString();
+  })();
+  
   return (
     <>
       <FPSCounter onFpsUpdate={onFpsUpdate} />
       <DrawCallMonitor onUpdate={onDrawCallsUpdate} />
       
       <SceneLighting />
-      <AtmosphericFog />
+      <AtmosphericFog color={fogColor} />
 
       {/* Render all rooms */}
       {ROOMS.map((room, index) => {

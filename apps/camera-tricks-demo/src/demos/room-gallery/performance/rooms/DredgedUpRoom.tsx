@@ -5,6 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoomColors } from '../../types';
 import { useMatcap } from '../shared/useMatcap';
 import { InstancedCrates } from '../shared/InstancedComponents';
+import { Bubbles } from '../shared/RoomParticles';
 
 interface DredgedUpRoomProps {
   colors: RoomColors;
@@ -81,9 +82,9 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     
     tempObject.rotation.z = 0;
     
-    // Ship wheel center
+    // Ship wheel center - moved closer
     const wheelCenter = new THREE.CylinderGeometry(0.2, 0.2, 0.15, 16);
-    tempObject.position.set(offsetX - 5, 3, -8);
+    tempObject.position.set(offsetX - 5, 3, -1); // Moved from z=-8 to z=-1
     tempObject.rotation.x = Math.PI / 2;
     tempObject.updateMatrix();
     wheelCenter.applyMatrix4(tempObject.matrix);
@@ -189,10 +190,10 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     needle.applyMatrix4(tempObject.matrix);
     geometries.push(needle);
     
-    // Fishing rods leaning in corner (moved to side wall)
+    // Fishing rods leaning in corner (moved closer)
     for (let i = 0; i < 3; i++) {
       const rod = new THREE.CylinderGeometry(0.02, 0.02, 3, 6);
-      tempObject.position.set(offsetX + 14, 1.5, -8 + i * 2);
+      tempObject.position.set(offsetX + 14, 1.5, -2 + i * 2); // Moved from z=-8 to z=-2
       tempObject.rotation.z = Math.PI / 6;
       tempObject.updateMatrix();
       rod.applyMatrix4(tempObject.matrix);
@@ -215,15 +216,15 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     clasp.applyMatrix4(tempObject.matrix);
     geometries.push(clasp);
     
-    // Lantern on hook (moved away from camera)
+    // Lantern on hook - moved closer
     const lanternTop = new THREE.ConeGeometry(0.15, 0.2, 8);
-    tempObject.position.set(offsetX + 7, 3, -8);
+    tempObject.position.set(offsetX + 7, 3, 0); // Moved from z=-8 to z=0
     tempObject.updateMatrix();
     lanternTop.applyMatrix4(tempObject.matrix);
     geometries.push(lanternTop);
     
     const lanternBody = new THREE.CylinderGeometry(0.12, 0.12, 0.3, 8);
-    tempObject.position.set(offsetX + 7, 2.65, -8);
+    tempObject.position.set(offsetX + 7, 2.65, 0); // Moved closer
     tempObject.updateMatrix();
     lanternBody.applyMatrix4(tempObject.matrix);
     geometries.push(lanternBody);
@@ -391,6 +392,27 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
         <planeGeometry args={[10, 8]} />
         <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
+      
+      {/* Underwater bubbles rising */}
+      <Bubbles offsetX={offsetX} color="#4a9eff" count={35} />
+      
+      {/* Hanging rope coils and kelp strands from ceiling */}
+      {[-6, -2, 2, 6].map((x, i) => (
+        <group key={i} position={[offsetX + x, 8, -4 + i * 2.5]}>
+          {/* Rope coil */}
+          <mesh>
+            <torusGeometry args={[0.3, 0.08, 8, 12]} />
+            <meshMatcapMaterial matcap={matcap} color={colors.accent} />
+          </mesh>
+          {/* Hanging strands */}
+          {Array.from({ length: 3 }, (_, j) => (
+            <mesh key={j} position={[Math.cos(j * 2) * 0.2, -0.8 - j * 0.3, Math.sin(j * 2) * 0.2]}>
+              <cylinderGeometry args={[0.03, 0.02, 0.6 + j * 0.2, 6]} />
+              <meshMatcapMaterial matcap={matcap} color={colors.furniture} transparent opacity={0.7} />
+            </mesh>
+          ))}
+        </group>
+      ))}
     </>
   );
 }

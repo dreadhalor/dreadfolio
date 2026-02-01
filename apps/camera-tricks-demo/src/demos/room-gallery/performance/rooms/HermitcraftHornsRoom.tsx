@@ -4,6 +4,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoomColors } from '../../types';
 import { InstancedMonitors } from '../shared/InstancedComponents';
 import { useMatcap } from '../shared/useMatcap';
+import { Sparkles } from '../shared/RoomParticles';
 
 interface HermitcraftHornsRoomProps {
   colors: RoomColors;
@@ -78,16 +79,20 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
     
     tempObject.rotation.x = 0; // Reset rotation
     
-    // Sound foam panels on walls (blocky, colorful)
+    // Sound foam panels on side walls (blocky, colorful) - moved closer
     for (let i = 0; i < 8; i++) {
       const foam = new THREE.BoxGeometry(1, 1, 0.2);
-      const x = -6 + (i % 4) * 3;
+      const isLeft = i < 4;
+      const xPos = isLeft ? -13 : 13; // Side walls
+      const zPos = -3 + (i % 4) * 2; // Spread along wall, closer to camera
       const y = 2 + Math.floor(i / 4) * 2;
-      tempObject.position.set(offsetX + x, y, -9.5);
+      tempObject.position.set(offsetX + xPos, y, zPos);
+      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2; // Face inward
       tempObject.updateMatrix();
       foam.applyMatrix4(tempObject.matrix);
       geometries.push(foam);
     }
+    tempObject.rotation.y = 0; // Reset rotation
     
     // Storage shelves (blocky)
     const shelf = new THREE.BoxGeometry(2, 0.2, 0.8);
@@ -155,14 +160,19 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
     mouse.applyMatrix4(tempObject.matrix);
     geometries.push(mouse);
     
-    // Minecraft-style posters on walls (moved to back wall to avoid camera collision)
+    // Minecraft-style posters on side walls - closer and more visible
     for (let i = 0; i < 4; i++) {
       const poster = new THREE.BoxGeometry(1.2, 1.5, 0.05);
-      tempObject.position.set(offsetX - 7 + i * 2.5, 5, -9.8); // Moved to back wall, higher up
+      const isLeft = i < 2;
+      const xPos = isLeft ? -13 : 13; // Side walls
+      const zPos = -1 + (i % 2) * 4; // Two per wall
+      tempObject.position.set(offsetX + xPos, 5, zPos);
+      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2; // Face inward
       tempObject.updateMatrix();
       poster.applyMatrix4(tempObject.matrix);
       geometries.push(poster);
     }
+    tempObject.rotation.y = 0; // Reset rotation
     
     // Pop filter (ring in front of mic)
     const popFilter = new THREE.TorusGeometry(0.25, 0.02, 8, 16);
@@ -238,6 +248,17 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
         <planeGeometry args={[10, 8]} />
         <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
+      
+      {/* Musical note particles */}
+      <Sparkles offsetX={offsetX} color="#6b9fff" count={45} />
+      
+      {/* Hanging banners/flags */}
+      {[-6, -2, 2, 6].map((x, i) => (
+        <mesh key={i} position={[offsetX + x, 7 + Math.sin(i) * 0.5, 0]} rotation={[0, 0, 0.1 * (i % 2 ? 1 : -1)]}>
+          <planeGeometry args={[1.5, 2.5]} />
+          <meshMatcapMaterial matcap={matcap} color={colors.picture} transparent opacity={0.9} />
+        </mesh>
+      ))}
     </>
   );
 }

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { useMatcap } from '../shared/useMatcap';
-import { InstancedBottles } from '../shared/InstancedComponents';
+import { Bubbles } from '../shared/RoomParticles';
 
 interface RootBeerReviewsRoomProps {
   colors: RoomColors;
@@ -11,254 +11,197 @@ interface RootBeerReviewsRoomProps {
 }
 
 /**
- * Root Beer Reviews Room - Vintage Soda Shop / Tasting Room
+ * Root Beer Reviews Room - Vintage Soda Fountain Bar
  * 
- * Features:
- * - Bar counter with bottles displayed
- * - Root beer barrels and kegs
- * - Vintage soda fountain machine
- * - Review cards/score boards
- * - Bar stools
- * - Checkered floor pattern
+ * Design Philosophy:
+ * - Cozy vintage bar with prominent vertical shelving
+ * - All geometry within z=-1 to z=2 (10-12 units from camera)
+ * - Carbonation bubble particles fill the air
+ * - Warm pendant lighting from ceiling
+ * - Full FOV utilization with tall bottle displays
  */
 export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProps) {
   const matcap = useMatcap();
-
-  // Merge all static decorations into single geometry
+  
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
     const tempObject = new THREE.Object3D();
     
-    // Bar counter (long, vintage style)
-    const barTop = new THREE.BoxGeometry(6, 0.3, 2);
-    tempObject.position.set(offsetX, 1.2, -7);
+    // ===== MAIN BAR COUNTER =====
+    // Bar counter top (serving surface)
+    const barTop = new THREE.BoxGeometry(8, 0.2, 1.5);
+    tempObject.position.set(offsetX, 1.2, 0);
     tempObject.updateMatrix();
     barTop.applyMatrix4(tempObject.matrix);
     geometries.push(barTop);
     
-    // Bar front panel
-    const barFront = new THREE.BoxGeometry(6, 1, 0.2);
-    tempObject.position.set(offsetX, 0.6, -6);
+    // Bar front panel (customer-facing)
+    const barFront = new THREE.BoxGeometry(8, 1, 0.15);
+    tempObject.position.set(offsetX, 0.6, 0.75);
     tempObject.updateMatrix();
     barFront.applyMatrix4(tempObject.matrix);
     geometries.push(barFront);
     
-    // Bar stools (4 stools)
-    for (let i = 0; i < 4; i++) {
+    // Bar side panels
+    for (const xSide of [-4, 4]) {
+      const sidePanel = new THREE.BoxGeometry(0.15, 1, 1.5);
+      tempObject.position.set(offsetX + xSide, 0.6, 0);
+      tempObject.updateMatrix();
+      sidePanel.applyMatrix4(tempObject.matrix);
+      geometries.push(sidePanel);
+    }
+    
+    // ===== BAR STOOLS (in front of bar) =====
+    for (let i = 0; i < 5; i++) {
+      const xPos = -4 + i * 2;
+      
       // Stool seat
-      const seat = new THREE.CylinderGeometry(0.4, 0.4, 0.15, 16);
-      tempObject.position.set(offsetX - 3 + i * 2, 0.8, -4);
+      const seat = new THREE.CylinderGeometry(0.35, 0.35, 0.12, 16);
+      tempObject.position.set(offsetX + xPos, 0.75, 2);
       tempObject.updateMatrix();
       seat.applyMatrix4(tempObject.matrix);
       geometries.push(seat);
       
       // Stool pole
-      const pole = new THREE.CylinderGeometry(0.08, 0.08, 0.8, 8);
-      tempObject.position.set(offsetX - 3 + i * 2, 0.4, -4);
+      const pole = new THREE.CylinderGeometry(0.06, 0.06, 0.75, 8);
+      tempObject.position.set(offsetX + xPos, 0.37, 2);
       tempObject.updateMatrix();
       pole.applyMatrix4(tempObject.matrix);
       geometries.push(pole);
       
       // Stool base
-      const base = new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16);
-      tempObject.position.set(offsetX - 3 + i * 2, 0.05, -4);
+      const base = new THREE.CylinderGeometry(0.3, 0.3, 0.08, 16);
+      tempObject.position.set(offsetX + xPos, 0.04, 2);
       tempObject.updateMatrix();
       base.applyMatrix4(tempObject.matrix);
       geometries.push(base);
     }
     
-    // Root beer barrels (wooden kegs)
-    for (let i = 0; i < 3; i++) {
-      const barrel = new THREE.CylinderGeometry(0.6, 0.6, 1.2, 16);
-      tempObject.position.set(offsetX + 6, 0.6, -8 + i * 1.5);
-      tempObject.rotation.z = Math.PI / 2;
-      tempObject.updateMatrix();
-      barrel.applyMatrix4(tempObject.matrix);
-      geometries.push(barrel);
+    // ===== TALL BOTTLE DISPLAY SHELVES (behind bar) =====
+    // Create a dramatic 4-tier shelf display
+    for (let shelf = 0; shelf < 4; shelf++) {
+      const shelfHeight = 1.8 + shelf * 1.2;
       
-      // Barrel bands (metal hoops)
-      for (let j = 0; j < 3; j++) {
-        const band = new THREE.TorusGeometry(0.62, 0.05, 8, 16);
-        tempObject.position.set(offsetX + 6 + (j - 1) * 0.4, 0.6, -8 + i * 1.5);
-        tempObject.rotation.y = Math.PI / 2;
+      // Shelf board
+      const shelfBoard = new THREE.BoxGeometry(6, 0.08, 0.5);
+      tempObject.position.set(offsetX, shelfHeight, -0.8);
+      tempObject.updateMatrix();
+      shelfBoard.applyMatrix4(tempObject.matrix);
+      geometries.push(shelfBoard);
+      
+      // Bottles on this shelf (varied positions)
+      for (let b = 0; b < 8; b++) {
+        const bottle = new THREE.CylinderGeometry(0.08, 0.08, 0.35, 8);
+        tempObject.position.set(
+          offsetX - 2.5 + b * 0.7,
+          shelfHeight + 0.22,
+          -0.8
+        );
         tempObject.updateMatrix();
-        band.applyMatrix4(tempObject.matrix);
-        geometries.push(band);
+        bottle.applyMatrix4(tempObject.matrix);
+        geometries.push(bottle);
+        
+        // Bottle cap
+        const cap = new THREE.CylinderGeometry(0.09, 0.09, 0.05, 8);
+        tempObject.position.set(
+          offsetX - 2.5 + b * 0.7,
+          shelfHeight + 0.42,
+          -0.8
+        );
+        tempObject.updateMatrix();
+        cap.applyMatrix4(tempObject.matrix);
+        geometries.push(cap);
       }
     }
     
-    tempObject.rotation.z = 0;
-    tempObject.rotation.y = 0;
+    // Shelf support pillars
+    for (const xPillar of [-3, 3]) {
+      const pillar = new THREE.BoxGeometry(0.15, 5, 0.15);
+      tempObject.position.set(offsetX + xPillar, 4.3, -0.8);
+      tempObject.updateMatrix();
+      pillar.applyMatrix4(tempObject.matrix);
+      geometries.push(pillar);
+    }
     
-    // Vintage soda fountain machine
-    const fountainBase = new THREE.BoxGeometry(1.5, 1.2, 0.8);
-    tempObject.position.set(offsetX + 2, 1.8, -7.5);
+    // ===== SODA FOUNTAIN MACHINE (on bar) =====
+    // Machine base
+    const fountainBase = new THREE.BoxGeometry(1.2, 0.8, 0.6);
+    tempObject.position.set(offsetX - 2, 1.6, 0);
     tempObject.updateMatrix();
     fountainBase.applyMatrix4(tempObject.matrix);
     geometries.push(fountainBase);
     
-    // Fountain taps (3 taps)
-    for (let i = 0; i < 3; i++) {
-      const tap = new THREE.CylinderGeometry(0.06, 0.08, 0.4, 8);
-      tempObject.position.set(offsetX + 2 + (i - 1) * 0.4, 2.2, -7);
-      tempObject.rotation.x = Math.PI / 4;
+    // Three taps
+    for (let tap = 0; tap < 3; tap++) {
+      const spout = new THREE.CylinderGeometry(0.04, 0.06, 0.3, 8);
+      tempObject.position.set(offsetX - 2.4 + tap * 0.4, 2.1, 0.1);
+      tempObject.rotation.x = Math.PI / 5;
       tempObject.updateMatrix();
-      tap.applyMatrix4(tempObject.matrix);
-      geometries.push(tap);
+      spout.applyMatrix4(tempObject.matrix);
+      geometries.push(spout);
     }
-    
     tempObject.rotation.x = 0;
     
-    // Review board on wall
-    const reviewBoard = new THREE.BoxGeometry(3, 2, 0.1);
-    tempObject.position.set(offsetX - 5, 2.5, -9.8);
+    // ===== CASH REGISTER (on bar) =====
+    const register = new THREE.BoxGeometry(0.4, 0.35, 0.35);
+    tempObject.position.set(offsetX + 2.5, 1.5, 0);
     tempObject.updateMatrix();
-    reviewBoard.applyMatrix4(tempObject.matrix);
-    geometries.push(reviewBoard);
+    register.applyMatrix4(tempObject.matrix);
+    geometries.push(register);
     
-    // Review board frame
-    const frameTop = new THREE.BoxGeometry(3.2, 0.1, 0.12);
-    tempObject.position.set(offsetX - 5, 3.5, -9.75);
-    tempObject.updateMatrix();
-    frameTop.applyMatrix4(tempObject.matrix);
-    geometries.push(frameTop);
-    
-    const frameBottom = new THREE.BoxGeometry(3.2, 0.1, 0.12);
-    tempObject.position.set(offsetX - 5, 1.5, -9.75);
-    tempObject.updateMatrix();
-    frameBottom.applyMatrix4(tempObject.matrix);
-    geometries.push(frameBottom);
-    
-    // Menu board
-    const menuBoard = new THREE.BoxGeometry(2, 1.5, 0.1);
-    tempObject.position.set(offsetX + 2, 3, -9.8);
-    tempObject.updateMatrix();
-    menuBoard.applyMatrix4(tempObject.matrix);
-    geometries.push(menuBoard);
-    
-    // Shelf behind bar for bottles
-    const shelf = new THREE.BoxGeometry(4, 0.1, 0.6);
-    tempObject.position.set(offsetX, 2, -8.5);
-    tempObject.updateMatrix();
-    shelf.applyMatrix4(tempObject.matrix);
-    geometries.push(shelf);
-    
-    // Vintage cash register on bar
-    const cashRegister = new THREE.BoxGeometry(0.5, 0.4, 0.5);
-    tempObject.position.set(offsetX - 2.5, 1.5, -7);
-    tempObject.updateMatrix();
-    cashRegister.applyMatrix4(tempObject.matrix);
-    geometries.push(cashRegister);
-    
-    // Cash register display
-    const display = new THREE.BoxGeometry(0.3, 0.15, 0.05);
-    tempObject.position.set(offsetX - 2.5, 1.75, -6.8);
+    // Register display
+    const display = new THREE.BoxGeometry(0.25, 0.12, 0.04);
+    tempObject.position.set(offsetX + 2.5, 1.72, 0.15);
     tempObject.rotation.x = -Math.PI / 6;
     tempObject.updateMatrix();
     display.applyMatrix4(tempObject.matrix);
     geometries.push(display);
-    
     tempObject.rotation.x = 0;
     
-    // Vintage root beer signs on walls
-    for (let i = 0; i < 3; i++) {
-      const sign = new THREE.BoxGeometry(1.5, 0.8, 0.05);
-      tempObject.position.set(offsetX - 4 + i * 4, 3.5, -9.8);
-      tempObject.updateMatrix();
-      sign.applyMatrix4(tempObject.matrix);
-      geometries.push(sign);
-    }
-    
-    // Napkin dispenser on bar
-    const napkinHolder = new THREE.BoxGeometry(0.25, 0.15, 0.2);
-    tempObject.position.set(offsetX + 2.5, 1.42, -7);
+    // ===== SMALL BAR DETAILS =====
+    // Napkin holder
+    const napkinHolder = new THREE.BoxGeometry(0.2, 0.12, 0.15);
+    tempObject.position.set(offsetX + 1, 1.35, 0.3);
     tempObject.updateMatrix();
     napkinHolder.applyMatrix4(tempObject.matrix);
     geometries.push(napkinHolder);
     
     // Straw dispenser
-    const strawHolder = new THREE.CylinderGeometry(0.08, 0.08, 0.3, 8);
-    tempObject.position.set(offsetX + 2, 1.5, -6.5);
+    const strawHolder = new THREE.CylinderGeometry(0.06, 0.06, 0.25, 8);
+    tempObject.position.set(offsetX - 0.5, 1.45, 0.3);
     tempObject.updateMatrix();
     strawHolder.applyMatrix4(tempObject.matrix);
     geometries.push(strawHolder);
     
-    // Ice cream scooper on counter
-    const scoop = new THREE.SphereGeometry(0.08, 8, 8);
-    tempObject.position.set(offsetX - 1.5, 1.4, -7);
+    // Menu holder stand
+    const menuStand = new THREE.BoxGeometry(0.3, 0.4, 0.08);
+    tempObject.position.set(offsetX, 1.55, 0.3);
+    tempObject.rotation.x = Math.PI / 12;
     tempObject.updateMatrix();
-    scoop.applyMatrix4(tempObject.matrix);
-    geometries.push(scoop);
-    
-    const scoopHandle = new THREE.CylinderGeometry(0.02, 0.02, 0.35, 6);
-    tempObject.position.set(offsetX - 1.5, 1.55, -7);
-    tempObject.rotation.z = Math.PI / 4;
-    tempObject.updateMatrix();
-    scoopHandle.applyMatrix4(tempObject.matrix);
-    geometries.push(scoopHandle);
-    
-    tempObject.rotation.z = 0;
-    
-    // Glasses rack above bar
-    const glassRack = new THREE.BoxGeometry(3, 0.05, 0.4);
-    tempObject.position.set(offsetX, 2.5, -8);
-    tempObject.updateMatrix();
-    glassRack.applyMatrix4(tempObject.matrix);
-    geometries.push(glassRack);
-    
-    // Hanging glasses
-    for (let i = 0; i < 8; i++) {
-      const glass = new THREE.CylinderGeometry(0.08, 0.06, 0.25, 8);
-      tempObject.position.set(offsetX - 1.5 + i * 0.4, 2.3, -8);
-      tempObject.updateMatrix();
-      glass.applyMatrix4(tempObject.matrix);
-      geometries.push(glass);
-    }
-    
-    // Coasters on bar
-    for (let i = 0; i < 6; i++) {
-      const coaster = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 16);
-      tempObject.position.set(offsetX - 2 + i * 0.8, 1.36, -7);
-      tempObject.rotation.x = Math.PI / 2;
-      tempObject.updateMatrix();
-      coaster.applyMatrix4(tempObject.matrix);
-      geometries.push(coaster);
-    }
-    
+    menuStand.applyMatrix4(tempObject.matrix);
+    geometries.push(menuStand);
     tempObject.rotation.x = 0;
     
-    // Vintage pendant lights above bar
-    for (let i = 0; i < 3; i++) {
-      const pendant = new THREE.ConeGeometry(0.25, 0.5, 8);
-      tempObject.position.set(offsetX - 2 + i * 2, 3.5, -5);
-      tempObject.rotation.x = Math.PI;
+    // ===== BARREL DECORATIONS (corners) =====
+    for (let i = 0; i < 2; i++) {
+      const barrel = new THREE.CylinderGeometry(0.5, 0.5, 1, 16);
+      tempObject.position.set(offsetX + (i === 0 ? -7 : 7), 0.5, -0.5 + i * 1);
+      tempObject.rotation.z = Math.PI / 2;
       tempObject.updateMatrix();
-      pendant.applyMatrix4(tempObject.matrix);
-      geometries.push(pendant);
+      barrel.applyMatrix4(tempObject.matrix);
+      geometries.push(barrel);
       
-      // Pendant cord
-      const cord = new THREE.CylinderGeometry(0.01, 0.01, 1, 6);
-      tempObject.position.set(offsetX - 2 + i * 2, 4.5, -5);
-      tempObject.updateMatrix();
-      cord.applyMatrix4(tempObject.matrix);
-      geometries.push(cord);
+      // Barrel bands
+      for (let band = 0; band < 3; band++) {
+        const bandRing = new THREE.TorusGeometry(0.52, 0.04, 8, 16);
+        tempObject.position.set(offsetX + (i === 0 ? -7 : 7), 0.5, -0.5 + i * 1);
+        tempObject.rotation.set(0, 0, Math.PI / 2);
+        tempObject.updateMatrix();
+        bandRing.applyMatrix4(tempObject.matrix);
+        geometries.push(bandRing);
+      }
     }
-    
-    tempObject.rotation.x = 0;
-    
-    // Menu chalkboard on wall
-    const chalkboard = new THREE.BoxGeometry(1.5, 2, 0.08);
-    tempObject.position.set(offsetX + 7, 2.5, -9.8);
-    tempObject.updateMatrix();
-    chalkboard.applyMatrix4(tempObject.matrix);
-    geometries.push(chalkboard);
-    
-    // Chalkboard frame
-    const chalkFrame = new THREE.BoxGeometry(1.7, 2.2, 0.05);
-    tempObject.position.set(offsetX + 7, 2.5, -9.75);
-    tempObject.updateMatrix();
-    chalkFrame.applyMatrix4(tempObject.matrix);
-    geometries.push(chalkFrame);
+    tempObject.rotation.set(0, 0, 0);
     
     return mergeGeometries(geometries);
   }, [offsetX]);
@@ -270,70 +213,71 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
         <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
-      {/* Root beer bottles on bar and shelf */}
-      <InstancedBottles offsetX={offsetX} count={18} color="#8b4513" />
+      {/* Pendant lights hanging from ceiling */}
+      {[-3, -1, 1, 3].map((x, i) => (
+        <group key={i} position={[offsetX + x, 8, 0.5]}>
+          {/* Light shade */}
+          <mesh>
+            <coneGeometry args={[0.25, 0.5, 8]} />
+            <meshMatcapMaterial matcap={matcap} color={colors.accent} />
+          </mesh>
+          {/* Light cord */}
+          <mesh position={[0, 0.75, 0]}>
+            <cylinderGeometry args={[0.01, 0.01, 1.5, 6]} />
+            <meshMatcapMaterial matcap={matcap} color="#333333" />
+          </mesh>
+        </group>
+      ))}
       
-      {/* Review cards on board */}
-      <group position={[offsetX - 5, 2.5, -9.75]}>
-        {Array.from({ length: 12 }, (_, i) => {
-          const col = i % 3;
-          const row = Math.floor(i / 3);
-          const x = -1 + col * 1;
-          const y = 0.6 - row * 0.4;
-          
-          return (
-            <group key={i}>
-              {/* Review card */}
-              <mesh position={[x, y, 0]}>
-                <planeGeometry args={[0.8, 0.3]} />
-                <meshMatcapMaterial matcap={matcap} color="#f5e6d3" />
-              </mesh>
-              
-              {/* Star rating (simple bars) */}
-              {Array.from({ length: 5 }, (_, j) => (
-                <mesh key={j} position={[x - 0.3 + j * 0.15, y, 0.01]}>
-                  <planeGeometry args={[0.1, 0.1]} />
-                  <meshMatcapMaterial matcap={matcap} color={j < (i % 5) + 1 ? '#ffd700' : '#cccccc'} />
-                </mesh>
-              ))}
-            </group>
-          );
-        })}
-      </group>
+      {/* Vintage signs on side walls - positioned to avoid z-fighting */}
+      {[
+        { x: -13, z: -0.8, y: 5.5 }, // Left wall, lower
+        { x: -13, z: 1, y: 5.5 },    // Left wall, upper
+        { x: 13, z: 1.2, y: 5.5 },   // Right wall, lower
+        { x: 13, z: -0.7, y: 6.5 },  // Right wall, upper
+      ].map((sign, i) => (
+        <mesh
+          key={i}
+          position={[offsetX + sign.x, sign.y, sign.z]}
+          rotation={[0, sign.x < 0 ? Math.PI / 2 : -Math.PI / 2, 0]}
+        >
+          <planeGeometry args={[1.2, 0.7]} />
+          <meshMatcapMaterial matcap={matcap} color={colors.picture} />
+        </mesh>
+      ))}
       
-      {/* Menu board content */}
-      <mesh position={[offsetX + 2, 3, -9.75]}>
-        <planeGeometry args={[1.9, 1.4]} />
-        <meshMatcapMaterial matcap={matcap} color="#2d2d2d" />
+      {/* Chalkboard menu on right wall */}
+      <mesh position={[offsetX + 13, 2.8, -0.3]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[2.2, 1.8]} />
+        <meshMatcapMaterial matcap={matcap} color="#1a1a1a" />
       </mesh>
       
-      {/* Menu items (simple lines) */}
-      <group position={[offsetX + 2, 3, -9.7]}>
-        {Array.from({ length: 8 }, (_, i) => (
-          <mesh key={i} position={[0, 0.5 - i * 0.15, 0]}>
-            <planeGeometry args={[1.6, 0.08]} />
+      {/* Menu text lines */}
+      <group position={[offsetX + 13, 2.8, -0.3]} rotation={[0, -Math.PI / 2, 0]}>
+        {Array.from({ length: 6 }, (_, i) => (
+          <mesh key={i} position={[0, 0.6 - i * 0.2, 0.02]}>
+            <planeGeometry args={[1.8, 0.1]} />
             <meshMatcapMaterial matcap={matcap} color="#d4a574" />
           </mesh>
         ))}
       </group>
       
-      {/* Checkered floor pattern */}
-      <group position={[offsetX, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        {Array.from({ length: 10 }, (_, row) =>
-          Array.from({ length: 8 }, (_, col) => {
-            const isLight = (row + col) % 2 === 0;
-            return (
-              <mesh
-                key={`${row}-${col}`}
-                position={[-5 + row, -4 + col, 0]}
-              >
-                <planeGeometry args={[1, 1]} />
-                <meshMatcapMaterial matcap={matcap} color={isLight ? '#f5f5dc' : '#8b7355'} />
-              </mesh>
-            );
-          })
-        )}
+      {/* Review cards on left wall */}
+      <group position={[offsetX - 13, 2.8, 0.2]} rotation={[0, Math.PI / 2, 0]}>
+        {Array.from({ length: 9 }, (_, i) => {
+          const col = i % 3;
+          const row = Math.floor(i / 3);
+          return (
+            <mesh key={i} position={[-0.9 + col * 0.9, 0.7 - row * 0.7, 0]}>
+              <planeGeometry args={[0.7, 0.5]} />
+              <meshMatcapMaterial matcap={matcap} color="#f5e6d3" />
+            </mesh>
+          );
+        })}
       </group>
+      
+      {/* Carbonation bubbles rising through the space */}
+      <Bubbles offsetX={offsetX} color="#cd853f" count={50} />
     </>
   );
 }

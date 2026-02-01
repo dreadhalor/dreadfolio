@@ -373,7 +373,7 @@ export function InstancedBottles({ offsetX, count = 12, color = '#8b4513' }: { o
     return Array.from({ length: count }, (_, i) => ({
       x: -5 + (i % 6) * 2,
       y: 1.2,
-      z: -7 + Math.floor(i / 6) * 2,
+      z: -1 + (i % 3) * 0.5, // Constrained to z=-1 to z=0 (3 rows, tighter spacing)
       scale: 0.8 + Math.random() * 0.4,
     }));
   }, [count]);
