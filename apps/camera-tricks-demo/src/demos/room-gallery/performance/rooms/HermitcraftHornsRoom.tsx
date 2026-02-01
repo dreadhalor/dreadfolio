@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { InstancedMonitors } from '../shared/InstancedComponents';
+import { getMatcapTexture } from '../shared/matcaps';
 
 interface HermitcraftHornsRoomProps {
   colors: RoomColors;
@@ -19,6 +20,8 @@ interface HermitcraftHornsRoomProps {
  * - Gaming setup with monitors
  */
 export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+  
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -211,7 +214,7 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Gaming monitors */}
@@ -224,7 +227,7 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
           return (
             <mesh key={i} position={[i * 0.4 - 2, height / 2, 0]}>
               <boxGeometry args={[0.3, height, 0.2]} />
-              <meshBasicMaterial color={colors.accent} />
+              <meshMatcapMaterial matcap={matcap} color={colors.accent} />
             </mesh>
           );
         })}
@@ -233,7 +236,7 @@ export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomPr
       {/* Rug */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

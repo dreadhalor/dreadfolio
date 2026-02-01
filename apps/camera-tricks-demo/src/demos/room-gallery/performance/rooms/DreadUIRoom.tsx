@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 
 interface DreadUIRoomProps {
   colors: RoomColors;
@@ -18,6 +19,8 @@ interface DreadUIRoomProps {
  * - Modern designer aesthetic
  */
 export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -215,7 +218,7 @@ export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Component shapes on pedestals */}
@@ -229,7 +232,7 @@ export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
             {shape.type === 'torus' && <torusGeometry args={shape.args as [number, number, number, number]} />}
             {shape.type === 'octahedron' && <octahedronGeometry args={shape.args as [number, number]} />}
             {shape.type === 'tetrahedron' && <tetrahedronGeometry args={shape.args as [number, number]} />}
-            <meshBasicMaterial color={shape.color} />
+            <meshMatcapMaterial matcap={matcap} color={shape.color} />
           </mesh>
         );
       })}
@@ -244,7 +247,7 @@ export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
           return (
             <mesh key={i} position={[-8 + col * 2, 2 + row * 1.5, 0.05]}>
               <planeGeometry args={[0.75, 0.75]} />
-              <meshBasicMaterial color={color} />
+              <meshMatcapMaterial matcap={matcap} color={color} />
             </mesh>
           );
         })}
@@ -253,13 +256,13 @@ export function DreadUIRoom({ colors, offsetX }: DreadUIRoomProps) {
       {/* Design grid overlay */}
       <mesh position={[offsetX + 5, 3, 9.75]}>
         <planeGeometry args={[3.8, 2.8]} />
-        <meshBasicMaterial color="#1a1a1a" wireframe={true} />
+        <meshMatcapMaterial matcap={matcap} color="#1a1a1a" wireframe={true} />
       </mesh>
       
       {/* Rug */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

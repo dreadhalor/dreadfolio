@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedMonitors, InstancedFloatingParticles } from '../shared/InstancedComponents';
 
 interface MatrixCamRoomProps {
@@ -19,6 +20,8 @@ interface MatrixCamRoomProps {
  * - Person silhouette cutouts
  */
 export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -193,7 +196,7 @@ export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Multiple monitors with green glow */}
@@ -204,7 +207,7 @@ export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
         {[-1.5, 0, 1.5].map((x, i) => (
           <mesh key={i} position={[x, 0, 0.06]}>
             <planeGeometry args={[1.3, 0.8]} />
-            <meshBasicMaterial color="#00ff41" />
+            <meshMatcapMaterial matcap={matcap} color="#00ff41" />
           </mesh>
         ))}
       </group>
@@ -217,7 +220,7 @@ export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
         {[-7, -4.5, -2, 0.5, 3, 5.5].map((x, i) => (
           <mesh key={i} position={[x, 0, 0]}>
             <planeGeometry args={[1.4, 1.9]} />
-            <meshBasicMaterial color="#003300" />
+            <meshMatcapMaterial matcap={matcap} color="#003300" />
           </mesh>
         ))}
       </group>
@@ -225,7 +228,7 @@ export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
       {/* Rug */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

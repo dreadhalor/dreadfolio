@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedGridCubes } from '../shared/InstancedComponents';
 
 interface SuDoneKuRoomProps {
@@ -20,6 +21,8 @@ interface SuDoneKuRoomProps {
  * - Clean, logical organization
  */
 export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -235,7 +238,7 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Sudoku grid cubes (main centerpiece) */}
@@ -258,7 +261,7 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
               ]}
             >
               <boxGeometry args={[0.5, 0.5, 0.5]} />
-              <meshBasicMaterial color={colors.accent} />
+              <meshMatcapMaterial matcap={matcap} color={colors.accent} />
             </mesh>
           );
         })}
@@ -267,7 +270,7 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
       {/* Whiteboard content (Sudoku strategy notes) */}
       <mesh position={[offsetX, 3, -9.75]}>
         <planeGeometry args={[3.8, 2.3]} />
-        <meshBasicMaterial color="#f0f0f0" />
+        <meshMatcapMaterial matcap={matcap} color="#f0f0f0" />
       </mesh>
       
       {/* Grid pattern on whiteboard */}
@@ -282,12 +285,12 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
               {/* Vertical line */}
               <mesh position={[pos, 0, 0]}>
                 <planeGeometry args={[isThick ? 0.03 : 0.01, 2]} />
-                <meshBasicMaterial color="#3b82f6" />
+                <meshMatcapMaterial matcap={matcap} color="#3b82f6" />
               </mesh>
               {/* Horizontal line */}
               <mesh position={[0, 0.5 - i * 0.333, 0]}>
                 <planeGeometry args={[2, isThick ? 0.03 : 0.01]} />
-                <meshBasicMaterial color="#3b82f6" />
+                <meshMatcapMaterial matcap={matcap} color="#3b82f6" />
               </mesh>
             </group>
           );
@@ -297,7 +300,7 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
       {/* Floor with grid pattern */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
       
       {/* Grid lines on floor */}
@@ -308,11 +311,11 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
             <group key={i}>
               <mesh position={[pos, 0, 0]}>
                 <planeGeometry args={[0.02, 8]} />
-                <meshBasicMaterial color="#2563eb" transparent opacity={0.3} />
+                <meshMatcapMaterial matcap={matcap} color="#2563eb" transparent opacity={0.3} />
               </mesh>
               <mesh position={[0, -4 + i, 0]}>
                 <planeGeometry args={[10, 0.02]} />
-                <meshBasicMaterial color="#2563eb" transparent opacity={0.3} />
+                <meshMatcapMaterial matcap={matcap} color="#2563eb" transparent opacity={0.3} />
               </mesh>
             </group>
           );

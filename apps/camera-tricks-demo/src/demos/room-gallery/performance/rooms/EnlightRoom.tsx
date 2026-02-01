@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 
 interface EnlightRoomProps {
   colors: RoomColors;
@@ -19,6 +20,8 @@ interface EnlightRoomProps {
  * - Dark walls with bright light rays
  */
 export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   const spotlightRef = useRef<THREE.Mesh>(null);
   const crystalRefs = useRef<THREE.Mesh[]>([]);
   
@@ -196,19 +199,19 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Main spotlight on tripod */}
       <mesh ref={spotlightRef} position={[offsetX + 5, 3, 4]}>
         <coneGeometry args={[0.4, 0.8, 8]} />
-        <meshBasicMaterial color="#ffffff" />
+        <meshMatcapMaterial matcap={matcap} color="#ffffff" />
       </mesh>
       
       {/* Spotlight beam (emissive) */}
       <mesh position={[offsetX + 5, 2, 4]} rotation={[-Math.PI / 4, 0, 0]}>
         <coneGeometry args={[2, 4, 8, 1, true]} />
-        <meshBasicMaterial color="#ff6b9d" transparent opacity={0.3} side={THREE.DoubleSide} />
+        <meshMatcapMaterial matcap={matcap} color="#ff6b9d" transparent opacity={0.3} side={THREE.DoubleSide} />
       </mesh>
       
       {/* Crystal prisms with pink glow */}
@@ -225,7 +228,7 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
           position={[offsetX + pos.x, 1.5, pos.z]}
         >
           <octahedronGeometry args={[0.6, 0]} />
-          <meshBasicMaterial color="#ff6b9d" />
+          <meshMatcapMaterial matcap={matcap} color="#ff6b9d" />
         </mesh>
       ))}
       
@@ -234,7 +237,7 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
         {[0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4].map((angle, i) => (
           <mesh key={i} rotation={[0, angle, 0]}>
             <planeGeometry args={[0.1, 4]} />
-            <meshBasicMaterial color="#ffffff" transparent opacity={0.2} side={THREE.DoubleSide} />
+            <meshMatcapMaterial matcap={matcap} color="#ffffff" transparent opacity={0.2} side={THREE.DoubleSide} />
           </mesh>
         ))}
       </group>
@@ -242,7 +245,7 @@ export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
       {/* Dark floor (represents black background) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color="#0a0a0a" />
+        <meshMatcapMaterial matcap={matcap} color="#0a0a0a" />
       </mesh>
     </>
   );

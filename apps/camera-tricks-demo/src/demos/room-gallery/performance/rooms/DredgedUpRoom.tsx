@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedCrates } from '../shared/InstancedComponents';
 
 interface DredgedUpRoomProps {
@@ -21,6 +22,8 @@ interface DredgedUpRoomProps {
  * - Weathered aesthetic
  */
 export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   const shipWheelRef = useRef<THREE.Mesh>(null);
   const fishRefs = useRef<THREE.Mesh[]>([]);
   
@@ -309,13 +312,13 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Ship wheel (animated) */}
       <mesh ref={shipWheelRef} position={[offsetX - 5, 3, -8]}>
         <torusGeometry args={[1, 0.12, 8, 16]} />
-        <meshBasicMaterial color={colors.accent} />
+        <meshMatcapMaterial matcap={matcap} color={colors.accent} />
       </mesh>
       
       {/* Hanging fish trophies */}
@@ -333,7 +336,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
           rotation={[0, Math.PI / 2, 0]}
         >
           <coneGeometry args={[0.2, 0.8, 8]} />
-          <meshBasicMaterial color="#4a5a3a" />
+          <meshMatcapMaterial matcap={matcap} color="#4a5a3a" />
         </mesh>
       ))}
       
@@ -342,7 +345,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
         <group key={i} position={[offsetX + x, 3.5, -9.5]}>
           <mesh position={[0, 0, 0.4]} rotation={[0, Math.PI / 4, 0]}>
             <coneGeometry args={[0.15, 0.3, 3]} />
-            <meshBasicMaterial color="#3a4a2a" />
+            <meshMatcapMaterial matcap={matcap} color="#3a4a2a" />
           </mesh>
         </group>
       ))}
@@ -351,7 +354,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
       {[0, 1, 2].map((i) => (
         <mesh key={i} position={[offsetX - 2 + i * 2, 3, 9.7]}>
           <circleGeometry args={[0.5, 16]} />
-          <meshBasicMaterial color="#1a4d2e" transparent opacity={0.7} />
+          <meshMatcapMaterial matcap={matcap} color="#1a4d2e" transparent opacity={0.7} />
         </mesh>
       ))}
       
@@ -361,7 +364,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
       {/* Navigation map on table */}
       <mesh position={[offsetX - 4, 0.85, 4]}>
         <planeGeometry args={[1.4, 1.1]} />
-        <meshBasicMaterial color="#d4c4a8" />
+        <meshMatcapMaterial matcap={matcap} color="#d4c4a8" />
       </mesh>
       
       {/* Map grid lines */}
@@ -372,11 +375,11 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
             <group key={i}>
               <mesh position={[pos, 0, 0]}>
                 <planeGeometry args={[0.01, 1]} />
-                <meshBasicMaterial color="#8b7355" />
+                <meshMatcapMaterial matcap={matcap} color="#8b7355" />
               </mesh>
               <mesh position={[0, pos, 0]}>
                 <planeGeometry args={[1.3, 0.01]} />
-                <meshBasicMaterial color="#8b7355" />
+                <meshMatcapMaterial matcap={matcap} color="#8b7355" />
               </mesh>
             </group>
           );
@@ -386,7 +389,7 @@ export function DredgedUpRoom({ colors, offsetX }: DredgedUpRoomProps) {
       {/* Weathered wooden floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

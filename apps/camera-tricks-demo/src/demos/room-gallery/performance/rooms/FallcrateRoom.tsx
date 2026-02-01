@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedCrates } from '../shared/InstancedComponents';
 
 interface FallcrateRoomProps {
@@ -21,6 +22,8 @@ interface FallcrateRoomProps {
  * - Clean, organized aesthetic
  */
 export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   const cloudRefs = useRef<THREE.Mesh[]>([]);
   
   // Animate floating clouds
@@ -241,7 +244,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Storage crates organized on floor */}
@@ -258,19 +261,19 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
           {/* Cloud made of spheres */}
           <mesh position={[0, 0, 0]}>
             <sphereGeometry args={[0.6, 16, 16]} />
-            <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+            <meshMatcapMaterial matcap={matcap} color="#ffffff" transparent opacity={0.8} />
           </mesh>
           <mesh position={[-0.5, 0.1, 0]}>
             <sphereGeometry args={[0.4, 16, 16]} />
-            <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+            <meshMatcapMaterial matcap={matcap} color="#ffffff" transparent opacity={0.8} />
           </mesh>
           <mesh position={[0.5, 0.1, 0]}>
             <sphereGeometry args={[0.5, 16, 16]} />
-            <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+            <meshMatcapMaterial matcap={matcap} color="#ffffff" transparent opacity={0.8} />
           </mesh>
           <mesh position={[0, 0.3, 0]}>
             <sphereGeometry args={[0.4, 16, 16]} />
-            <meshBasicMaterial color="#ffffff" transparent opacity={0.8} />
+            <meshMatcapMaterial matcap={matcap} color="#ffffff" transparent opacity={0.8} />
           </mesh>
         </group>
       ))}
@@ -287,7 +290,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
           return (
             <mesh key={i} position={[x, y, -7.7]}>
               <boxGeometry args={[0.6, 0.4, 0.1]} />
-              <meshBasicMaterial color={colors[pos]} />
+              <meshMatcapMaterial matcap={matcap} color={colors[pos]} />
             </mesh>
           );
         })}
@@ -298,7 +301,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
         {[0, 1, 2].map((i) => (
           <mesh key={i} position={[-7 + i * 1.2, 1, 0]}>
             <planeGeometry args={[0.6, 0.3]} />
-            <meshBasicMaterial color="#e5e7eb" />
+            <meshMatcapMaterial matcap={matcap} color="#e5e7eb" />
           </mesh>
         ))}
       </group>
@@ -306,7 +309,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       {/* Monitor screen showing file browser */}
       <mesh position={[offsetX - 3, 1.6, 5.05]}>
         <planeGeometry args={[1.4, 0.9]} />
-        <meshBasicMaterial color="#1a1a1a" />
+        <meshMatcapMaterial matcap={matcap} color="#1a1a1a" />
       </mesh>
       
       {/* File icons on screen (simple grid) */}
@@ -320,7 +323,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
           return (
             <mesh key={i} position={[x, y, 0]}>
               <planeGeometry args={[0.15, 0.15]} />
-              <meshBasicMaterial color="#0061fe" />
+              <meshMatcapMaterial matcap={matcap} color="#0061fe" />
             </mesh>
           );
         })}
@@ -329,7 +332,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       {/* Organization board with folder structure */}
       <mesh position={[offsetX, 2.5, 9.75]}>
         <planeGeometry args={[2.9, 2.4]} />
-        <meshBasicMaterial color="#f9fafb" />
+        <meshMatcapMaterial matcap={matcap} color="#f9fafb" />
       </mesh>
       
       {/* Folder tree visualization */}
@@ -341,7 +344,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
           return (
             <mesh key={i} position={[-1 + indent, y, 0]}>
               <planeGeometry args={[1.8 - indent * 2, 0.12]} />
-              <meshBasicMaterial color="#0061fe" />
+              <meshMatcapMaterial matcap={matcap} color="#0061fe" />
             </mesh>
           );
         })}
@@ -350,7 +353,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
       {/* Clean floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

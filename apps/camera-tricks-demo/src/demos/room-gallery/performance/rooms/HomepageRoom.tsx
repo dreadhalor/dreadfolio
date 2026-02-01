@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { InstancedFloatingParticles, InstancedFrames } from '../shared/InstancedComponents';
+import { getMatcapTexture } from '../shared/matcaps';
 
 interface HomepageRoomProps {
   colors: RoomColors;
@@ -21,6 +22,7 @@ interface HomepageRoomProps {
  */
 export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
   const logoRef = useRef<THREE.Mesh>(null);
+  const matcap = useMemo(() => getMatcapTexture(), []);
   
   // Rotate the logo
   useFrame((state) => {
@@ -178,13 +180,13 @@ export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Rotating 3D logo on podium */}
       <mesh ref={logoRef} position={[offsetX, 1.5, 0]}>
         <torusGeometry args={[0.6, 0.25, 16, 32]} />
-        <meshBasicMaterial color={colors.accent} />
+        <meshMatcapMaterial matcap={matcap} color={colors.accent} />
       </mesh>
       
       {/* RGB particle effects */}
@@ -196,7 +198,7 @@ export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
       {/* Rug/carpet */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

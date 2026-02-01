@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedNumberBlocks } from '../shared/InstancedComponents';
 
 interface MinesweeperRoomProps {
@@ -20,6 +21,8 @@ interface MinesweeperRoomProps {
  * - Retro beige PC tower
  */
 export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -231,13 +234,13 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* CRT monitor screen with minesweeper game glow */}
       <mesh position={[offsetX, 1.6, -5.61]}>
         <planeGeometry args={[1, 0.75]} />
-        <meshBasicMaterial color="#c0c0c0" />
+        <meshMatcapMaterial matcap={matcap} color="#c0c0c0" />
       </mesh>
       
       {/* Minesweeper number blocks scattered around room */}
@@ -253,7 +256,7 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
           return (
             <mesh key={i} position={[x, 0, z]}>
               <boxGeometry args={[1, 0.1, 1]} />
-              <meshBasicMaterial color="#c0c0c0" />
+              <meshMatcapMaterial matcap={matcap} color="#c0c0c0" />
             </mesh>
           );
         })}
@@ -263,18 +266,18 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
       <group position={[offsetX + 3, 0.5, 5.31]}>
         <mesh>
           <planeGeometry args={[0.6, 0.6]} />
-          <meshBasicMaterial color="#0061fe" />
+          <meshMatcapMaterial matcap={matcap} color="#0061fe" />
         </mesh>
         <mesh position={[0, 0, 0.01]}>
           <planeGeometry args={[0.4, 0.05]} />
-          <meshBasicMaterial color="#ffffff" />
+          <meshMatcapMaterial matcap={matcap} color="#ffffff" />
         </mesh>
       </group>
       
       {/* Retro carpet (with pattern) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

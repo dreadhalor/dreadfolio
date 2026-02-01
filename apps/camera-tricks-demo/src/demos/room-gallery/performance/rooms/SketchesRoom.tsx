@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedFloatingParticles } from '../shared/InstancedComponents';
 
 interface SketchesRoomProps {
@@ -20,6 +21,8 @@ interface SketchesRoomProps {
  * - Code snippets as wall art
  */
 export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   const shapeRefs = useRef<THREE.Mesh[]>([]);
   
   // Animate geometric art pieces
@@ -207,7 +210,7 @@ export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Rotating geometric art pieces */}
@@ -223,7 +226,7 @@ export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
           {shape.type === 'octahedron' && <octahedronGeometry args={shape.args as [number, number]} />}
           {shape.type === 'icosahedron' && <icosahedronGeometry args={shape.args as [number, number]} />}
           {shape.type === 'torusKnot' && <torusKnotGeometry args={shape.args as [number, number, number, number]} />}
-          <meshBasicMaterial color={shape.color} />
+          <meshMatcapMaterial matcap={matcap} color={shape.color} />
         </mesh>
       ))}
       
@@ -233,7 +236,7 @@ export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
       {/* Monitor screen glow */}
       <mesh position={[offsetX + 6, 1.7, -5.95]}>
         <planeGeometry args={[1.4, 0.9]} />
-        <meshBasicMaterial color="#ed225d" />
+        <meshMatcapMaterial matcap={matcap} color="#ed225d" />
       </mesh>
       
       {/* Code snippet text (simple colored rectangles representing code) */}
@@ -243,7 +246,7 @@ export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
             {Array.from({ length: 8 }, (_, j) => (
               <mesh key={j} position={[0, 0.5 - j * 0.12, 0.05]}>
                 <planeGeometry args={[1.3, 0.08]} />
-                <meshBasicMaterial color={new THREE.Color().setHSL(0.9, 0.3, 0.3 + (j % 3) * 0.1)} />
+                <meshMatcapMaterial matcap={matcap} color={new THREE.Color().setHSL(0.9, 0.3, 0.3 + (j % 3) * 0.1)} />
               </mesh>
             ))}
           </group>
@@ -253,7 +256,7 @@ export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
       {/* Black floor (like p5.js canvas background) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color="#1a1a1a" />
+        <meshMatcapMaterial matcap={matcap} color="#1a1a1a" />
       </mesh>
     </>
   );

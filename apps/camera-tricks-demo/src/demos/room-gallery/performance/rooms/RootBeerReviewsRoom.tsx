@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedBottles } from '../shared/InstancedComponents';
 
 interface RootBeerReviewsRoomProps {
@@ -21,6 +22,8 @@ interface RootBeerReviewsRoomProps {
  * - Checkered floor pattern
  */
 export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -264,7 +267,7 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Root beer bottles on bar and shelf */}
@@ -283,14 +286,14 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
               {/* Review card */}
               <mesh position={[x, y, 0]}>
                 <planeGeometry args={[0.8, 0.3]} />
-                <meshBasicMaterial color="#f5e6d3" />
+                <meshMatcapMaterial matcap={matcap} color="#f5e6d3" />
               </mesh>
               
               {/* Star rating (simple bars) */}
               {Array.from({ length: 5 }, (_, j) => (
                 <mesh key={j} position={[x - 0.3 + j * 0.15, y, 0.01]}>
                   <planeGeometry args={[0.1, 0.1]} />
-                  <meshBasicMaterial color={j < (i % 5) + 1 ? '#ffd700' : '#cccccc'} />
+                  <meshMatcapMaterial matcap={matcap} color={j < (i % 5) + 1 ? '#ffd700' : '#cccccc'} />
                 </mesh>
               ))}
             </group>
@@ -301,7 +304,7 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
       {/* Menu board content */}
       <mesh position={[offsetX + 2, 3, -9.75]}>
         <planeGeometry args={[1.9, 1.4]} />
-        <meshBasicMaterial color="#2d2d2d" />
+        <meshMatcapMaterial matcap={matcap} color="#2d2d2d" />
       </mesh>
       
       {/* Menu items (simple lines) */}
@@ -309,7 +312,7 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
         {Array.from({ length: 8 }, (_, i) => (
           <mesh key={i} position={[0, 0.5 - i * 0.15, 0]}>
             <planeGeometry args={[1.6, 0.08]} />
-            <meshBasicMaterial color="#d4a574" />
+            <meshMatcapMaterial matcap={matcap} color="#d4a574" />
           </mesh>
         ))}
       </group>
@@ -325,7 +328,7 @@ export function RootBeerReviewsRoom({ colors, offsetX }: RootBeerReviewsRoomProp
                 position={[-5 + row, -4 + col, 0]}
               >
                 <planeGeometry args={[1, 1]} />
-                <meshBasicMaterial color={isLight ? '#f5f5dc' : '#8b7355'} />
+                <meshMatcapMaterial matcap={matcap} color={isLight ? '#f5f5dc' : '#8b7355'} />
               </mesh>
             );
           })

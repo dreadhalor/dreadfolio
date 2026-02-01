@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedFrames } from '../shared/InstancedComponents';
 
 interface ShareMeRoomProps {
@@ -19,6 +20,8 @@ interface ShareMeRoomProps {
  * - Pinterest-style aesthetic
  */
 export function ShareMeRoom({ colors, offsetX }: ShareMeRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -210,7 +213,7 @@ export function ShareMeRoom({ colors, offsetX }: ShareMeRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Masonry-style photo frames on walls */}
@@ -227,7 +230,7 @@ export function ShareMeRoom({ colors, offsetX }: ShareMeRoomProps) {
           return (
             <mesh key={i} position={[offsetX + x, y, -9.5]} rotation={[0, 0, rotation]}>
               <planeGeometry args={[0.6, 0.7]} />
-              <meshBasicMaterial color={new THREE.Color().setHSL(Math.random(), 0.6, 0.7)} />
+              <meshMatcapMaterial matcap={matcap} color={new THREE.Color().setHSL(Math.random(), 0.6, 0.7)} />
             </mesh>
           );
         })}
@@ -236,7 +239,7 @@ export function ShareMeRoom({ colors, offsetX }: ShareMeRoomProps) {
       {/* Paint palette on table */}
       <mesh position={[offsetX + 4, 1.1, 5]}>
         <boxGeometry args={[0.8, 0.05, 0.6]} />
-        <meshBasicMaterial color="#8b7355" />
+        <meshMatcapMaterial matcap={matcap} color="#8b7355" />
       </mesh>
       
       {/* Paint blobs on palette */}
@@ -248,14 +251,14 @@ export function ShareMeRoom({ colors, offsetX }: ShareMeRoomProps) {
       ].map((paint, i) => (
         <mesh key={i} position={[offsetX + 4 + paint.x, 1.15, 5 + paint.z]}>
           <cylinderGeometry args={[0.1, 0.1, 0.05, 8]} />
-          <meshBasicMaterial color={paint.color} />
+          <meshMatcapMaterial matcap={matcap} color={paint.color} />
         </mesh>
       ))}
       
       {/* Rug */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 
 interface GifsterRoomProps {
   colors: RoomColors;
@@ -21,6 +22,8 @@ interface GifsterRoomProps {
  * - Playful, energetic vibe
  */
 export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   const reelRefs = useRef<THREE.Mesh[]>([]);
   const frameRefs = useRef<THREE.Mesh[]>([]);
   
@@ -248,7 +251,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Movie reels (spinning) */}
@@ -265,7 +268,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
           position={[offsetX + pos.x, pos.y, pos.z]}
         >
           <cylinderGeometry args={[0.6, 0.6, 0.15, 32]} />
-          <meshBasicMaterial color="#9333ea" />
+          <meshMatcapMaterial matcap={matcap} color="#9333ea" />
         </mesh>
       ))}
       
@@ -281,7 +284,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
             return (
               <mesh key={i} position={[Math.cos(angle) * 0.3, Math.sin(angle) * 0.3, 0]}>
                 <boxGeometry args={[0.1, 0.05, 0.1]} />
-                <meshBasicMaterial color="#7c3aed" />
+                <meshMatcapMaterial matcap={matcap} color="#7c3aed" />
               </mesh>
             );
           })}
@@ -301,7 +304,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
             position={[offsetX + Math.cos(angle) * radius, 1.5, Math.sin(angle) * radius]}
           >
             <boxGeometry args={[0.5, 0.5, 0.5]} />
-            <meshBasicMaterial color="#9333ea" />
+            <meshMatcapMaterial matcap={matcap} color="#9333ea" />
           </mesh>
         );
       })}
@@ -309,7 +312,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
       {/* TV screen with colorful display */}
       <mesh position={[offsetX + 2, 1.4, -7.61]}>
         <planeGeometry args={[1.5, 1]} />
-        <meshBasicMaterial color="#9333ea" />
+        <meshMatcapMaterial matcap={matcap} color="#9333ea" />
       </mesh>
       
       {/* TV static effect (small colored squares) */}
@@ -322,7 +325,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
           return (
             <mesh key={i} position={[x, y, 0]}>
               <planeGeometry args={[0.25, 0.2]} />
-              <meshBasicMaterial color={colors[i % colors.length]} />
+              <meshMatcapMaterial matcap={matcap} color={colors[i % colors.length]} />
             </mesh>
           );
         })}
@@ -341,7 +344,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
               position={[Math.cos(angle) * radius, height, Math.sin(angle) * radius]}
             >
               <sphereGeometry args={[0.1, 8, 8]} />
-              <meshBasicMaterial color="#fffacd" />
+              <meshMatcapMaterial matcap={matcap} color="#fffacd" />
             </mesh>
           );
         })}
@@ -352,7 +355,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
         {[0, 1].map((i) => (
           <mesh key={i} position={[offsetX, 0.1, -9 + i * 18]} rotation={[0, Math.PI / 2, 0]}>
             <boxGeometry args={[0.2, 0.1, 10]} />
-            <meshBasicMaterial color="#9333ea" />
+            <meshMatcapMaterial matcap={matcap} color="#9333ea" />
           </mesh>
         ))}
       </group>
@@ -360,7 +363,7 @@ export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
       {/* Floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
     </>
   );

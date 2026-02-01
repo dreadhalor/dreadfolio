@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
+import { getMatcapTexture } from '../shared/matcaps';
 import { InstancedGridCubes } from '../shared/InstancedComponents';
 
 interface PathfinderRoomProps {
@@ -20,6 +21,8 @@ interface PathfinderRoomProps {
  * - Modern academic aesthetic
  */
 export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
+  const matcap = useMemo(() => getMatcapTexture(), []);
+
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
@@ -200,7 +203,7 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
     <>
       {/* Static furniture */}
       <mesh geometry={mergedGeometry}>
-        <meshBasicMaterial color={colors.furniture} />
+        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
       {/* Grid cubes for visualization */}
@@ -210,14 +213,14 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
       {pathNodes.map((node, i) => (
         <mesh key={i} position={[offsetX + node.x, 0.8, node.z]}>
           <boxGeometry args={[0.8, 0.6, 0.8]} />
-          <meshBasicMaterial color={node.color} />
+          <meshMatcapMaterial matcap={matcap} color={node.color} />
         </mesh>
       ))}
       
       {/* Monitor screen showing grid */}
       <mesh position={[offsetX + 5, 1.8, -5.96]}>
         <planeGeometry args={[1.7, 1.1]} />
-        <meshBasicMaterial color="#1a1a1a" />
+        <meshMatcapMaterial matcap={matcap} color="#1a1a1a" />
       </mesh>
       
       {/* Grid on monitor screen */}
@@ -228,11 +231,11 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
             <group key={i}>
               <mesh position={[pos, 0, 0]}>
                 <planeGeometry args={[0.01, 1]} />
-                <meshBasicMaterial color="#6c757d" />
+                <meshMatcapMaterial matcap={matcap} color="#6c757d" />
               </mesh>
               <mesh position={[0, pos, 0]}>
                 <planeGeometry args={[1.6, 0.01]} />
-                <meshBasicMaterial color="#6c757d" />
+                <meshMatcapMaterial matcap={matcap} color="#6c757d" />
               </mesh>
             </group>
           );
@@ -242,7 +245,7 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
       {/* Whiteboard with flowchart */}
       <mesh position={[offsetX - 3, 2.5, -9.75]}>
         <planeGeometry args={[3.8, 2.8]} />
-        <meshBasicMaterial color="#f0f0f0" />
+        <meshMatcapMaterial matcap={matcap} color="#f0f0f0" />
       </mesh>
       
       {/* Flowchart nodes on whiteboard */}
@@ -250,21 +253,21 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
         {/* Start node */}
         <mesh position={[0, 1, 0]}>
           <circleGeometry args={[0.3, 16]} />
-          <meshBasicMaterial color="#22c55e" />
+          <meshMatcapMaterial matcap={matcap} color="#22c55e" />
         </mesh>
         
         {/* Process nodes */}
         {[-0.8, 0, 0.8].map((x, i) => (
           <mesh key={i} position={[x, 0, 0]}>
             <planeGeometry args={[0.5, 0.4]} />
-            <meshBasicMaterial color="#6c757d" />
+            <meshMatcapMaterial matcap={matcap} color="#6c757d" />
           </mesh>
         ))}
         
         {/* End node */}
         <mesh position={[0, -1, 0]}>
           <circleGeometry args={[0.3, 16]} />
-          <meshBasicMaterial color="#ef4444" />
+          <meshMatcapMaterial matcap={matcap} color="#ef4444" />
         </mesh>
         
         {/* Connecting arrows */}
@@ -278,7 +281,7 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
             rotation={[0, 0, Math.PI / 2]}
           >
             <planeGeometry args={[0.02, Math.abs(arrow.to[1] - arrow.from[1])]} />
-            <meshBasicMaterial color="#6c757d" />
+            <meshMatcapMaterial matcap={matcap} color="#6c757d" />
           </mesh>
         ))}
       </group>
@@ -286,7 +289,7 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
       {/* Floor with grid pattern */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
         <planeGeometry args={[10, 8]} />
-        <meshBasicMaterial color={colors.rug} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
       </mesh>
       
       {/* Grid lines on floor */}
@@ -297,12 +300,12 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
             <group key={i}>
               <mesh position={[pos, 0, 0]}>
                 <planeGeometry args={[0.01, 8]} />
-                <meshBasicMaterial color="#4a5568" transparent opacity={0.3} />
+                <meshMatcapMaterial matcap={matcap} color="#4a5568" transparent opacity={0.3} />
               </mesh>
               {i < 17 && (
                 <mesh position={[0, -4 + i * 0.5, 0]}>
                   <planeGeometry args={[10, 0.01]} />
-                  <meshBasicMaterial color="#4a5568" transparent opacity={0.3} />
+                  <meshMatcapMaterial matcap={matcap} color="#4a5568" transparent opacity={0.3} />
                 </mesh>
               )}
             </group>
