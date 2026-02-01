@@ -66,12 +66,17 @@ export function createMatcapTexture(): THREE.DataTexture {
   return texture;
 }
 
-// Cached matcap instance
-let cachedMatcap: THREE.DataTexture | null = null;
+/**
+ * Singleton matcap texture instance
+ * 
+ * Generated once at module load time and reused across all components.
+ * This avoids unnecessary function calls and useMemo wrapping.
+ */
+export const MATCAP_TEXTURE = createMatcapTexture();
 
+/**
+ * @deprecated Use MATCAP_TEXTURE directly or useMatcap() hook instead
+ */
 export function getMatcapTexture(): THREE.DataTexture {
-  if (!cachedMatcap) {
-    cachedMatcap = createMatcapTexture();
-  }
-  return cachedMatcap;
+  return MATCAP_TEXTURE;
 }

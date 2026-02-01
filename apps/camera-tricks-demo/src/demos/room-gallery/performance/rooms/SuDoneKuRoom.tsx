@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedGridCubes } from '../shared/InstancedComponents';
 
 interface SuDoneKuRoomProps {
@@ -21,7 +21,7 @@ interface SuDoneKuRoomProps {
  * - Clean, logical organization
  */
 export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {

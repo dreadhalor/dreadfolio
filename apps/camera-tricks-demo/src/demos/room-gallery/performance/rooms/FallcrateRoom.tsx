@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedCrates } from '../shared/InstancedComponents';
 
 interface FallcrateRoomProps {
@@ -22,7 +22,7 @@ interface FallcrateRoomProps {
  * - Clean, organized aesthetic
  */
 export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   const cloudRefs = useRef<THREE.Mesh[]>([]);
   

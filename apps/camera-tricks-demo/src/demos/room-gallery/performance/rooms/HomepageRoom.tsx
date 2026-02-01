@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { InstancedFloatingParticles, InstancedFrames } from '../shared/InstancedComponents';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 
 interface HomepageRoomProps {
   colors: RoomColors;
@@ -22,7 +22,7 @@ interface HomepageRoomProps {
  */
 export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
   const logoRef = useRef<THREE.Mesh>(null);
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   
   // Rotate the logo
   useFrame((state) => {

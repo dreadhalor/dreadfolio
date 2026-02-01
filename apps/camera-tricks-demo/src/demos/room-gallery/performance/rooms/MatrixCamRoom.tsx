@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedMonitors, InstancedFloatingParticles } from '../shared/InstancedComponents';
 
 interface MatrixCamRoomProps {
@@ -20,7 +20,7 @@ interface MatrixCamRoomProps {
  * - Person silhouette cutouts
  */
 export function MatrixCamRoom({ colors, offsetX }: MatrixCamRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {

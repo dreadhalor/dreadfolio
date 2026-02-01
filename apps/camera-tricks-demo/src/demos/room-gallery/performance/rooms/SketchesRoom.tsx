@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedFloatingParticles } from '../shared/InstancedComponents';
 
 interface SketchesRoomProps {
@@ -21,7 +21,7 @@ interface SketchesRoomProps {
  * - Code snippets as wall art
  */
 export function SketchesRoom({ colors, offsetX }: SketchesRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   const shapeRefs = useRef<THREE.Mesh[]>([]);
   

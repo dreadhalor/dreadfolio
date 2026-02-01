@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedNumberBlocks } from '../shared/InstancedComponents';
 
 interface MinesweeperRoomProps {
@@ -21,7 +21,7 @@ interface MinesweeperRoomProps {
  * - Retro beige PC tower
  */
 export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {

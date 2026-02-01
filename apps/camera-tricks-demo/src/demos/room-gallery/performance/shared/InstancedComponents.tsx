@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getMatcapTexture } from './matcaps';
+import { useMatcap } from './useMatcap';
 
 /**
  * Shared Instanced Components
@@ -69,7 +69,7 @@ const LAMP_CONFIG = {
  * Instanced Books - 36 books with gentle floating animation
  */
 export function InstancedBooks({ offsetX }: { offsetX: number }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const colors = ['#8b0000', '#00008b', '#228b22', '#ffd700', '#ff4500', '#9400d3'];
   
@@ -143,7 +143,7 @@ export function InstancedBooks({ offsetX }: { offsetX: number }) {
  * Instanced Plants - Cylindrical plants with swaying animation
  */
 export function InstancedPlants({ offsetX, count = 18 }: { offsetX: number; count?: number }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   // Memoize plant positions, radii, and scales so they don't change
@@ -216,7 +216,7 @@ export function InstancedPlants({ offsetX, count = 18 }: { offsetX: number; coun
  * Instanced Picture Frames - Wall decorations
  */
 export function InstancedFrames({ offsetX, count = 8 }: { offsetX: number; count?: number }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   useEffect(() => {
@@ -254,7 +254,7 @@ export function InstancedFrames({ offsetX, count = 8 }: { offsetX: number; count
  * Instanced Lamps - Cone-shaped ceiling lights
  */
 export function InstancedLamps({ offsetX, count = 6 }: { offsetX: number; count?: number }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   useEffect(() => {
@@ -286,7 +286,7 @@ export function InstancedLamps({ offsetX, count = 6 }: { offsetX: number; count?
  * Rotating Planets - Animated planetary system for Observatory
  */
 export function RotatingPlanets({ offsetX }: { offsetX: number }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const group = useRef<THREE.Group>(null);
   
   useFrame((state) => {
@@ -320,7 +320,7 @@ export function RotatingPlanets({ offsetX }: { offsetX: number }) {
  * Instanced Monitors - Computer monitors for tech-themed rooms
  */
 export function InstancedMonitors({ offsetX, count = 3, color = '#1a1a1a' }: { offsetX: number; count?: number; color?: string }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   const positions = useMemo(() => {
@@ -366,7 +366,7 @@ export function InstancedMonitors({ offsetX, count = 3, color = '#1a1a1a' }: { o
  * Instanced Bottles - Soda bottles for Root Beer Reviews
  */
 export function InstancedBottles({ offsetX, count = 12, color = '#8b4513' }: { offsetX: number; count?: number; color?: string }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   const positions = useMemo(() => {
@@ -415,7 +415,7 @@ export function InstancedBottles({ offsetX, count = 12, color = '#8b4513' }: { o
  * Instanced Crates - Storage boxes for Fallcrate and DredgedUp
  */
 export function InstancedCrates({ offsetX, count = 9, color = '#8b7355' }: { offsetX: number; count?: number; color?: string }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   const positions = useMemo(() => {
@@ -461,7 +461,7 @@ export function InstancedCrates({ offsetX, count = 9, color = '#8b7355' }: { off
  * Instanced Grid Cubes - For Pathfinder and Su-Done-Ku
  */
 export function InstancedGridCubes({ offsetX, count = 9, gridSize = 3, color = '#4a90e2' }: { offsetX: number; count?: number; gridSize?: number; color?: string }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   useEffect(() => {
@@ -508,7 +508,7 @@ export function InstancedGridCubes({ offsetX, count = 9, gridSize = 3, color = '
  * Instanced Floating Particles - For Matrix-Cam, Steering Text, p5.js
  */
 export function InstancedFloatingParticles({ offsetX, count = 30, color = '#00ff41', speed = 0.5 }: { offsetX: number; count?: number; color?: string; speed?: number }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   const particleData = useMemo(() => {
@@ -565,7 +565,7 @@ export function InstancedFloatingParticles({ offsetX, count = 30, color = '#00ff
  * Instanced Number Blocks - For Minesweeper and Su-Done-Ku
  */
 export function InstancedNumberBlocks({ offsetX, count = 9, color = '#c0c0c0' }: { offsetX: number; count?: number; color?: string }) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
   const positions = useMemo(() => {

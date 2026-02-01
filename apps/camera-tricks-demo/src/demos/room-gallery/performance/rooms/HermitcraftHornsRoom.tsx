@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { InstancedMonitors } from '../shared/InstancedComponents';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 
 interface HermitcraftHornsRoomProps {
   colors: RoomColors;
@@ -20,7 +20,7 @@ interface HermitcraftHornsRoomProps {
  * - Gaming setup with monitors
  */
 export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
   
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {

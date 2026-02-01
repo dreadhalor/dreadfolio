@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedFrames } from '../shared/InstancedComponents';
 
 interface ShareMeRoomProps {
@@ -20,7 +20,7 @@ interface ShareMeRoomProps {
  * - Pinterest-style aesthetic
  */
 export function ShareMeRoom({ colors, offsetX }: ShareMeRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   // Merge all static decorations into single geometry
   const mergedGeometry = useMemo(() => {

@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 import { InstancedFloatingParticles } from '../shared/InstancedComponents';
 
 interface SteeringTextRoomProps {
@@ -22,7 +22,7 @@ interface SteeringTextRoomProps {
  * - Orange glow effects
  */
 export function SteeringTextRoom({ colors, offsetX }: SteeringTextRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   const trailRefs = useRef<THREE.Mesh[]>([]);
   

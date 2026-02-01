@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { getMatcapTexture } from '../shared/matcaps';
+import { useMatcap } from '../shared/useMatcap';
 
 interface GifsterRoomProps {
   colors: RoomColors;
@@ -22,7 +22,7 @@ interface GifsterRoomProps {
  * - Playful, energetic vibe
  */
 export function GifsterRoom({ colors, offsetX }: GifsterRoomProps) {
-  const matcap = useMemo(() => getMatcapTexture(), []);
+  const matcap = useMatcap();
 
   const reelRefs = useRef<THREE.Mesh[]>([]);
   const frameRefs = useRef<THREE.Mesh[]>([]);
