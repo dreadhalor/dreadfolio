@@ -12,32 +12,19 @@ import { FPSDisplay } from './components/ui/FPSDisplay';
 import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { RoomHeader } from './components/ui/RoomHeader';
 import { RoomMinimap } from './components/ui/RoomMinimap';
+import { AppLoader } from './components/ui/AppLoader';
+
+// Providers
+import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
 
 // Types
 import { RoomData } from './types';
 
 /**
- * Room Gallery - Split Camera Edition
- * 
- * A 3D room gallery with split-screen view and independent camera control for 60 FPS performance
- * 
- * Architecture:
- * - Fifteen cameras moving together, spaced 10 units apart (one per app)
- * - 15 app-themed rooms at 20-unit intervals (0, 20, 40, ... 280)
- * - No camera wrapping - straightforward 1:1 mapping
- * - Each room themed with vibrant colors from portfolio apps
- * - Simple camera system: camera[i] covers room[i]
- * - Smooth parallax transitions between all apps
- * - Type-safe props throughout
- * - Automatic room-component mapping via registry
- * - Performance optimizations: merged geometry, instanced meshes, minimal lights
- * 
- * Performance targets:
- * - 60 FPS steady (even with dual rendering)
- * - < 50 draw calls per viewport
- * - < 16.67ms frame time
+ * Room Gallery - Inner component with access to AppLoader context
  */
-export default function RoomGallery() {
+function RoomGalleryInner() {
+  const { state: appLoaderState } = useAppLoader();
   // Performance monitoring
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
@@ -60,17 +47,17 @@ export default function RoomGallery() {
   const targetRoomProgressRef = useRef(0);
   const lastMouseXRef = useRef(0);
 
-  // Drag handlers (room-space)
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  // Drag handlers (room-space) - works for both mouse and touch
+  const handlePointerDown = useCallback((clientX: number) => {
     setIsDragging(true);
-    lastMouseXRef.current = e.clientX;
+    lastMouseXRef.current = clientX;
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  const handlePointerMove = useCallback((clientX: number) => {
     if (!isDragging) return;
     
-    const deltaX = e.clientX - lastMouseXRef.current;
-    lastMouseXRef.current = e.clientX;
+    const deltaX = clientX - lastMouseXRef.current;
+    lastMouseXRef.current = clientX;
     
     // Update room progress (negative because dragging right moves left)
     const newProgress = targetRoomProgressRef.current - (deltaX * DRAG_SENSITIVITY);
@@ -80,20 +67,60 @@ export default function RoomGallery() {
     setRoomProgress(clampedProgress);
   }, [isDragging]);
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  // Attach mouse event listeners
+  // Mouse event handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    handlePointerDown(e.clientX);
+  }, [handlePointerDown]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    handlePointerMove(e.clientX);
+  }, [handlePointerMove]);
+
+  const handleMouseUp = useCallback(() => {
+    handlePointerUp();
+  }, [handlePointerUp]);
+
+  // Touch event handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      e.preventDefault(); // Prevent iOS scrolling/zooming
+      handlePointerDown(e.touches[0].clientX);
+    }
+  }, [handlePointerDown]);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 1) {
+      e.preventDefault(); // Prevent iOS scrolling
+      handlePointerMove(e.touches[0].clientX);
+    }
+  }, [handlePointerMove]);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    e.preventDefault(); // Prevent iOS delayed click events
+    handlePointerUp();
+  }, [handlePointerUp]);
+
+  // Attach mouse and touch event listeners
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+    // passive: false is critical for preventDefault() to work on iOS
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd, { passive: false });
+    window.addEventListener('touchcancel', handleTouchEnd, { passive: false }); // iOS can cancel touches
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [handleMouseMove, handleMouseUp]);
+  }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   // Fast travel to specific room (simple!)
   const moveTo = useCallback((room: RoomData) => {
@@ -118,19 +145,25 @@ export default function RoomGallery() {
         touchAction: 'none', // Disable native touch scrolling/zooming
         WebkitUserSelect: 'none', // Disable text selection on iOS
         WebkitTouchCallout: 'none', // Disable callout on iOS
-      }}
+        WebkitTapHighlightColor: 'transparent', // Remove tap highlight on iOS
+      } as React.CSSProperties}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
+      onContextMenu={(e) => e.preventDefault()} // Prevent long-press context menu on iOS
     >
       <Canvas
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
-        frameloop="always" // Always render for animations/particles
+        frameloop={appLoaderState === 'app-active' ? 'never' : 'always'} // Pause rendering when app is active
         gl={{ 
           antialias: false, // Disabled for 20-30% performance gain
           powerPreference: "high-performance",
           autoClear: false, // We manually clear in SplitCameraRenderer
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
+        style={{
+          visibility: appLoaderState === 'app-active' ? 'hidden' : 'visible',
+        }}
       >
         <Scene 
           onFpsUpdate={setFps}
@@ -145,15 +178,22 @@ export default function RoomGallery() {
       </Canvas>
 
       {/* UI Overlays */}
-      <RoomHeader currentRoom={currentRoom} />
-      <FPSDisplay fps={fps} />
-      <DrawCallDisplay calls={drawCalls} />
-      <RoomMinimap 
-        rooms={ROOMS} 
-        currentRoom={currentRoom}
-        roomProgress={roomProgress}
-        onRoomClick={moveTo}
-      />
+      {appLoaderState === 'idle' && (
+        <>
+          <RoomHeader currentRoom={currentRoom} />
+          <FPSDisplay fps={fps} />
+          <DrawCallDisplay calls={drawCalls} />
+          <RoomMinimap 
+            rooms={ROOMS} 
+            currentRoom={currentRoom}
+            roomProgress={roomProgress}
+            onRoomClick={moveTo}
+          />
+        </>
+      )}
+      
+      {/* App Loader Overlay */}
+      <AppLoader />
       
       {/* Debug Overlay */}
       {debugInfo && (
@@ -191,5 +231,35 @@ export default function RoomGallery() {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Room Gallery - Split Camera Edition
+ * 
+ * A 3D room gallery with split-screen view and independent camera control for 60 FPS performance
+ * 
+ * Architecture:
+ * - Fifteen cameras moving together, spaced 10 units apart (one per app)
+ * - 15 app-themed rooms at 20-unit intervals (0, 20, 40, ... 280)
+ * - No camera wrapping - straightforward 1:1 mapping
+ * - Each room themed with vibrant colors from portfolio apps
+ * - Simple camera system: camera[i] covers room[i]
+ * - Smooth parallax transitions between all apps
+ * - Type-safe props throughout
+ * - Automatic room-component mapping via registry
+ * - Performance optimizations: merged geometry, instanced meshes, minimal lights
+ * - Interactive portals: Click to load apps in fullscreen iframes
+ * 
+ * Performance targets:
+ * - 60 FPS steady (even with dual rendering)
+ * - < 50 draw calls per viewport
+ * - < 16.67ms frame time
+ */
+export default function RoomGallery() {
+  return (
+    <AppLoaderProvider>
+      <RoomGalleryInner />
+    </AppLoaderProvider>
   );
 }

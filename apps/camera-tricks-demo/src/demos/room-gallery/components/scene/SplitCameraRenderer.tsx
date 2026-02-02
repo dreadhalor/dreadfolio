@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
-import { useThree, useFrame } from '@react-three/fiber';
+import { useThree, useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
   CAMERA_HEIGHT,
@@ -10,6 +10,9 @@ import {
   NUM_ROOMS,
 } from '../../config/constants';
 import { calculateCameraPosition } from '../../utils/cameraCalculations';
+import { ROOMS } from '../../config/rooms';
+import { createPortalGroup } from './AppPortal';
+import { useAppLoader } from '../../providers/AppLoaderContext';
 
 interface SplitCameraRendererProps {
   targetRoomProgressRef: React.RefObject<number>;
@@ -76,8 +79,12 @@ export function SplitCameraRenderer({
   onRoomProgressUpdate,
   onDebugUpdate,
 }: SplitCameraRendererProps) {
-  const { gl, scene, size } = useThree();
+  const { gl, scene, size, set } = useThree();
   const currentRoomProgressRef = useRef(0);
+  const { loadApp } = useAppLoader();
+  
+  // Raycaster for portal click detection
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
 
   // Create cameras once (one per room)
   const cameras = useMemo(() => {
@@ -96,6 +103,24 @@ export function SplitCameraRenderer({
         // At roomProgress=0: camera[0]=0, camera[1]=CAMERA_SPACING, camera[2]=CAMERA_SPACING*2, etc.
         const initialX = calculateCameraPosition(i, 0, CAMERA_SPACING);
         camera.position.set(initialX, CAMERA_HEIGHT, CAMERA_Z_POSITION);
+        
+        // Create portal for this camera using utility function
+        const room = ROOMS[i];
+        const portal = createPortalGroup(room);
+        
+        // Add portal group as child of camera (stays centered in viewport)
+        camera.add(portal.group);
+        
+        // Store references for animation, click handling, and cleanup
+        (camera as any).portalGroup = portal.group;
+        (camera as any).roomData = room;
+        (camera as any).portalAnimData = portal.animData;
+        (camera as any).portalDispose = portal.dispose;
+        
+        if (i === 0) {
+          console.log('✅ Ornate portals added to all', NUM_ROOMS, 'cameras');
+        }
+        
         return camera;
       });
     } catch (error) {
@@ -107,17 +132,76 @@ export function SplitCameraRenderer({
   // Note: Aspect ratio and view offsets are now calculated per-frame
   // since they depend on the dynamic split ratio
 
-  // Cleanup cameras on unmount
+  // Add cameras to scene + setup click handlers
   useEffect(() => {
-    return () => {
-      // Dispose of all cameras to prevent memory leaks
-      cameras.forEach((cam) => cam.clear());
+    console.log('Adding', cameras.length, 'cameras to scene');
+    cameras.forEach((cam) => scene.add(cam));
+    
+    // Click handler for portal detection
+    const handleClick = (event: MouseEvent) => {
+      // Get normalized device coordinates
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      // Get current active camera (use the one taking up more screen space)
+      const currentProgress = currentRoomProgressRef.current;
+      const currentRoom = Math.floor(currentProgress);
+      const transitionProgress = currentProgress - currentRoom;
+      
+      // Determine which camera we're primarily looking through
+      const primaryCameraIndex = transitionProgress < 0.5 
+        ? Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom))
+        : Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom + 1));
+      
+      const activeCamera = cameras[primaryCameraIndex];
+      
+      // Cast ray from camera
+      raycaster.setFromCamera(new THREE.Vector2(x, y), activeCamera);
+      
+      // Get portal group and check for intersections
+      const portalGroup = (activeCamera as any).portalGroup;
+      const roomData = (activeCamera as any).roomData;
+      
+      if (portalGroup && roomData) {
+        const intersects = raycaster.intersectObjects(portalGroup.children, true);
+        
+        if (intersects.length > 0) {
+          console.log('🎯 Portal clicked!', roomData.name);
+          
+          // Load the app
+          if (roomData.appUrl) {
+            loadApp(roomData.appUrl, roomData.name);
+          } else {
+            console.warn('No app URL for', roomData.name);
+          }
+        }
+      }
     };
-  }, [cameras]);
+    
+    gl.domElement.addEventListener('click', handleClick);
+    
+    return () => {
+      gl.domElement.removeEventListener('click', handleClick);
+      
+      // Clean up: dispose portals, remove cameras
+      cameras.forEach((cam) => {
+        // Dispose portal resources
+        const portalDispose = (cam as any).portalDispose;
+        if (portalDispose) {
+          portalDispose();
+        }
+        
+        scene.remove(cam);
+        cam.clear();
+      });
+    };
+  }, [cameras, scene, gl, raycaster, loadApp]);
 
-  // Animation loop: smooth room progress updates
-  useFrame(() => {
+  // Animation loop: smooth room progress updates + portal animations
+  useFrame((state) => {
     const targetProgress = targetRoomProgressRef.current ?? 0;
+    const time = state.clock.elapsedTime;
 
     // Smooth lerp to target room progress
     currentRoomProgressRef.current +=
@@ -127,9 +211,7 @@ export function SplitCameraRenderer({
     // Notify parent of room progress for UI updates
     onRoomProgressUpdate(currentProgress);
 
-    // UPDATE ALL CAMERA POSITIONS based on roomProgress
-    // Uses centralized calculation utility for consistency
-    // Cameras spaced CAMERA_SPACING apart, offset by roomProgress * CAMERA_SPACING
+    // UPDATE ALL CAMERA POSITIONS
     for (let i = 0; i < cameras.length; i++) {
       cameras[i].position.x = calculateCameraPosition(
         i,
@@ -139,13 +221,10 @@ export function SplitCameraRenderer({
     }
 
     // DERIVED VALUES from roomProgress:
-
     // Which room are we in? (0-14)
     const currentRoom = Math.floor(currentProgress);
-
     // Transition progress within current room (0.0-1.0)
     const transitionProgress = currentProgress - currentRoom;
-
     // Which two cameras to show (clamp to valid range)
     const leftCameraIndex = Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom));
     const rightCameraIndex = Math.max(
@@ -153,8 +232,72 @@ export function SplitCameraRenderer({
       Math.min(NUM_ROOMS - 1, currentRoom + 1),
     );
 
+    // OPTIMIZE: Only animate portals for visible cameras (87% reduction!)
+    const visibleCameraIndices = [leftCameraIndex];
+    if (rightCameraIndex !== leftCameraIndex) {
+      visibleCameraIndices.push(rightCameraIndex);
+    }
+
+    for (const i of visibleCameraIndices) {
+      const animData = (cameras[i] as any).portalAnimData;
+      if (animData) {
+        // Pulse outer glow (breathing effect)
+        animData.outerGlow.material.opacity = 0.3 + Math.sin(time * 2) * 0.15;
+        animData.outerGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.05);
+        
+        // Pulse inner glow (faster, more intense)
+        animData.innerGlow.material.opacity = 0.95 + Math.sin(time * 3) * 0.05;
+        
+        // Rotate portal surface (hypnotic swirl)
+        animData.portalSurface.rotation.z = time * 0.5;
+        
+        // Rotate 3D torus frame (slow rotation for depth)
+        if (animData.torus) {
+          animData.torus.rotation.x = time * 0.2;
+        }
+        
+        // Animate orbital particles (rotate around portal)
+        if (animData.orbitalParticles) {
+          for (const particle of animData.orbitalParticles) {
+            const baseAngle = (particle as any).orbitAngle;
+            const radius = (particle as any).orbitRadius;
+            const newAngle = baseAngle + time * 0.5; // Orbit speed
+            particle.position.x = Math.cos(newAngle) * radius;
+            particle.position.y = Math.sin(newAngle) * radius;
+          }
+        }
+        
+        // Animate swirl particles (floating + slow rotation)
+        if (animData.swirlParticles) {
+          for (const particle of animData.swirlParticles) {
+            const baseAngle = (particle as any).baseAngle;
+            const baseRadius = (particle as any).baseRadius;
+            const baseDepth = (particle as any).baseDepth;
+            const floatOffset = (particle as any).floatOffset;
+            
+            // Slow spiral inward/outward
+            const newAngle = baseAngle + time * 0.8;
+            const radiusWave = baseRadius + Math.sin(time * 1.5 + floatOffset) * 0.2;
+            
+            // Gentle floating motion
+            const floatZ = baseDepth + Math.sin(time * 2 + floatOffset) * 0.15;
+            
+            particle.position.x = Math.cos(newAngle) * radiusWave;
+            particle.position.y = Math.sin(newAngle) * radiusWave;
+            particle.position.z = floatZ;
+            
+            // Pulse opacity for extra mystique
+            particle.material.opacity = 0.7 + Math.sin(time * 3 + floatOffset) * 0.2;
+          }
+        }
+      }
+    }
+
     const leftCamera = cameras[leftCameraIndex];
     const rightCamera = cameras[rightCameraIndex];
+    
+    // Update R3F's active camera for other systems (e.g., raycasting, effects)
+    set({ camera: leftCamera });
 
     // Calculate dynamic viewport widths based on transition progress
     const leftWidth = (1 - transitionProgress) * size.width;
