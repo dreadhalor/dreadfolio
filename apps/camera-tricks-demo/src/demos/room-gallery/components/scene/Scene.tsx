@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import * as THREE from 'three';
 import { ROOMS, getDividingWallColors } from '../../config/rooms';
 import { getThemeColors } from '../../config/themes';
 import { getRoomComponent } from '../../config/registry';
@@ -30,17 +31,30 @@ interface SceneProps {
  * - Procedurally generates vibrant colors from app themes
  */
 export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: SceneProps) {
-  // Determine current room for fog color
-  const currentRoomIndex = Math.round(roomProgress);
-  const currentRoom = ROOMS[Math.max(0, Math.min(currentRoomIndex, ROOMS.length - 1))];
-  const currentColors = getThemeColors(currentRoom.theme);
-  
-  // Calculate fog color based on current room's wall color
-  // Memoized to avoid recalculation on every render
-  const fogColor = useMemo(
-    () => calculateFogColor(currentColors.wall),
-    [currentColors.wall]
-  );
+  // Calculate blended fog color based on both visible rooms during transitions
+  // This creates smooth fog transitions during split-screen camera blending
+  const fogColor = useMemo(() => {
+    const leftCameraIndex = Math.floor(roomProgress);
+    const rightCameraIndex = Math.ceil(roomProgress);
+    const blendFactor = roomProgress - leftCameraIndex;
+    
+    // Get both rooms (clamp to valid indices)
+    const leftRoom = ROOMS[Math.max(0, Math.min(leftCameraIndex, ROOMS.length - 1))];
+    const rightRoom = ROOMS[Math.max(0, Math.min(rightCameraIndex, ROOMS.length - 1))];
+    
+    // Calculate fog color for each room
+    const leftFogColor = leftRoom.theme === 'home' 
+      ? '#0a0a0a' 
+      : calculateFogColor(getThemeColors(leftRoom.theme).backWall);
+    const rightFogColor = rightRoom.theme === 'home' 
+      ? '#0a0a0a' 
+      : calculateFogColor(getThemeColors(rightRoom.theme).backWall);
+    
+    // Blend the two fog colors based on transition progress
+    const leftColor = new THREE.Color(leftFogColor);
+    const rightColor = new THREE.Color(rightFogColor);
+    return leftColor.lerp(rightColor, blendFactor).getHexString();
+  }, [roomProgress]);
   
   return (
     <>
@@ -48,7 +62,7 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: ScenePro
       <DrawCallMonitor onUpdate={onDrawCallsUpdate} />
       
       <SceneLighting />
-      <AtmosphericFog color={fogColor} />
+      <AtmosphericFog color={`#${fogColor}`} />
 
       {/* Render all rooms */}
       {ROOMS.map((room, index) => {
@@ -57,6 +71,9 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: ScenePro
 
         // Get theme colors (works for both original and app-specific themes)
         const colors = getThemeColors(room.theme);
+        
+        // Disable fog for Homepage to prevent color bleeding
+        const disableFog = room.theme === 'home';
 
         return (
           <group key={room.offsetX}>
@@ -65,6 +82,7 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: ScenePro
               colors={colors}
               isFirst={index === 0}
               isLast={index === ROOMS.length - 1}
+              disableFog={disableFog}
             />
             {RoomDecorations && (
               <RoomDecorations colors={colors} offsetX={room.offsetX} />

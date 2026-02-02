@@ -54,8 +54,20 @@ export const generateAppRoomColors = (appColor: string): RoomColors => {
  * Colors are dynamically generated from each app's primary color
  */
 export const ROOM_THEMES: Record<RoomTheme, RoomColors> = {
-  // App-specific themes (all generated from app colors)
-  'home': generateAppRoomColors('#4a90e2'),
+  // Homepage gets a custom dark theme to accentuate RGB spheres
+  'home': {
+    floor: '#2a2a2a',       // Visible dark floor
+    ceiling: '#353535',     // Slightly lighter ceiling for visibility
+    backWall: '#303030',    // Visible dark back wall
+    sideWalls: '#303030',   // Visible dark side walls
+    rug: '#1a1a1a',         // Darker accent
+    pedestal1: '#404040',   // Medium dark accent
+    pedestal2: '#404040',   // Medium dark accent
+    picture: '#3a3a3a',     // Medium dark accent
+    light: '#3a3a3a',       // Medium dark accent
+    accent: '#404040',      // Medium dark accent
+    furniture: '#353535',   // Visible dark furniture
+  },
   'hermitcraft-horns': generateAppRoomColors('#6b9fff'),
   'enlight': generateAppRoomColors('#ff6b9d'),
   'dredged-up': generateAppRoomColors('#1a4d2e'),

@@ -15,7 +15,7 @@ export const PORTFOLIO_APPS: AppData[] = [
   {
     id: 'home',
     name: 'Homepage',
-    color: '#4a90e2', // Vibrant blue
+    color: '#303030', // Dark gray to match room theme
     description: "Scott Hetrick's official portfolio homepage.",
     url: '/home',
   },

@@ -21,7 +21,12 @@ const SHARED_GEOMETRIES = {
  */
 export function createPortalGroup(room: RoomData) {
   const portalGroup = new THREE.Group();
-  const portalColor = new THREE.Color(room.color);
+  
+  // Special RGB theme for Homepage portal
+  const isHomepage = room.theme === 'home';
+  const portalColor = isHomepage 
+    ? new THREE.Color('#ffffff') // White/bright for Homepage
+    : new THREE.Color(room.color);
 
   // Track materials for disposal
   const materials: THREE.Material[] = [];
@@ -31,7 +36,7 @@ export function createPortalGroup(room: RoomData) {
   // Outer glow ring (flat, large, faint)
   const outerGlowMaterial = new THREE.MeshBasicMaterial({
     color: portalColor,
-    opacity: 0.3,
+    opacity: isHomepage ? 0.5 : 0.3, // Brighter for Homepage
     transparent: true,
     side: THREE.DoubleSide,
   });
@@ -53,7 +58,7 @@ export function createPortalGroup(room: RoomData) {
   // 3D Torus ring (main portal frame - thick and dimensional)
   const torusMaterial = new THREE.MeshBasicMaterial({
     color: portalColor,
-    opacity: 0.8,
+    opacity: isHomepage ? 0.9 : 0.8, // Brighter for Homepage
     transparent: true,
   });
   materials.push(torusMaterial);
@@ -63,7 +68,7 @@ export function createPortalGroup(room: RoomData) {
   // Inner glow ring (bright, intense, flat)
   const innerGlowMaterial = new THREE.MeshBasicMaterial({
     color: portalColor,
-    opacity: 0.95,
+    opacity: isHomepage ? 1.0 : 0.95, // Full brightness for Homepage
     transparent: true,
     side: THREE.DoubleSide,
   });
@@ -74,14 +79,21 @@ export function createPortalGroup(room: RoomData) {
   // === DECORATIVE ELEMENTS ===
 
   // Orbital particles (20 spheres that will rotate around the portal)
+  // For Homepage, use RGB colors; otherwise use room color
   const particleCount = 20;
-  const particleMaterial = new THREE.MeshBasicMaterial({
-    color: portalColor,
-  });
-  materials.push(particleMaterial);
-  
   const orbitalParticles: THREE.Mesh[] = [];
+  
   for (let i = 0; i < particleCount; i++) {
+    // RGB rainbow effect for Homepage portal particles
+    const particleColor = isHomepage 
+      ? new THREE.Color().setHSL(i / particleCount, 1.0, 0.6)
+      : portalColor;
+    
+    const particleMaterial = new THREE.MeshBasicMaterial({
+      color: particleColor,
+    });
+    materials.push(particleMaterial);
+    
     const particle = new THREE.Mesh(SHARED_GEOMETRIES.orbitalParticle, particleMaterial);
     const angle = (i / particleCount) * Math.PI * 2;
     const radius = 2.3;
@@ -94,12 +106,17 @@ export function createPortalGroup(room: RoomData) {
   }
 
   // Corner ornaments (4 tetrahedrons at cardinal points)
-  const ornamentMaterial = new THREE.MeshBasicMaterial({
-    color: portalColor,
-  });
-  materials.push(ornamentMaterial);
+  // RGB colors for Homepage, room color otherwise
+  const ornamentColors = isHomepage 
+    ? ['#FF0040', '#00FF40', '#0040FF', '#FFFF00'] // RGB + Yellow
+    : [portalColor, portalColor, portalColor, portalColor];
 
-  [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach((angle) => {
+  [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach((angle, idx) => {
+    const ornamentMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(ornamentColors[idx]),
+    });
+    materials.push(ornamentMaterial);
+    
     const ornament = new THREE.Mesh(SHARED_GEOMETRIES.ornament, ornamentMaterial);
     const distance = 2.6;
     ornament.position.set(

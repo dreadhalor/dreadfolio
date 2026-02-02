@@ -3,140 +3,107 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { InstancedFloatingParticles, InstancedFrames } from '../shared/InstancedComponents';
-import { useMatcap } from '../shared/useMatcap';
+import { InstancedFloatingParticles } from '../shared/InstancedComponents';
 
 interface HomepageRoomProps {
   colors: RoomColors;
   offsetX: number;
 }
 
+// RGB color palette for glowing spheres
+const COLORS = [
+  '#FF0040', // Red
+  '#00FF40', // Green
+  '#0040FF', // Blue
+  '#FF00FF', // Magenta
+  '#00FFFF', // Cyan
+  '#FFFF00', // Yellow
+  '#FF8800', // Orange
+];
+
 /**
- * Homepage Room - Tech Showroom
+ * Homepage Room - Glassmorphic Design
  * 
  * Features:
- * - Central rotating logo podium
- * - Floating holographic screens
- * - RGB particle effects
- * - Tech aesthetic with blue accent
+ * - Floating glowing RGB spheres with additive blending
+ * - Color blending when spheres overlap (red + green = yellow, etc.)
+ * - Translucent glassmorphic panels
+ * - Minimal geometry for 60 FPS performance
+ * - Calming, smooth floating animations
  */
 export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
-  const logoRef = useRef<THREE.Mesh>(null);
-  const matcap = useMatcap();
+  // Refs for each floating sphere
+  const sphereRefs = useRef<(THREE.Mesh | null)[]>([]);
   
-  // Rotate the logo
+  // Sphere configuration - spread out across the room
+  const spheres = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) => ({
+        color: COLORS[i % COLORS.length],
+        radius: 0.8 + Math.random() * 0.7, // Varied sizes (0.8 - 1.5)
+        phase: Math.random() * Math.PI * 2, // Random starting phase
+        speed: 0.15 + Math.random() * 0.25, // Different speeds (0.15 - 0.4)
+        orbitRadius: 4 + Math.random() * 4, // Large orbit size (4 - 8) for spread
+        verticalOffset: 1.5 + Math.random() * 1.5, // Varied height centers (1.5 - 3)
+        depthPhase: Math.random() * Math.PI * 2, // Independent Z-axis phase
+      })),
+    []
+  );
+  
+  // Smooth floating animation - spread across room volume
   useFrame((state) => {
-    if (logoRef.current) {
-      logoRef.current.rotation.y = state.clock.elapsedTime * 0.5;
-      logoRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.2;
-    }
+    const time = state.clock.elapsedTime;
+    sphereRefs.current.forEach((ref, i) => {
+      if (!ref) return;
+      const sphere = spheres[i];
+      // Wide 3D floating motion across entire room
+      ref.position.x =
+        offsetX +
+        Math.cos(time * sphere.speed + sphere.phase) * sphere.orbitRadius;
+      ref.position.y = 
+        sphere.verticalOffset + 
+        Math.sin(time * sphere.speed * 0.8 + sphere.phase) * 1.2;
+      ref.position.z =
+        Math.sin(time * sphere.speed + sphere.depthPhase) * sphere.orbitRadius * 0.8;
+    });
   });
   
-  // Merge all static decorations into single geometry
+  // Merged static geometry for glassmorphic panels and base
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
     const tempObject = new THREE.Object3D();
     
-    // Central podium with details
-    const podium = new THREE.CylinderGeometry(1, 1.2, 0.8, 8);
-    tempObject.position.set(offsetX, 0.4, 0);
-    tempObject.updateMatrix();
-    podium.applyMatrix4(tempObject.matrix);
-    geometries.push(podium);
-    
-    // Podium accent rings
-    for (let i = 0; i < 3; i++) {
-      const ring = new THREE.TorusGeometry(1.1 + i * 0.15, 0.03, 8, 16);
-      tempObject.position.set(offsetX, 0.3 + i * 0.25, 0);
-      tempObject.rotation.x = Math.PI / 2;
-      tempObject.updateMatrix();
-      ring.applyMatrix4(tempObject.matrix);
-      geometries.push(ring);
-    }
-    
-    tempObject.rotation.x = 0;
-    
-    // Display screens (3 floating around the room)
-    for (let i = 0; i < 3; i++) {
-      const screen = new THREE.BoxGeometry(2, 1.5, 0.1);
-      const angle = (i / 3) * Math.PI * 2;
-      const radius = 6;
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * radius, 
-        2.5, 
-        Math.sin(angle) * radius
-      );
-      tempObject.rotation.y = -angle;
-      tempObject.updateMatrix();
-      screen.applyMatrix4(tempObject.matrix);
-      geometries.push(screen);
-      
-      // Screen frames
-      const frame = new THREE.BoxGeometry(2.2, 1.7, 0.05);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * radius, 
-        2.5, 
-        Math.sin(angle) * radius - 0.08
-      );
-      tempObject.rotation.y = -angle;
-      tempObject.updateMatrix();
-      frame.applyMatrix4(tempObject.matrix);
-      geometries.push(frame);
-      
-      // Light rings around screens
-      const lightRing = new THREE.TorusGeometry(1.2, 0.05, 8, 16);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * radius, 
-        2.5, 
-        Math.sin(angle) * radius
-      );
-      tempObject.rotation.y = -angle + Math.PI / 2;
-      tempObject.updateMatrix();
-      lightRing.applyMatrix4(tempObject.matrix);
-      geometries.push(lightRing);
-    }
-    
-    tempObject.rotation.y = 0;
-    
-    // Tech platform/stage with steps
-    const platform = new THREE.CylinderGeometry(4, 4.5, 0.2, 16);
+    // Circular base platform (low-poly)
+    const platform = new THREE.CylinderGeometry(5, 5.5, 0.2, 16);
     tempObject.position.set(offsetX, 0.1, 0);
     tempObject.updateMatrix();
     platform.applyMatrix4(tempObject.matrix);
     geometries.push(platform);
     
-    // Platform steps (3 levels)
-    for (let i = 0; i < 3; i++) {
-      const step = new THREE.CylinderGeometry(5 + i * 0.5, 5.5 + i * 0.5, 0.1, 16);
-      tempObject.position.set(offsetX, 0.05 - i * 0.15, 0);
+    // Static RGB orbs positioned in front area
+    // Portal is at (0, 0.5, -5) so we position orbs around it
+    const staticOrbPositions = [
+      { x: -5, y: 2.5, z: -1, radius: 0.6 },
+      { x: 5, y: 3, z: -2, radius: 0.7 },
+      { x: -3, y: 3.8, z: 1, radius: 0.5 },
+      { x: 3, y: 2.2, z: 0, radius: 0.65 },
+      { x: 0, y: 4, z: 2, radius: 0.55 },
+      { x: -6, y: 3.5, z: -3, radius: 0.6 },
+      { x: 6, y: 2.8, z: 1, radius: 0.7 },
+    ];
+    
+    staticOrbPositions.forEach(({ x, y, z, radius }) => {
+      const orb = new THREE.SphereGeometry(radius, 16, 16);
+      tempObject.position.set(offsetX + x, y, z);
       tempObject.updateMatrix();
-      step.applyMatrix4(tempObject.matrix);
-      geometries.push(step);
-    }
+      orb.applyMatrix4(tempObject.matrix);
+      geometries.push(orb);
+    });
     
-    // Tech panels on walls (hexagonal)
-    for (let i = 0; i < 12; i++) {
-      const angle = (i / 12) * Math.PI * 2;
-      const panel = new THREE.CylinderGeometry(0.4, 0.4, 0.05, 6);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * 8.5,
-        2 + Math.sin(i * 0.5) * 0.5,
-        Math.sin(angle) * 8.5
-      );
-      tempObject.rotation.x = Math.PI / 2;
-      tempObject.rotation.z = angle;
-      tempObject.updateMatrix();
-      panel.applyMatrix4(tempObject.matrix);
-      geometries.push(panel);
-    }
-    
-    tempObject.rotation.x = 0;
-    tempObject.rotation.z = 0;
-    
-    // Floor grid pattern
+    // Subtle floor grid pattern (5x5 tiles)
     for (let i = -2; i <= 2; i++) {
       for (let j = -2; j <= 2; j++) {
-        if (Math.abs(i) + Math.abs(j) > 2) continue; // Skip corners
+        if (Math.abs(i) + Math.abs(j) > 3) continue; // Skip far corners
         const gridTile = new THREE.BoxGeometry(1.8, 0.02, 1.8);
         tempObject.position.set(offsetX + i * 2, 0.02, j * 2);
         tempObject.updateMatrix();
@@ -145,32 +112,14 @@ export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
       }
     }
     
-    // Ceiling light fixtures
-    for (let i = 0; i < 4; i++) {
-      const angle = (i / 4) * Math.PI * 2;
-      const fixture = new THREE.CylinderGeometry(0.3, 0.4, 0.3, 8);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * 4,
-        4.8,
-        Math.sin(angle) * 4
-      );
+    // Ceiling accent rings (3 concentric rings)
+    for (let i = 0; i < 3; i++) {
+      const ring = new THREE.TorusGeometry(2 + i * 1.5, 0.05, 8, 32);
+      tempObject.position.set(offsetX, 4.8, 0);
+      tempObject.rotation.x = Math.PI / 2;
       tempObject.updateMatrix();
-      fixture.applyMatrix4(tempObject.matrix);
-      geometries.push(fixture);
-    }
-    
-    // Data cables/conduits along walls
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      const conduit = new THREE.BoxGeometry(0.1, 3, 0.1);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * 9,
-        2,
-        Math.sin(angle) * 9
-      );
-      tempObject.updateMatrix();
-      conduit.applyMatrix4(tempObject.matrix);
-      geometries.push(conduit);
+      ring.applyMatrix4(tempObject.matrix);
+      geometries.push(ring);
     }
     
     return mergeGeometries(geometries);
@@ -178,27 +127,43 @@ export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
   
   return (
     <>
-      {/* Static furniture */}
+      {/* Static RGB orbs and base structures */}
       <mesh geometry={mergedGeometry}>
-        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
+        <meshBasicMaterial 
+          color="#888888" 
+          opacity={0.6} 
+          transparent 
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
       </mesh>
       
-      {/* Rotating 3D logo on podium */}
-      <mesh ref={logoRef} position={[offsetX, 1.5, 0]}>
-        <torusGeometry args={[0.6, 0.25, 16, 32]} />
-        <meshMatcapMaterial matcap={matcap} color={colors.accent} />
-      </mesh>
+      {/* Floating RGB spheres with additive blending */}
+      {spheres.map((sphere, i) => (
+        <mesh key={i} ref={(el) => (sphereRefs.current[i] = el)}>
+          <sphereGeometry args={[sphere.radius, 32, 32]} />
+          <meshBasicMaterial
+            color={sphere.color}
+            transparent
+            opacity={0.8}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
       
-      {/* RGB particle effects */}
-      <InstancedFloatingParticles offsetX={offsetX} count={25} color="#4a90e2" speed={0.3} />
+      {/* Small ambient particles for depth */}
+      <InstancedFloatingParticles
+        offsetX={offsetX}
+        count={10}
+        color="#ffffff"
+        speed={0.2}
+      />
       
-      {/* Project thumbnail frames */}
-      <InstancedFrames offsetX={offsetX} count={6} />
-      
-      {/* Rug/carpet */}
+      {/* Floor rug/carpet for visual grounding */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
-        <planeGeometry args={[10, 8]} />
-        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
+        <circleGeometry args={[4, 32]} />
+        <meshBasicMaterial color={colors.rug} opacity={0.3} transparent />
       </mesh>
     </>
   );
