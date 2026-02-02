@@ -18,6 +18,7 @@ import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { RoomHeader } from './components/ui/RoomHeader';
 import { RoomMinimap } from './components/ui/RoomMinimap';
 import { AppLoader } from './components/ui/AppLoader';
+import { PortalScreenshotOverlay } from './components/ui/PortalScreenshotOverlay';
 
 // Providers
 import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
@@ -169,15 +170,20 @@ function RoomGalleryInner() {
       <Canvas
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
-        frameloop={appLoaderState === 'app-active' ? 'never' : 'always'} // Pause rendering when app is active
+        frameloop={appLoaderState === 'app-active' ? 'never' : 'always'} // Pause rendering when app is fullscreen
         gl={{ 
           antialias: false, // Disabled for 20-30% performance gain
           powerPreference: "high-performance",
           autoClear: false, // We manually clear in SplitCameraRenderer
+          alpha: true, // Enable transparency for punch-through
+          premultipliedAlpha: false,
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
         style={{
           visibility: appLoaderState === 'app-active' ? 'hidden' : 'visible',
+          position: 'relative',
+          zIndex: appLoaderState === 'minimizing' ? 10 : 'auto',
+          background: 'transparent',
         }}
       >
         <Scene 
@@ -192,8 +198,13 @@ function RoomGalleryInner() {
         />
       </Canvas>
 
-      {/* UI Overlays */}
-      {appLoaderState === 'idle' && (
+      {/* Portal screenshot overlay - fades in during minimize */}
+      {appLoaderState === 'minimizing' && (
+        <PortalScreenshotOverlay />
+      )}
+
+      {/* UI Overlays - show when idle, minimizing, or when app is minimized */}
+      {(appLoaderState === 'idle' || appLoaderState === 'minimizing' || appLoaderState === 'minimized') && (
         <>
           <RoomHeader currentRoom={currentRoom} />
           <FPSDisplay fps={fps} />
@@ -204,6 +215,44 @@ function RoomGalleryInner() {
             roomProgress={roomProgress}
             onRoomClick={moveTo}
           />
+          
+          {/* Show indicator when app is minimizing or minimized */}
+          {(appLoaderState === 'minimizing' || appLoaderState === 'minimized') && (
+            <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(0, 0, 0, 0.85)',
+              color: '#fff',
+              padding: '12px 24px',
+              borderRadius: '24px',
+              fontSize: '14px',
+              fontWeight: '600',
+              zIndex: 1000,
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+              <span style={{
+                width: '8px',
+                height: '8px',
+                background: '#4ade80',
+                borderRadius: '50%',
+                animation: 'pulse 2s ease-in-out infinite',
+              }} />
+              <span>App running in background - Click portal to restore</span>
+              <style>{`
+                @keyframes pulse {
+                  0%, 100% { opacity: 1; }
+                  50% { opacity: 0.5; }
+                }
+              `}</style>
+            </div>
+          )}
         </>
       )}
       

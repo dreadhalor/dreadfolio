@@ -161,7 +161,7 @@ export function SplitCameraRenderer({
   onRoomProgressUpdate,
   onDebugUpdate,
 }: SplitCameraRendererProps) {
-  const { gl, scene, size, set } = useThree();
+  const { gl, scene, size, set, camera: activeCamera } = useThree();
   const currentRoomProgressRef = useRef(0);
   const { loadApp, state: appLoaderState } = useAppLoader();
   
@@ -258,8 +258,8 @@ export function SplitCameraRenderer({
         return; // This was a drag, not a click
       }
       
-      // Race condition guard: don't allow clicks if already loading
-      if (appLoaderState !== 'idle') {
+      // Race condition guard: only allow clicks when idle, minimizing, or minimized
+      if (appLoaderState !== 'idle' && appLoaderState !== 'minimizing' && appLoaderState !== 'minimized') {
         return;
       }
       
@@ -367,27 +367,74 @@ export function SplitCameraRenderer({
     };
   }, [cameras, scene, gl, raycaster]);
 
-  // Reset portal zoom when app closes (only the active portal)
+  // Reset portal zoom when app closes, minimizes, or is minimizing (only the active portal)
   useEffect(() => {
-    if (appLoaderState === 'idle' && activePortalRef.current !== null) {
+    if ((appLoaderState === 'idle' || appLoaderState === 'minimizing' || appLoaderState === 'minimized') && activePortalRef.current !== null) {
       const camera = cameras[activePortalRef.current] as ExtendedCamera;
-      const { portalZoomState, portalAnimData } = camera;
+      const { portalZoomState, portalAnimData, portalGroup } = camera;
       
       if (portalZoomState) {
         portalZoomState.isZooming = true;
         portalZoomState.targetZ = PORTAL_DEFAULT_Z;
+        
+        // When minimizing starts, initialize screenshot overlay position/scale
+        // Iframe stays fullscreen, only screenshot moves with portal
+        if (appLoaderState === 'minimizing' && portalGroup) {
+          const currentDistance = Math.abs(portalZoomState.currentZ);
+          
+          // PROJECT PORTAL TO SCREEN COORDINATES
+          const portalWorldPos = new THREE.Vector3();
+          portalGroup.getWorldPosition(portalWorldPos);
+          const portalScreenPos = portalWorldPos.clone().project(camera);
+          
+          // Convert to pixel coordinates
+          const canvas = gl.domElement;
+          const screenX = (portalScreenPos.x * 0.5 + 0.5) * canvas.clientWidth;
+          const screenY = (-portalScreenPos.y * 0.5 + 0.5) * canvas.clientHeight;
+          
+          // Calculate portal's actual screen size
+          // Scale up 2.0x to ensure rectangular div fully covers circular portal
+          const portalMeshHeight = 2.0;
+          const fov = camera.fov * (Math.PI / 180);
+          const apparentHeight = (portalMeshHeight / currentDistance) * (canvas.clientHeight / (2 * Math.tan(fov / 2)));
+          const initialScale = (apparentHeight / canvas.clientHeight) * 2.0;
+          
+          // Initialize screenshot overlay (starts transparent)
+          const screenshotImg = (window as any).__portalScreenshotImg;
+          if (screenshotImg) {
+            screenshotImg.style.left = `${screenX}px`;
+            screenshotImg.style.top = `${screenY}px`;
+            screenshotImg.style.opacity = '0';
+            screenshotImg.style.transform = `translate(-50%, -50%) scale(${initialScale})`;
+          }
+        }
       }
       
       // Reset portal surface color when returning
       if (portalAnimData?.portalSurface?.material) {
         const material = portalAnimData.portalSurface.material as THREE.MeshBasicMaterial;
         material.color.setRGB(1, 1, 1); // White = shows full texture
+        
+        // During minimize, punch hole to see iframe (screenshot is HTML overlay, not WebGL)
+        if (appLoaderState === 'minimizing') {
+          material.colorWrite = false; // Punch hole for iframe
+          material.depthWrite = true;
+        } else {
+          material.colorWrite = true; // Show screenshot in 3D
+          material.opacity = 1.0;
+          material.transparent = false;
+          material.depthWrite = true;
+        }
+        material.needsUpdate = true;
       }
       
-      // Clear active portal reference
-      activePortalRef.current = null;
+      // Clear active portal reference only when fully idle (not minimized)
+      if (appLoaderState === 'idle') {
+        activePortalRef.current = null;
+      }
     }
   }, [appLoaderState, cameras]);
+  
 
   // Animation loop: smooth room progress updates + portal animations
   useFrame((state) => {
@@ -436,22 +483,80 @@ export function SplitCameraRenderer({
       visibleCameraIndices.push(rightCameraIndex);
     }
 
+    // Update iframe scale every frame when minimizing (direct DOM manipulation for zero latency)
+    if (appLoaderState === 'minimizing' && activePortalRef.current !== null) {
+      const activeCamera = cameras[activePortalRef.current] as ExtendedCamera;
+      if (activeCamera?.portalZoomState && activeCamera?.portalGroup && activeCamera?.portalAnimData) {
+        const currentDistance = Math.abs(activeCamera.portalZoomState.currentZ);
+        const closeDistance = Math.abs(PORTAL_ZOOM_TARGET_Z);
+        const farDistance = Math.abs(PORTAL_DEFAULT_Z);
+        const perspectiveRatio = closeDistance / currentDistance;
+        const baseScale = 3.5;
+        const finalScale = Math.max(0.15, Math.min(perspectiveRatio * baseScale, 1.0));
+        
+        // Calculate fade: start fading screenshot in when portal is 60% of the way back
+        const distanceProgress = (currentDistance - closeDistance) / (farDistance - closeDistance);
+        const fadeStartThreshold = 0.6; // Start fading screenshot in at 60% distance
+        
+        // PROJECT PORTAL TO SCREEN COORDINATES
+        // Get portal's world position
+        const portalWorldPos = new THREE.Vector3();
+        activeCamera.portalGroup.getWorldPosition(portalWorldPos);
+        
+        // Project to normalized device coordinates (-1 to 1)
+        const portalScreenPos = portalWorldPos.clone().project(activeCamera);
+        
+        // Convert to pixel coordinates (0 to window width/height)
+        const canvas = gl.domElement;
+        const screenX = (portalScreenPos.x * 0.5 + 0.5) * canvas.clientWidth;
+        const screenY = (-portalScreenPos.y * 0.5 + 0.5) * canvas.clientHeight; // Flip Y
+        
+        // Calculate portal's actual screen size
+        // Portal mesh is ~2 units tall, scale up 2.0x to ensure rectangular div fully covers circular portal
+        const portalMeshHeight = 2.0;
+        const fov = activeCamera.fov * (Math.PI / 180); // Convert to radians
+        const apparentHeight = (portalMeshHeight / currentDistance) * (canvas.clientHeight / (2 * Math.tan(fov / 2)));
+        const portalScreenScale = (apparentHeight / canvas.clientHeight) * 2.0; // 2.0x for full coverage
+        
+        // Update HTML screenshot overlay (direct DOM manipulation for instant updates)
+        // Screenshot scales and positions to match portal, iframe stays fullscreen behind
+        const screenshotImg = (window as any).__portalScreenshotImg;
+        if (screenshotImg) {
+          if (distanceProgress > fadeStartThreshold) {
+            // Fade screenshot from transparent to opaque over last 40%
+            const screenshotOpacity = (distanceProgress - fadeStartThreshold) / (1.0 - fadeStartThreshold);
+            screenshotImg.style.opacity = screenshotOpacity.toString();
+          } else {
+            // Keep transparent at start
+            screenshotImg.style.opacity = '0';
+          }
+          // Position at portal's exact screen location
+          screenshotImg.style.left = `${screenX}px`;
+          screenshotImg.style.top = `${screenY}px`;
+          screenshotImg.style.transform = `translate(-50%, -50%) scale(${portalScreenScale})`;
+        }
+      }
+    }
+    
     // CRITICAL: Animate zooming portals even if not visible (so they can reset)
     for (let i = 0; i < cameras.length; i++) {
       const camera = cameras[i] as ExtendedCamera;
       const { portalZoomState: zoomState, portalGroup, portalAnimData: animData } = camera;
       
-      // Animate portal zoom when clicked (runs for ALL cameras if zooming)
+      // Animate portal zoom (portal approaches camera)
       if (zoomState?.isZooming && portalGroup) {
         // Smooth lerp toward target position
         zoomState.currentZ += (zoomState.targetZ - zoomState.currentZ) * PORTAL_ZOOM_LERP_SPEED;
+        
+        // Move portal closer to camera
         portalGroup.position.z = zoomState.currentZ;
         
-        // Calculate zoom progress (0 = default position, 1 = fully zoomed)
+        // Calculate zoom progress for fade effect
         const zoomProgress = 1 - (zoomState.currentZ - PORTAL_ZOOM_TARGET_Z) / (PORTAL_DEFAULT_Z - PORTAL_ZOOM_TARGET_Z);
         
-        // Fade portal surface to black as it approaches
-        if (animData?.portalSurface?.material) {
+        // Fade portal surface to black as it approaches (only when opening app, not when minimizing)
+        // (zoomProgress already calculated above)
+        if (animData?.portalSurface?.material && appLoaderState !== 'minimizing' && appLoaderState !== 'minimized') {
           const material = animData.portalSurface.material as THREE.MeshBasicMaterial;
           // Keep opacity constant but darken the color (fade from white to black)
           const brightness = 1 - zoomProgress; // 1 = white (shows texture), 0 = black
@@ -462,6 +567,15 @@ export function SplitCameraRenderer({
         if (Math.abs(zoomState.targetZ - zoomState.currentZ) < PORTAL_ZOOM_THRESHOLD) {
           zoomState.isZooming = false;
           zoomState.currentZ = zoomState.targetZ; // Snap to exact value
+          portalGroup.position.z = zoomState.targetZ; // Snap portal to final position
+          
+          // DEBUG: Don't hide iframe to see what's happening
+          // if (appLoaderState === 'minimizing') {
+          //   const iframeElement = (window as any).__appIframeRef;
+          //   if (iframeElement) {
+          //     iframeElement.style.display = 'none';
+          //   }
+          // }
         }
       }
     }
@@ -558,7 +672,12 @@ export function SplitCameraRenderer({
     // Clear viewport to black before rendering split cameras
     gl.setScissorTest(true);
     gl.autoClear = false;
-    gl.setClearColor(0x000000); // Black background to match fog
+    // Transparent clear when minimizing to see iframe behind portal
+    if (appLoaderState === 'minimizing') {
+      gl.setClearColor(0x000000, 0); // Transparent
+    } else {
+      gl.setClearColor(0x000000, 1); // Black background to match fog
+    }
     gl.clear();
 
     // Render left viewport (always has width)
