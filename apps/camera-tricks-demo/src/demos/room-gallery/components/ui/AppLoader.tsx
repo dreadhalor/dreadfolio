@@ -6,7 +6,7 @@ import { Z_INDEX } from '../../config/constants';
 
 /**
  * AppLoader - Handles the portal zoom animation and app display
- * 
+ *
  * States:
  * - idle: Portal is normal size
  * - zooming-in: Portal expands to fill screen
@@ -14,7 +14,7 @@ import { Z_INDEX } from '../../config/constants';
  * - zooming-out: Portal shrinks back to normal
  * - minimizing: App scales down into portal (iframe visible through canvas hole)
  * - minimized: App hidden but loaded in background
- * 
+ *
  * Performance Note: Uses direct DOM manipulation for iframe positioning during minimize
  * to avoid React re-render overhead. This is intentional for 60fps animation.
  */
@@ -22,14 +22,14 @@ export function AppLoader() {
   const { state, currentAppUrl, currentAppName, minimizeApp } = useAppLoader();
   const [showIframe, setShowIframe] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  
+
   // Register iframe ref with portal ref manager (replaces window object pollution)
   usePortalIframeRef(iframeRef);
-  
+
   // Manage iframe opacity transitions
   useLayoutEffect(() => {
     if (!iframeRef.current) return;
-    
+
     if (state === 'zooming-in') {
       // Start at opacity 0, then fade in after short delay (portal fades to black first)
       iframeRef.current.style.opacity = '0';
@@ -43,10 +43,10 @@ export function AppLoader() {
       iframeRef.current.style.opacity = '0';
     }
   }, [state]);
-  
+
   // Calculate iframe styles based on state
   const getIframeStyles = () => {
-    // When minimizing: fade to black
+    // When minimizing: fade to black, scale down, and apply circular mask
     if (state === 'minimizing') {
       return {
         position: 'fixed' as const,
@@ -57,13 +57,17 @@ export function AppLoader() {
         border: 'none',
         background: '#000',
         zIndex: Z_INDEX.IFRAME_ACTIVE,
-        opacity: 0, // Will fade to 0
+        opacity: 0, // Fade to 0
+        transform: 'scale(0.6)', // Scale down to 60%
+        transformOrigin: 'center center',
+        clipPath: 'circle(30% at center)', // Circular mask shrinks to 30%
         visibility: 'visible' as const,
         pointerEvents: 'none' as const,
-        transition: 'opacity 0.5s ease-in-out',
+        transition:
+          'opacity 0.5s ease-in-out, transform 0.5s ease-in-out, clip-path 0.2s ease-in-out', // Much faster mask shrink
       };
     }
-    
+
     // When fully minimized, hide completely
     if (state === 'minimized') {
       return {
@@ -80,8 +84,8 @@ export function AppLoader() {
         pointerEvents: 'none' as const,
       };
     }
-    
-    // When zooming in: fade in from black
+
+    // When zooming in: fade in from black at full scale with large circle (effectively no mask)
     if (state === 'zooming-in') {
       return {
         position: 'fixed' as const,
@@ -93,13 +97,17 @@ export function AppLoader() {
         background: '#000',
         zIndex: Z_INDEX.IFRAME_TRANSITIONING,
         opacity: 0, // Start at 0, will animate to 1
+        transform: 'scale(1)', // Full scale
+        transformOrigin: 'center center',
+        clipPath: 'circle(150% at center)', // Large circle - bigger than screen, no visible clipping
         visibility: 'visible' as const,
         pointerEvents: 'none' as const,
-        transition: 'opacity 0.5s ease-in-out 0.3s', // Delay slightly for portal to fade to black first
+        transition:
+          'opacity 0.5s ease-in-out 0.3s, transform 0.3s ease-in-out, clip-path 0.5s ease-in-out', // Delay opacity slightly
       };
     }
-    
-    // When active: fully visible
+
+    // When active: fully visible at full scale with large circle (effectively no mask)
     if (state === 'app-active') {
       return {
         position: 'fixed' as const,
@@ -111,12 +119,16 @@ export function AppLoader() {
         background: '#fff',
         zIndex: Z_INDEX.IFRAME_ACTIVE,
         opacity: 1,
+        transform: 'scale(1)', // Full scale
+        transformOrigin: 'center center',
+        clipPath: 'circle(150% at center)', // Large circle - bigger than screen, no visible clipping
         visibility: 'visible' as const,
         pointerEvents: 'auto' as const,
-        transition: 'opacity 0.5s ease-in-out',
+        transition:
+          'opacity 0.5s ease-in-out, transform 0.3s ease-in-out, clip-path 0.5s ease-in-out',
       };
     }
-    
+
     // Default fallback
     return {
       position: 'fixed' as const,
@@ -144,13 +156,17 @@ export function AppLoader() {
 
   // Show iframe when app is active, zooming in, minimizing, or minimized (keep it loaded)
   useEffect(() => {
-    if (state === 'app-active' || state === 'zooming-in' || state === 'minimizing' || state === 'minimized') {
+    if (
+      state === 'app-active' ||
+      state === 'zooming-in' ||
+      state === 'minimizing' ||
+      state === 'minimized'
+    ) {
       setShowIframe(true);
     } else if (state === 'idle') {
       setShowIframe(false);
     }
   }, [state]);
-  
 
   // Don't render overlay when idle, but keep iframe alive when minimized
   if (state === 'idle') return null;
@@ -164,8 +180,8 @@ export function AppLoader() {
           src={currentAppUrl}
           title={currentAppName || 'App'}
           style={getIframeStyles()}
-          allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; usb; xr-spatial-tracking"
-          sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts"
+          allow='accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; usb; xr-spatial-tracking'
+          sandbox='allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts'
         />
       )}
 
