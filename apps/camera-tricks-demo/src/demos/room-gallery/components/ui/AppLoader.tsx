@@ -15,9 +15,8 @@ export function AppLoader() {
   const { state, currentAppUrl, currentAppName, closeApp } = useAppLoader();
   const [showIframe, setShowIframe] = useState(false);
 
-  // Zoom animation
-  const { scale, opacity } = useSpring({
-    scale: state === 'idle' ? 0 : state === 'zooming-in' ? 1 : 0,
+  // Simple fade animation (no zoom effect)
+  const { opacity } = useSpring({
     opacity: state === 'app-active' ? 1 : 0,
     config: {
       tension: 280,
@@ -39,7 +38,7 @@ export function AppLoader() {
   return (
     <>
       {/* Full-screen overlay */}
-      <animated.div
+      <div
         style={{
           position: 'fixed',
           top: 0,
@@ -51,7 +50,6 @@ export function AppLoader() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: scale.to(s => s * 0.95), // Fade in with scale
         }}
       >
         {/* Iframe container */}
@@ -60,7 +58,6 @@ export function AppLoader() {
             width: '100%',
             height: '100%',
             opacity,
-            transform: scale.to(s => `scale(${s})`),
           }}
         >
           {showIframe && currentAppUrl && (
@@ -110,7 +107,7 @@ export function AppLoader() {
             ✕ Close
           </button>
         )}
-      </animated.div>
+      </div>
     </>
   );
 }

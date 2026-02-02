@@ -93,10 +93,14 @@ export function SplitCameraRenderer({
 }: SplitCameraRendererProps) {
   const { gl, scene, size, set } = useThree();
   const currentRoomProgressRef = useRef(0);
-  const { loadApp } = useAppLoader();
+  const { loadApp, state: appLoaderState } = useAppLoader();
   
   // Raycaster for portal click detection
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
+  
+  // Track mouse position for click vs drag detection
+  const mouseDownPos = useRef({ x: 0, y: 0 });
+  const CLICK_THRESHOLD = 5; // pixels - movement less than this is a click
 
   // Create cameras once (one per room)
   const cameras = useMemo(() => {
@@ -127,6 +131,13 @@ export function SplitCameraRenderer({
         (camera as any).portalGroup = portal.group;
         (camera as any).roomData = room;
         (camera as any).portalAnimData = portal.animData;
+        
+        // Portal zoom animation state
+        (camera as any).portalZoomState = {
+          isZooming: false,
+          targetZ: -5, // Default position
+          currentZ: -5,
+        };
         (camera as any).portalDispose = portal.dispose;
         
         if (i === 0) {
@@ -149,8 +160,22 @@ export function SplitCameraRenderer({
     console.log('Adding', cameras.length, 'cameras to scene');
     cameras.forEach((cam) => scene.add(cam));
     
-    // Click handler for portal detection
-    const handleClick = (event: MouseEvent) => {
+    // Track mousedown position to differentiate clicks from drags
+    const handleMouseDown = (event: MouseEvent) => {
+      mouseDownPos.current = { x: event.clientX, y: event.clientY };
+    };
+    
+    const handleMouseUp = (event: MouseEvent) => {
+      // Calculate distance moved since mousedown
+      const dx = event.clientX - mouseDownPos.current.x;
+      const dy = event.clientY - mouseDownPos.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Only treat as click if movement is below threshold (not a drag)
+      if (distance > CLICK_THRESHOLD) {
+        return; // This was a drag, not a click
+      }
+      
       // Get normalized device coordinates
       const rect = gl.domElement.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -174,27 +199,36 @@ export function SplitCameraRenderer({
       // Get portal group and check for intersections
       const portalGroup = (activeCamera as any).portalGroup;
       const roomData = (activeCamera as any).roomData;
+      const zoomState = (activeCamera as any).portalZoomState;
       
-      if (portalGroup && roomData) {
+      if (portalGroup && roomData && zoomState) {
         const intersects = raycaster.intersectObjects(portalGroup.children, true);
         
         if (intersects.length > 0) {
           console.log('🎯 Portal clicked!', roomData.name);
           
-          // Load the app
-          if (roomData.appUrl) {
-            loadApp(roomData.appUrl, roomData.name);
-          } else {
-            console.warn('No app URL for', roomData.name);
-          }
+          // Trigger zoom animation
+          zoomState.isZooming = true;
+          zoomState.targetZ = -0.8; // Move very close to camera
+          
+          // Load the app after a delay for zoom effect
+          setTimeout(() => {
+            if (roomData.appUrl) {
+              loadApp(roomData.appUrl, roomData.name);
+            } else {
+              console.warn('No app URL for', roomData.name);
+            }
+          }, 600); // 600ms delay for slower zoom animation
         }
       }
     };
     
-    gl.domElement.addEventListener('click', handleClick);
+    gl.domElement.addEventListener('mousedown', handleMouseDown);
+    gl.domElement.addEventListener('mouseup', handleMouseUp);
     
     return () => {
-      gl.domElement.removeEventListener('click', handleClick);
+      gl.domElement.removeEventListener('mousedown', handleMouseDown);
+      gl.domElement.removeEventListener('mouseup', handleMouseUp);
       
       // Clean up: dispose portals, remove cameras
       cameras.forEach((cam) => {
@@ -209,6 +243,20 @@ export function SplitCameraRenderer({
       });
     };
   }, [cameras, scene, gl, raycaster, loadApp]);
+
+  // Reset portal zoom when app closes
+  useEffect(() => {
+    if (appLoaderState === 'idle') {
+      // Reset all portals to default position
+      cameras.forEach((camera) => {
+        const zoomState = (camera as any).portalZoomState;
+        if (zoomState) {
+          zoomState.isZooming = true;
+          zoomState.targetZ = -5; // Move back to default
+        }
+      });
+    }
+  }, [appLoaderState, cameras]);
 
   // Animation loop: smooth room progress updates + portal animations
   useFrame((state) => {
@@ -251,7 +299,26 @@ export function SplitCameraRenderer({
     }
 
     for (const i of visibleCameraIndices) {
-      const animData = (cameras[i] as any).portalAnimData;
+      const camera = cameras[i];
+      const animData = (camera as any).portalAnimData;
+      const zoomState = (camera as any).portalZoomState;
+      const portalGroup = (camera as any).portalGroup;
+      
+      // Animate portal zoom when clicked
+      if (zoomState && portalGroup) {
+        if (zoomState.isZooming) {
+          // Smooth lerp toward target position (slower speed)
+          zoomState.currentZ += (zoomState.targetZ - zoomState.currentZ) * 0.08;
+          portalGroup.position.z = zoomState.currentZ;
+          
+          // Stop zooming when close enough
+          if (Math.abs(zoomState.targetZ - zoomState.currentZ) < 0.01) {
+            zoomState.isZooming = false;
+            zoomState.currentZ = zoomState.targetZ; // Snap to exact value
+          }
+        }
+      }
+      
       if (animData) {
         // Pulse outer glow (breathing effect)
         animData.outerGlow.material.opacity = 0.3 + Math.sin(time * 2) * 0.15;

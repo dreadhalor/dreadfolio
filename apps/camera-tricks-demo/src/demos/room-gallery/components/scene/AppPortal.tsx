@@ -162,7 +162,7 @@ export function createPortalGroup(room: RoomData) {
   }
 
   // Position portal group in camera's local space
-  portalGroup.position.set(0, 0.5, -5); // Centered, slightly up, 5 units forward
+  portalGroup.position.set(0, 0, -5); // Perfectly centered, 5 units forward
 
   // Return the group, animated element refs, and disposal function
   return {
