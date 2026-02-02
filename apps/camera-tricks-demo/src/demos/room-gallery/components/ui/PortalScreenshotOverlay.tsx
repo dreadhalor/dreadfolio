@@ -1,26 +1,23 @@
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useAppLoader } from '../../providers/AppLoaderContext';
 import { PORTFOLIO_APPS } from '../../config/apps';
+import { usePortalScreenshotRef } from '../../hooks/usePortalRefs';
 
 /**
  * PortalScreenshotOverlay - Fades in the static app screenshot over the live iframe during minimize
  * 
  * Positioned between iframe (z-index: 1) and canvas (z-index: 10)
  * Starts transparent and fades to opaque, creating a dissolve effect
+ * 
+ * Uses direct DOM manipulation for performance (bypasses React render cycle)
+ * Ref is managed by usePortalScreenshotRef hook for type safety
  */
 export function PortalScreenshotOverlay() {
   const { currentAppUrl } = useAppLoader();
   const imgRef = useRef<HTMLImageElement>(null);
   
-  // Expose img element for direct manipulation from render loop
-  useEffect(() => {
-    if (imgRef.current) {
-      (window as any).__portalScreenshotImg = imgRef.current;
-    }
-    return () => {
-      (window as any).__portalScreenshotImg = null;
-    };
-  }, []);
+  // Register ref with portal ref manager (replaces window object pollution)
+  usePortalScreenshotRef(imgRef);
   
   // Find the current app's screenshot image
   const currentApp = PORTFOLIO_APPS.find(app => app.url === currentAppUrl);

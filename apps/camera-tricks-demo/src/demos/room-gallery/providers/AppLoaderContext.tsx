@@ -1,4 +1,11 @@
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { useSafeTimeout } from '../hooks/useSafeTimeout';
+import {
+  APP_ZOOM_IN_DURATION_MS,
+  APP_MINIMIZE_DURATION_MS,
+  APP_ZOOM_OUT_DURATION_MS,
+  APP_SWITCH_CLEANUP_DELAY_MS,
+} from '../config/constants';
 
 type AppLoaderState = 'idle' | 'zooming-in' | 'app-active' | 'zooming-out' | 'minimized' | 'minimizing';
 
@@ -17,14 +24,18 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AppLoaderState>('idle');
   const [currentAppUrl, setCurrentAppUrl] = useState<string | null>(null);
   const [currentAppName, setCurrentAppName] = useState<string | null>(null);
+  const { safeSetTimeout, clearAllTimeouts } = useSafeTimeout();
 
   const loadApp = useCallback((url: string, name: string) => {
+    // Clear any pending timeouts from previous operations
+    clearAllTimeouts();
+    
     // If same app is minimizing or minimized, just restore it
     if ((state === 'minimizing' || state === 'minimized') && currentAppUrl === url) {
       setState('zooming-in');
-      setTimeout(() => {
+      safeSetTimeout(() => {
         setState('app-active');
-      }, 500);
+      }, APP_ZOOM_IN_DURATION_MS);
       return;
     }
     
@@ -34,14 +45,14 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
       setCurrentAppUrl(null);
       setCurrentAppName(null);
       // Small delay to let old app clean up
-      setTimeout(() => {
+      safeSetTimeout(() => {
         setCurrentAppUrl(url);
         setCurrentAppName(name);
         setState('zooming-in');
-        setTimeout(() => {
+        safeSetTimeout(() => {
           setState('app-active');
-        }, 500);
-      }, 100);
+        }, APP_ZOOM_IN_DURATION_MS);
+      }, APP_SWITCH_CLEANUP_DELAY_MS);
       return;
     }
     
@@ -50,31 +61,30 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
     setCurrentAppName(name);
     setState('zooming-in');
     
-    setTimeout(() => {
+    safeSetTimeout(() => {
       setState('app-active');
-    }, 500);
-  }, [state, currentAppUrl]);
+    }, APP_ZOOM_IN_DURATION_MS);
+  }, [state, currentAppUrl, safeSetTimeout, clearAllTimeouts]);
 
   const minimizeApp = useCallback(() => {
     setState('minimizing');
     
     // Transition to minimized (keep app loaded in background)
-    // Longer timeout to match the slower fade
-    setTimeout(() => {
+    safeSetTimeout(() => {
       setState('minimized');
-    }, 1500);
-  }, []);
+    }, APP_MINIMIZE_DURATION_MS);
+  }, [safeSetTimeout]);
 
   const closeApp = useCallback(() => {
     setState('zooming-out');
     
-    // After zoom-out animation completes (500ms), reset
-    setTimeout(() => {
+    // After zoom-out animation completes, reset
+    safeSetTimeout(() => {
       setState('idle');
       setCurrentAppUrl(null);
       setCurrentAppName(null);
-    }, 500);
-  }, []);
+    }, APP_ZOOM_OUT_DURATION_MS);
+  }, [safeSetTimeout]);
 
   return (
     <AppLoaderContext.Provider

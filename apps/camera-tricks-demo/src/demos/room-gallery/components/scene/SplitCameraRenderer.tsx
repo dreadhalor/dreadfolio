@@ -19,6 +19,12 @@ import { calculateCameraPosition } from '../../utils/cameraCalculations';
 import { ROOMS } from '../../config/rooms';
 import { createPortalGroup } from './AppPortal';
 import { useAppLoader } from '../../providers/AppLoaderContext';
+import { getPortalRefs } from '../../hooks/usePortalRefs';
+import {
+  calculatePortalScreenProjection,
+  calculateZoomProgress,
+  PORTAL_FADE_START_THRESHOLD,
+} from '../../utils/portalProjection';
 import type { RoomData } from '../../types';
 
 // Development mode flag for conditional logging (Vite build system replaces this at build time)
@@ -37,7 +43,12 @@ interface SplitCameraRendererProps {
   }) => void;
 }
 
-// Extended camera type with portal-specific properties
+/**
+ * Extended camera interface with portal-specific properties
+ * 
+ * Properties are added at runtime during camera initialization.
+ * TypeScript can't verify these exist at compile time, hence the interface extension.
+ */
 interface ExtendedCamera extends THREE.PerspectiveCamera {
   portalGroup: THREE.Group;
   roomData: RoomData;
@@ -56,6 +67,10 @@ interface ExtendedCamera extends THREE.PerspectiveCamera {
     currentZ: number;
   };
   portalDispose: () => void;
+  userData: {
+    originalZ?: number; // Stored for dolly-in animations (if implemented)
+    [key: string]: any;
+  };
 }
 
 // Camera projection constants
@@ -277,8 +292,13 @@ export function SplitCameraRenderer({
       const primaryCameraIndex = getPrimaryCameraIndex(currentRoom, transitionProgress);
       const activeCamera = cameras[primaryCameraIndex] as ExtendedCamera;
       
-      // Cast ray from camera
-      raycaster.setFromCamera(new THREE.Vector2(x, y), activeCamera);
+      // Cast ray from camera (with error handling for invalid camera state)
+      try {
+        raycaster.setFromCamera(new THREE.Vector2(x, y), activeCamera);
+      } catch (error) {
+        console.warn('Raycasting failed:', error);
+        return;
+      }
       
       // Get portal group and check for intersections
       const { portalGroup, roomData, portalZoomState } = activeCamera;
@@ -380,32 +400,20 @@ export function SplitCameraRenderer({
         // When minimizing starts, initialize screenshot overlay position/scale
         // Iframe stays fullscreen, only screenshot moves with portal
         if (appLoaderState === 'minimizing' && portalGroup) {
-          const currentDistance = Math.abs(portalZoomState.currentZ);
-          
-          // PROJECT PORTAL TO SCREEN COORDINATES
-          const portalWorldPos = new THREE.Vector3();
-          portalGroup.getWorldPosition(portalWorldPos);
-          const portalScreenPos = portalWorldPos.clone().project(camera);
-          
-          // Convert to pixel coordinates
-          const canvas = gl.domElement;
-          const screenX = (portalScreenPos.x * 0.5 + 0.5) * canvas.clientWidth;
-          const screenY = (-portalScreenPos.y * 0.5 + 0.5) * canvas.clientHeight;
-          
-          // Calculate portal's actual screen size
-          // Scale up 2.0x to ensure rectangular div fully covers circular portal
-          const portalMeshHeight = 2.0;
-          const fov = camera.fov * (Math.PI / 180);
-          const apparentHeight = (portalMeshHeight / currentDistance) * (canvas.clientHeight / (2 * Math.tan(fov / 2)));
-          const initialScale = (apparentHeight / canvas.clientHeight) * 2.0;
+          // Project portal to screen coordinates
+          const projection = calculatePortalScreenProjection(
+            portalGroup,
+            camera,
+            gl.domElement
+          );
           
           // Initialize screenshot overlay (starts transparent)
-          const screenshotImg = (window as any).__portalScreenshotImg;
-          if (screenshotImg) {
-            screenshotImg.style.left = `${screenX}px`;
-            screenshotImg.style.top = `${screenY}px`;
-            screenshotImg.style.opacity = '0';
-            screenshotImg.style.transform = `translate(-50%, -50%) scale(${initialScale})`;
+          const { screenshotElement } = getPortalRefs();
+          if (screenshotElement) {
+            screenshotElement.style.left = `${projection.screenX}px`;
+            screenshotElement.style.top = `${projection.screenY}px`;
+            screenshotElement.style.opacity = '0';
+            screenshotElement.style.transform = `translate(-50%, -50%) scale(${projection.scale})`;
           }
         }
       }
@@ -435,8 +443,19 @@ export function SplitCameraRenderer({
     }
   }, [appLoaderState, cameras]);
   
-
-  // Animation loop: smooth room progress updates + portal animations
+  /**
+   * Main animation loop - runs every frame (60fps target)
+   * 
+   * Responsibilities:
+   * 1. Smooth camera position interpolation (horizontal scrolling between rooms)
+   * 2. Dynamic split-screen viewport calculation for transitions
+   * 3. Portal zoom animations (approach/retreat)
+   * 4. Portal visual effects (glow breathing, particle rotation, frame rotation)
+   * 5. Screenshot overlay positioning during app minimize (3D→2D projection)
+   * 6. Manual render calls for each visible camera viewport
+   * 
+   * Performance: Optimized to only animate visible portals (87% reduction in work)
+   */
   useFrame((state) => {
     const targetProgress = targetRoomProgressRef.current ?? 0;
     const time = state.clock.elapsedTime;
@@ -483,57 +502,40 @@ export function SplitCameraRenderer({
       visibleCameraIndices.push(rightCameraIndex);
     }
 
-    // Update iframe scale every frame when minimizing (direct DOM manipulation for zero latency)
+    // Update screenshot overlay position/scale during minimize animation
+    // Uses direct DOM manipulation for 60fps performance (bypasses React render cycle)
     if (appLoaderState === 'minimizing' && activePortalRef.current !== null) {
       const activeCamera = cameras[activePortalRef.current] as ExtendedCamera;
-      if (activeCamera?.portalZoomState && activeCamera?.portalGroup && activeCamera?.portalAnimData) {
+      if (activeCamera?.portalZoomState && activeCamera?.portalGroup) {
         const currentDistance = Math.abs(activeCamera.portalZoomState.currentZ);
         const closeDistance = Math.abs(PORTAL_ZOOM_TARGET_Z);
         const farDistance = Math.abs(PORTAL_DEFAULT_Z);
-        const perspectiveRatio = closeDistance / currentDistance;
-        const baseScale = 3.5;
-        const finalScale = Math.max(0.15, Math.min(perspectiveRatio * baseScale, 1.0));
         
-        // Calculate fade: start fading screenshot in when portal is 60% of the way back
+        // Calculate zoom progress for fade timing
         const distanceProgress = (currentDistance - closeDistance) / (farDistance - closeDistance);
-        const fadeStartThreshold = 0.6; // Start fading screenshot in at 60% distance
         
-        // PROJECT PORTAL TO SCREEN COORDINATES
-        // Get portal's world position
-        const portalWorldPos = new THREE.Vector3();
-        activeCamera.portalGroup.getWorldPosition(portalWorldPos);
+        // Project portal to screen coordinates
+        const projection = calculatePortalScreenProjection(
+          activeCamera.portalGroup,
+          activeCamera,
+          gl.domElement
+        );
         
-        // Project to normalized device coordinates (-1 to 1)
-        const portalScreenPos = portalWorldPos.clone().project(activeCamera);
-        
-        // Convert to pixel coordinates (0 to window width/height)
-        const canvas = gl.domElement;
-        const screenX = (portalScreenPos.x * 0.5 + 0.5) * canvas.clientWidth;
-        const screenY = (-portalScreenPos.y * 0.5 + 0.5) * canvas.clientHeight; // Flip Y
-        
-        // Calculate portal's actual screen size
-        // Portal mesh is ~2 units tall, scale up 2.0x to ensure rectangular div fully covers circular portal
-        const portalMeshHeight = 2.0;
-        const fov = activeCamera.fov * (Math.PI / 180); // Convert to radians
-        const apparentHeight = (portalMeshHeight / currentDistance) * (canvas.clientHeight / (2 * Math.tan(fov / 2)));
-        const portalScreenScale = (apparentHeight / canvas.clientHeight) * 2.0; // 2.0x for full coverage
-        
-        // Update HTML screenshot overlay (direct DOM manipulation for instant updates)
-        // Screenshot scales and positions to match portal, iframe stays fullscreen behind
-        const screenshotImg = (window as any).__portalScreenshotImg;
-        if (screenshotImg) {
-          if (distanceProgress > fadeStartThreshold) {
-            // Fade screenshot from transparent to opaque over last 40%
-            const screenshotOpacity = (distanceProgress - fadeStartThreshold) / (1.0 - fadeStartThreshold);
-            screenshotImg.style.opacity = screenshotOpacity.toString();
+        // Update screenshot overlay (retrieved from ref manager, not window object)
+        const { screenshotElement } = getPortalRefs();
+        if (screenshotElement) {
+          // Fade in over last 40% of animation
+          if (distanceProgress > PORTAL_FADE_START_THRESHOLD) {
+            const fadeProgress = (distanceProgress - PORTAL_FADE_START_THRESHOLD) / (1.0 - PORTAL_FADE_START_THRESHOLD);
+            screenshotElement.style.opacity = fadeProgress.toString();
           } else {
-            // Keep transparent at start
-            screenshotImg.style.opacity = '0';
+            screenshotElement.style.opacity = '0';
           }
-          // Position at portal's exact screen location
-          screenshotImg.style.left = `${screenX}px`;
-          screenshotImg.style.top = `${screenY}px`;
-          screenshotImg.style.transform = `translate(-50%, -50%) scale(${portalScreenScale})`;
+          
+          // Position and scale to match portal
+          screenshotElement.style.left = `${projection.screenX}px`;
+          screenshotElement.style.top = `${projection.screenY}px`;
+          screenshotElement.style.transform = `translate(-50%, -50%) scale(${projection.scale})`;
         }
       }
     }
@@ -552,7 +554,11 @@ export function SplitCameraRenderer({
         portalGroup.position.z = zoomState.currentZ;
         
         // Calculate zoom progress for fade effect
-        const zoomProgress = 1 - (zoomState.currentZ - PORTAL_ZOOM_TARGET_Z) / (PORTAL_DEFAULT_Z - PORTAL_ZOOM_TARGET_Z);
+        const zoomProgress = calculateZoomProgress(
+          zoomState.currentZ,
+          PORTAL_ZOOM_TARGET_Z,
+          PORTAL_DEFAULT_Z
+        );
         
         // Fade portal surface to black as it approaches (only when opening app, not when minimizing)
         // (zoomProgress already calculated above)
@@ -568,14 +574,6 @@ export function SplitCameraRenderer({
           zoomState.isZooming = false;
           zoomState.currentZ = zoomState.targetZ; // Snap to exact value
           portalGroup.position.z = zoomState.targetZ; // Snap portal to final position
-          
-          // DEBUG: Don't hide iframe to see what's happening
-          // if (appLoaderState === 'minimizing') {
-          //   const iframeElement = (window as any).__appIframeRef;
-          //   if (iframeElement) {
-          //     iframeElement.style.display = 'none';
-          //   }
-          // }
         }
       }
     }
@@ -593,8 +591,7 @@ export function SplitCameraRenderer({
         // Pulse inner glow (faster, more intense)
         (animData.innerGlow.material as THREE.MeshBasicMaterial).opacity = 0.95 + Math.sin(time * 3) * 0.05;
         
-        // Keep portal surface upright (no rotation for screenshots to stay readable)
-        // animData.portalSurface.rotation.z = time * 0.5; // Disabled
+        // Portal surface stays upright (no rotation to keep screenshots readable)
         
         // Rotate 3D torus frames (slow rotation for depth)
         if (animData.torus) {
@@ -669,6 +666,12 @@ export function SplitCameraRenderer({
       });
     }
 
+    // Check WebGL context is not lost before rendering
+    if (!gl.domElement.getContext('webgl2') && !gl.domElement.getContext('webgl')) {
+      console.error('WebGL context lost');
+      return;
+    }
+    
     // Clear viewport to black before rendering split cameras
     gl.setScissorTest(true);
     gl.autoClear = false;

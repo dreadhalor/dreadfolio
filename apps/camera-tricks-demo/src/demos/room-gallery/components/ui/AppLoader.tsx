@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useAppLoader } from '../../providers/AppLoaderContext';
+import { usePortalIframeRef } from '../../hooks/usePortalRefs';
 
 /**
  * AppLoader - Handles the portal zoom animation and app display
@@ -10,27 +11,31 @@ import { useAppLoader } from '../../providers/AppLoaderContext';
  * - zooming-in: Portal expands to fill screen
  * - app-active: App is visible, 3D scene paused
  * - zooming-out: Portal shrinks back to normal
+ * - minimizing: App scales down into portal (iframe visible through canvas hole)
+ * - minimized: App hidden but loaded in background
+ * 
+ * Performance Note: Uses direct DOM manipulation for iframe positioning during minimize
+ * to avoid React re-render overhead. This is intentional for 60fps animation.
  */
 export function AppLoader() {
   const { state, currentAppUrl, currentAppName, minimizeApp } = useAppLoader();
   const [showIframe, setShowIframe] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const screenshotRef = useRef<HTMLDivElement>(null);
   
-  // Manage iframe opacity for smooth fade-in
+  // Register iframe ref with portal ref manager (replaces window object pollution)
+  usePortalIframeRef(iframeRef);
+  
+  // Manage iframe opacity for smooth fade-in when reopening minimized apps
   useLayoutEffect(() => {
-    if (iframeRef.current) {
-      // When transitioning to zooming-in from minimized, ensure proper starting opacity
-      if (state === 'zooming-in') {
-        // Force opacity to 0 so CSS transition can fade to 1
-        iframeRef.current.style.opacity = '0';
-        // Use setTimeout to allow the 0 opacity to apply before CSS transition takes over
-        setTimeout(() => {
-          if (iframeRef.current) {
-            iframeRef.current.style.opacity = ''; // Clear to let CSS handle it
-          }
-        }, 0);
-      }
+    if (iframeRef.current && state === 'zooming-in') {
+      // Force opacity to 0 so CSS transition can fade to 1
+      iframeRef.current.style.opacity = '0';
+      // Next frame: clear to let CSS transition take over
+      requestAnimationFrame(() => {
+        if (iframeRef.current) {
+          iframeRef.current.style.opacity = '';
+        }
+      });
     }
   }, [state]);
   
@@ -101,13 +106,11 @@ export function AppLoader() {
   });
 
   // Show iframe when app is active, zooming in, minimizing, or minimized (keep it loaded)
-  // DEBUG: Keep iframe always visible
   useEffect(() => {
     if (state === 'app-active' || state === 'zooming-in' || state === 'minimizing' || state === 'minimized') {
       setShowIframe(true);
     } else if (state === 'idle') {
-      // DEBUG: Don't hide iframe
-      // setShowIframe(false);
+      setShowIframe(false);
     }
   }, [state]);
   

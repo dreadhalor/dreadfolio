@@ -38,6 +38,12 @@ export const PORTAL_ZOOM_THRESHOLD = 0.01; // When to stop zooming
 export const PORTAL_ZOOM_DURATION_MS = 1000; // Delay before loading app
 export const CLICK_THRESHOLD = 5; // Pixels - movement less than this is a click
 
+// App loader animation timing
+export const APP_ZOOM_IN_DURATION_MS = 500; // Portal zoom-in to app active
+export const APP_MINIMIZE_DURATION_MS = 1500; // Minimize animation (longer for fade)
+export const APP_ZOOM_OUT_DURATION_MS = 500; // App close zoom-out
+export const APP_SWITCH_CLEANUP_DELAY_MS = 100; // Delay between closing old app and opening new
+
 // Dividing wall dimensions
 export const WALL_THICKNESS = 0.3;
 export const DOORWAY_WIDTH = 3;
