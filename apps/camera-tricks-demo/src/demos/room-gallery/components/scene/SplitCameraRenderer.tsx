@@ -45,7 +45,7 @@ interface SplitCameraRendererProps {
 
 /**
  * Extended camera interface with portal-specific properties
- * 
+ *
  * Properties are added at runtime during camera initialization.
  * TypeScript can't verify these exist at compile time, hence the interface extension.
  */
@@ -104,17 +104,20 @@ function setViewOffsetForDynamicSplit(
 
 /**
  * Calculate viewport widths for split-screen rendering
- * 
+ *
  * Creates a dynamic horizontal split based on transition progress:
  * - At transitionProgress = 0: left viewport = 100%, right viewport = 0%
  * - At transitionProgress = 0.5: left viewport = 50%, right viewport = 50%
  * - At transitionProgress = 1: left viewport = 0%, right viewport = 100%
- * 
+ *
  * @param transitionProgress - Progress between rooms (0.0 to 1.0)
  * @param screenWidth - Full screen width in pixels
  * @returns Object with leftWidth and rightWidth in pixels
  */
-function calculateViewportWidths(transitionProgress: number, screenWidth: number) {
+function calculateViewportWidths(
+  transitionProgress: number,
+  screenWidth: number,
+) {
   const leftWidth = Math.max(0, screenWidth * (1 - transitionProgress));
   const rightWidth = screenWidth - leftWidth;
   return { leftWidth, rightWidth };
@@ -123,50 +126,53 @@ function calculateViewportWidths(transitionProgress: number, screenWidth: number
 /**
  * Determines which camera is taking up more screen space
  * Used for raycasting to ensure clicks are detected on the correct camera
- * 
+ *
  * @param currentRoom - Current room index (0-14)
  * @param transitionProgress - Progress through transition (0-1)
  * @returns Camera index that's most visible to the user
  */
-function getPrimaryCameraIndex(currentRoom: number, transitionProgress: number): number {
+function getPrimaryCameraIndex(
+  currentRoom: number,
+  transitionProgress: number,
+): number {
   const baseIndex = transitionProgress < 0.5 ? currentRoom : currentRoom + 1;
   return Math.max(0, Math.min(NUM_ROOMS - 1, baseIndex));
 }
 
 /**
  * Split Camera Renderer - 15-Camera System with Portal Animations
- * 
+ *
  * Core Architecture:
  * - 15 cameras, one per portfolio app, spaced CAMERA_SPACING units apart
  * - Each camera has a 3D portal attached as a child (moves with camera)
  * - Dynamic split-screen rendering transitions smoothly between rooms
  * - Manual rendering with viewport/scissor for precise control
- * 
+ *
  * Camera System:
  * - Cameras move together based on roomProgress (0-14)
  * - At roomProgress=n: camera[n] is centered, camera[n+1] is next
  * - Viewport split ratio animates smoothly (0% to 100% transition)
- * 
+ *
  * Portal Interactions:
  * - Click detection via raycasting (distinguishes clicks from drags)
  * - Portal zooms toward camera when clicked (LERP animation)
  * - Portal surface fades to black as it approaches
  * - App loads after PORTAL_ZOOM_DURATION_MS delay
  * - Portal resets to default position when app closes
- * 
+ *
  * Animation System:
  * - Zoom animations run for ALL cameras (allows reset when off-screen)
  * - Visual animations (breathing, rotation) only for visible cameras (87% perf gain)
  * - Smooth lerp for all movements with snap threshold for final approach
- * 
+ *
  * Edge Cases Handled:
  * - Zero-width viewports at room edges (prevents black screen)
  * - Race conditions (prevents multiple simultaneous app loads)
  * - Touch support (mobile-friendly click detection)
  * - Memory management (proper cleanup of timeouts and event listeners)
- * 
+ *
  * Performance: 60 FPS maintained with dual rendering (~2x draw calls per frame)
- * 
+ *
  * @param props.targetRoomProgressRef - Ref to target room position (0-14)
  * @param props.onRoomProgressUpdate - Callback with current lerped progress
  * @param props.onDebugUpdate - Optional callback with debug info for overlay
@@ -179,19 +185,19 @@ export function SplitCameraRenderer({
   const { gl, scene, size, set, camera: activeCamera } = useThree();
   const currentRoomProgressRef = useRef(0);
   const { loadApp, state: appLoaderState } = useAppLoader();
-  
+
   // Raycaster for portal click detection
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  
+
   // Track mouse/touch position for click vs drag detection
   const mouseDownPos = useRef({ x: 0, y: 0 });
-  
+
   // Track active portal for targeted reset
   const activePortalRef = useRef<number | null>(null);
-  
+
   // Track setTimeout for cleanup
   const loadAppTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Stable reference to loadApp to avoid effect recreation
   const loadAppRef = useRef(loadApp);
   useEffect(() => {
@@ -211,24 +217,24 @@ export function SplitCameraRenderer({
           CAMERA_NEAR_PLANE,
           CAMERA_FAR_PLANE,
         ) as ExtendedCamera;
-        
+
         // Initialize at starting positions (consistent with runtime formula)
         // At roomProgress=0: camera[0]=0, camera[1]=CAMERA_SPACING, camera[2]=CAMERA_SPACING*2, etc.
         const initialX = calculateCameraPosition(i, 0, CAMERA_SPACING);
         camera.position.set(initialX, CAMERA_HEIGHT, CAMERA_Z_POSITION);
-        
+
         // Create portal for this camera using utility function
         const room = ROOMS[i];
         const portal = createPortalGroup(room);
-        
+
         // Add portal group as child of camera (stays centered in viewport)
         camera.add(portal.group);
-        
+
         // Store references for animation, click handling, and cleanup
         camera.portalGroup = portal.group;
         camera.roomData = room;
         camera.portalAnimData = portal.animData;
-        
+
         // Portal zoom animation state
         camera.portalZoomState = {
           isZooming: false,
@@ -236,11 +242,11 @@ export function SplitCameraRenderer({
           currentZ: PORTAL_DEFAULT_Z,
         };
         camera.portalDispose = portal.dispose;
-        
+
         if (i === 0 && DEBUG) {
           console.log('✅ Ornate portals added to all', NUM_ROOMS, 'cameras');
         }
-        
+
         return camera;
       });
     } catch (error) {
@@ -256,42 +262,49 @@ export function SplitCameraRenderer({
   useEffect(() => {
     console.log('Adding', cameras.length, 'cameras to scene');
     cameras.forEach((cam) => scene.add(cam));
-    
+
     // Track mousedown position to differentiate clicks from drags
     const handleMouseDown = (event: MouseEvent) => {
       mouseDownPos.current = { x: event.clientX, y: event.clientY };
     };
-    
+
     const handlePointerUp = (clientX: number, clientY: number) => {
       // Calculate distance moved since mousedown
       const dx = clientX - mouseDownPos.current.x;
       const dy = clientY - mouseDownPos.current.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
+
       // Only treat as click if movement is below threshold (not a drag)
       if (distance > CLICK_THRESHOLD) {
         return; // This was a drag, not a click
       }
-      
+
       // Race condition guard: only allow clicks when idle, minimizing, or minimized
-      if (appLoaderState !== 'idle' && appLoaderState !== 'minimizing' && appLoaderState !== 'minimized') {
+      if (
+        appLoaderState !== 'idle' &&
+        appLoaderState !== 'minimizing' &&
+        appLoaderState !== 'minimized'
+      ) {
         return;
       }
-      
+
       // Get normalized device coordinates
       const rect = gl.domElement.getBoundingClientRect();
       const x = ((clientX - rect.left) / rect.width) * 2 - 1;
       const y = -((clientY - rect.top) / rect.height) * 2 + 1;
-      
+
       // Get current active camera (use the one taking up more screen space)
       const currentProgress = currentRoomProgressRef.current;
       const currentRoom = Math.floor(currentProgress);
       const transitionProgress = currentProgress - currentRoom;
-      
+
       // Determine which camera we're primarily looking through
-      const primaryCameraIndex = getPrimaryCameraIndex(currentRoom, transitionProgress);
+      const primaryCameraIndex = getPrimaryCameraIndex(
+        currentRoom,
+        transitionProgress,
+      );
       const activeCamera = cameras[primaryCameraIndex] as ExtendedCamera;
-      
+
       // Cast ray from camera (with error handling for invalid camera state)
       try {
         raycaster.setFromCamera(new THREE.Vector2(x, y), activeCamera);
@@ -299,28 +312,31 @@ export function SplitCameraRenderer({
         console.warn('Raycasting failed:', error);
         return;
       }
-      
+
       // Get portal group and check for intersections
       const { portalGroup, roomData, portalZoomState } = activeCamera;
-      
+
       if (portalGroup && roomData && portalZoomState) {
-        const intersects = raycaster.intersectObjects(portalGroup.children, true);
-        
+        const intersects = raycaster.intersectObjects(
+          portalGroup.children,
+          true,
+        );
+
         if (intersects.length > 0) {
           if (DEBUG) console.log('🎯 Portal clicked!', roomData.name);
-          
+
           // Track which portal was clicked
           activePortalRef.current = primaryCameraIndex;
-          
+
           // Trigger zoom animation
           portalZoomState.isZooming = true;
           portalZoomState.targetZ = PORTAL_ZOOM_TARGET_Z;
-          
+
           // Clear any existing timeout
           if (loadAppTimeoutRef.current) {
             clearTimeout(loadAppTimeoutRef.current);
           }
-          
+
           // Load the app after a delay for zoom effect
           loadAppTimeoutRef.current = setTimeout(() => {
             if (roomData.appUrl) {
@@ -333,48 +349,50 @@ export function SplitCameraRenderer({
         }
       }
     };
-    
+
     const handleMouseUp = (event: MouseEvent) => {
       handlePointerUp(event.clientX, event.clientY);
     };
-    
+
     const handleTouchEnd = (event: TouchEvent) => {
       if (event.changedTouches.length === 1) {
         const touch = event.changedTouches[0];
         handlePointerUp(touch.clientX, touch.clientY);
       }
     };
-    
+
     // Add mouse handlers
     gl.domElement.addEventListener('mousedown', handleMouseDown);
     gl.domElement.addEventListener('mouseup', handleMouseUp);
-    
+
     // Add touch handlers for mobile support
     const handleTouchStart = (event: TouchEvent) => {
       if (event.touches.length === 1) {
-        mouseDownPos.current = { 
-          x: event.touches[0].clientX, 
-          y: event.touches[0].clientY 
+        mouseDownPos.current = {
+          x: event.touches[0].clientX,
+          y: event.touches[0].clientY,
         };
       }
     };
-    
-    gl.domElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+
+    gl.domElement.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    });
     gl.domElement.addEventListener('touchend', handleTouchEnd);
-    
+
     return () => {
       // Clear any pending timeout
       if (loadAppTimeoutRef.current) {
         clearTimeout(loadAppTimeoutRef.current);
         loadAppTimeoutRef.current = null;
       }
-      
+
       // Remove event listeners
       gl.domElement.removeEventListener('mousedown', handleMouseDown);
       gl.domElement.removeEventListener('mouseup', handleMouseUp);
       gl.domElement.removeEventListener('touchstart', handleTouchStart);
       gl.domElement.removeEventListener('touchend', handleTouchEnd);
-      
+
       // Clean up: dispose portals, remove cameras
       cameras.forEach((cam) => {
         const extCam = cam as ExtendedCamera;
@@ -389,14 +407,19 @@ export function SplitCameraRenderer({
 
   // Reset portal zoom when app closes, minimizes, or is minimizing (only the active portal)
   useEffect(() => {
-    if ((appLoaderState === 'idle' || appLoaderState === 'minimizing' || appLoaderState === 'minimized') && activePortalRef.current !== null) {
+    if (
+      (appLoaderState === 'idle' ||
+        appLoaderState === 'minimizing' ||
+        appLoaderState === 'minimized') &&
+      activePortalRef.current !== null
+    ) {
       const camera = cameras[activePortalRef.current] as ExtendedCamera;
       const { portalZoomState, portalAnimData, portalGroup } = camera;
-      
+
       if (portalZoomState) {
         portalZoomState.isZooming = true;
         portalZoomState.targetZ = PORTAL_DEFAULT_Z;
-        
+
         // When minimizing starts, initialize screenshot overlay position/scale
         // Iframe stays fullscreen, only screenshot moves with portal
         if (appLoaderState === 'minimizing' && portalGroup) {
@@ -404,9 +427,9 @@ export function SplitCameraRenderer({
           const projection = calculatePortalScreenProjection(
             portalGroup,
             camera,
-            gl.domElement
+            gl.domElement,
           );
-          
+
           // Initialize screenshot overlay (starts transparent)
           const { screenshotElement } = getPortalRefs();
           if (screenshotElement) {
@@ -417,12 +440,13 @@ export function SplitCameraRenderer({
           }
         }
       }
-      
+
       // Reset portal surface color when returning
       if (portalAnimData?.portalSurface?.material) {
-        const material = portalAnimData.portalSurface.material as THREE.MeshBasicMaterial;
+        const material = portalAnimData.portalSurface
+          .material as THREE.MeshBasicMaterial;
         material.color.setRGB(1, 1, 1); // White = shows full texture
-        
+
         // During minimize, punch hole to see iframe (screenshot is HTML overlay, not WebGL)
         if (appLoaderState === 'minimizing') {
           material.colorWrite = false; // Punch hole for iframe
@@ -435,17 +459,17 @@ export function SplitCameraRenderer({
         }
         material.needsUpdate = true;
       }
-      
+
       // Clear active portal reference only when fully idle (not minimized)
       if (appLoaderState === 'idle') {
         activePortalRef.current = null;
       }
     }
   }, [appLoaderState, cameras]);
-  
+
   /**
    * Main animation loop - runs every frame (60fps target)
-   * 
+   *
    * Responsibilities:
    * 1. Smooth camera position interpolation (horizontal scrolling between rooms)
    * 2. Dynamic split-screen viewport calculation for transitions
@@ -453,7 +477,7 @@ export function SplitCameraRenderer({
    * 4. Portal visual effects (glow breathing, particle rotation, frame rotation)
    * 5. Screenshot overlay positioning during app minimize (3D→2D projection)
    * 6. Manual render calls for each visible camera viewport
-   * 
+   *
    * Performance: Optimized to only animate visible portals (87% reduction in work)
    */
   useFrame((state) => {
@@ -462,14 +486,14 @@ export function SplitCameraRenderer({
 
     // Smooth lerp to target room progress with snap threshold
     const delta = targetProgress - currentRoomProgressRef.current;
-    
+
     // If very close to target, snap instantly (prevents slow final approach)
     if (Math.abs(delta) < 0.01) {
       currentRoomProgressRef.current = targetProgress;
     } else {
       currentRoomProgressRef.current += delta * CAMERA_LERP_SPEED;
     }
-    
+
     const currentProgress = currentRoomProgressRef.current;
 
     // Notify parent of room progress for UI updates
@@ -510,28 +534,31 @@ export function SplitCameraRenderer({
         const currentDistance = Math.abs(activeCamera.portalZoomState.currentZ);
         const closeDistance = Math.abs(PORTAL_ZOOM_TARGET_Z);
         const farDistance = Math.abs(PORTAL_DEFAULT_Z);
-        
+
         // Calculate zoom progress for fade timing
-        const distanceProgress = (currentDistance - closeDistance) / (farDistance - closeDistance);
-        
+        const distanceProgress =
+          (currentDistance - closeDistance) / (farDistance - closeDistance);
+
         // Project portal to screen coordinates
         const projection = calculatePortalScreenProjection(
           activeCamera.portalGroup,
           activeCamera,
-          gl.domElement
+          gl.domElement,
         );
-        
+
         // Update screenshot overlay (retrieved from ref manager, not window object)
         const { screenshotElement } = getPortalRefs();
         if (screenshotElement) {
           // Fade in over last 40% of animation
           if (distanceProgress > PORTAL_FADE_START_THRESHOLD) {
-            const fadeProgress = (distanceProgress - PORTAL_FADE_START_THRESHOLD) / (1.0 - PORTAL_FADE_START_THRESHOLD);
+            const fadeProgress =
+              (distanceProgress - PORTAL_FADE_START_THRESHOLD) /
+              (1.0 - PORTAL_FADE_START_THRESHOLD);
             screenshotElement.style.opacity = fadeProgress.toString();
           } else {
             screenshotElement.style.opacity = '0';
           }
-          
+
           // Position and scale to match portal
           screenshotElement.style.left = `${projection.screenX}px`;
           screenshotElement.style.top = `${projection.screenY}px`;
@@ -539,41 +566,86 @@ export function SplitCameraRenderer({
         }
       }
     }
-    
+
     // CRITICAL: Animate zooming portals even if not visible (so they can reset)
     for (let i = 0; i < cameras.length; i++) {
       const camera = cameras[i] as ExtendedCamera;
-      const { portalZoomState: zoomState, portalGroup, portalAnimData: animData } = camera;
-      
-      // Animate portal zoom (portal approaches camera)
+      const {
+        portalZoomState: zoomState,
+        portalGroup,
+        portalAnimData: animData,
+      } = camera;
+
+      // Animate camera dolly-in (camera moves forward, portal stays at world position)
       if (zoomState?.isZooming && portalGroup) {
         // Smooth lerp toward target position
-        zoomState.currentZ += (zoomState.targetZ - zoomState.currentZ) * PORTAL_ZOOM_LERP_SPEED;
-        
-        // Move portal closer to camera
-        portalGroup.position.z = zoomState.currentZ;
-        
+        zoomState.currentZ +=
+          (zoomState.targetZ - zoomState.currentZ) * PORTAL_ZOOM_LERP_SPEED;
+
+        // Store original camera Z position on first frame
+        if (camera.userData.originalZ === undefined) {
+          camera.userData.originalZ = camera.position.z;
+        }
+
+        // Calculate how much camera should move forward
+        // Portal starts at world Z = originalZ + PORTAL_DEFAULT_Z
+        // We want portal to stay at that world position
+        // So as portal's local Z changes, camera must compensate
+        const defaultDistance = Math.abs(PORTAL_DEFAULT_Z); // 5 units
+        const currentDistance = Math.abs(zoomState.currentZ); // Current distance (5 → 0.8)
+        const dollyForward = defaultDistance - currentDistance; // How far to move forward (0 → 4.2)
+
+        // Move camera forward in world space
+        camera.position.z = camera.userData.originalZ - dollyForward;
+
+        // Compensate portal's local position so it stays at original world position
+        // Portal world Z = camera world Z + portal local Z
+        // We want: portal world Z = originalZ + PORTAL_DEFAULT_Z (constant)
+        // So: portal local Z = (originalZ + PORTAL_DEFAULT_Z) - camera world Z
+        //                    = (originalZ + PORTAL_DEFAULT_Z) - (originalZ + dollyForward)
+        //                    = PORTAL_DEFAULT_Z - dollyForward
+        portalGroup.position.z = PORTAL_DEFAULT_Z + dollyForward;
+
         // Calculate zoom progress for fade effect
         const zoomProgress = calculateZoomProgress(
           zoomState.currentZ,
           PORTAL_ZOOM_TARGET_Z,
-          PORTAL_DEFAULT_Z
+          PORTAL_DEFAULT_Z,
         );
-        
+
         // Fade portal surface to black as it approaches (only when opening app, not when minimizing)
         // (zoomProgress already calculated above)
-        if (animData?.portalSurface?.material && appLoaderState !== 'minimizing' && appLoaderState !== 'minimized') {
-          const material = animData.portalSurface.material as THREE.MeshBasicMaterial;
+        if (
+          animData?.portalSurface?.material &&
+          appLoaderState !== 'minimizing' &&
+          appLoaderState !== 'minimized'
+        ) {
+          const material = animData.portalSurface
+            .material as THREE.MeshBasicMaterial;
           // Keep opacity constant but darken the color (fade from white to black)
           const brightness = 1 - zoomProgress; // 1 = white (shows texture), 0 = black
           material.color.setRGB(brightness, brightness, brightness);
         }
-        
+
         // Stop zooming when close enough
-        if (Math.abs(zoomState.targetZ - zoomState.currentZ) < PORTAL_ZOOM_THRESHOLD) {
+        if (
+          Math.abs(zoomState.targetZ - zoomState.currentZ) <
+          PORTAL_ZOOM_THRESHOLD
+        ) {
           zoomState.isZooming = false;
           zoomState.currentZ = zoomState.targetZ; // Snap to exact value
-          portalGroup.position.z = zoomState.targetZ; // Snap portal to final position
+
+          // Snap camera and portal to final positions
+          const finalDollyForward =
+            Math.abs(PORTAL_DEFAULT_Z) - Math.abs(zoomState.targetZ);
+          camera.position.z = camera.userData.originalZ + finalDollyForward;
+          portalGroup.position.z = PORTAL_DEFAULT_Z - finalDollyForward;
+
+          // If we're back at default position (zoom out complete), clear dolly state
+          if (Math.abs(zoomState.targetZ - PORTAL_DEFAULT_Z) < 0.01) {
+            camera.position.z = camera.userData.originalZ;
+            portalGroup.position.z = PORTAL_DEFAULT_Z;
+          }
         }
       }
     }
@@ -582,17 +654,19 @@ export function SplitCameraRenderer({
     for (const i of visibleCameraIndices) {
       const camera = cameras[i] as ExtendedCamera;
       const { portalAnimData: animData } = camera;
-      
+
       if (animData) {
         // Pulse outer glow (breathing effect)
-        (animData.outerGlow.material as THREE.MeshBasicMaterial).opacity = 0.3 + Math.sin(time * 2) * 0.15;
+        (animData.outerGlow.material as THREE.MeshBasicMaterial).opacity =
+          0.3 + Math.sin(time * 2) * 0.15;
         animData.outerGlow.scale.setScalar(1 + Math.sin(time * 1.5) * 0.05);
-        
+
         // Pulse inner glow (faster, more intense)
-        (animData.innerGlow.material as THREE.MeshBasicMaterial).opacity = 0.95 + Math.sin(time * 3) * 0.05;
-        
+        (animData.innerGlow.material as THREE.MeshBasicMaterial).opacity =
+          0.95 + Math.sin(time * 3) * 0.05;
+
         // Portal surface stays upright (no rotation to keep screenshots readable)
-        
+
         // Rotate 3D torus frames (slow rotation for depth)
         if (animData.torus) {
           animData.torus.rotation.x = time * 0.2; // Rotates horizontally
@@ -600,7 +674,7 @@ export function SplitCameraRenderer({
         if (animData.torus2) {
           animData.torus2.rotation.y = time * 0.15; // Rotates vertically at different speed
         }
-        
+
         // Animate orbital particles (rotate around portal)
         if (animData.orbitalParticles) {
           for (const particle of animData.orbitalParticles) {
@@ -613,7 +687,7 @@ export function SplitCameraRenderer({
             particle.position.y = Math.sin(newAngle) * radius;
           }
         }
-        
+
         // Animate swirl particles (floating + slow rotation)
         if (animData.swirlParticles) {
           for (const particle of animData.swirlParticles) {
@@ -623,20 +697,22 @@ export function SplitCameraRenderer({
             const baseRadius = swirlParticle.baseRadius;
             const baseDepth = swirlParticle.baseDepth;
             const floatOffset = swirlParticle.floatOffset;
-            
+
             // Slow spiral inward/outward
             const newAngle = baseAngle + time * 0.8;
-            const radiusWave = baseRadius + Math.sin(time * 1.5 + floatOffset) * 0.2;
-            
+            const radiusWave =
+              baseRadius + Math.sin(time * 1.5 + floatOffset) * 0.2;
+
             // Gentle floating motion
             const floatZ = baseDepth + Math.sin(time * 2 + floatOffset) * 0.15;
-            
+
             particle.position.x = Math.cos(newAngle) * radiusWave;
             particle.position.y = Math.sin(newAngle) * radiusWave;
             particle.position.z = floatZ;
-            
+
             // Pulse opacity for extra mystique
-            (particle.material as THREE.MeshBasicMaterial).opacity = 0.7 + Math.sin(time * 3 + floatOffset) * 0.2;
+            (particle.material as THREE.MeshBasicMaterial).opacity =
+              0.7 + Math.sin(time * 3 + floatOffset) * 0.2;
           }
         }
       }
@@ -644,12 +720,15 @@ export function SplitCameraRenderer({
 
     const leftCamera = cameras[leftCameraIndex];
     const rightCamera = cameras[rightCameraIndex];
-    
+
     // Update R3F's active camera for other systems (e.g., raycasting, effects)
     set({ camera: leftCamera });
 
     // Calculate dynamic viewport widths based on transition progress
-    const { leftWidth, rightWidth } = calculateViewportWidths(transitionProgress, size.width);
+    const { leftWidth, rightWidth } = calculateViewportWidths(
+      transitionProgress,
+      size.width,
+    );
 
     // Send debug info to parent
     if (onDebugUpdate) {
@@ -667,11 +746,14 @@ export function SplitCameraRenderer({
     }
 
     // Check WebGL context is not lost before rendering
-    if (!gl.domElement.getContext('webgl2') && !gl.domElement.getContext('webgl')) {
+    if (
+      !gl.domElement.getContext('webgl2') &&
+      !gl.domElement.getContext('webgl')
+    ) {
       console.error('WebGL context lost');
       return;
     }
-    
+
     // Clear viewport to black before rendering split cameras
     gl.setScissorTest(true);
     gl.autoClear = false;
@@ -687,7 +769,7 @@ export function SplitCameraRenderer({
     if (leftWidth > 0) {
       leftCamera.aspect = leftWidth / size.height;
       leftCamera.updateProjectionMatrix();
-      
+
       setViewOffsetForDynamicSplit(
         leftCamera,
         size.width,
@@ -695,7 +777,7 @@ export function SplitCameraRenderer({
         leftWidth,
         0,
       );
-      
+
       gl.setViewport(0, 0, leftWidth, size.height);
       gl.setScissor(0, 0, leftWidth, size.height);
       gl.render(scene, leftCamera);
@@ -706,7 +788,7 @@ export function SplitCameraRenderer({
     if (rightWidth > 0) {
       rightCamera.aspect = rightWidth / size.height;
       rightCamera.updateProjectionMatrix();
-      
+
       setViewOffsetForDynamicSplit(
         rightCamera,
         size.width,
@@ -714,7 +796,7 @@ export function SplitCameraRenderer({
         rightWidth,
         size.width - rightWidth,
       );
-      
+
       gl.setViewport(leftWidth, 0, rightWidth, size.height);
       gl.setScissor(leftWidth, 0, rightWidth, size.height);
       gl.render(scene, rightCamera);
