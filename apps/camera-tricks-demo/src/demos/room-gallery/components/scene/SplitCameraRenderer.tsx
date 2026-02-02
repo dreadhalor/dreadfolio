@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
-import { useThree, useFrame, ThreeEvent } from '@react-three/fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
   CAMERA_HEIGHT,
@@ -54,6 +54,18 @@ function setViewOffsetForDynamicSplit(
     viewportWidth, // viewport width (dynamic)
     screenHeight, // viewport height
   );
+}
+
+/**
+ * Helper: Calculate viewport widths for split-screen rendering
+ * @param transitionProgress - Progress between rooms (0.0 to 1.0)
+ * @param screenWidth - Full screen width
+ * @returns Object with leftWidth and rightWidth
+ */
+function calculateViewportWidths(transitionProgress: number, screenWidth: number) {
+  const leftWidth = Math.max(0, screenWidth * (1 - transitionProgress));
+  const rightWidth = screenWidth - leftWidth;
+  return { leftWidth, rightWidth };
 }
 
 /**
@@ -300,8 +312,7 @@ export function SplitCameraRenderer({
     set({ camera: leftCamera });
 
     // Calculate dynamic viewport widths based on transition progress
-    const leftWidth = (1 - transitionProgress) * size.width;
-    const rightWidth = transitionProgress * size.width;
+    const { leftWidth, rightWidth } = calculateViewportWidths(transitionProgress, size.width);
 
     // Send debug info to parent
     if (onDebugUpdate) {
@@ -340,7 +351,7 @@ export function SplitCameraRenderer({
       size.width - rightWidth,
     );
 
-    // Clear and prepare for split rendering
+    // Clear viewport to black before rendering split cameras
     gl.setScissorTest(true);
     gl.autoClear = false;
     gl.setClearColor(0x000000); // Black background to match fog

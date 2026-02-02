@@ -39,7 +39,7 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: ScenePro
       <DrawCallMonitor onUpdate={onDrawCallsUpdate} />
       
       <SceneLighting />
-      <AtmosphericFog color={`#${fogColor}`} />
+      <AtmosphericFog color={fogColor} />
 
       {/* Render all rooms */}
       {ROOMS.map((room, index) => {

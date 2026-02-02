@@ -21,6 +21,19 @@ const COLORS = [
   '#FF8800', // Orange
 ];
 
+// Sphere animation configuration
+const SPHERE_CONFIG = {
+  COUNT: 7,
+  MIN_RADIUS: 0.8,
+  MAX_RADIUS: 1.5,
+  MIN_SPEED: 0.15,
+  MAX_SPEED: 0.4,
+  MIN_ORBIT_RADIUS: 4,
+  MAX_ORBIT_RADIUS: 8,
+  MIN_VERTICAL_OFFSET: 1.5,
+  MAX_VERTICAL_OFFSET: 3.0,
+};
+
 /**
  * Homepage Room - Glassmorphic Design
  * 
@@ -38,14 +51,14 @@ export function HomepageRoom({ colors, offsetX }: HomepageRoomProps) {
   // Sphere configuration - spread out across the room
   const spheres = useMemo(
     () =>
-      Array.from({ length: 7 }, (_, i) => ({
+      Array.from({ length: SPHERE_CONFIG.COUNT }, (_, i) => ({
         color: COLORS[i % COLORS.length],
-        radius: 0.8 + Math.random() * 0.7, // Varied sizes (0.8 - 1.5)
-        phase: Math.random() * Math.PI * 2, // Random starting phase
-        speed: 0.15 + Math.random() * 0.25, // Different speeds (0.15 - 0.4)
-        orbitRadius: 4 + Math.random() * 4, // Large orbit size (4 - 8) for spread
-        verticalOffset: 1.5 + Math.random() * 1.5, // Varied height centers (1.5 - 3)
-        depthPhase: Math.random() * Math.PI * 2, // Independent Z-axis phase
+        radius: SPHERE_CONFIG.MIN_RADIUS + Math.random() * (SPHERE_CONFIG.MAX_RADIUS - SPHERE_CONFIG.MIN_RADIUS),
+        phase: Math.random() * Math.PI * 2,
+        speed: SPHERE_CONFIG.MIN_SPEED + Math.random() * (SPHERE_CONFIG.MAX_SPEED - SPHERE_CONFIG.MIN_SPEED),
+        orbitRadius: SPHERE_CONFIG.MIN_ORBIT_RADIUS + Math.random() * (SPHERE_CONFIG.MAX_ORBIT_RADIUS - SPHERE_CONFIG.MIN_ORBIT_RADIUS),
+        verticalOffset: SPHERE_CONFIG.MIN_VERTICAL_OFFSET + Math.random() * (SPHERE_CONFIG.MAX_VERTICAL_OFFSET - SPHERE_CONFIG.MIN_VERTICAL_OFFSET),
+        depthPhase: Math.random() * Math.PI * 2,
       })),
     []
   );

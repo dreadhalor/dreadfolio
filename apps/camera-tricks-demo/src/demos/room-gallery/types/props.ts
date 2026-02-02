@@ -7,8 +7,7 @@ import { RoomColors, RoomData } from './index';
 
 // Scene component props
 export interface SceneProps {
-  targetXRef: React.MutableRefObject<number>;
-  cameraX: number;
+  roomProgress: number;
   onFpsUpdate: (fps: number) => void;
   onDrawCallsUpdate: (calls: number) => void;
 }
