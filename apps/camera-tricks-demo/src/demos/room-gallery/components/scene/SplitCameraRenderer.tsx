@@ -343,6 +343,7 @@ export function SplitCameraRenderer({
     // Clear and prepare for split rendering
     gl.setScissorTest(true);
     gl.autoClear = false;
+    gl.setClearColor(0x000000); // Black background to match fog
     gl.clear();
 
     // Render left viewport
