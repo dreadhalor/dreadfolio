@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useAppLoader } from '../../providers/AppLoaderContext';
 import { PORTFOLIO_APPS } from '../../config/apps';
 import { usePortalScreenshotRef } from '../../hooks/usePortalRefs';
+import { Z_INDEX } from '../../config/constants';
 
 /**
  * PortalScreenshotOverlay - Fades in the static app screenshot over the live iframe during minimize
@@ -36,10 +37,10 @@ export function PortalScreenshotOverlay() {
         left: '50%', // Fallback, overridden by direct DOM manipulation
         width: '100vw',
         height: '100vh',
-        objectFit: 'contain', // Show full image without cropping
+        objectFit: 'cover', // Fill portal completely (matches portal screenshot display mode)
         transform: 'translate(-50%, -50%) scale(1)', // Fallback, overridden by direct DOM manipulation
         transformOrigin: 'center center',
-        zIndex: 5, // Between iframe (1) and canvas (10)
+        zIndex: Z_INDEX.SCREENSHOT_OVERLAY, // Between iframe and canvas
         opacity: 0, // Start transparent, updated via direct DOM manipulation
         pointerEvents: 'none',
         transition: 'none', // No CSS transition, updated via direct DOM manipulation

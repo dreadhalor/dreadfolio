@@ -19,12 +19,7 @@ import { calculateCameraPosition } from '../../utils/cameraCalculations';
 import { ROOMS } from '../../config/rooms';
 import { createPortalGroup } from './AppPortal';
 import { useAppLoader } from '../../providers/AppLoaderContext';
-import { getPortalRefs } from '../../hooks/usePortalRefs';
-import {
-  calculatePortalScreenProjection,
-  calculateZoomProgress,
-  PORTAL_FADE_START_THRESHOLD,
-} from '../../utils/portalProjection';
+import { calculateZoomProgress } from '../../utils/portalProjection';
 import type { RoomData } from '../../types';
 
 // Development mode flag for conditional logging (Vite build system replaces this at build time)
@@ -419,45 +414,13 @@ export function SplitCameraRenderer({
       if (portalZoomState) {
         portalZoomState.isZooming = true;
         portalZoomState.targetZ = PORTAL_DEFAULT_Z;
-
-        // When minimizing starts, initialize screenshot overlay position/scale
-        // Iframe stays fullscreen, only screenshot moves with portal
-        if (appLoaderState === 'minimizing' && portalGroup) {
-          // Project portal to screen coordinates
-          const projection = calculatePortalScreenProjection(
-            portalGroup,
-            camera,
-            gl.domElement,
-          );
-
-          // Initialize screenshot overlay (starts transparent)
-          const { screenshotElement } = getPortalRefs();
-          if (screenshotElement) {
-            screenshotElement.style.left = `${projection.screenX}px`;
-            screenshotElement.style.top = `${projection.screenY}px`;
-            screenshotElement.style.opacity = '0';
-            screenshotElement.style.transform = `translate(-50%, -50%) scale(${projection.scale})`;
-          }
-        }
       }
 
-      // Reset portal surface color when returning
+      // Ensure portal shows full texture when zoom starts
       if (portalAnimData?.portalSurface?.material) {
         const material = portalAnimData.portalSurface
           .material as THREE.MeshBasicMaterial;
         material.color.setRGB(1, 1, 1); // White = shows full texture
-
-        // During minimize, punch hole to see iframe (screenshot is HTML overlay, not WebGL)
-        if (appLoaderState === 'minimizing') {
-          material.colorWrite = false; // Punch hole for iframe
-          material.depthWrite = true;
-        } else {
-          material.colorWrite = true; // Show screenshot in 3D
-          material.opacity = 1.0;
-          material.transparent = false;
-          material.depthWrite = true;
-        }
-        material.needsUpdate = true;
       }
 
       // Clear active portal reference only when fully idle (not minimized)
@@ -473,10 +436,9 @@ export function SplitCameraRenderer({
    * Responsibilities:
    * 1. Smooth camera position interpolation (horizontal scrolling between rooms)
    * 2. Dynamic split-screen viewport calculation for transitions
-   * 3. Portal zoom animations (approach/retreat)
+   * 3. Portal zoom animations (approach/retreat) with bidirectional fade
    * 4. Portal visual effects (glow breathing, particle rotation, frame rotation)
-   * 5. Screenshot overlay positioning during app minimize (3D→2D projection)
-   * 6. Manual render calls for each visible camera viewport
+   * 5. Manual render calls for each visible camera viewport
    *
    * Performance: Optimized to only animate visible portals (87% reduction in work)
    */
@@ -506,6 +468,27 @@ export function SplitCameraRenderer({
         currentProgress,
         CAMERA_SPACING,
       );
+      
+      // SAFETY CHECK: Validate portal world position hasn't drifted (development only)
+      if (DEBUG) {
+        const camera = cameras[i] as ExtendedCamera;
+        if (camera.userData.originalZ !== undefined && camera.portalGroup) {
+          const portalWorldPos = new THREE.Vector3();
+          camera.portalGroup.getWorldPosition(portalWorldPos);
+          const expectedWorldZ = camera.userData.originalZ + PORTAL_DEFAULT_Z;
+          const drift = Math.abs(portalWorldPos.z - expectedWorldZ);
+          
+          if (drift > 0.1) {
+            console.warn(`⚠️ Portal ${i} world position drift detected!`, {
+              expected: expectedWorldZ,
+              actual: portalWorldPos.z,
+              drift: drift.toFixed(3),
+              cameraZ: camera.position.z.toFixed(3),
+              portalLocalZ: camera.portalGroup.position.z.toFixed(3),
+            });
+          }
+        }
+      }
     }
 
     // DERIVED VALUES from roomProgress:
@@ -526,47 +509,6 @@ export function SplitCameraRenderer({
       visibleCameraIndices.push(rightCameraIndex);
     }
 
-    // Update screenshot overlay position/scale during minimize animation
-    // Uses direct DOM manipulation for 60fps performance (bypasses React render cycle)
-    if (appLoaderState === 'minimizing' && activePortalRef.current !== null) {
-      const activeCamera = cameras[activePortalRef.current] as ExtendedCamera;
-      if (activeCamera?.portalZoomState && activeCamera?.portalGroup) {
-        const currentDistance = Math.abs(activeCamera.portalZoomState.currentZ);
-        const closeDistance = Math.abs(PORTAL_ZOOM_TARGET_Z);
-        const farDistance = Math.abs(PORTAL_DEFAULT_Z);
-
-        // Calculate zoom progress for fade timing
-        const distanceProgress =
-          (currentDistance - closeDistance) / (farDistance - closeDistance);
-
-        // Project portal to screen coordinates
-        const projection = calculatePortalScreenProjection(
-          activeCamera.portalGroup,
-          activeCamera,
-          gl.domElement,
-        );
-
-        // Update screenshot overlay (retrieved from ref manager, not window object)
-        const { screenshotElement } = getPortalRefs();
-        if (screenshotElement) {
-          // Fade in over last 40% of animation
-          if (distanceProgress > PORTAL_FADE_START_THRESHOLD) {
-            const fadeProgress =
-              (distanceProgress - PORTAL_FADE_START_THRESHOLD) /
-              (1.0 - PORTAL_FADE_START_THRESHOLD);
-            screenshotElement.style.opacity = fadeProgress.toString();
-          } else {
-            screenshotElement.style.opacity = '0';
-          }
-
-          // Position and scale to match portal
-          screenshotElement.style.left = `${projection.screenX}px`;
-          screenshotElement.style.top = `${projection.screenY}px`;
-          screenshotElement.style.transform = `translate(-50%, -50%) scale(${projection.scale})`;
-        }
-      }
-    }
-
     // CRITICAL: Animate zooming portals even if not visible (so they can reset)
     for (let i = 0; i < cameras.length; i++) {
       const camera = cameras[i] as ExtendedCamera;
@@ -576,55 +518,68 @@ export function SplitCameraRenderer({
         portalAnimData: animData,
       } = camera;
 
-      // Animate camera dolly-in (camera moves forward, portal stays at world position)
+      /**
+       * Camera dolly-in with portal world position compensation
+       * 
+       * GOAL: Camera moves forward, portal stays at fixed world position
+       * 
+       * MATH:
+       *   Portal World Z = Camera World Z + Portal Local Z
+       *   Target: Portal World Z = originalZ + PORTAL_DEFAULT_Z (constant)
+       * 
+       * SOLUTION:
+       *   1. Store original camera position when zoom starts
+       *   2. Calculate dolly amount: defaultDistance - currentDistance
+       *   3. Move camera: position.z = originalZ - dollyAmount (forward in -Z)
+       *   4. Compensate portal: position.z = PORTAL_DEFAULT_Z + dollyAmount
+       * 
+       * RESULT: Portal world position remains constant throughout animation!
+       */
       if (zoomState?.isZooming && portalGroup) {
         // Smooth lerp toward target position
         zoomState.currentZ +=
           (zoomState.targetZ - zoomState.currentZ) * PORTAL_ZOOM_LERP_SPEED;
 
-        // Store original camera Z position on first frame
+        // Store original camera Z position when zoom animation starts
         if (camera.userData.originalZ === undefined) {
           camera.userData.originalZ = camera.position.z;
         }
 
-        // Calculate how much camera should move forward
-        // Portal starts at world Z = originalZ + PORTAL_DEFAULT_Z
-        // We want portal to stay at that world position
-        // So as portal's local Z changes, camera must compensate
-        const defaultDistance = Math.abs(PORTAL_DEFAULT_Z); // 5 units
-        const currentDistance = Math.abs(zoomState.currentZ); // Current distance (5 → 0.8)
-        const dollyForward = defaultDistance - currentDistance; // How far to move forward (0 → 4.2)
+        // Calculate camera dolly amount based on distance change
+        const defaultDistance = Math.abs(PORTAL_DEFAULT_Z); // Starting distance
+        const currentDistance = Math.abs(zoomState.currentZ); // Current distance during lerp
+        const dollyAmount = defaultDistance - currentDistance; // Camera movement offset
 
-        // Move camera forward in world space
-        camera.position.z = camera.userData.originalZ - dollyForward;
+        // Move camera forward in world space (Three.js convention: -Z is forward)
+        camera.position.z = camera.userData.originalZ - dollyAmount;
 
-        // Compensate portal's local position so it stays at original world position
-        // Portal world Z = camera world Z + portal local Z
-        // We want: portal world Z = originalZ + PORTAL_DEFAULT_Z (constant)
-        // So: portal local Z = (originalZ + PORTAL_DEFAULT_Z) - camera world Z
-        //                    = (originalZ + PORTAL_DEFAULT_Z) - (originalZ + dollyForward)
-        //                    = PORTAL_DEFAULT_Z - dollyForward
-        portalGroup.position.z = PORTAL_DEFAULT_Z + dollyForward;
+        // Compensate portal's local position to maintain constant world position
+        // Portal world Z = camera.position.z + portalGroup.position.z
+        //                = (originalZ - dollyAmount) + (PORTAL_DEFAULT_Z + dollyAmount)
+        //                = originalZ + PORTAL_DEFAULT_Z ✅ Constant!
+        portalGroup.position.z = PORTAL_DEFAULT_Z + dollyAmount;
 
-        // Calculate zoom progress for fade effect
-        const zoomProgress = calculateZoomProgress(
-          zoomState.currentZ,
-          PORTAL_ZOOM_TARGET_Z,
-          PORTAL_DEFAULT_Z,
-        );
-
-        // Fade portal surface to black as it approaches (only when opening app, not when minimizing)
-        // (zoomProgress already calculated above)
-        if (
-          animData?.portalSurface?.material &&
-          appLoaderState !== 'minimizing' &&
-          appLoaderState !== 'minimized'
-        ) {
+        // Fade portal surface based on zoom direction
+        if (animData?.portalSurface?.material) {
           const material = animData.portalSurface
             .material as THREE.MeshBasicMaterial;
-          // Keep opacity constant but darken the color (fade from white to black)
-          const brightness = 1 - zoomProgress; // 1 = white (shows texture), 0 = black
-          material.color.setRGB(brightness, brightness, brightness);
+          
+          // Check which direction portal is zooming
+          const isZoomingIn = Math.abs(zoomState.targetZ) < Math.abs(PORTAL_DEFAULT_Z);
+          
+          if (isZoomingIn) {
+            // Portal approaching camera: fade FROM texture TO black
+            const zoomProgress = calculateZoomProgress(
+              zoomState.currentZ,
+              PORTAL_ZOOM_TARGET_Z,
+              PORTAL_DEFAULT_Z,
+            );
+            const brightness = 1 - zoomProgress; // 1 = white/texture (far), 0 = black (close)
+            material.color.setRGB(brightness, brightness, brightness);
+          } else {
+            // Portal moving away (minimizing): keep at full brightness
+            material.color.setRGB(1, 1, 1); // Full texture throughout minimize
+          }
         }
 
         // Stop zooming when close enough
@@ -635,16 +590,17 @@ export function SplitCameraRenderer({
           zoomState.isZooming = false;
           zoomState.currentZ = zoomState.targetZ; // Snap to exact value
 
-          // Snap camera and portal to final positions
+          // Snap camera and portal to final positions (use same signs as animation loop)
           const finalDollyForward =
             Math.abs(PORTAL_DEFAULT_Z) - Math.abs(zoomState.targetZ);
-          camera.position.z = camera.userData.originalZ + finalDollyForward;
-          portalGroup.position.z = PORTAL_DEFAULT_Z - finalDollyForward;
+          camera.position.z = camera.userData.originalZ - finalDollyForward; // ✅ Match line 599
+          portalGroup.position.z = PORTAL_DEFAULT_Z + finalDollyForward; // ✅ Match line 607
 
           // If we're back at default position (zoom out complete), clear dolly state
           if (Math.abs(zoomState.targetZ - PORTAL_DEFAULT_Z) < 0.01) {
             camera.position.z = camera.userData.originalZ;
             portalGroup.position.z = PORTAL_DEFAULT_Z;
+            delete camera.userData.originalZ; // Clear stale cached value
           }
         }
       }

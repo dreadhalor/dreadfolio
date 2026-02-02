@@ -7,7 +7,8 @@ import {
   MIN_ROOM_PROGRESS, 
   MAX_ROOM_PROGRESS, 
   DRAG_SENSITIVITY, 
-  SNAP_THRESHOLD 
+  SNAP_THRESHOLD,
+  Z_INDEX 
 } from './config/constants';
 
 // Components
@@ -175,14 +176,11 @@ function RoomGalleryInner() {
           antialias: false, // Disabled for 20-30% performance gain
           powerPreference: "high-performance",
           autoClear: false, // We manually clear in SplitCameraRenderer
-          alpha: true, // Enable transparency for punch-through
-          premultipliedAlpha: false,
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
         style={{
           visibility: appLoaderState === 'app-active' ? 'hidden' : 'visible',
           position: 'relative',
-          zIndex: appLoaderState === 'minimizing' ? 10 : 'auto',
           background: 'transparent',
         }}
       >
@@ -197,11 +195,6 @@ function RoomGalleryInner() {
           onDebugUpdate={setDebugInfo}
         />
       </Canvas>
-
-      {/* Portal screenshot overlay - fades in during minimize */}
-      {appLoaderState === 'minimizing' && (
-        <PortalScreenshotOverlay />
-      )}
 
       {/* UI Overlays - show when idle, minimizing, or when app is minimized */}
       {(appLoaderState === 'idle' || appLoaderState === 'minimizing' || appLoaderState === 'minimized') && (

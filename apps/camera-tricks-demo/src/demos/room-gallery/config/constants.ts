@@ -61,3 +61,15 @@ export const CAMERA_SAFE_ZONE = {
   minY: 0,
   maxY: CAMERA_HEIGHT + 2, // Keep tall objects away from camera height
 } as const;
+
+// Z-index layering for portal punch-through effect
+export const Z_INDEX = {
+  IFRAME_HIDDEN: -999, // Iframe when minimized and hidden
+  IFRAME_BACKGROUND: 1, // Iframe visible through portal hole during minimize
+  SCREENSHOT_OVERLAY: 5, // Screenshot fading in over iframe during minimize
+  CANVAS: 10, // WebGL canvas with punched hole
+  IFRAME_TRANSITIONING: 500, // Iframe during zoom-in transition
+  BLACK_OVERLAY: 999, // Black fade overlay during transitions
+  IFRAME_ACTIVE: 1000, // Iframe when app is fully active
+  MINIMIZE_BUTTON: 1001, // Back to gallery button
+} as const;

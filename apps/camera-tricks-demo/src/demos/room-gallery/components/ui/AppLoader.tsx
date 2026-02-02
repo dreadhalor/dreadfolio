@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useAppLoader } from '../../providers/AppLoaderContext';
 import { usePortalIframeRef } from '../../hooks/usePortalRefs';
+import { Z_INDEX } from '../../config/constants';
 
 /**
  * AppLoader - Handles the portal zoom animation and app display
@@ -25,23 +26,27 @@ export function AppLoader() {
   // Register iframe ref with portal ref manager (replaces window object pollution)
   usePortalIframeRef(iframeRef);
   
-  // Manage iframe opacity for smooth fade-in when reopening minimized apps
+  // Manage iframe opacity transitions
   useLayoutEffect(() => {
-    if (iframeRef.current && state === 'zooming-in') {
-      // Force opacity to 0 so CSS transition can fade to 1
+    if (!iframeRef.current) return;
+    
+    if (state === 'zooming-in') {
+      // Start at opacity 0, then fade in after short delay (portal fades to black first)
       iframeRef.current.style.opacity = '0';
-      // Next frame: clear to let CSS transition take over
       requestAnimationFrame(() => {
         if (iframeRef.current) {
-          iframeRef.current.style.opacity = '';
+          iframeRef.current.style.opacity = '1';
         }
       });
+    } else if (state === 'minimizing') {
+      // Fade out to black
+      iframeRef.current.style.opacity = '0';
     }
   }, [state]);
   
   // Calculate iframe styles based on state
   const getIframeStyles = () => {
-    // When minimizing, keep iframe fullscreen (just visible through portal hole)
+    // When minimizing: fade to black
     if (state === 'minimizing') {
       return {
         position: 'fixed' as const,
@@ -50,15 +55,16 @@ export function AppLoader() {
         width: '100vw',
         height: '100vh',
         border: 'none',
-        background: '#fff',
-        zIndex: 1, // Behind canvas so it shows through portal hole
-        opacity: 1,
+        background: '#000',
+        zIndex: Z_INDEX.IFRAME_ACTIVE,
+        opacity: 0, // Will fade to 0
         visibility: 'visible' as const,
         pointerEvents: 'none' as const,
+        transition: 'opacity 0.5s ease-in-out',
       };
     }
     
-    // When fully minimized, hide (display:none set via direct DOM manipulation after zoom completes)
+    // When fully minimized, hide completely
     if (state === 'minimized') {
       return {
         position: 'fixed' as const,
@@ -67,19 +73,51 @@ export function AppLoader() {
         width: '100vw',
         height: '100vh',
         border: 'none',
-        background: '#fff',
-        zIndex: -999,
+        background: '#000',
+        zIndex: Z_INDEX.IFRAME_HIDDEN,
         opacity: 0,
         visibility: 'hidden' as const,
         pointerEvents: 'none' as const,
-        // display:none is set via direct DOM manipulation after animation completes
       };
     }
     
-    // During zoom-in or when active
-    const isVisible = state === 'app-active';
-    const isZoomingIn = state === 'zooming-in';
+    // When zooming in: fade in from black
+    if (state === 'zooming-in') {
+      return {
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        border: 'none',
+        background: '#000',
+        zIndex: Z_INDEX.IFRAME_TRANSITIONING,
+        opacity: 0, // Start at 0, will animate to 1
+        visibility: 'visible' as const,
+        pointerEvents: 'none' as const,
+        transition: 'opacity 0.5s ease-in-out 0.3s', // Delay slightly for portal to fade to black first
+      };
+    }
     
+    // When active: fully visible
+    if (state === 'app-active') {
+      return {
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        border: 'none',
+        background: '#fff',
+        zIndex: Z_INDEX.IFRAME_ACTIVE,
+        opacity: 1,
+        visibility: 'visible' as const,
+        pointerEvents: 'auto' as const,
+        transition: 'opacity 0.5s ease-in-out',
+      };
+    }
+    
+    // Default fallback
     return {
       position: 'fixed' as const,
       top: 0,
@@ -87,12 +125,11 @@ export function AppLoader() {
       width: '100vw',
       height: '100vh',
       border: 'none',
-      background: '#fff',
-      zIndex: isVisible ? 1000 : 500,
-      opacity: isVisible ? 1 : 0, // Fade in during zoom-in transition
-      visibility: (isVisible || isZoomingIn ? 'visible' : 'hidden') as const,
-      pointerEvents: (isVisible ? 'auto' : 'none') as const,
-      transition: 'opacity 0.5s ease-in-out', // Smooth fade-in
+      background: '#000',
+      zIndex: Z_INDEX.IFRAME_HIDDEN,
+      opacity: 0,
+      visibility: 'hidden' as const,
+      pointerEvents: 'none' as const,
     };
   };
 
@@ -142,7 +179,7 @@ export function AppLoader() {
             width: '100vw',
             height: '100vh',
             background: '#000',
-            zIndex: 999,
+            zIndex: Z_INDEX.BLACK_OVERLAY,
             opacity,
             pointerEvents: 'none',
           }}
@@ -164,7 +201,7 @@ export function AppLoader() {
             fontSize: '16px',
             fontWeight: '600',
             cursor: 'pointer',
-            zIndex: 1001,
+            zIndex: Z_INDEX.MINIMIZE_BUTTON,
             transition: 'all 0.2s',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
           }}

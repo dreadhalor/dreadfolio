@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PORTAL_ZOOM_TARGET_Z, PORTAL_DEFAULT_Z } from '../config/constants';
 
 /**
  * Portal projection constants
@@ -54,4 +55,20 @@ export function calculateZoomProgress(
   defaultZ: number
 ): number {
   return 1 - (currentZ - targetZ) / (defaultZ - targetZ);
+}
+
+/**
+ * Calculates the minimize animation progress for screenshot fade timing
+ * 
+ * Used during app minimize to determine when to fade in the screenshot overlay.
+ * Returns a normalized value from 0 (portal at close position) to 1 (portal at far position).
+ * 
+ * @param currentZ - Current portal Z position during minimize animation
+ * @returns Progress value from 0 (close) to 1 (far)
+ */
+export function calculateMinimizeProgress(currentZ: number): number {
+  const currentDistance = Math.abs(currentZ);
+  const closeDistance = Math.abs(PORTAL_ZOOM_TARGET_Z);
+  const farDistance = Math.abs(PORTAL_DEFAULT_Z);
+  return (currentDistance - closeDistance) / (farDistance - closeDistance);
 }
