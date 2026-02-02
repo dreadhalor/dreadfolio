@@ -19,7 +19,7 @@ import { calculateCameraPosition } from '../../utils/cameraCalculations';
 import { ROOMS } from '../../config/rooms';
 import { createPortalGroup } from './AppPortal';
 import { useAppLoader } from '../../providers/AppLoaderContext';
-import { calculateZoomProgress } from '../../utils/portalProjection';
+import { calculatePortalBrightness } from '../../utils/portalProjection';
 import type { RoomData } from '../../types';
 
 // Development mode flag for conditional logging (Vite build system replaces this at build time)
@@ -177,7 +177,7 @@ export function SplitCameraRenderer({
   onRoomProgressUpdate,
   onDebugUpdate,
 }: SplitCameraRendererProps) {
-  const { gl, scene, size, set, camera: activeCamera } = useThree();
+  const { gl, scene, size, set } = useThree();
   const currentRoomProgressRef = useRef(0);
   const { loadApp, state: appLoaderState } = useAppLoader();
 
@@ -382,6 +382,9 @@ export function SplitCameraRenderer({
         loadAppTimeoutRef.current = null;
       }
 
+      // Clear active portal ref
+      activePortalRef.current = null;
+
       // Remove event listeners
       gl.domElement.removeEventListener('mousedown', handleMouseDown);
       gl.domElement.removeEventListener('mouseup', handleMouseUp);
@@ -398,7 +401,7 @@ export function SplitCameraRenderer({
         cam.clear();
       });
     };
-  }, [cameras, scene, gl, raycaster]);
+  }, [cameras, scene, gl]);
 
   // Reset portal zoom when app closes, minimizes, or is minimizing (only the active portal)
   useEffect(() => {
@@ -409,7 +412,7 @@ export function SplitCameraRenderer({
       activePortalRef.current !== null
     ) {
       const camera = cameras[activePortalRef.current] as ExtendedCamera;
-      const { portalZoomState, portalAnimData, portalGroup } = camera;
+      const { portalZoomState, portalAnimData } = camera;
 
       if (portalZoomState) {
         portalZoomState.isZooming = true;
@@ -567,19 +570,9 @@ export function SplitCameraRenderer({
           // Check which direction portal is zooming
           const isZoomingIn = Math.abs(zoomState.targetZ) < Math.abs(PORTAL_DEFAULT_Z);
           
-          if (isZoomingIn) {
-            // Portal approaching camera: fade FROM texture TO black
-            const zoomProgress = calculateZoomProgress(
-              zoomState.currentZ,
-              PORTAL_ZOOM_TARGET_Z,
-              PORTAL_DEFAULT_Z,
-            );
-            const brightness = 1 - zoomProgress; // 1 = white/texture (far), 0 = black (close)
-            material.color.setRGB(brightness, brightness, brightness);
-          } else {
-            // Portal moving away (minimizing): keep at full brightness
-            material.color.setRGB(1, 1, 1); // Full texture throughout minimize
-          }
+          // Calculate brightness using centralized utility
+          const brightness = calculatePortalBrightness(zoomState.currentZ, isZoomingIn);
+          material.color.setRGB(brightness, brightness, brightness);
         }
 
         // Stop zooming when close enough

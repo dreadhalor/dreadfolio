@@ -20,6 +20,16 @@ interface SwirlParticle extends THREE.Mesh {
 }
 
 /**
+ * Portal configuration constants
+ * Defines the number of decorative elements per portal
+ */
+const PORTAL_CONFIG = {
+  ORBITAL_PARTICLES: 20,
+  ORNAMENTS: 4,
+  SWIRL_PARTICLES: 12,
+} as const;
+
+/**
  * Shared geometries across all portals for performance
  * Created once and reused by all 15 portals
  */
@@ -109,8 +119,8 @@ export function createPortalGroup(room: RoomData) {
       undefined, // onLoad
       undefined, // onProgress
       (error) => {
-        console.warn(`Failed to load texture for ${room.name}:`, error);
-        // Texture will remain black, which is acceptable fallback
+        console.error(`Failed to load portal texture for ${room.name}:`, error);
+        // Fallback: texture will remain black, which is acceptable
       }
     );
     texture.colorSpace = THREE.SRGBColorSpace; // Correct color space for accurate colors
@@ -170,15 +180,14 @@ export function createPortalGroup(room: RoomData) {
 
   // === DECORATIVE ELEMENTS ===
 
-  // Orbital particles (20 spheres that will rotate around the portal)
+  // Orbital particles (spheres that will rotate around the portal)
   // For Homepage, use RGB colors; otherwise use room color
-  const particleCount = 20;
   const orbitalParticles: THREE.Mesh[] = [];
   
-  for (let i = 0; i < particleCount; i++) {
+  for (let i = 0; i < PORTAL_CONFIG.ORBITAL_PARTICLES; i++) {
     // RGB rainbow effect for Homepage portal particles
     const particleColor = isHomepage 
-      ? new THREE.Color().setHSL(i / particleCount, 1.0, 0.6)
+      ? new THREE.Color().setHSL(i / PORTAL_CONFIG.ORBITAL_PARTICLES, 1.0, 0.6)
       : portalColor;
     
     const particleMaterial = new THREE.MeshBasicMaterial({
@@ -187,7 +196,7 @@ export function createPortalGroup(room: RoomData) {
     materials.push(particleMaterial);
     
     const particle = new THREE.Mesh(SHARED_GEOMETRIES.orbitalParticle, particleMaterial);
-    const angle = (i / particleCount) * Math.PI * 2;
+    const angle = (i / PORTAL_CONFIG.ORBITAL_PARTICLES) * Math.PI * 2;
     const radius = 2.3;
     // Store initial angle and radius for animation (using type assertion after property assignment)
     (particle as unknown as OrbitalParticle).orbitAngle = angle;
@@ -197,11 +206,11 @@ export function createPortalGroup(room: RoomData) {
     orbitalParticles.push(particle as unknown as THREE.Mesh);
   }
 
-  // Corner ornaments (4 tetrahedrons at cardinal points)
+  // Corner ornaments (tetrahedrons at cardinal points)
   // RGB colors for Homepage, room color otherwise
   const ornamentColors = isHomepage 
     ? ['#FF0040', '#00FF40', '#0040FF', '#FFFF00'] // RGB + Yellow
-    : [portalColor, portalColor, portalColor, portalColor];
+    : Array(PORTAL_CONFIG.ORNAMENTS).fill(portalColor);
 
   [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach((angle, idx) => {
     const ornamentMaterial = new THREE.MeshBasicMaterial({
@@ -235,8 +244,8 @@ export function createPortalGroup(room: RoomData) {
     });
     materials.push(swirlMaterial);
     
-    const swirlParticle = new THREE.Mesh(SHARED_GEOMETRIES.swirlParticle, swirlMaterial) as SwirlParticle;
-    const angle = (i / swirls) * Math.PI * 2;
+    const swirlParticle = new THREE.Mesh(SHARED_GEOMETRIES.swirlParticle, swirlMaterial) as unknown as SwirlParticle;
+    const angle = (i / PORTAL_CONFIG.SWIRL_PARTICLES) * Math.PI * 2;
     const radius = 1.2 + Math.random() * 0.5;
     const depth = (Math.random() - 0.5) * 0.3;
     // Store initial values for animation

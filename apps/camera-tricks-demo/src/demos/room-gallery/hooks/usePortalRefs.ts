@@ -1,11 +1,10 @@
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, RefObject } from 'react';
 
 /**
  * Type-safe portal element references
  */
 export interface PortalRefs {
   iframeElement: HTMLIFrameElement | null;
-  screenshotElement: HTMLImageElement | null;
 }
 
 /**
@@ -15,15 +14,10 @@ export interface PortalRefs {
 class PortalRefManager {
   private refs: PortalRefs = {
     iframeElement: null,
-    screenshotElement: null,
   };
 
   setIframeRef(element: HTMLIFrameElement | null) {
     this.refs.iframeElement = element;
-  }
-
-  setScreenshotRef(element: HTMLImageElement | null) {
-    this.refs.screenshotElement = element;
   }
 
   getRefs(): PortalRefs {
@@ -32,7 +26,6 @@ class PortalRefManager {
 
   clear() {
     this.refs.iframeElement = null;
-    this.refs.screenshotElement = null;
   }
 }
 
@@ -57,26 +50,9 @@ export function usePortalIframeRef(ref: RefObject<HTMLIFrameElement>) {
 }
 
 /**
- * Hook to register screenshot element for portal rendering
- * 
- * @param ref - React ref to the screenshot image element
- * @returns void
- */
-export function usePortalScreenshotRef(ref: RefObject<HTMLImageElement>) {
-  useEffect(() => {
-    if (ref.current) {
-      portalRefManager.setScreenshotRef(ref.current);
-    }
-    return () => {
-      portalRefManager.setScreenshotRef(null);
-    };
-  }, [ref]);
-}
-
-/**
  * Hook to access portal element references (for use in Three.js render loop)
  * 
- * @returns PortalRefs object with current iframe and screenshot elements
+ * @returns PortalRefs object with current iframe element
  */
 export function usePortalRefs(): PortalRefs {
   return portalRefManager.getRefs();
@@ -85,7 +61,7 @@ export function usePortalRefs(): PortalRefs {
 /**
  * Get portal refs synchronously (for use outside React components, e.g., useFrame)
  * 
- * @returns PortalRefs object with current iframe and screenshot elements
+ * @returns PortalRefs object with current iframe element
  */
 export function getPortalRefs(): PortalRefs {
   return portalRefManager.getRefs();

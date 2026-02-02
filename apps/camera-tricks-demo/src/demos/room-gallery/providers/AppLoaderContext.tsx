@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useRef, useEffect } from 'react';
 import { useSafeTimeout } from '../hooks/useSafeTimeout';
 import {
   APP_ZOOM_IN_DURATION_MS,
@@ -47,7 +47,8 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
       setCurrentAppName(null);
       
       // Use requestAnimationFrame to ensure DOM updates, then load new app immediately
-      requestAnimationFrame(() => {
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null; // Clear ref after execution
         setCurrentAppUrl(url);
         setCurrentAppName(name);
         setState('zooming-in');

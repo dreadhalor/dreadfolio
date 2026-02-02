@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ROOMS, getDividingWallColors } from '../../config/rooms';
 import { getThemeColors } from '../../config/themes';
 import { getRoomComponent } from '../../config/registry';
@@ -26,12 +27,25 @@ interface SceneProps {
  * - Uses optimized room components (merged geometry, instanced meshes)
  * - Scene rendered twice per frame (once for each camera viewport)
  * - Procedurally generates vibrant colors from app themes
+ * - Room data is memoized to prevent 900+ function calls per second
  */
 export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: SceneProps) {
   // Use consistent black fog for all rooms
   // This eliminates color bleeding between rooms and provides atmospheric depth
   // without complexity or performance overhead
   const fogColor = '#000000'; // Pure black fog
+  
+  // Memoize room data to prevent calling getRoomComponent/getThemeColors on every render
+  // ROOMS is static, so we compute this once and reuse it
+  // Performance: Eliminates 900 function calls per second (15 rooms × 2 calls × 30 FPS)
+  const roomDataMemo = useMemo(() => {
+    return ROOMS.map((room, index) => ({
+      room,
+      index,
+      RoomDecorations: getRoomComponent(room.theme),
+      colors: getThemeColors(room.theme),
+    }));
+  }, []);
   
   return (
     <>
@@ -42,27 +56,19 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: ScenePro
       <AtmosphericFog color={fogColor} />
 
       {/* Render all rooms */}
-      {ROOMS.map((room, index) => {
-        // Get room decorations component for the theme
-        const RoomDecorations = getRoomComponent(room.theme);
-
-        // Get theme colors (works for both original and app-specific themes)
-        const colors = getThemeColors(room.theme);
-
-        return (
-          <group key={room.offsetX}>
-            <RoomStructure
-              offsetX={room.offsetX}
-              colors={colors}
-              isFirst={index === 0}
-              isLast={index === ROOMS.length - 1}
-            />
-            {RoomDecorations && (
-              <RoomDecorations colors={colors} offsetX={room.offsetX} />
-            )}
-          </group>
-        );
-      })}
+      {roomDataMemo.map(({ room, index, RoomDecorations, colors }) => (
+        <group key={room.offsetX}>
+          <RoomStructure
+            offsetX={room.offsetX}
+            colors={colors}
+            isFirst={index === 0}
+            isLast={index === ROOMS.length - 1}
+          />
+          {RoomDecorations && (
+            <RoomDecorations colors={colors} offsetX={room.offsetX} />
+          )}
+        </group>
+      ))}
 
       {/* Dividing walls between rooms */}
       {ROOMS.slice(0, -1).map((room, index) => {

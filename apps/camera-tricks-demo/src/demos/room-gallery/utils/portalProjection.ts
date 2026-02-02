@@ -72,3 +72,31 @@ export function calculateMinimizeProgress(currentZ: number): number {
   const farDistance = Math.abs(PORTAL_DEFAULT_Z);
   return (currentDistance - closeDistance) / (farDistance - closeDistance);
 }
+
+/**
+ * Calculates portal surface brightness during zoom/minimize animations
+ * 
+ * Centralizes brightness calculation logic to eliminate duplication.
+ * - When zooming in (opening app): Fades from texture (1.0) to black (0.0)
+ * - When zooming out (minimizing): Fades from black (0.0) to texture (1.0)
+ * 
+ * @param currentZ - Current portal Z position
+ * @param isZoomingIn - True if camera is moving toward portal (opening app)
+ * @returns Brightness value from 0 (black) to 1 (full texture brightness)
+ */
+export function calculatePortalBrightness(
+  currentZ: number,
+  isZoomingIn: boolean
+): number {
+  if (isZoomingIn) {
+    // Opening app: fade texture to black as portal approaches
+    const progress = calculateZoomProgress(currentZ, PORTAL_ZOOM_TARGET_Z, PORTAL_DEFAULT_Z);
+    return 1 - progress; // 1.0 (far/bright) → 0.0 (close/black)
+  } else {
+    // Minimizing: fade from black to texture as portal moves away
+    const currentDistance = Math.abs(currentZ);
+    const closeDistance = Math.abs(PORTAL_ZOOM_TARGET_Z);
+    const farDistance = Math.abs(PORTAL_DEFAULT_Z);
+    return (currentDistance - closeDistance) / (farDistance - closeDistance); // 0.0 (close/black) → 1.0 (far/bright)
+  }
+}
