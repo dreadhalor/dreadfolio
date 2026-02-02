@@ -41,18 +41,20 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
     
     // If different app while one is minimizing or minimized, close old and open new
     if (state === 'minimizing' || state === 'minimized') {
+      // Immediately close old app (no delay) to prevent flash
       setState('idle');
       setCurrentAppUrl(null);
       setCurrentAppName(null);
-      // Small delay to let old app clean up
-      safeSetTimeout(() => {
+      
+      // Use requestAnimationFrame to ensure DOM updates, then load new app immediately
+      requestAnimationFrame(() => {
         setCurrentAppUrl(url);
         setCurrentAppName(name);
         setState('zooming-in');
         safeSetTimeout(() => {
           setState('app-active');
         }, APP_ZOOM_IN_DURATION_MS);
-      }, APP_SWITCH_CLEANUP_DELAY_MS);
+      });
       return;
     }
     
