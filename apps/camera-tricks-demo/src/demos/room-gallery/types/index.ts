@@ -40,5 +40,6 @@ export interface RoomData {
   color: string;
   appId?: string;
   appUrl?: string;
+  imageUrl?: string;
   description?: string;
 }

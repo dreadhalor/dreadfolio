@@ -76,7 +76,7 @@ export function AppLoader() {
           )}
         </animated.div>
 
-        {/* Close button */}
+        {/* Close button - only show when app is fully loaded */}
         {state === 'app-active' && (
           <button
             onClick={closeApp}

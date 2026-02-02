@@ -69,6 +69,16 @@ function RoomGalleryInner() {
 
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
+    
+    // Snap to nearest room for a pleasing "fast travel" effect
+    const currentProgress = targetRoomProgressRef.current;
+    const nearestRoom = Math.round(currentProgress);
+    
+    // Only snap if we're not already at a whole number (avoid unnecessary animation)
+    if (Math.abs(currentProgress - nearestRoom) > 0.01) {
+      targetRoomProgressRef.current = nearestRoom;
+      setRoomProgress(nearestRoom);
+    }
   }, []);
 
   // Mouse event handlers

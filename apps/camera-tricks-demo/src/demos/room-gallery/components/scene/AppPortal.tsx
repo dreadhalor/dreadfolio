@@ -28,8 +28,9 @@ export function createPortalGroup(room: RoomData) {
     ? new THREE.Color('#ffffff') // White/bright for Homepage
     : new THREE.Color(room.color);
 
-  // Track materials for disposal
+  // Track materials and textures for disposal
   const materials: THREE.Material[] = [];
+  const textures: THREE.Texture[] = [];
 
   // === 3D PORTAL FRAME ===
 
@@ -44,18 +45,37 @@ export function createPortalGroup(room: RoomData) {
   const outerGlow = new THREE.Mesh(SHARED_GEOMETRIES.outerGlow, outerGlowMaterial);
   portalGroup.add(outerGlow);
 
-  // Main portal surface (dark void with subtle texture)
-  const portalSurfaceMaterial = new THREE.MeshBasicMaterial({
-    color: 0x000000,
-    opacity: 0.9,
-    transparent: true,
-    side: THREE.DoubleSide,
-  });
+  // Main portal surface with app screenshot
+  let portalSurfaceMaterial: THREE.MeshBasicMaterial;
+  
+  if (room.imageUrl) {
+    // Load app screenshot texture
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load(room.imageUrl);
+    texture.colorSpace = THREE.SRGBColorSpace; // Correct color space for accurate colors
+    textures.push(texture);
+    
+    portalSurfaceMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      opacity: 1.0, // Fully opaque
+      transparent: false, // No transparency needed
+      side: THREE.DoubleSide,
+    });
+  } else {
+    // Fallback to black void if no image
+    portalSurfaceMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      opacity: 0.9,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+  }
+  
   materials.push(portalSurfaceMaterial);
   const portalSurface = new THREE.Mesh(SHARED_GEOMETRIES.portalSurface, portalSurfaceMaterial);
   portalGroup.add(portalSurface);
 
-  // 3D Torus ring (main portal frame - thick and dimensional)
+  // 3D Torus ring #1 (main portal frame - thick and dimensional)
   const torusMaterial = new THREE.MeshBasicMaterial({
     color: portalColor,
     opacity: isHomepage ? 0.9 : 0.8, // Brighter for Homepage
@@ -64,6 +84,17 @@ export function createPortalGroup(room: RoomData) {
   materials.push(torusMaterial);
   const torus = new THREE.Mesh(SHARED_GEOMETRIES.torus, torusMaterial);
   portalGroup.add(torus);
+  
+  // 3D Torus ring #2 (rotates on different axis for intersecting effect)
+  const torus2Material = new THREE.MeshBasicMaterial({
+    color: portalColor,
+    opacity: isHomepage ? 0.9 : 0.8, // Brighter for Homepage
+    transparent: true,
+  });
+  materials.push(torus2Material);
+  const torus2 = new THREE.Mesh(SHARED_GEOMETRIES.torus, torus2Material);
+  // Start at same position as first ring, but will rotate on Y-axis instead of X-axis
+  portalGroup.add(torus2);
 
   // Inner glow ring (bright, intense, flat)
   const innerGlowMaterial = new THREE.MeshBasicMaterial({
@@ -164,6 +195,9 @@ export function createPortalGroup(room: RoomData) {
   // Position portal group in camera's local space
   portalGroup.position.set(0, 0, -5); // Perfectly centered, 5 units forward
 
+  // Position portal group in camera's local space
+  portalGroup.position.set(0, 0, -5); // Perfectly centered, 5 units forward
+
   // Return the group, animated element refs, and disposal function
   return {
     group: portalGroup,
@@ -172,12 +206,16 @@ export function createPortalGroup(room: RoomData) {
       innerGlow,
       portalSurface,
       torus,
+      torus2,
       orbitalParticles,
       swirlParticles,
     },
     dispose: () => {
       // Dispose all materials (geometries are shared, so don't dispose those)
       materials.forEach(material => material.dispose());
+      
+      // Dispose all textures
+      textures.forEach(texture => texture.dispose());
       
       // Clear the group
       portalGroup.clear();
