@@ -26,6 +26,18 @@ export const MAX_ROOM_PROGRESS = NUM_ROOMS - 1; // 14
 // Drag control (sensitivity in room-space units per pixel)
 export const DRAG_SENSITIVITY = 0.01; // 100 pixels = move 1 room
 
+// Snap-to-room behavior
+export const SNAP_THRESHOLD = 0.01; // Minimum distance from whole number to trigger snap
+export const SNAP_LERP_SPEED = 0.15; // Faster than drag for snappier feel (optional - currently uses CAMERA_LERP_SPEED)
+
+// Portal animation configuration
+export const PORTAL_DEFAULT_Z = -5; // Default portal distance from camera
+export const PORTAL_ZOOM_TARGET_Z = -0.8; // How close portal zooms when clicked
+export const PORTAL_ZOOM_LERP_SPEED = 0.04; // Slower for more dramatic zoom effect
+export const PORTAL_ZOOM_THRESHOLD = 0.01; // When to stop zooming
+export const PORTAL_ZOOM_DURATION_MS = 1000; // Delay before loading app
+export const CLICK_THRESHOLD = 5; // Pixels - movement less than this is a click
+
 // Dividing wall dimensions
 export const WALL_THICKNESS = 0.3;
 export const DOORWAY_WIDTH = 3;

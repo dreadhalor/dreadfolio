@@ -2,6 +2,24 @@ import * as THREE from 'three';
 import type { RoomData } from '../../types';
 
 /**
+ * Type-safe orbital particle with animation properties
+ */
+interface OrbitalParticle extends THREE.Mesh {
+  orbitAngle: number;
+  orbitRadius: number;
+}
+
+/**
+ * Type-safe swirl particle with animation properties
+ */
+interface SwirlParticle extends THREE.Mesh {
+  baseAngle: number;
+  baseRadius: number;
+  baseDepth: number;
+  floatOffset: number;
+}
+
+/**
  * Shared geometries across all portals for performance
  * Created once and reused by all 15 portals
  */
@@ -16,8 +34,43 @@ const SHARED_GEOMETRIES = {
 };
 
 /**
- * Creates a portal group with all visual elements for a room's app portal
- * Returns the group, animated element refs, and disposal function
+ * Creates an ornate 3D portal with animated elements for a room's app
+ * 
+ * The portal consists of:
+ * - Outer glow ring (breathing effect)
+ * - Portal surface (app screenshot or black void)
+ * - Two rotating torus rings (3D frames)
+ * - Inner glow ring (intense highlight)
+ * - 20 orbital particles (rotating around portal)
+ * - 4 corner ornaments (tetrahedrons at cardinal points)
+ * - 12 swirl particles (inner vortex effect)
+ * 
+ * Special handling for Homepage room:
+ * - Uses RGB rainbow colors for particles instead of single theme color
+ * - Brighter glow and opacity values
+ * 
+ * Performance notes:
+ * - All geometries are shared across 15 portals (SHARED_GEOMETRIES)
+ * - Materials and textures are tracked for proper disposal
+ * - Portal is positioned at (0, 0, -5) in camera local space
+ * 
+ * @param room - Room data containing theme, color, name, and optional screenshot
+ * @returns Object containing:
+ *   - group: THREE.Group with all portal meshes
+ *   - animData: References to animated elements for per-frame updates
+ *   - dispose: Function to clean up materials and textures
+ * 
+ * @example
+ * ```typescript
+ * const portal = createPortalGroup(ROOMS[0]);
+ * camera.add(portal.group);
+ * 
+ * // In animation loop:
+ * portal.animData.torus.rotation.x = time * 0.2;
+ * 
+ * // On cleanup:
+ * portal.dispose();
+ * ```
  */
 export function createPortalGroup(room: RoomData) {
   const portalGroup = new THREE.Group();
@@ -51,7 +104,15 @@ export function createPortalGroup(room: RoomData) {
   if (room.imageUrl) {
     // Load app screenshot texture
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(room.imageUrl);
+    const texture = textureLoader.load(
+      room.imageUrl,
+      undefined, // onLoad
+      undefined, // onProgress
+      (error) => {
+        console.warn(`Failed to load texture for ${room.name}:`, error);
+        // Texture will remain black, which is acceptable fallback
+      }
+    );
     texture.colorSpace = THREE.SRGBColorSpace; // Correct color space for accurate colors
     textures.push(texture);
     
@@ -128,12 +189,12 @@ export function createPortalGroup(room: RoomData) {
     const particle = new THREE.Mesh(SHARED_GEOMETRIES.orbitalParticle, particleMaterial);
     const angle = (i / particleCount) * Math.PI * 2;
     const radius = 2.3;
-    // Store initial angle for animation
-    (particle as any).orbitAngle = angle;
-    (particle as any).orbitRadius = radius;
+    // Store initial angle and radius for animation (using type assertion after property assignment)
+    (particle as unknown as OrbitalParticle).orbitAngle = angle;
+    (particle as unknown as OrbitalParticle).orbitRadius = radius;
     particle.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
     portalGroup.add(particle);
-    orbitalParticles.push(particle);
+    orbitalParticles.push(particle as unknown as THREE.Mesh);
   }
 
   // Corner ornaments (4 tetrahedrons at cardinal points)
@@ -174,15 +235,15 @@ export function createPortalGroup(room: RoomData) {
     });
     materials.push(swirlMaterial);
     
-    const swirlParticle = new THREE.Mesh(SHARED_GEOMETRIES.swirlParticle, swirlMaterial);
+    const swirlParticle = new THREE.Mesh(SHARED_GEOMETRIES.swirlParticle, swirlMaterial) as SwirlParticle;
     const angle = (i / swirls) * Math.PI * 2;
     const radius = 1.2 + Math.random() * 0.5;
     const depth = (Math.random() - 0.5) * 0.3;
     // Store initial values for animation
-    (swirlParticle as any).baseAngle = angle;
-    (swirlParticle as any).baseRadius = radius;
-    (swirlParticle as any).baseDepth = depth;
-    (swirlParticle as any).floatOffset = Math.random() * Math.PI * 2; // Random phase offset
+    swirlParticle.baseAngle = angle;
+    swirlParticle.baseRadius = radius;
+    swirlParticle.baseDepth = depth;
+    swirlParticle.floatOffset = Math.random() * Math.PI * 2; // Random phase offset
     swirlParticle.position.set(
       Math.cos(angle) * radius,
       Math.sin(angle) * radius,
@@ -207,8 +268,8 @@ export function createPortalGroup(room: RoomData) {
       portalSurface,
       torus,
       torus2,
-      orbitalParticles,
-      swirlParticles,
+      orbitalParticles: orbitalParticles as THREE.Mesh[],
+      swirlParticles: swirlParticles as THREE.Mesh[],
     },
     dispose: () => {
       // Dispose all materials (geometries are shared, so don't dispose those)

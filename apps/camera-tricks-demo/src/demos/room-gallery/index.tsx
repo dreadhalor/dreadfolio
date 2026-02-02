@@ -3,7 +3,12 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Configuration
 import { ROOMS } from './config/rooms';
-import { MIN_ROOM_PROGRESS, MAX_ROOM_PROGRESS, DRAG_SENSITIVITY } from './config/constants';
+import { 
+  MIN_ROOM_PROGRESS, 
+  MAX_ROOM_PROGRESS, 
+  DRAG_SENSITIVITY, 
+  SNAP_THRESHOLD 
+} from './config/constants';
 
 // Components
 import { Scene } from './components/scene/Scene';
@@ -75,7 +80,7 @@ function RoomGalleryInner() {
     const nearestRoom = Math.round(currentProgress);
     
     // Only snap if we're not already at a whole number (avoid unnecessary animation)
-    if (Math.abs(currentProgress - nearestRoom) > 0.01) {
+    if (Math.abs(currentProgress - nearestRoom) > SNAP_THRESHOLD) {
       targetRoomProgressRef.current = nearestRoom;
       setRoomProgress(nearestRoom);
     }
