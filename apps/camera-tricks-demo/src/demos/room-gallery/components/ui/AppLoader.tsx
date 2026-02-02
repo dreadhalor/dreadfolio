@@ -94,7 +94,7 @@ export function AppLoader() {
         width: '100vw',
         height: '100vh',
         border: 'none',
-        background: '#000',
+        background: '#000', // Black background during load
         zIndex: Z_INDEX.IFRAME_TRANSITIONING,
         opacity: 0, // Start at 0, will animate to 1
         transform: 'scale(1)', // Full scale
@@ -106,7 +106,7 @@ export function AppLoader() {
           'opacity 0.5s ease-in-out 0.3s, transform 0.3s ease-in-out, clip-path 0.5s ease-in-out', // Delay opacity slightly
       };
     }
-
+    
     // When active: fully visible at full scale with large circle (effectively no mask)
     if (state === 'app-active') {
       return {
@@ -116,7 +116,7 @@ export function AppLoader() {
         width: '100vw',
         height: '100vh',
         border: 'none',
-        background: '#fff',
+        background: '#000', // Black background (app content will cover it)
         zIndex: Z_INDEX.IFRAME_ACTIVE,
         opacity: 1,
         transform: 'scale(1)', // Full scale
@@ -168,14 +168,15 @@ export function AppLoader() {
     }
   }, [state]);
 
-  // Don't render overlay when idle, but keep iframe alive when minimized
-  if (state === 'idle') return null;
+  // Don't render anything when idle OR when currentAppUrl is null (prevents flash during app switch)
+  if (state === 'idle' || !currentAppUrl) return null;
 
   return (
     <>
       {/* Iframe - repositions based on state */}
-      {showIframe && currentAppUrl && (
+      {showIframe && (
         <iframe
+          key={currentAppUrl} // Force remount when URL changes to prevent old content flash
           ref={iframeRef}
           src={currentAppUrl}
           title={currentAppName || 'App'}
