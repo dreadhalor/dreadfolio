@@ -135,7 +135,17 @@ export function RoomMinimap({
             return (
               <div
                 key={room.offsetX}
-                onClick={() => onRoomClick(room)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRoomClick(room);
+                }}
+                onTouchEnd={(e) => {
+                  // Touch event handler for mobile devices
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRoomClick(room);
+                }}
                 style={{
                   width: `${MINIMAP_CONFIG.ROOM_CARD_WIDTH}px`,
                   height: `${MINIMAP_CONFIG.ROOM_CARD_HEIGHT}px`,
@@ -156,6 +166,10 @@ export function RoomMinimap({
                   justifyContent: 'center',
                   position: 'relative',
                   overflow: 'hidden',
+                  WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.3)',
+                  touchAction: 'manipulation',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {

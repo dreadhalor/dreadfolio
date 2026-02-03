@@ -206,7 +206,17 @@ export function AppLoader() {
       {/* Minimize button - only show when app is fully loaded */}
       {state === 'app-active' && (
         <button
-          onClick={() => minimizeApp()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            minimizeApp();
+          }}
+          onTouchEnd={(e) => {
+            // Touch event handler for mobile - prevents issues with iframe blocking clicks
+            e.preventDefault();
+            e.stopPropagation();
+            minimizeApp();
+          }}
           style={{
             position: 'fixed',
             top: '20px',
@@ -221,6 +231,10 @@ export function AppLoader() {
             zIndex: Z_INDEX.MINIMIZE_BUTTON,
             transition: 'all 0.2s',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.3)', // Mobile tap feedback
+            touchAction: 'manipulation', // Disable double-tap zoom on mobile
+            userSelect: 'none', // Prevent text selection on mobile
+            WebkitUserSelect: 'none',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = '#fff';
