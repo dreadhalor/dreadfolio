@@ -38,7 +38,7 @@ const portalRefManager = new PortalRefManager();
  * @param ref - React ref to the iframe element
  * @returns void
  */
-export function usePortalIframeRef(ref: RefObject<HTMLIFrameElement>) {
+export function usePortalIframeRef(ref: RefObject<HTMLIFrameElement | null>) {
   useEffect(() => {
     if (ref.current) {
       portalRefManager.setIframeRef(ref.current);

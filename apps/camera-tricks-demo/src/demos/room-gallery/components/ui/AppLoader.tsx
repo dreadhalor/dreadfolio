@@ -19,9 +19,9 @@ import { Z_INDEX } from '../../config/constants';
  * to avoid React re-render overhead. This is intentional for 60fps animation.
  */
 export function AppLoader() {
-  const { state, currentAppUrl, currentAppName, minimizeApp } = useAppLoader();
+  const { state, currentAppUrl, currentAppName } = useAppLoader();
   const [showIframe, setShowIframe] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // Register iframe ref with portal ref manager (replaces window object pollution)
   usePortalIframeRef(iframeRef);
@@ -203,51 +203,6 @@ export function AppLoader() {
         />
       )}
 
-      {/* Minimize button - only show when app is fully loaded */}
-      {state === 'app-active' && (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            minimizeApp();
-          }}
-          onTouchEnd={(e) => {
-            // Touch event handler for mobile - prevents issues with iframe blocking clicks
-            e.preventDefault();
-            e.stopPropagation();
-            minimizeApp();
-          }}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            padding: '12px 24px',
-            background: 'rgba(255, 255, 255, 0.9)',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            zIndex: Z_INDEX.MINIMIZE_BUTTON,
-            transition: 'all 0.2s',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.3)', // Mobile tap feedback
-            touchAction: 'manipulation', // Disable double-tap zoom on mobile
-            userSelect: 'none', // Prevent text selection on mobile
-            WebkitUserSelect: 'none',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#fff';
-            e.currentTarget.style.transform = 'scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-        >
-          ⬇ Back to Gallery
-        </button>
-      )}
     </>
   );
 }

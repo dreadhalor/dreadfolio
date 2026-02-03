@@ -1,10 +1,11 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
   CAMERA_HEIGHT,
   CAMERA_Z_POSITION,
   CAMERA_FOV,
+  CAMERA_FOV_MOBILE,
   CAMERA_SPACING,
   CAMERA_LERP_SPEED,
   NUM_ROOMS,
@@ -14,6 +15,7 @@ import {
   PORTAL_ZOOM_THRESHOLD,
   PORTAL_ZOOM_DURATION_MS,
   CLICK_THRESHOLD,
+  DEBUG_MODE,
 } from '../../config/constants';
 import { calculateCameraPosition } from '../../utils/cameraCalculations';
 import { ROOMS } from '../../config/rooms';
@@ -22,11 +24,12 @@ import { useAppLoader } from '../../providers/AppLoaderContext';
 import { calculatePortalBrightness } from '../../utils/portalProjection';
 import type { RoomData } from '../../types';
 
-// Development mode flag for conditional logging (Vite build system replaces this at build time)
-const DEBUG = process.env.NODE_ENV !== 'production';
+// Development mode flag for conditional logging and debug features
+const DEBUG = DEBUG_MODE;
 
 interface SplitCameraRendererProps {
   targetRoomProgressRef: React.RefObject<number>;
+  currentRoomProgressRef?: React.RefObject<number>; // Optional: Expose actual camera position for UI sync
   onRoomProgressUpdate: (progress: number) => void;
   onDebugUpdate?: (info: {
     roomProgress: number;
@@ -174,11 +177,13 @@ function getPrimaryCameraIndex(
  */
 export function SplitCameraRenderer({
   targetRoomProgressRef,
+  currentRoomProgressRef: externalCurrentRef,
   onRoomProgressUpdate,
   onDebugUpdate,
 }: SplitCameraRendererProps) {
   const { gl, scene, size, set } = useThree();
-  const currentRoomProgressRef = useRef(0);
+  const internalCurrentRoomProgressRef = useRef(0);
+  const currentRoomProgressRef = externalCurrentRef || internalCurrentRoomProgressRef;
   const { loadApp, state: appLoaderState } = useAppLoader();
 
   // Raycaster for portal click detection
@@ -199,15 +204,33 @@ export function SplitCameraRenderer({
     loadAppRef.current = loadApp;
   }, [loadApp]);
 
+  // Track mobile state for responsive FOV
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
+  
+  // Update mobile state on resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Create cameras once (one per room)
   const cameras = useMemo(() => {
     try {
       const aspect = size.width / 2 / size.height;
+      // Use wider FOV on mobile to make portals feel smaller and give more spatial context
+      const fov = isMobile ? CAMERA_FOV_MOBILE : CAMERA_FOV;
 
       // Create one camera per room with extended properties
       return Array.from({ length: NUM_ROOMS }, (_, i) => {
         const camera = new THREE.PerspectiveCamera(
-          CAMERA_FOV,
+          fov,
           aspect,
           CAMERA_NEAR_PLANE,
           CAMERA_FAR_PLANE,
@@ -248,7 +271,16 @@ export function SplitCameraRenderer({
       console.error('Failed to create cameras:', error);
       throw error; // Re-throw to trigger error boundary
     }
-  }, []); // Create once on mount
+  }, [isMobile]); // Recreate cameras when mobile state changes
+  
+  // Update camera FOV when mobile state changes (for existing cameras)
+  useEffect(() => {
+    const fov = isMobile ? CAMERA_FOV_MOBILE : CAMERA_FOV;
+    cameras.forEach(camera => {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    });
+  }, [isMobile, cameras]);
 
   // Note: Aspect ratio and view offsets are now calculated per-frame
   // since they depend on the dynamic split ratio

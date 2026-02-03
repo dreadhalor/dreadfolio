@@ -1,5 +1,6 @@
+import { useState, useEffect, useRef } from 'react';
 import { RoomData } from '../../types';
-import { CAMERA_SPACING, NUM_ROOMS } from '../../config/constants';
+import { CAMERA_SPACING, NUM_ROOMS, DEBUG_MODE } from '../../config/constants';
 import { calculateAllCameraPositions } from '../../utils/cameraCalculations';
 import { worldToMinimapX, MINIMAP_CONFIG, getRoomCardSpacing } from '../../utils/minimapMapping';
 
@@ -7,47 +8,126 @@ interface RoomMinimapProps {
   rooms: RoomData[];
   currentRoom: RoomData;
   roomProgress: number;
+  targetRoomProgressRef: React.RefObject<number>; // NEW: Direct access to ref for smooth 60fps updates
   onRoomClick: (room: RoomData) => void;
+  onRoomProgressChange: (progress: number) => void;
 }
 
 export function RoomMinimap({
   rooms,
   currentRoom,
   roomProgress,
+  currentRoomProgressRef,
   onRoomClick,
+  onRoomProgressChange,
 }: RoomMinimapProps) {
   // Calculate camera positions using centralized utility
   const cameraPositions = calculateAllCameraPositions(NUM_ROOMS, roomProgress, CAMERA_SPACING);
+  
+  // Properly detect mobile with state and resize listener
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Track drag state for minimap
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDraggingMinimapRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartProgressRef = useRef(0);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check on mount
+    checkMobile();
+    
+    // Check on resize
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // NEW: Smooth 60fps position updates using RAF (synced to actual camera position)
+  const [smoothRoomProgress, setSmoothRoomProgress] = useState(roomProgress);
+  
+  useEffect(() => {
+    let rafId: number;
+    
+    const updatePosition = () => {
+      if (currentRoomProgressRef.current !== undefined) {
+        setSmoothRoomProgress(currentRoomProgressRef.current);
+      }
+      rafId = requestAnimationFrame(updatePosition);
+    };
+    
+    rafId = requestAnimationFrame(updatePosition);
+    return () => cancelAnimationFrame(rafId);
+  }, [currentRoomProgressRef]);
+  
+  // Calculate the translation offset to center the current roomProgress (using smoothRoomProgress for jitter-free 60fps updates)
+  const cardWidth = isMobile ? 60 : MINIMAP_CONFIG.ROOM_CARD_WIDTH;
+  const cardGap = isMobile ? 8 : MINIMAP_CONFIG.ROOM_CARD_GAP;
+  
+  // Position from left edge: we want card N's center to be at 50% of container width
+  // Card N's left edge is at: N * (cardWidth + gap)
+  // Card N's center is at: N * (cardWidth + gap) + cardWidth/2
+  // Container width is available via ref, but we can calculate the needed offset directly
+  // To center, translateX should position card N's center at viewport center
+  const cardCenterOffset = smoothRoomProgress * (cardWidth + cardGap) + (cardWidth / 2);
+  const translateX = -cardCenterOffset;
+  
+  // Responsive card sizing
+  const cardHeight = isMobile ? 35 : MINIMAP_CONFIG.ROOM_CARD_HEIGHT;
+  
   return (
     <>
       <div
         style={{
-          position: 'absolute',
-          bottom: '2rem',
+          position: 'fixed',
+          bottom: isMobile ? 'max(0.5rem, env(safe-area-inset-bottom))' : '2rem',
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.75rem',
-          background: 'rgba(0, 0, 0, 0.8)',
-          padding: '1rem',
-          borderRadius: '1rem',
+          background: isMobile ? 'rgba(255, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.85)', // DEBUG: Red on mobile
+          padding: isMobile ? '0.5rem' : '1rem',
+          borderRadius: isMobile ? '0.4rem' : '1rem',
           backdropFilter: 'blur(10px)',
-          border: '2px solid rgba(255, 255, 255, 0.2)',
+          border: isMobile ? '3px solid yellow' : '2px solid rgba(255, 255, 255, 0.2)', // DEBUG: Yellow border on mobile
+          transition: 'all 0.2s ease',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          zIndex: 9999, // Very high z-index to ensure visibility
+          maxWidth: isMobile ? 'calc(100vw - 1rem)' : 'auto',
+          overflow: 'visible',
+          touchAction: 'pan-x',
+          pointerEvents: 'auto', // Ensure it's interactive
+        } as React.CSSProperties}
+        onTouchMove={(e) => {
+          // Prevent touch events from bubbling to the scene
+          e.stopPropagation();
+        }}
+        onTouchStart={(e) => {
+          // Prevent touch events from bubbling to the scene
+          e.stopPropagation();
+        }}
+        onTouchEnd={(e) => {
+          // Prevent touch events from bubbling to the scene
+          e.stopPropagation();
         }}
       >
-        {/* Camera position visualization */}
-        <div style={{
-          position: 'relative',
-          height: `${MINIMAP_CONFIG.VISUALIZATION_HEIGHT}px`,
-          width: `${NUM_ROOMS * MINIMAP_CONFIG.ROOM_CARD_WIDTH + (NUM_ROOMS - 1) * MINIMAP_CONFIG.ROOM_CARD_GAP}px`,
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '4px',
-          overflow: 'visible',
-          paddingTop: `${MINIMAP_CONFIG.VISUALIZATION_PADDING}px`,
-        }}>
-          {/* Room position markers */}
-          {rooms.map((room, index) => {
+        {/* Camera position visualization (DEBUG MODE ONLY) */}
+        {DEBUG_MODE && (
+          <div style={{
+            position: 'relative',
+            height: `${MINIMAP_CONFIG.VISUALIZATION_HEIGHT}px`,
+            width: `${NUM_ROOMS * MINIMAP_CONFIG.ROOM_CARD_WIDTH + (NUM_ROOMS - 1) * MINIMAP_CONFIG.ROOM_CARD_GAP}px`,
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '4px',
+            overflow: 'visible',
+            paddingTop: `${MINIMAP_CONFIG.VISUALIZATION_PADDING}px`,
+          }}>
+            {/* Room position markers */}
+            {rooms.map((room, index) => {
             const cardSpacing = getRoomCardSpacing();
             return (
               <div
@@ -122,43 +202,118 @@ export function RoomMinimap({
               </div>
             );
           })}
+          </div>
+        )}
+        
+        {/* Debug: Show isMobile state */}
+        <div style={{
+          color: 'white',
+          background: 'black',
+          padding: '4px 8px',
+          fontSize: '12px',
+          borderRadius: '4px',
+        }}>
+          isMobile: {isMobile ? 'TRUE' : 'FALSE'} | width: {typeof window !== 'undefined' ? window.innerWidth : 'N/A'}
         </div>
         
-        {/* Room cards */}
-        <div style={{
-          display: 'flex',
-          gap: `${MINIMAP_CONFIG.ROOM_CARD_GAP}px`,
-        }}>
-          {rooms.map((room, index) => {
-            const isActive = currentRoom.offsetX === room.offsetX;
+        {/* Simplified minimap - just show position indicator (mobile only for now) */}
+        {isMobile && (
+          <div 
+            ref={containerRef}
+            style={{
+              position: 'relative',
+              width: '100%',
+              height: `${cardHeight}px`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              background: 'rgba(255, 0, 0, 0.1)', // Debug: slight red tint to see container
+            } as React.CSSProperties}
+          >
+          {/* Debug text */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '-20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              fontSize: '10px',
+              whiteSpace: 'nowrap',
+              background: 'rgba(0, 0, 0, 0.8)',
+              padding: '2px 4px',
+              borderRadius: '2px',
+            }}
+          >
+            roomProgress: {smoothRoomProgress.toFixed(2)}
+          </div>
+          
+          {/* Center indicator line - always at 50% */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '0',
+              bottom: '0',
+              width: '3px',
+              background: 'rgba(255, 255, 255, 0.8)',
+              transform: 'translateX(-1.5px)',
+              zIndex: 100,
+            }}
+          />
+          
+          {/* Cards container - moves to keep current position centered */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: `translate(${translateX}px, -50%)`,
+              display: 'flex',
+              gap: `${cardGap}px`,
+              alignItems: 'center',
+            }}
+          >
+            {rooms.map((room, index) => {
+              const isActive = currentRoom.offsetX === room.offsetX;
+              
+              // Calculate opacity based on distance from smoothRoomProgress (smooth fade instead of jump)
+              const distance = Math.abs(index - smoothRoomProgress);
+              const opacity = Math.max(0.3, 1 - distance * 0.3); // Fade out as we move away
 
-            return (
-              <div
-                key={room.offsetX}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onRoomClick(room);
-                }}
-                onTouchEnd={(e) => {
-                  // Touch event handler for mobile devices
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onRoomClick(room);
-                }}
+              return (
+                <div
+                  key={room.offsetX}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!isDraggingMinimapRef.current) {
+                      onRoomClick(room);
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Only trigger on tap, not drag
+                    if (!isDraggingMinimapRef.current) {
+                      onRoomClick(room);
+                    }
+                  }}
                 style={{
-                  width: `${MINIMAP_CONFIG.ROOM_CARD_WIDTH}px`,
-                  height: `${MINIMAP_CONFIG.ROOM_CARD_HEIGHT}px`,
+                  width: `${cardWidth}px`,
+                  minWidth: `${cardWidth}px`,
+                  height: `${cardHeight}px`,
+                  flexShrink: 0,
                   background: room.color,
                   borderRadius: '0.5rem',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  transform: isActive ? 'scale(1.15)' : 'scale(1)',
+                  opacity: opacity, // Smooth opacity based on distance
                   border: isActive
-                    ? '3px solid white'
-                    : '2px solid rgba(255, 255, 255, 0.3)',
+                    ? isMobile ? '2px solid white' : '3px solid white'
+                    : isMobile ? '1px solid rgba(255, 255, 255, 0.3)' : '2px solid rgba(255, 255, 255, 0.3)',
                   boxShadow: isActive
-                    ? `0 0 20px ${room.color}, 0 0 40px ${room.color}`
+                    ? `0 0 ${isMobile ? '12px' : '20px'} ${room.color}, 0 0 ${isMobile ? '24px' : '40px'} ${room.color}`
                     : '0 4px 8px rgba(0, 0, 0, 0.3)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -170,45 +325,39 @@ export function RoomMinimap({
                   touchAction: 'manipulation',
                   userSelect: 'none',
                   WebkitUserSelect: 'none',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.boxShadow = `0 0 15px ${room.color}`;
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow =
-                      '0 4px 8px rgba(0, 0, 0, 0.3)';
-                  }
-                }}
+                  transform: 'translateZ(0)', // Force GPU acceleration, prevent jitter
+                  backfaceVisibility: 'hidden' as const, // Improve rendering stability
+                } as React.CSSProperties}
               >
-                {/* Room number */}
+                {/* Room number - top left corner */}
                 <div
                   style={{
                     position: 'absolute',
-                    top: '0.25rem',
-                    left: '0.25rem',
-                    fontSize: '0.7rem',
+                    top: isMobile ? '0.15rem' : '0.5rem',
+                    left: isMobile ? '0.15rem' : '0.5rem',
+                    fontSize: isMobile ? '0.5rem' : '0.7rem',
                     fontWeight: 'bold',
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'rgba(255, 255, 255, 0.6)',
                     fontFamily: 'monospace',
                   }}
                 >
                   {index + 1}
                 </div>
 
-                {/* Room name */}
+                {/* Room name - centered */}
                 <div
                   style={{
                     color: 'white',
-                    fontSize: '0.75rem',
+                    fontSize: isMobile ? '0.55rem' : '0.75rem',
                     fontWeight: 'bold',
                     textAlign: 'center',
                     textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
-                    padding: '0 0.25rem',
+                    padding: isMobile ? '0 0.2rem' : '0 0.5rem',
+                    lineHeight: isMobile ? '1' : '1.4',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    width: '100%',
                   }}
                 >
                   {room.name}
@@ -226,17 +375,35 @@ export function RoomMinimap({
                     }}
                   />
                 )}
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
+          </div>
         </div>
+        )}
       </div>
 
-      {/* CSS animation for pulse effect */}
+      {/* CSS animations and scrollbar styling */}
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 0; transform: scale(1); }
           50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        /* Custom scrollbar styling for webkit browsers */
+        div::-webkit-scrollbar {
+          height: 6px;
+        }
+        div::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 3px;
+        }
+        div::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 3px;
+        }
+        div::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.5);
         }
       `}</style>
     </>

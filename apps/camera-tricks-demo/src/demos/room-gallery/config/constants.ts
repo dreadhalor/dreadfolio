@@ -1,3 +1,6 @@
+// Debug mode (set to false to hide all debug UI)
+export const DEBUG_MODE = false;
+
 // Room dimensions (visual size - how big the actual room geometry is)
 export const ROOM_VISUAL_WIDTH = 30;
 export const ROOM_VISUAL_HEIGHT = 12;
@@ -17,6 +20,7 @@ export const NUM_ROOMS = 15;
 export const CAMERA_HEIGHT = 3; // Very low camera = more dramatic perspective
 export const CAMERA_Z_POSITION = 10;
 export const CAMERA_FOV = 85; // Very wide FOV = spaces feel much bigger
+export const CAMERA_FOV_MOBILE = 100; // Even wider on mobile to make portal feel smaller and give more context
 export const CAMERA_LERP_SPEED = 0.1;
 
 // Room progress bounds (normalized 0-14 for 15 rooms)
