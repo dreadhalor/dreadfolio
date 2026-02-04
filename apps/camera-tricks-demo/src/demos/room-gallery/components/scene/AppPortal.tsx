@@ -1,8 +1,13 @@
 import * as THREE from 'three';
 import type { RoomData } from '../../types';
+import type {
+  OrbitalParticleMesh,
+  SwirlParticleMesh,
+} from '../../types/portalTypes';
 
 /**
  * Type-safe orbital particle with animation properties
+ * @deprecated Use OrbitalParticleMesh from portalTypes instead
  */
 interface OrbitalParticle extends THREE.Mesh {
   orbitAngle: number;
@@ -11,6 +16,7 @@ interface OrbitalParticle extends THREE.Mesh {
 
 /**
  * Type-safe swirl particle with animation properties
+ * @deprecated Use SwirlParticleMesh from portalTypes instead
  */
 interface SwirlParticle extends THREE.Mesh {
   baseAngle: number;
@@ -277,16 +283,16 @@ export function createPortalGroup(room: RoomData) {
       portalSurface,
       torus,
       torus2,
-      orbitalParticles: orbitalParticles as THREE.Mesh[],
-      swirlParticles: swirlParticles as THREE.Mesh[],
+      orbitalParticles: orbitalParticles as OrbitalParticleMesh[],
+      swirlParticles: swirlParticles as SwirlParticleMesh[],
     },
     dispose: () => {
       // Dispose all materials (geometries are shared, so don't dispose those)
-      materials.forEach(material => material.dispose());
-      
+      materials.forEach((material) => material.dispose());
+
       // Dispose all textures
-      textures.forEach(texture => texture.dispose());
-      
+      textures.forEach((texture) => texture.dispose());
+
       // Clear the group
       portalGroup.clear();
     },
