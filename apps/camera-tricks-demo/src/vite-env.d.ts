@@ -1,2 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="@react-three/fiber" />
+
+// Import R3F types to ensure JSX namespace extensions are loaded
+import '@react-three/fiber'
