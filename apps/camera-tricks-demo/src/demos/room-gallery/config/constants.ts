@@ -1,6 +1,12 @@
 // Debug mode (set to false to hide all debug UI)
 export const DEBUG_MODE = false;
 
+// Minimap debug visualization (can be enabled independently of DEBUG_MODE)
+export const SHOW_MINIMAP_DEBUG = false;
+
+// Responsive breakpoints
+export const MOBILE_BREAKPOINT = 768; // px - viewport width below this is considered mobile
+
 // Room dimensions (visual size - how big the actual room geometry is)
 export const ROOM_VISUAL_WIDTH = 30;
 export const ROOM_VISUAL_HEIGHT = 12;

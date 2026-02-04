@@ -106,7 +106,7 @@ export function AppLoader() {
           'opacity 0.5s ease-in-out 0.3s, transform 0.3s ease-in-out, clip-path 0.5s ease-in-out', // Delay opacity slightly
       };
     }
-    
+
     // When active: fully visible at full scale with large circle (effectively no mask)
     if (state === 'app-active') {
       return {
@@ -202,7 +202,6 @@ export function AppLoader() {
           }}
         />
       )}
-
     </>
   );
 }

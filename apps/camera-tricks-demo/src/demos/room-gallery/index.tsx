@@ -3,12 +3,12 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Configuration
 import { ROOMS } from './config/rooms';
-import { 
-  MIN_ROOM_PROGRESS, 
-  MAX_ROOM_PROGRESS, 
-  DRAG_SENSITIVITY, 
+import {
+  MIN_ROOM_PROGRESS,
+  MAX_ROOM_PROGRESS,
+  DRAG_SENSITIVITY,
   SNAP_THRESHOLD,
-  DEBUG_MODE 
+  DEBUG_MODE,
 } from './config/constants';
 
 // Components
@@ -19,12 +19,16 @@ import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { RoomHeader } from './components/ui/RoomHeader';
 import { RoomMinimap } from './components/ui/RoomMinimap';
 import { AppLoader } from './components/ui/AppLoader';
+import { ReturnButton } from './components/ui/ReturnButton';
 
 // Providers
 import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
 
 // Types
 import { RoomData } from './types';
+
+// Hooks
+import { useSyncedRefState } from './hooks/useSyncedRefState';
 
 /**
  * Room Gallery - Inner component with access to AppLoader context
@@ -34,11 +38,11 @@ function RoomGalleryInner() {
   // Performance monitoring
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
-  
+
   // PRIMARY STATE: Room progress (0.0 to 14.0)
   const [roomProgress, setRoomProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   // Debug state
   const [debugInfo, setDebugInfo] = useState<{
     roomProgress: number;
@@ -48,7 +52,7 @@ function RoomGalleryInner() {
     rightCameraIdx: number;
     viewportSplit: { left: number; right: number };
   } | null>(null);
-  
+
   // Refs for smooth updates
   const targetRoomProgressRef = useRef(0); // Target position (instant)
   const currentRoomProgressRef = useRef(0); // Current position (lerped, matches camera)
@@ -60,27 +64,34 @@ function RoomGalleryInner() {
     lastMouseXRef.current = clientX;
   }, []);
 
-  const handlePointerMove = useCallback((clientX: number) => {
-    if (!isDragging) return;
-    
-    const deltaX = clientX - lastMouseXRef.current;
-    lastMouseXRef.current = clientX;
-    
-    // Update room progress (negative because dragging right moves left)
-    const newProgress = targetRoomProgressRef.current - (deltaX * DRAG_SENSITIVITY);
-    const clampedProgress = Math.max(MIN_ROOM_PROGRESS, Math.min(MAX_ROOM_PROGRESS, newProgress));
-    
-    targetRoomProgressRef.current = clampedProgress;
-    setRoomProgress(clampedProgress);
-  }, [isDragging]);
+  const handlePointerMove = useCallback(
+    (clientX: number) => {
+      if (!isDragging) return;
+
+      const deltaX = clientX - lastMouseXRef.current;
+      lastMouseXRef.current = clientX;
+
+      // Update room progress (negative because dragging right moves left)
+      const newProgress =
+        targetRoomProgressRef.current - deltaX * DRAG_SENSITIVITY;
+      const clampedProgress = Math.max(
+        MIN_ROOM_PROGRESS,
+        Math.min(MAX_ROOM_PROGRESS, newProgress),
+      );
+
+      targetRoomProgressRef.current = clampedProgress;
+      setRoomProgress(clampedProgress);
+    },
+    [isDragging],
+  );
 
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
-    
+
     // Snap to nearest room for a pleasing "fast travel" effect
     const currentProgress = targetRoomProgressRef.current;
     const nearestRoom = Math.round(currentProgress);
-    
+
     // Only snap if we're not already at a whole number (avoid unnecessary animation)
     if (Math.abs(currentProgress - nearestRoom) > SNAP_THRESHOLD) {
       targetRoomProgressRef.current = nearestRoom;
@@ -89,37 +100,52 @@ function RoomGalleryInner() {
   }, []);
 
   // Mouse event handlers
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    handlePointerDown(e.clientX);
-  }, [handlePointerDown]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      handlePointerDown(e.clientX);
+    },
+    [handlePointerDown],
+  );
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    handlePointerMove(e.clientX);
-  }, [handlePointerMove]);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      handlePointerMove(e.clientX);
+    },
+    [handlePointerMove],
+  );
 
   const handleMouseUp = useCallback(() => {
     handlePointerUp();
   }, [handlePointerUp]);
 
   // Touch event handlers
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      e.preventDefault(); // Prevent iOS scrolling/zooming
-      handlePointerDown(e.touches[0].clientX);
-    }
-  }, [handlePointerDown]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+        e.preventDefault(); // Prevent iOS scrolling/zooming
+        handlePointerDown(e.touches[0].clientX);
+      }
+    },
+    [handlePointerDown],
+  );
 
-  const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (e.touches.length === 1) {
-      e.preventDefault(); // Prevent iOS scrolling
-      handlePointerMove(e.touches[0].clientX);
-    }
-  }, [handlePointerMove]);
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        e.preventDefault(); // Prevent iOS scrolling
+        handlePointerMove(e.touches[0].clientX);
+      }
+    },
+    [handlePointerMove],
+  );
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
-    e.preventDefault(); // Prevent iOS delayed click events
-    handlePointerUp();
-  }, [handlePointerUp]);
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      e.preventDefault(); // Prevent iOS delayed click events
+      handlePointerUp();
+    },
+    [handlePointerUp],
+  );
 
   // Attach mouse and touch event listeners
   useEffect(() => {
@@ -129,7 +155,7 @@ function RoomGalleryInner() {
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd, { passive: false });
     window.addEventListener('touchcancel', handleTouchEnd, { passive: false }); // iOS can cancel touches
-    
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -142,46 +168,36 @@ function RoomGalleryInner() {
   // Fast travel to specific room (simple!)
   const moveTo = useCallback((room: RoomData) => {
     const roomIndex = ROOMS.indexOf(room);
-    
+
     // Just set room progress to the room index
     targetRoomProgressRef.current = roomIndex;
     setRoomProgress(roomIndex);
   }, []);
 
   // Derive current room from lerped camera position (smooth, jitter-free)
-  const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
-  
-  useEffect(() => {
-    let rafId: number;
-    
-    const updateCurrentRoom = () => {
-      if (currentRoomProgressRef.current !== undefined) {
-        const index = Math.round(currentRoomProgressRef.current);
-        setCurrentRoomIndex(index);
-      }
-      rafId = requestAnimationFrame(updateCurrentRoom);
-    };
-    
-    rafId = requestAnimationFrame(updateCurrentRoom);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-  
+  // Using useSyncedRefState hook to eliminate RAF boilerplate
+  const currentRoomIndex = useSyncedRefState(
+    currentRoomProgressRef,
+    Math.round,
+  ) as number;
   const currentRoom = ROOMS[currentRoomIndex] || ROOMS[0];
 
   return (
-    <div 
-      style={{ 
-        width: '100vw', 
-        height: '100vh', 
-        background: '#000',
-        cursor: isDragging ? 'grabbing' : 'grab',
-        userSelect: 'none',
-        touchAction: 'none', // Disable native touch scrolling/zooming
-        WebkitUserSelect: 'none', // Disable text selection on iOS
-        WebkitTouchCallout: 'none', // Disable callout on iOS
-        WebkitTapHighlightColor: 'transparent', // Remove tap highlight on iOS
-        paddingBottom: 'env(safe-area-inset-bottom)', // Account for iOS bottom bar
-      } as React.CSSProperties}
+    <div
+      style={
+        {
+          width: '100vw',
+          height: '100vh',
+          background: '#000',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          touchAction: 'none', // Disable native touch scrolling/zooming
+          WebkitUserSelect: 'none', // Disable text selection on iOS
+          WebkitTouchCallout: 'none', // Disable callout on iOS
+          WebkitTapHighlightColor: 'transparent', // Remove tap highlight on iOS
+          paddingBottom: 'env(safe-area-inset-bottom)', // Account for iOS bottom bar
+        } as React.CSSProperties
+      }
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onContextMenu={(e) => e.preventDefault()} // Prevent long-press context menu on iOS
@@ -190,9 +206,9 @@ function RoomGalleryInner() {
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
         frameloop={appLoaderState === 'app-active' ? 'never' : 'always'} // Pause rendering when app is fullscreen
-        gl={{ 
+        gl={{
           antialias: false, // Disabled for 20-30% performance gain
-          powerPreference: "high-performance",
+          powerPreference: 'high-performance',
           autoClear: false, // We manually clear in SplitCameraRenderer
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
@@ -202,12 +218,12 @@ function RoomGalleryInner() {
           background: 'transparent',
         }}
       >
-        <Scene 
+        <Scene
           onFpsUpdate={setFps}
           onDrawCallsUpdate={setDrawCalls}
           roomProgress={roomProgress}
         />
-        <SplitCameraRenderer 
+        <SplitCameraRenderer
           targetRoomProgressRef={targetRoomProgressRef}
           currentRoomProgressRef={currentRoomProgressRef}
           onRoomProgressUpdate={setRoomProgress}
@@ -216,7 +232,9 @@ function RoomGalleryInner() {
       </Canvas>
 
       {/* UI Overlays - show when idle, minimizing, or when app is minimized */}
-      {(appLoaderState === 'idle' || appLoaderState === 'minimizing' || appLoaderState === 'minimized') && (
+      {(appLoaderState === 'idle' ||
+        appLoaderState === 'minimizing' ||
+        appLoaderState === 'minimized') && (
         <>
           <RoomHeader currentRoom={currentRoom} />
           {DEBUG_MODE && <FPSDisplay fps={fps} />}
@@ -224,104 +242,72 @@ function RoomGalleryInner() {
         </>
       )}
 
-      {/* Fast Travel Minimap - only visible when gallery is active */}
-      {(appLoaderState === 'idle' || appLoaderState === 'minimizing' || appLoaderState === 'minimized') && (
-        <RoomMinimap 
-          rooms={ROOMS} 
-          currentRoom={currentRoom}
-          roomProgress={roomProgress}
-          currentRoomProgressRef={currentRoomProgressRef}
-          onRoomClick={moveTo}
-          onRoomProgressChange={(progress) => {
-            targetRoomProgressRef.current = progress;
-            setRoomProgress(progress);
-          }}
-        />
-      )}
+      {/* Fast Travel Minimap - always visible as primary navigation */}
+      <RoomMinimap
+        rooms={ROOMS}
+        currentRoom={currentRoom}
+        roomProgress={roomProgress}
+        currentRoomProgressRef={currentRoomProgressRef}
+        onRoomClick={moveTo}
+        onRoomProgressChange={(progress) => {
+          targetRoomProgressRef.current = progress;
+          setRoomProgress(progress);
+        }}
+      />
 
       {/* Compact Return Button - only visible when app is active */}
       {appLoaderState === 'app-active' && (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            minimizeApp();
-          }}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            minimizeApp();
-          }}
-          style={{
-            position: 'fixed',
-            bottom: window.innerWidth < 768 ? 'max(0.75rem, env(safe-area-inset-bottom))' : '1.5rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            padding: window.innerWidth < 768 ? '0.5rem 1rem' : '0.75rem 1.5rem',
-            background: 'rgba(0, 0, 0, 0.9)',
-            color: '#fff',
-            border: window.innerWidth < 768 ? '1px solid rgba(255, 255, 255, 0.5)' : '2px solid rgba(255, 255, 255, 0.5)',
-            borderRadius: '2rem',
-            fontSize: window.innerWidth < 768 ? '0.75rem' : '0.875rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            zIndex: 1002,
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 255, 255, 0.1)',
-            WebkitTapHighlightColor: 'rgba(255, 255, 255, 0.3)',
-            touchAction: 'manipulation',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
-            e.currentTarget.style.transform = 'translateX(-50%) scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
-            e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
-          }}
-        >
-          ↓ Return to Gallery
-        </button>
+        <ReturnButton onClick={minimizeApp} />
       )}
-      
+
       {/* App Loader Overlay */}
       <AppLoader />
-      
+
       {/* Debug Overlay */}
       {DEBUG_MODE && debugInfo && (
-        <div style={{
-          position: 'fixed',
-          top: '80px',
-          right: '20px',
-          background: 'rgba(0, 0, 0, 0.85)',
-          color: '#0f0',
-          padding: '16px',
-          fontFamily: 'monospace',
-          fontSize: '13px',
-          lineHeight: '1.7',
-          borderRadius: '6px',
-          pointerEvents: 'none',
-          zIndex: 1000,
-          border: '2px solid #0f0',
-        }}>
-          <div style={{ color: '#ff0', marginBottom: '8px' }}><strong>🔍 DEBUG INFO</strong></div>
-          
-          <div style={{ marginTop: '8px' }}><strong>Room Progress:</strong></div>
+        <div
+          style={{
+            position: 'fixed',
+            top: '80px',
+            right: '20px',
+            background: 'rgba(0, 0, 0, 0.85)',
+            color: '#0f0',
+            padding: '16px',
+            fontFamily: 'monospace',
+            fontSize: '13px',
+            lineHeight: '1.7',
+            borderRadius: '6px',
+            pointerEvents: 'none',
+            zIndex: 1000,
+            border: '2px solid #0f0',
+          }}
+        >
+          <div style={{ color: '#ff0', marginBottom: '8px' }}>
+            <strong>🔍 DEBUG INFO</strong>
+          </div>
+
+          <div style={{ marginTop: '8px' }}>
+            <strong>Room Progress:</strong>
+          </div>
           <div style={{ color: '#0ff', fontSize: '16px' }}>
             <strong>{debugInfo.roomProgress.toFixed(3)}</strong> / 14.0
           </div>
           <div>currentRoom: {debugInfo.currentRoom}</div>
-          <div>transitionProgress: {(debugInfo.transitionProgress * 100).toFixed(1)}%</div>
-          
-          <div style={{ marginTop: '8px' }}><strong>Viewport Split:</strong></div>
+          <div>
+            transitionProgress:{' '}
+            {(debugInfo.transitionProgress * 100).toFixed(1)}%
+          </div>
+
+          <div style={{ marginTop: '8px' }}>
+            <strong>Viewport Split:</strong>
+          </div>
           <div style={{ color: '#ff0' }}>
-            Left: Camera {debugInfo.leftCameraIdx} ({(debugInfo.viewportSplit.left * 100).toFixed(1)}%)
+            Left: Camera {debugInfo.leftCameraIdx} (
+            {(debugInfo.viewportSplit.left * 100).toFixed(1)}%)
           </div>
           <div style={{ color: '#f0f' }}>
-            Right: Camera {debugInfo.rightCameraIdx} ({(debugInfo.viewportSplit.right * 100).toFixed(1)}%)
+            Right: Camera {debugInfo.rightCameraIdx} (
+            {(debugInfo.viewportSplit.right * 100).toFixed(1)}%)
           </div>
         </div>
       )}
@@ -331,9 +317,9 @@ function RoomGalleryInner() {
 
 /**
  * Room Gallery - Split Camera Edition
- * 
+ *
  * A 3D room gallery with split-screen view and independent camera control for 60 FPS performance
- * 
+ *
  * Architecture:
  * - Fifteen cameras moving together, spaced 10 units apart (one per app)
  * - 15 app-themed rooms at 20-unit intervals (0, 20, 40, ... 280)
@@ -345,7 +331,7 @@ function RoomGalleryInner() {
  * - Automatic room-component mapping via registry
  * - Performance optimizations: merged geometry, instanced meshes, minimal lights
  * - Interactive portals: Click to load apps in fullscreen iframes
- * 
+ *
  * Performance targets:
  * - 60 FPS steady (even with dual rendering)
  * - < 50 draw calls per viewport

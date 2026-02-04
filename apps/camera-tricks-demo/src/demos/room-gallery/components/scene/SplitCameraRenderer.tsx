@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useState } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
@@ -17,6 +17,7 @@ import {
   CLICK_THRESHOLD,
   DEBUG_MODE,
 } from '../../config/constants';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { calculateCameraPosition } from '../../utils/cameraCalculations';
 import { ROOMS } from '../../config/rooms';
 import { createPortalGroup } from './AppPortal';
@@ -183,7 +184,8 @@ export function SplitCameraRenderer({
 }: SplitCameraRendererProps) {
   const { gl, scene, size, set } = useThree();
   const internalCurrentRoomProgressRef = useRef(0);
-  const currentRoomProgressRef = externalCurrentRef || internalCurrentRoomProgressRef;
+  const currentRoomProgressRef =
+    externalCurrentRef || internalCurrentRoomProgressRef;
   const { loadApp, state: appLoaderState } = useAppLoader();
 
   // Raycaster for portal click detection
@@ -204,21 +206,8 @@ export function SplitCameraRenderer({
     loadAppRef.current = loadApp;
   }, [loadApp]);
 
-  // Track mobile state for responsive FOV
-  const [isMobile, setIsMobile] = useState(() => 
-    typeof window !== 'undefined' && window.innerWidth < 768
-  );
-  
-  // Update mobile state on resize
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Track mobile state for responsive FOV (using custom hook)
+  const isMobile = useIsMobile();
 
   // Create cameras once (one per room)
   const cameras = useMemo(() => {
@@ -272,11 +261,11 @@ export function SplitCameraRenderer({
       throw error; // Re-throw to trigger error boundary
     }
   }, [isMobile]); // Recreate cameras when mobile state changes
-  
+
   // Update camera FOV when mobile state changes (for existing cameras)
   useEffect(() => {
     const fov = isMobile ? CAMERA_FOV_MOBILE : CAMERA_FOV;
-    cameras.forEach(camera => {
+    cameras.forEach((camera) => {
       camera.fov = fov;
       camera.updateProjectionMatrix();
     });
@@ -503,7 +492,7 @@ export function SplitCameraRenderer({
         currentProgress,
         CAMERA_SPACING,
       );
-      
+
       // SAFETY CHECK: Validate portal world position hasn't drifted (development only)
       if (DEBUG) {
         const camera = cameras[i] as ExtendedCamera;
@@ -512,7 +501,7 @@ export function SplitCameraRenderer({
           camera.portalGroup.getWorldPosition(portalWorldPos);
           const expectedWorldZ = camera.userData.originalZ + PORTAL_DEFAULT_Z;
           const drift = Math.abs(portalWorldPos.z - expectedWorldZ);
-          
+
           if (drift > 0.1) {
             console.warn(`⚠️ Portal ${i} world position drift detected!`, {
               expected: expectedWorldZ,
@@ -555,19 +544,19 @@ export function SplitCameraRenderer({
 
       /**
        * Camera dolly-in with portal world position compensation
-       * 
+       *
        * GOAL: Camera moves forward, portal stays at fixed world position
-       * 
+       *
        * MATH:
        *   Portal World Z = Camera World Z + Portal Local Z
        *   Target: Portal World Z = originalZ + PORTAL_DEFAULT_Z (constant)
-       * 
+       *
        * SOLUTION:
        *   1. Store original camera position when zoom starts
        *   2. Calculate dolly amount: defaultDistance - currentDistance
        *   3. Move camera: position.z = originalZ - dollyAmount (forward in -Z)
        *   4. Compensate portal: position.z = PORTAL_DEFAULT_Z + dollyAmount
-       * 
+       *
        * RESULT: Portal world position remains constant throughout animation!
        */
       if (zoomState?.isZooming && portalGroup) {
@@ -598,12 +587,16 @@ export function SplitCameraRenderer({
         if (animData?.portalSurface?.material) {
           const material = animData.portalSurface
             .material as THREE.MeshBasicMaterial;
-          
+
           // Check which direction portal is zooming
-          const isZoomingIn = Math.abs(zoomState.targetZ) < Math.abs(PORTAL_DEFAULT_Z);
-          
+          const isZoomingIn =
+            Math.abs(zoomState.targetZ) < Math.abs(PORTAL_DEFAULT_Z);
+
           // Calculate brightness using centralized utility
-          const brightness = calculatePortalBrightness(zoomState.currentZ, isZoomingIn);
+          const brightness = calculatePortalBrightness(
+            zoomState.currentZ,
+            isZoomingIn,
+          );
           material.color.setRGB(brightness, brightness, brightness);
         }
 

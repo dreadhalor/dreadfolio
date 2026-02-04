@@ -1,25 +1,19 @@
-import { useState, useEffect } from 'react';
 import { RoomData } from '../../types';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { SPACING, BORDER_RADIUS } from '../../config/styleConstants';
 
 interface RoomHeaderProps {
   currentRoom: RoomData;
 }
 
 export function RoomHeader({ currentRoom }: RoomHeaderProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   return (
     <div
       style={{
         position: 'absolute',
-        top: isMobile ? '0.5rem' : '2rem',
+        top: isMobile ? SPACING.xs : SPACING.xl,
         left: '50%',
         transform: 'translateX(-50%)',
         color: 'white',
@@ -27,18 +21,22 @@ export function RoomHeader({ currentRoom }: RoomHeaderProps) {
         fontWeight: 'bold',
         textAlign: 'center',
         background: 'rgba(0, 0, 0, 0.7)',
-        padding: isMobile ? '0.5rem 1rem' : '1rem 2rem',
-        borderRadius: isMobile ? '0.4rem' : '0.5rem',
+        padding: isMobile
+          ? `${SPACING.xs} ${SPACING.md}`
+          : `${SPACING.md} ${SPACING.xl}`,
+        borderRadius: isMobile ? BORDER_RADIUS.sm : BORDER_RADIUS.md,
         pointerEvents: 'none',
         maxWidth: isMobile ? 'calc(100vw - 1rem)' : 'none',
       }}
     >
-      <div style={{ 
-        fontSize: isMobile ? '1rem' : '1.8rem', 
-        marginBottom: isMobile ? '0.25rem' : '0.5rem',
-        textShadow: `0 0 ${isMobile ? '6px' : '10px'} ${currentRoom.color}`,
-        transition: 'all 0.5s ease',
-      }}>
+      <div
+        style={{
+          fontSize: isMobile ? '1rem' : '1.8rem',
+          marginBottom: isMobile ? '0.25rem' : '0.5rem',
+          textShadow: `0 0 ${isMobile ? '6px' : '10px'} ${currentRoom.color}`,
+          transition: 'all 0.5s ease',
+        }}
+      >
         {currentRoom.name}
       </div>
       {!isMobile && (

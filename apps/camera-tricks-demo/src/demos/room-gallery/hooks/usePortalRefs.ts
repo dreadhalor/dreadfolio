@@ -34,7 +34,7 @@ const portalRefManager = new PortalRefManager();
 
 /**
  * Hook to register iframe element for portal rendering
- * 
+ *
  * @param ref - React ref to the iframe element
  * @returns void
  */
@@ -51,7 +51,7 @@ export function usePortalIframeRef(ref: RefObject<HTMLIFrameElement | null>) {
 
 /**
  * Hook to access portal element references (for use in Three.js render loop)
- * 
+ *
  * @returns PortalRefs object with current iframe element
  */
 export function usePortalRefs(): PortalRefs {
@@ -60,7 +60,7 @@ export function usePortalRefs(): PortalRefs {
 
 /**
  * Get portal refs synchronously (for use outside React components, e.g., useFrame)
- * 
+ *
  * @returns PortalRefs object with current iframe element
  */
 export function getPortalRefs(): PortalRefs {
