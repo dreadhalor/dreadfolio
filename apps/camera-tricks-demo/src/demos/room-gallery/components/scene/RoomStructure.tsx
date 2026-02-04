@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import { RoomStructureProps } from '../../types/props';
 import { createTileTexture } from '../../utils/TextureGenerator';
-import { ROOM_VISUAL_WIDTH, ROOM_VISUAL_HEIGHT, ROOM_VISUAL_DEPTH } from '../../config/constants';
+import {
+  ROOM_VISUAL_WIDTH,
+  ROOM_VISUAL_HEIGHT,
+  ROOM_VISUAL_DEPTH,
+} from '../../config/constants';
 
 /**
  * Room Structure Component - Enhanced with Textures
