@@ -20,6 +20,12 @@ export const MINIMAP_MOBILE = {
   MIN_OPACITY: 0.3,
 } as const;
 
+// Minimap indicator line constants
+export const MINIMAP_INDICATOR = {
+  WIDTH: 3,
+  COLOR: 'rgba(255, 255, 255, 0.8)',
+} as const;
+
 // Z-index hierarchy for UI layering
 export const UI_Z_INDEX = {
   MINIMAP: 9999, // Must be above canvas
