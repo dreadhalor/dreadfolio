@@ -1,134 +1,177 @@
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useMatcap } from './useMatcap';
+import { useInstancedMesh } from '../../utils/useInstancedMesh';
+import { useInstancedAnimation } from '../../utils/useInstancedAnimation';
+import type { InstancedComponentProps } from '../../types/instancedComponents';
+import {
+  BOOK_CONFIG,
+  PLANT_CONFIG,
+  FRAME_CONFIG,
+  LAMP_CONFIG,
+  MONITOR_CONFIG,
+  BOTTLE_CONFIG,
+  CRATE_CONFIG,
+  GRID_CUBE_CONFIG,
+  FLOATING_PARTICLE_CONFIG,
+  NUMBER_BLOCK_CONFIG,
+} from '../../config/instancedComponentsConfig';
 
 /**
  * Shared Instanced Components
  * 
- * MATERIAL COMPATIBILITY NOTE:
- * - meshMatcapMaterial: matcap (texture), color, transparent, opacity (simulated lighting via texture)
- * - meshBasicMaterial: color, map, transparent, opacity (NO lighting properties)
- * - meshLambertMaterial: color, map, emissive, emissiveIntensity, transparent, opacity
- * - meshStandardMaterial: ALL properties including metalness, roughness, normalMap
+ * Performance-optimized components using THREE.InstancedMesh for rendering
+ * multiple identical objects with a single draw call.
+ * 
+ * Refactored to use shared utilities:
+ * - useInstancedMesh: Common initialization logic
+ * - useInstancedAnimation: Common animation logic
+ * - instancedComponentsConfig: Centralized constants
  */
 
-// ========== CONSTANTS (extracted from magic numbers) ==========
+// ========== POSITION GENERATORS ==========
 
-const BOOK_CONFIG = {
-  COUNT: 36,
-  ROWS: 6,
-  COLS: 6,
-  START_X: -8,
-  START_Y: 1.5,
-  SPACING_X: 0.35,
-  SPACING_Y: 0.6,
-  DEPTH_BASE: -7.2,
-  DEPTH_VARIATION: 0.1,
-  ROTATION_RANGE: 0.2,
-  FLOAT_SPEED: 0.5,
-  FLOAT_AMPLITUDE: 0.02,
-  SWAY_AMPLITUDE: 0.05,
-} as const;
+function generateBookPositions() {
+  return Array.from({ length: BOOK_CONFIG.COUNT }, (_, i) => {
+    const row = Math.floor(i / BOOK_CONFIG.COLS);
+    const col = i % BOOK_CONFIG.COLS;
+    return {
+      x: BOOK_CONFIG.START_X + col * BOOK_CONFIG.SPACING_X,
+      y: BOOK_CONFIG.START_Y + row * BOOK_CONFIG.SPACING_Y,
+      z: BOOK_CONFIG.DEPTH_BASE + (row % 2) * BOOK_CONFIG.DEPTH_VARIATION,
+      rotation: (Math.random() - 0.5) * BOOK_CONFIG.ROTATION_RANGE,
+    };
+  });
+}
 
-const PLANT_CONFIG = {
-  RADIUS_MIN: 5,
-  RADIUS_RANGE: 2,
-  BASE_HEIGHT: 0.5,
-  SCALE_MIN: 1.2,
-  SCALE_RANGE: 0.6,
-  HUE_BASE: 0.3,
-  HUE_RANGE: 0.1,
-  LIGHTNESS_BASE: 0.3,
-  LIGHTNESS_RANGE: 0.2,
-  SWAY_SPEED: 0.8,
-  SWAY_AMPLITUDE: 0.1,
-} as const;
+function generatePlantPositions(count: number) {
+  return Array.from({ length: count }, (_, i) => {
+    const angle = (i / count) * Math.PI * 2;
+    const radius = PLANT_CONFIG.RADIUS_MIN + Math.random() * PLANT_CONFIG.RADIUS_RANGE;
+    return {
+      x: Math.cos(angle) * radius,
+      y: PLANT_CONFIG.BASE_HEIGHT,
+      z: Math.sin(angle) * radius,
+      scale: PLANT_CONFIG.SCALE_MIN + Math.random() * PLANT_CONFIG.SCALE_RANGE,
+      hue: PLANT_CONFIG.HUE_BASE + Math.random() * PLANT_CONFIG.HUE_RANGE,
+      lightness: PLANT_CONFIG.LIGHTNESS_BASE + Math.random() * PLANT_CONFIG.LIGHTNESS_RANGE,
+    };
+  });
+}
 
-const FRAME_CONFIG = {
-  START_X: -7,
-  SPACING_X: 4.5,
-  COLS: 4,
-  BASE_Y: 3,
-  SPACING_Y: 2,
-  DEPTH: -9.8,
-} as const;
+function generateFramePositions(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: FRAME_CONFIG.START_X + (i % FRAME_CONFIG.COLS) * FRAME_CONFIG.SPACING_X,
+    y: FRAME_CONFIG.BASE_Y + Math.floor(i / FRAME_CONFIG.COLS) * FRAME_CONFIG.SPACING_Y,
+    z: FRAME_CONFIG.DEPTH,
+  }));
+}
 
-const LAMP_CONFIG = {
-  START_X: -6,
-  START_Z: -3,
-  SPACING_X: 6,
-  SPACING_Z: 6,
-  COLS: 3,
-  HEIGHT: 2.5,
-} as const;
+function generateLampPositions(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: LAMP_CONFIG.START_X + (i % LAMP_CONFIG.COLS) * LAMP_CONFIG.SPACING_X,
+    y: LAMP_CONFIG.HEIGHT,
+    z: LAMP_CONFIG.START_Z + Math.floor(i / LAMP_CONFIG.COLS) * LAMP_CONFIG.SPACING_Z,
+  }));
+}
 
-// ========== INSTANCED COMPONENTS ==========
+function generateMonitorPositions(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: MONITOR_CONFIG.START_X + i * MONITOR_CONFIG.SPACING_X,
+    y: MONITOR_CONFIG.BASE_Y,
+    z: MONITOR_CONFIG.BASE_Z,
+    rotation: Math.random() * MONITOR_CONFIG.ROTATION_RANGE - MONITOR_CONFIG.ROTATION_RANGE / 2,
+  }));
+}
+
+function generateBottlePositions(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: BOTTLE_CONFIG.START_X + (i % BOTTLE_CONFIG.COLS) * BOTTLE_CONFIG.SPACING_X,
+    y: BOTTLE_CONFIG.BASE_Y,
+    z: BOTTLE_CONFIG.Z_START + (i % 3) * BOTTLE_CONFIG.Z_SPACING,
+    scale: BOTTLE_CONFIG.SCALE_MIN + Math.random() * BOTTLE_CONFIG.SCALE_RANGE,
+    hue: BOTTLE_CONFIG.HUE_BASE + Math.random() * BOTTLE_CONFIG.HUE_RANGE,
+  }));
+}
+
+function generateCratePositions(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: CRATE_CONFIG.START_X + (i % CRATE_CONFIG.COLS) * CRATE_CONFIG.SPACING_X,
+    y: CRATE_CONFIG.BASE_Y,
+    z: CRATE_CONFIG.START_Z + Math.floor(i / CRATE_CONFIG.COLS) * CRATE_CONFIG.SPACING_Z,
+    rotation: Math.random() * Math.PI * 2,
+  }));
+}
+
+function generateGridPositions(count: number, gridSize: number) {
+  const spacing = GRID_CUBE_CONFIG.SPACING;
+  const offset = (gridSize - 1) * spacing / 2;
+  
+  return Array.from({ length: count }, (_, i) => {
+    const row = Math.floor(i / gridSize);
+    const col = i % gridSize;
+    return {
+      x: col * spacing - offset,
+      y: GRID_CUBE_CONFIG.BASE_Y,
+      z: row * spacing - offset,
+      hue: GRID_CUBE_CONFIG.HUE_BASE + ((row + col) % 2) * GRID_CUBE_CONFIG.HUE_VARIATION,
+    };
+  });
+}
+
+function generateFloatingParticlePositions(count: number) {
+  return Array.from({ length: count }, () => ({
+    x: Math.random() * FLOATING_PARTICLE_CONFIG.RANGE_X - FLOATING_PARTICLE_CONFIG.RANGE_X / 2,
+    y: Math.random() * FLOATING_PARTICLE_CONFIG.RANGE_Y,
+    z: Math.random() * FLOATING_PARTICLE_CONFIG.RANGE_Z - FLOATING_PARTICLE_CONFIG.RANGE_Z / 2,
+    speedY: Math.random() * FLOATING_PARTICLE_CONFIG.SPEED_Y_RANGE + FLOATING_PARTICLE_CONFIG.SPEED_Y_MIN,
+    phase: Math.random() * Math.PI * 2,
+  }));
+}
+
+function generateNumberBlockPositions(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    x: NUMBER_BLOCK_CONFIG.START_X + (i % NUMBER_BLOCK_CONFIG.COLS) * NUMBER_BLOCK_CONFIG.SPACING,
+    y: NUMBER_BLOCK_CONFIG.BASE_Y,
+    z: NUMBER_BLOCK_CONFIG.START_Z + Math.floor(i / NUMBER_BLOCK_CONFIG.COLS) * NUMBER_BLOCK_CONFIG.SPACING,
+  }));
+}
+
+// ========== COMPONENTS ==========
 
 /**
  * Instanced Books - 36 books with gentle floating animation
  */
 export function InstancedBooks({ offsetX }: { offsetX: number }) {
-  const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(() => generateBookPositions(), []);
   const colors = ['#8b0000', '#00008b', '#228b22', '#ffd700', '#ff4500', '#9400d3'];
   
-  // Memoize random rotations so they don't change every frame
-  const baseRotations = useMemo(() => {
-    return Array.from({ length: BOOK_CONFIG.COUNT }, () => 
-      (Math.random() - 0.5) * BOOK_CONFIG.ROTATION_RANGE
-    );
-  }, []);
+  const meshRef = useInstancedMesh({
+    count: BOOK_CONFIG.COUNT,
+    offsetX,
+    color: (i) => colors[i % colors.length],
+    positionData: positions,
+    setupInstance: (obj, data, _i, offsetX) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+      obj.rotation.y = data.rotation!;
+    },
+  });
   
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    for (let i = 0; i < BOOK_CONFIG.COUNT; i++) {
-      const row = Math.floor(i / BOOK_CONFIG.COLS);
-      const col = i % BOOK_CONFIG.COLS;
-      tempObject.position.set(
-        offsetX + (BOOK_CONFIG.START_X + col * BOOK_CONFIG.SPACING_X),
-        BOOK_CONFIG.START_Y + row * BOOK_CONFIG.SPACING_Y,
-        BOOK_CONFIG.DEPTH_BASE + (row % 2) * BOOK_CONFIG.DEPTH_VARIATION
+  useInstancedAnimation({
+    meshRef,
+    count: BOOK_CONFIG.COUNT,
+    speed: BOOK_CONFIG.FLOAT_SPEED,
+    offsetX,
+    updateInstance: (obj, i, time, offsetX) => {
+      const data = positions[i];
+      obj.position.set(
+        offsetX + data.x,
+        data.y + Math.sin(time + i * 0.1) * BOOK_CONFIG.FLOAT_AMPLITUDE,
+        data.z
       );
-      tempObject.rotation.y = baseRotations[i];
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      tempColor.set(colors[i % colors.length]);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, colors, baseRotations]);
-  
-  // Gentle floating animation
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    const time = state.clock.elapsedTime * BOOK_CONFIG.FLOAT_SPEED;
-    const tempObject = new THREE.Object3D();
-    
-    for (let i = 0; i < BOOK_CONFIG.COUNT; i++) {
-      const row = Math.floor(i / BOOK_CONFIG.COLS);
-      const col = i % BOOK_CONFIG.COLS;
-      tempObject.position.set(
-        offsetX + (BOOK_CONFIG.START_X + col * BOOK_CONFIG.SPACING_X),
-        BOOK_CONFIG.START_Y + row * BOOK_CONFIG.SPACING_Y + 
-          Math.sin(time + i * 0.1) * BOOK_CONFIG.FLOAT_AMPLITUDE,
-        BOOK_CONFIG.DEPTH_BASE + (row % 2) * BOOK_CONFIG.DEPTH_VARIATION
-      );
-      tempObject.rotation.y = baseRotations[i] + 
-        Math.sin(time + i) * BOOK_CONFIG.SWAY_AMPLITUDE;
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
+      obj.rotation.y = data.rotation! + Math.sin(time + i) * BOOK_CONFIG.SWAY_AMPLITUDE;
+    },
   });
   
   return (
@@ -143,65 +186,33 @@ export function InstancedBooks({ offsetX }: { offsetX: number }) {
  * Instanced Plants - Cylindrical plants with swaying animation
  */
 export function InstancedPlants({ offsetX, count = 18 }: { offsetX: number; count?: number }) {
-  const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const plantData = useMemo(() => generatePlantPositions(count), [count]);
   
-  // Memoize plant positions, radii, and scales so they don't change
-  const plantData = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => {
-      const angle = (i / count) * Math.PI * 2;
-      const radius = PLANT_CONFIG.RADIUS_MIN + Math.random() * PLANT_CONFIG.RADIUS_RANGE;
-      return {
-        x: Math.cos(angle) * radius,
-        z: Math.sin(angle) * radius,
-        scale: PLANT_CONFIG.SCALE_MIN + Math.random() * PLANT_CONFIG.SCALE_RANGE,
-        hue: PLANT_CONFIG.HUE_BASE + Math.random() * PLANT_CONFIG.HUE_RANGE,
-        lightness: PLANT_CONFIG.LIGHTNESS_BASE + Math.random() * PLANT_CONFIG.LIGHTNESS_RANGE,
-      };
-    });
-  }, [count]);
-  
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    // Initialize plants with memoized data
-    for (let i = 0; i < count; i++) {
+  const meshRef = useInstancedMesh({
+    count,
+    offsetX,
+    color: (i) => {
       const data = plantData[i];
-      tempObject.position.set(offsetX + data.x, PLANT_CONFIG.BASE_HEIGHT, data.z);
-      tempObject.scale.set(1, data.scale, 1);
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      
-      // Varying shades of green
-      tempColor.setHSL(data.hue, 0.6, data.lightness);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count, plantData]);
+      return new THREE.Color().setHSL(data.hue!, 0.6, data.lightness!).getStyle();
+    },
+    positionData: plantData,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+      obj.scale.set(1, data.scale!, 1);
+    },
+  });
   
-  // Gentle swaying animation
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    const time = state.clock.elapsedTime * PLANT_CONFIG.SWAY_SPEED;
-    const tempObject = new THREE.Object3D();
-    
-    for (let i = 0; i < count; i++) {
+  useInstancedAnimation({
+    meshRef,
+    count,
+    speed: PLANT_CONFIG.SWAY_SPEED,
+    offsetX,
+    updateInstance: (obj, i, time, offsetX) => {
       const data = plantData[i];
-      tempObject.position.set(offsetX + data.x, PLANT_CONFIG.BASE_HEIGHT, data.z);
-      tempObject.scale.set(1, data.scale, 1);
-      tempObject.rotation.z = Math.sin(time + i * 0.5) * PLANT_CONFIG.SWAY_AMPLITUDE;
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
+      obj.position.set(offsetX + data.x, data.y, data.z);
+      obj.scale.set(1, data.scale!, 1);
+      obj.rotation.z = Math.sin(time + i * 0.5) * PLANT_CONFIG.SWAY_AMPLITUDE;
+    },
   });
   
   return (
@@ -215,32 +226,18 @@ export function InstancedPlants({ offsetX, count = 18 }: { offsetX: number; coun
 /**
  * Instanced Picture Frames - Wall decorations
  */
-export function InstancedFrames({ offsetX, count = 8 }: { offsetX: number; count?: number }) {
-  const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+export function InstancedFrames({ offsetX, count = 8 }: InstancedComponentProps) {
+  const positions = useMemo(() => generateFramePositions(count!), [count]);
   
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    for (let i = 0; i < count; i++) {
-      const x = FRAME_CONFIG.START_X + (i % FRAME_CONFIG.COLS) * FRAME_CONFIG.SPACING_X;
-      const y = FRAME_CONFIG.BASE_Y + Math.floor(i / FRAME_CONFIG.COLS) * FRAME_CONFIG.SPACING_Y;
-      
-      tempObject.position.set(offsetX + x, y, FRAME_CONFIG.DEPTH);
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      tempColor.set('#654321');
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color: FRAME_CONFIG.COLOR,
+    positionData: positions,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
@@ -253,31 +250,22 @@ export function InstancedFrames({ offsetX, count = 8 }: { offsetX: number; count
 /**
  * Instanced Lamps - Cone-shaped ceiling lights
  */
-export function InstancedLamps({ offsetX, count = 6 }: { offsetX: number; count?: number }) {
-  const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+export function InstancedLamps({ offsetX, count = 6 }: InstancedComponentProps) {
+  const positions = useMemo(() => generateLampPositions(count!), [count]);
   
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    
-    for (let i = 0; i < count; i++) {
-      const x = LAMP_CONFIG.START_X + (i % LAMP_CONFIG.COLS) * LAMP_CONFIG.SPACING_X;
-      const z = LAMP_CONFIG.START_Z + Math.floor(i / LAMP_CONFIG.COLS) * LAMP_CONFIG.SPACING_Z;
-      
-      tempObject.position.set(offsetX + x, LAMP_CONFIG.HEIGHT, z);
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-  }, [offsetX, count]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    positionData: positions,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <coneGeometry args={[0.3, 0.5, 8]} />
-      <meshLambertMaterial color="#ffff00" />
+      <meshLambertMaterial color={LAMP_CONFIG.COLOR} />
     </instancedMesh>
   );
 }
@@ -286,7 +274,6 @@ export function InstancedLamps({ offsetX, count = 6 }: { offsetX: number; count?
  * Rotating Planets - Animated planetary system for Observatory
  */
 export function RotatingPlanets({ offsetX }: { offsetX: number }) {
-  const matcap = useMatcap();
   const group = useRef<THREE.Group>(null);
   
   useFrame((state) => {
@@ -297,7 +284,7 @@ export function RotatingPlanets({ offsetX }: { offsetX: number }) {
   
   return (
     <group ref={group} position={[offsetX, 4, 0]}>
-      {/* Golden planet - uses meshStandardMaterial for metallic effect */}
+      {/* Golden planet */}
       <mesh position={[2, 0, 0]}>
         <sphereGeometry args={[0.5, 16, 16]} />
         <meshStandardMaterial color="#ffd700" metalness={0.8} roughness={0.2} />
@@ -319,40 +306,20 @@ export function RotatingPlanets({ offsetX }: { offsetX: number }) {
 /**
  * Instanced Monitors - Computer monitors for tech-themed rooms
  */
-export function InstancedMonitors({ offsetX, count = 3, color = '#1a1a1a' }: { offsetX: number; count?: number; color?: string }) {
+export function InstancedMonitors({ offsetX, count = 3, color = '#1a1a1a' }: InstancedComponentProps) {
   const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(() => generateMonitorPositions(count!), [count]);
   
-  const positions = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      x: -4 + i * 4,
-      y: 1.2,
-      z: -8,
-      rotation: Math.random() * 0.2 - 0.1,
-    }));
-  }, [count]);
-  
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    for (let i = 0; i < count; i++) {
-      const pos = positions[i];
-      tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
-      tempObject.rotation.y = pos.rotation;
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      tempColor.set(color);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count, positions, color]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color,
+    positionData: positions,
+    setupInstance: (obj, data, i, offsetX) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+      obj.rotation.y = data.rotation!;
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
@@ -365,43 +332,27 @@ export function InstancedMonitors({ offsetX, count = 3, color = '#1a1a1a' }: { o
 /**
  * Instanced Bottles - Soda bottles for Root Beer Reviews
  */
-export function InstancedBottles({ offsetX, count = 12, color = '#8b4513' }: { offsetX: number; count?: number; color?: string }) {
+export function InstancedBottles({ offsetX, count = 12 }: Omit<InstancedComponentProps, 'color'>) {
   const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(() => generateBottlePositions(count!), [count]);
   
-  const positions = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      x: -5 + (i % 6) * 2,
-      y: 1.2,
-      z: -1 + (i % 3) * 0.5, // Constrained to z=-1 to z=0 (3 rows, tighter spacing)
-      scale: 0.8 + Math.random() * 0.4,
-    }));
-  }, [count]);
-  
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    for (let i = 0; i < count; i++) {
-      const pos = positions[i];
-      tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
-      tempObject.scale.setScalar(pos.scale);
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      
-      // Varying shades of brown
-      const hue = 0.08 + Math.random() * 0.05;
-      tempColor.setHSL(hue, 0.6, 0.3 + Math.random() * 0.2);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count, positions, color]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color: (i) => {
+      const data = positions[i];
+      return new THREE.Color().setHSL(
+        data.hue!,
+        BOTTLE_CONFIG.SATURATION,
+        BOTTLE_CONFIG.LIGHTNESS_BASE + Math.random() * BOTTLE_CONFIG.LIGHTNESS_RANGE
+      ).getStyle();
+    },
+    positionData: positions,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+      obj.scale.setScalar(data.scale!);
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
@@ -414,40 +365,20 @@ export function InstancedBottles({ offsetX, count = 12, color = '#8b4513' }: { o
 /**
  * Instanced Crates - Storage boxes for Fallcrate and DredgedUp
  */
-export function InstancedCrates({ offsetX, count = 9, color = '#8b7355' }: { offsetX: number; count?: number; color?: string }) {
+export function InstancedCrates({ offsetX, count = 9, color = '#8b7355' }: InstancedComponentProps) {
   const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(() => generateCratePositions(count!), [count]);
   
-  const positions = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      x: -4 + (i % 3) * 2.5,
-      y: 0.4,
-      z: -3 + Math.floor(i / 3) * 2.5,
-      rotation: Math.random() * Math.PI * 2,
-    }));
-  }, [count]);
-  
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    for (let i = 0; i < count; i++) {
-      const pos = positions[i];
-      tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
-      tempObject.rotation.y = pos.rotation;
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      tempColor.set(color);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count, positions, color]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color,
+    positionData: positions,
+    setupInstance: (obj, data, i, offsetX) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+      obj.rotation.y = data.rotation!;
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
@@ -460,41 +391,26 @@ export function InstancedCrates({ offsetX, count = 9, color = '#8b7355' }: { off
 /**
  * Instanced Grid Cubes - For Pathfinder and Su-Done-Ku
  */
-export function InstancedGridCubes({ offsetX, count = 9, gridSize = 3, color = '#4a90e2' }: { offsetX: number; count?: number; gridSize?: number; color?: string }) {
+export function InstancedGridCubes({ offsetX, count = 9, gridSize = 3 }: Omit<InstancedComponentProps, 'color'> & { gridSize?: number }) {
   const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(() => generateGridPositions(count!, gridSize!), [count, gridSize]);
   
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    const spacing = 1.2;
-    const offset = (gridSize - 1) * spacing / 2;
-    
-    for (let i = 0; i < count; i++) {
-      const row = Math.floor(i / gridSize);
-      const col = i % gridSize;
-      
-      tempObject.position.set(
-        offsetX + col * spacing - offset,
-        0.5,
-        row * spacing - offset
-      );
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      
-      // Alternating colors for grid pattern
-      const hue = ((row + col) % 2) * 0.1;
-      tempColor.setHSL(0.55 + hue, 0.7, 0.5);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count, gridSize, color]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color: (i) => {
+      const data = positions[i];
+      return new THREE.Color().setHSL(
+        data.hue!,
+        GRID_CUBE_CONFIG.SATURATION,
+        GRID_CUBE_CONFIG.LIGHTNESS
+      ).getStyle();
+    },
+    positionData: positions,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
@@ -507,51 +423,40 @@ export function InstancedGridCubes({ offsetX, count = 9, gridSize = 3, color = '
 /**
  * Instanced Floating Particles - For Matrix-Cam, Steering Text, p5.js
  */
-export function InstancedFloatingParticles({ offsetX, count = 30, color = '#00ff41', speed = 0.5 }: { offsetX: number; count?: number; color?: string; speed?: number }) {
+export function InstancedFloatingParticles({ offsetX, count = 30, color = '#00ff41', speed = 0.5 }: InstancedComponentProps & { speed?: number }) {
   const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const particleData = useMemo(() => generateFloatingParticlePositions(count!), [count]);
   
-  const particleData = useMemo(() => {
-    return Array.from({ length: count }, () => ({
-      x: Math.random() * 16 - 8,
-      y: Math.random() * 8,
-      z: Math.random() * 16 - 8,
-      speedY: Math.random() * 0.5 + 0.2,
-      phase: Math.random() * Math.PI * 2,
-    }));
-  }, [count]);
-  
-  useFrame((state) => {
-    if (!meshRef.current) return;
-    const time = state.clock.elapsedTime * speed;
-    const tempObject = new THREE.Object3D();
-    
-    for (let i = 0; i < count; i++) {
-      const data = particleData[i];
-      const y = (data.y + time * data.speedY) % 8;
-      
-      tempObject.position.set(
-        offsetX + data.x + Math.sin(time + data.phase) * 0.5,
-        y,
-        data.z + Math.cos(time + data.phase) * 0.5
-      );
-      tempObject.scale.setScalar(0.8 + Math.sin(time * 2 + i) * 0.2);
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color,
+    positionData: particleData,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+    },
   });
   
-  useEffect(() => {
-    if (!meshRef.current || !meshRef.current.instanceColor) return;
-    
-    const tempColor = new THREE.Color(color);
-    for (let i = 0; i < count; i++) {
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    meshRef.current.instanceColor.needsUpdate = true;
-  }, [color, count]);
+  useInstancedAnimation({
+    meshRef,
+    count: count!,
+    speed,
+    offsetX,
+    updateInstance: (obj, i, time, offsetX) => {
+      const data = particleData[i];
+      const y = (data.y + time * data.speedY!) % FLOATING_PARTICLE_CONFIG.RANGE_Y;
+      
+      obj.position.set(
+        offsetX + data.x + Math.sin(time + data.phase!) * FLOATING_PARTICLE_CONFIG.DRIFT_AMPLITUDE,
+        y,
+        data.z + Math.cos(time + data.phase!) * FLOATING_PARTICLE_CONFIG.DRIFT_AMPLITUDE
+      );
+      obj.scale.setScalar(
+        FLOATING_PARTICLE_CONFIG.SCALE_BASE + 
+        Math.sin(time * 2 + i) * FLOATING_PARTICLE_CONFIG.SCALE_AMPLITUDE
+      );
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
@@ -564,38 +469,19 @@ export function InstancedFloatingParticles({ offsetX, count = 30, color = '#00ff
 /**
  * Instanced Number Blocks - For Minesweeper and Su-Done-Ku
  */
-export function InstancedNumberBlocks({ offsetX, count = 9, color = '#c0c0c0' }: { offsetX: number; count?: number; color?: string }) {
+export function InstancedNumberBlocks({ offsetX, count = 9, color = '#c0c0c0' }: InstancedComponentProps) {
   const matcap = useMatcap();
-  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const positions = useMemo(() => generateNumberBlockPositions(count!), [count]);
   
-  const positions = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      x: -4 + (i % 3) * 3,
-      y: 0.5,
-      z: -4 + Math.floor(i / 3) * 3,
-    }));
-  }, [count]);
-  
-  useEffect(() => {
-    if (!meshRef.current) return;
-    
-    const tempObject = new THREE.Object3D();
-    const tempColor = new THREE.Color();
-    
-    for (let i = 0; i < count; i++) {
-      const pos = positions[i];
-      tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
-      tempObject.updateMatrix();
-      meshRef.current.setMatrixAt(i, tempObject.matrix);
-      tempColor.set(color);
-      meshRef.current.setColorAt(i, tempColor);
-    }
-    
-    meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
-      meshRef.current.instanceColor.needsUpdate = true;
-    }
-  }, [offsetX, count, positions, color]);
+  const meshRef = useInstancedMesh({
+    count: count!,
+    offsetX,
+    color,
+    positionData: positions,
+    setupInstance: (obj, data) => {
+      obj.position.set(offsetX + data.x, data.y, data.z);
+    },
+  });
   
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
