@@ -4,7 +4,6 @@ import {
   APP_ZOOM_IN_DURATION_MS,
   APP_MINIMIZE_DURATION_MS,
   APP_ZOOM_OUT_DURATION_MS,
-  APP_SWITCH_CLEANUP_DELAY_MS,
 } from '../config/constants';
 
 type AppLoaderState = 'idle' | 'zooming-in' | 'app-active' | 'zooming-out' | 'minimized' | 'minimizing';
@@ -25,6 +24,7 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
   const [currentAppUrl, setCurrentAppUrl] = useState<string | null>(null);
   const [currentAppName, setCurrentAppName] = useState<string | null>(null);
   const { safeSetTimeout, clearAllTimeouts } = useSafeTimeout();
+  const rafRef = useRef<number | null>(null);
 
   const loadApp = useCallback((url: string, name: string) => {
     // Clear any pending timeouts from previous operations
@@ -88,6 +88,16 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
       setCurrentAppName(null);
     }, APP_ZOOM_OUT_DURATION_MS);
   }, [safeSetTimeout]);
+
+  // Cleanup RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <AppLoaderContext.Provider

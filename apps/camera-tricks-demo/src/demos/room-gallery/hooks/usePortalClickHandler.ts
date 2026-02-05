@@ -114,8 +114,6 @@ export function usePortalClickHandler({
         );
 
         if (intersects.length > 0) {
-          if (DEBUG) console.log('🎯 Portal clicked!', roomData.name);
-
           // Track which portal was clicked
           activePortalRef.current = primaryCameraIndex;
 

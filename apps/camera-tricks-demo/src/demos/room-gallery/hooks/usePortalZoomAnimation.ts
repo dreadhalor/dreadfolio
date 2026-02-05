@@ -1,6 +1,6 @@
 /**
  * Portal Zoom Animation Hook
- * 
+ *
  * Handles portal zoom-in/zoom-out animations with camera dolly compensation.
  * Ensures portal maintains constant world position while camera moves forward.
  */
@@ -29,14 +29,14 @@ interface UsePortalZoomAnimationProps {
 
 /**
  * Manages portal zoom animations for all cameras
- * 
+ *
  * Features:
  * - Smooth lerp toward target Z position
  * - Camera dolly-in with world position compensation
  * - Bidirectional fade (fade to black when zooming in, fade to full texture when zooming out)
  * - Automatic cleanup when zoom completes
  * - Resets active portal when app closes
- * 
+ *
  * CRITICAL: Animates ALL cameras, not just visible ones (allows off-screen reset)
  */
 export function usePortalZoomAnimation({
@@ -124,7 +124,13 @@ export function usePortalZoomAnimation({
       }
 
       // Stop zooming when close enough
-      if (isZoomComplete(zoomState.currentZ, zoomState.targetZ, PORTAL_ZOOM_THRESHOLD)) {
+      if (
+        isZoomComplete(
+          zoomState.currentZ,
+          zoomState.targetZ,
+          PORTAL_ZOOM_THRESHOLD,
+        )
+      ) {
         zoomState.isZooming = false;
         zoomState.currentZ = zoomState.targetZ; // Snap to exact value
 
