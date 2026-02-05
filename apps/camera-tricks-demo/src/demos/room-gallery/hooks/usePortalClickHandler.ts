@@ -7,16 +7,9 @@
 
 import { useEffect, useRef, type RefObject } from 'react';
 import * as THREE from 'three';
-import {
-  CLICK_THRESHOLD,
-  PORTAL_ZOOM_TARGET_Z,
-  PORTAL_ZOOM_DURATION_MS,
-  DEBUG_MODE,
-} from '../config/constants';
+import { CLICK_THRESHOLD } from '../config/constants';
 import { getPrimaryCameraIndex } from '../utils/viewportRenderer';
 import type { ExtendedCamera } from '../types/portalTypes';
-
-const DEBUG = DEBUG_MODE;
 
 interface UsePortalClickHandlerProps {
   cameras: ExtendedCamera[];
@@ -117,24 +110,19 @@ export function usePortalClickHandler({
           // Track which portal was clicked
           activePortalRef.current = primaryCameraIndex;
 
-          // Trigger zoom animation
-          portalZoomState.isZooming = true;
-          portalZoomState.targetZ = PORTAL_ZOOM_TARGET_Z;
-
           // Clear any existing timeout
           if (loadAppTimeoutRef.current) {
             clearTimeout(loadAppTimeoutRef.current);
           }
 
-          // Load the app after a delay for zoom effect
-          loadAppTimeoutRef.current = setTimeout(() => {
-            if (roomData.appUrl) {
-              onPortalClick(roomData.appUrl, roomData.name);
-            } else {
-              console.warn('No app URL for', roomData.name);
-            }
-            loadAppTimeoutRef.current = null;
-          }, PORTAL_ZOOM_DURATION_MS);
+          // Immediately start the app load process
+          // This changes the state, which triggers usePortalZoomAnimation to handle the portal zoom
+          // No more direct portal manipulation here - state is the single source of truth
+          if (roomData.appUrl) {
+            onPortalClick(roomData.appUrl, roomData.name);
+          } else {
+            console.warn('No app URL for', roomData.name);
+          }
         }
       }
     };

@@ -7,10 +7,11 @@ import { Z_INDEX } from '../../config/constants';
 /**
  * AppLoader - Handles the portal zoom animation and app display
  *
- * States:
+ * Orchestrated State Machine (Mediator Pattern):
  * - idle: Portal is normal size
- * - zooming-in: Portal expands to fill screen
- * - app-active: App is visible, 3D scene paused
+ * - portal-zooming: Portal animates, screen stays visible (Phase 1)
+ * - transitioning: Portal done, fade to black (Phase 2)
+ * - app-active: App is visible, 3D scene paused (Phase 3)
  * - zooming-out: Portal shrinks back to normal
  * - minimizing: App scales down into portal (iframe visible through canvas hole)
  * - minimized: App hidden but loaded in background
@@ -30,8 +31,8 @@ export function AppLoader() {
   useLayoutEffect(() => {
     if (!iframeRef.current) return;
 
-    if (state === 'zooming-in') {
-      // Start at opacity 0, then fade in after short delay (portal fades to black first)
+    if (state === 'transitioning' || state === 'app-active') {
+      // Start at opacity 0, then fade in after short delay (black overlay first)
       iframeRef.current.style.opacity = '0';
       requestAnimationFrame(() => {
         if (iframeRef.current) {
@@ -85,8 +86,8 @@ export function AppLoader() {
       };
     }
 
-    // When zooming in: fade in from black at full scale with large circle (effectively no mask)
-    if (state === 'zooming-in') {
+    // When transitioning: fade in from black at full scale with large circle (effectively no mask)
+    if (state === 'portal-zooming' || state === 'transitioning') {
       return {
         position: 'fixed' as const,
         top: 0,
@@ -145,20 +146,23 @@ export function AppLoader() {
     };
   };
 
-  // Black overlay fade animation: opaque during zoom-in, transparent when app is active
+  // Black overlay fade animation with proper phases:
+  // - portal-zooming: transparent (let portal animation be visible)
+  // - transitioning: fade to black
+  // - app-active: transparent (show app)
   const { opacity } = useSpring({
-    opacity: state === 'app-active' ? 0 : 1, // Inverted: 1 = black during zoom, 0 = transparent when active
+    opacity: state === 'transitioning' ? 1 : 0,
     config: {
       tension: 280,
       friction: 60,
     },
   });
 
-  // Show iframe when app is active, zooming in, minimizing, or minimized (keep it loaded)
+  // Show iframe when app is transitioning, active, minimizing, or minimized (keep it loaded)
   useEffect(() => {
     if (
+      state === 'transitioning' ||
       state === 'app-active' ||
-      state === 'zooming-in' ||
       state === 'minimizing' ||
       state === 'minimized'
     ) {
@@ -186,8 +190,8 @@ export function AppLoader() {
         />
       )}
 
-      {/* Black overlay for fade effect (only during transitions) */}
-      {(state === 'zooming-in' || state === 'zooming-out') && (
+      {/* Black overlay for fade effect (only during transition phases) */}
+      {(state === 'portal-zooming' || state === 'transitioning' || state === 'zooming-out') && (
         <animated.div
           style={{
             position: 'fixed',

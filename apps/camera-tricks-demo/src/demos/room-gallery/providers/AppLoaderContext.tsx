@@ -1,12 +1,20 @@
 import { createContext, useContext, useState, ReactNode, useCallback, useRef, useEffect } from 'react';
 import { useSafeTimeout } from '../hooks/useSafeTimeout';
 import {
-  APP_ZOOM_IN_DURATION_MS,
+  PORTAL_ZOOM_PHASE_MS,
+  TRANSITION_FADE_MS,
   APP_MINIMIZE_DURATION_MS,
   APP_ZOOM_OUT_DURATION_MS,
 } from '../config/constants';
 
-type AppLoaderState = 'idle' | 'zooming-in' | 'app-active' | 'zooming-out' | 'minimized' | 'minimizing';
+type AppLoaderState = 
+  | 'idle' 
+  | 'portal-zooming'  // Portal animates, screen stays visible
+  | 'transitioning'   // Portal done, fade to black
+  | 'app-active'      // App visible
+  | 'zooming-out' 
+  | 'minimizing'
+  | 'minimized';
 
 interface AppLoaderContextValue {
   state: AppLoaderState;
@@ -32,10 +40,16 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
     
     // If same app is minimizing or minimized, just restore it
     if ((state === 'minimizing' || state === 'minimized') && currentAppUrl === url) {
-      setState('zooming-in');
+      // Phase 1: Portal zooms
+      setState('portal-zooming');
       safeSetTimeout(() => {
-        setState('app-active');
-      }, APP_ZOOM_IN_DURATION_MS);
+        // Phase 2: Fade to black
+        setState('transitioning');
+        safeSetTimeout(() => {
+          // Phase 3: Show app
+          setState('app-active');
+        }, TRANSITION_FADE_MS);
+      }, PORTAL_ZOOM_PHASE_MS);
       return;
     }
     
@@ -51,10 +65,16 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
         rafRef.current = null; // Clear ref after execution
         setCurrentAppUrl(url);
         setCurrentAppName(name);
-        setState('zooming-in');
+        // Phase 1: Portal zooms
+        setState('portal-zooming');
         safeSetTimeout(() => {
-          setState('app-active');
-        }, APP_ZOOM_IN_DURATION_MS);
+          // Phase 2: Fade to black
+          setState('transitioning');
+          safeSetTimeout(() => {
+            // Phase 3: Show app
+            setState('app-active');
+          }, TRANSITION_FADE_MS);
+        }, PORTAL_ZOOM_PHASE_MS);
       });
       return;
     }
@@ -62,11 +82,17 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
     // Normal flow: no app currently loaded
     setCurrentAppUrl(url);
     setCurrentAppName(name);
-    setState('zooming-in');
+    // Phase 1: Portal zooms (screen stays visible)
+    setState('portal-zooming');
     
     safeSetTimeout(() => {
-      setState('app-active');
-    }, APP_ZOOM_IN_DURATION_MS);
+      // Phase 2: Fade to black
+      setState('transitioning');
+      safeSetTimeout(() => {
+        // Phase 3: Show app
+        setState('app-active');
+      }, TRANSITION_FADE_MS);
+    }, PORTAL_ZOOM_PHASE_MS);
   }, [state, currentAppUrl, safeSetTimeout, clearAllTimeouts]);
 
   const minimizeApp = useCallback(() => {

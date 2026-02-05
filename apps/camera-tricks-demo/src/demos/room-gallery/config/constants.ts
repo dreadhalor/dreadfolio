@@ -45,12 +45,13 @@ export const PORTAL_DEFAULT_Z = -5; // Default portal distance from camera
 export const PORTAL_ZOOM_TARGET_Z = -0.8; // How close portal zooms when clicked
 export const PORTAL_ZOOM_LERP_SPEED = 0.04; // Slower for more dramatic zoom effect
 export const PORTAL_ZOOM_THRESHOLD = 0.01; // When to stop zooming
-export const PORTAL_ZOOM_DURATION_MS = 1000; // Delay before loading app
+export const PORTAL_ZOOM_DURATION_MS = 1000; // Physical duration of portal zoom animation
 export const CLICK_THRESHOLD = 5; // Pixels - movement less than this is a click
 
-// App loader animation timing
-export const APP_ZOOM_IN_DURATION_MS = 500; // Portal zoom-in to app active
-export const APP_MINIMIZE_DURATION_MS = 1500; // Minimize animation (longer for fade)
+// App loader animation timing (orchestrated phases)
+export const PORTAL_ZOOM_PHASE_MS = 1000; // Phase 1: Portal physically zooms
+export const TRANSITION_FADE_MS = 300;     // Phase 2: Fade to black after portal zoom
+export const APP_MINIMIZE_DURATION_MS = 600; // Minimize animation - shorter for better UX
 export const APP_ZOOM_OUT_DURATION_MS = 500; // App close zoom-out
 export const APP_SWITCH_CLEANUP_DELAY_MS = 100; // Delay between closing old app and opening new
 

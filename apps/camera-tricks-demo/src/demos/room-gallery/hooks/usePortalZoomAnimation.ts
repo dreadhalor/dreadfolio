@@ -10,6 +10,7 @@ import { useEffect, type RefObject } from 'react';
 import * as THREE from 'three';
 import {
   PORTAL_DEFAULT_Z,
+  PORTAL_ZOOM_TARGET_Z,
   PORTAL_ZOOM_LERP_SPEED,
   PORTAL_ZOOM_THRESHOLD,
 } from '../config/constants';
@@ -44,31 +45,46 @@ export function usePortalZoomAnimation({
   appLoaderState,
   activePortalRef,
 }: UsePortalZoomAnimationProps): void {
-  // Reset portal zoom when app closes, minimizes, or is minimizing (only the active portal)
+  // Handle portal zoom based on app loader state
   useEffect(() => {
-    if (
-      (appLoaderState === 'idle' ||
-        appLoaderState === 'minimizing' ||
-        appLoaderState === 'minimized') &&
-      activePortalRef.current !== null
-    ) {
-      const camera = cameras[activePortalRef.current];
-      const { portalZoomState, portalAnimData } = camera;
+    if (activePortalRef.current === null) return;
 
+    const camera = cameras[activePortalRef.current];
+    const { portalZoomState, portalAnimData } = camera;
+
+    // Zoom IN when portal is zooming, transitioning, or app is active
+    if (
+      appLoaderState === 'portal-zooming' || 
+      appLoaderState === 'transitioning' ||
+      appLoaderState === 'app-active'
+    ) {
+      if (portalZoomState) {
+        portalZoomState.isZooming = true;
+        portalZoomState.targetZ = PORTAL_ZOOM_TARGET_Z;
+      }
+      // Portal fade to black is handled automatically in the animation loop
+    }
+    // Zoom OUT when app closes, minimizes, or is minimizing
+    else if (
+      appLoaderState === 'idle' ||
+      appLoaderState === 'minimizing' ||
+      appLoaderState === 'minimized'
+    ) {
       if (portalZoomState) {
         portalZoomState.isZooming = true;
         portalZoomState.targetZ = PORTAL_DEFAULT_Z;
       }
 
-      // Ensure portal shows full texture when zoom starts
+      // Ensure portal shows full texture when zoom out starts
       if (portalAnimData?.portalSurface?.material) {
         const material = portalAnimData.portalSurface
           .material as THREE.MeshBasicMaterial;
         material.color.setRGB(1, 1, 1); // White = shows full texture
       }
 
-      // Clear active portal reference only when fully idle or minimized (not during minimizing animation)
-      if (appLoaderState === 'idle' || appLoaderState === 'minimized') {
+      // CRITICAL: Only clear activePortalRef in 'minimized' (stable state), not 'idle'
+      // 'idle' is often a transition state during app switching where we need to preserve the ref
+      if (appLoaderState === 'minimized') {
         activePortalRef.current = null;
       }
     }
