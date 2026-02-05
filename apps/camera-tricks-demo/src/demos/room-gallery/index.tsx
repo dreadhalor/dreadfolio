@@ -20,6 +20,7 @@ import { RoomHeader } from './components/ui/RoomHeader';
 import { RoomMinimap } from './components/ui/RoomMinimap';
 import { AppLoader } from './components/ui/AppLoader';
 import { ReturnButton } from './components/ui/ReturnButton';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Providers
 import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
@@ -57,6 +58,65 @@ function RoomGalleryInner() {
   const targetRoomProgressRef = useRef(0); // Target position (instant)
   const currentRoomProgressRef = useRef(0); // Current position (lerped, matches camera)
   const lastMouseXRef = useRef(0);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't interfere with typing in inputs
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          // Move to previous room
+          const prevRoom = Math.max(0, Math.floor(targetRoomProgressRef.current) - 1);
+          targetRoomProgressRef.current = prevRoom;
+          setRoomProgress(prevRoom);
+          break;
+
+        case 'ArrowRight':
+          e.preventDefault();
+          // Move to next room
+          const nextRoom = Math.min(
+            MAX_ROOM_PROGRESS,
+            Math.floor(targetRoomProgressRef.current) + 1,
+          );
+          targetRoomProgressRef.current = nextRoom;
+          setRoomProgress(nextRoom);
+          break;
+
+        case 'Escape':
+          e.preventDefault();
+          // Minimize app if active
+          if (appLoaderState === 'app-active') {
+            minimizeApp();
+          }
+          break;
+
+        case 'Home':
+          e.preventDefault();
+          // Jump to first room
+          targetRoomProgressRef.current = 0;
+          setRoomProgress(0);
+          break;
+
+        case 'End':
+          e.preventDefault();
+          // Jump to last room
+          targetRoomProgressRef.current = MAX_ROOM_PROGRESS;
+          setRoomProgress(MAX_ROOM_PROGRESS);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [appLoaderState, minimizeApp]);
 
   // Drag handlers (room-space) - works for both mouse and touch
   const handlePointerDown = useCallback((clientX: number) => {
@@ -192,6 +252,7 @@ function RoomGalleryInner() {
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: 'none',
           touchAction: 'none', // Disable native touch scrolling/zooming
+          overscrollBehavior: 'none', // Prevent overscroll bounce/pull-to-refresh
           WebkitUserSelect: 'none', // Disable text selection on iOS
           WebkitTouchCallout: 'none', // Disable callout on iOS
           WebkitTapHighlightColor: 'transparent', // Remove tap highlight on iOS
@@ -241,18 +302,22 @@ function RoomGalleryInner() {
         </>
       )}
 
-      {/* Fast Travel Minimap - always visible as primary navigation */}
-      <RoomMinimap
-        rooms={ROOMS}
-        currentRoom={currentRoom}
-        roomProgress={roomProgress}
-        currentRoomProgressRef={currentRoomProgressRef}
-        onRoomClick={moveTo}
-        onRoomProgressChange={(progress) => {
-          targetRoomProgressRef.current = progress;
-          setRoomProgress(progress);
-        }}
-      />
+      {/* Fast Travel Minimap - hide when app is active or transitioning */}
+      {(appLoaderState === 'idle' ||
+        appLoaderState === 'minimizing' ||
+        appLoaderState === 'minimized') && (
+        <RoomMinimap
+          rooms={ROOMS}
+          currentRoom={currentRoom}
+          roomProgress={roomProgress}
+          currentRoomProgressRef={currentRoomProgressRef}
+          onRoomClick={moveTo}
+          onRoomProgressChange={(progress) => {
+            targetRoomProgressRef.current = progress;
+            setRoomProgress(progress);
+          }}
+        />
+      )}
 
       {/* Compact Return Button - only visible when app is active */}
       {appLoaderState === 'app-active' && (
@@ -338,8 +403,10 @@ function RoomGalleryInner() {
  */
 export default function RoomGallery() {
   return (
-    <AppLoaderProvider>
-      <RoomGalleryInner />
-    </AppLoaderProvider>
+    <ErrorBoundary>
+      <AppLoaderProvider>
+        <RoomGalleryInner />
+      </AppLoaderProvider>
+    </ErrorBoundary>
   );
 }

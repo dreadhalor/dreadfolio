@@ -66,7 +66,7 @@ export function RoomMinimap({
         />
       )}
 
-      {/* Minimap - room navigation cards (ALWAYS VISIBLE) */}
+      {/* Minimap - room navigation cards */}
       <div
         style={{
           position: 'fixed',
@@ -84,6 +84,10 @@ export function RoomMinimap({
           touchAction: 'none',
           pointerEvents: 'auto',
         }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onMouseMove={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
       >
         {/* Room navigation cards container */}
         <div

@@ -3,6 +3,8 @@ import { useSafeTimeout } from '../hooks/useSafeTimeout';
 import {
   PORTAL_ZOOM_PHASE_MS,
   TRANSITION_FADE_MS,
+  PORTAL_RESTORE_PHASE_MS,
+  TRANSITION_RESTORE_MS,
   APP_MINIMIZE_DURATION_MS,
   APP_ZOOM_OUT_DURATION_MS,
 } from '../config/constants';
@@ -38,18 +40,16 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
     // Clear any pending timeouts from previous operations
     clearAllTimeouts();
     
-    // If same app is minimizing or minimized, just restore it
+    // If same app is minimizing or minimized, restore it quickly (app already loaded!)
     if ((state === 'minimizing' || state === 'minimized') && currentAppUrl === url) {
-      // Phase 1: Portal zooms
+      // Fast restore: use shorter timings since iframe is already loaded
       setState('portal-zooming');
       safeSetTimeout(() => {
-        // Phase 2: Fade to black
         setState('transitioning');
         safeSetTimeout(() => {
-          // Phase 3: Show app
           setState('app-active');
-        }, TRANSITION_FADE_MS);
-      }, PORTAL_ZOOM_PHASE_MS);
+        }, TRANSITION_RESTORE_MS); // 100ms instead of 300ms
+      }, PORTAL_RESTORE_PHASE_MS); // 400ms instead of 1000ms
       return;
     }
     

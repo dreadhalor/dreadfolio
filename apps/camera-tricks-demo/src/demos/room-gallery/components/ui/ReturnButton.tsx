@@ -32,11 +32,11 @@ export function ReturnButton({ onClick }: ReturnButtonProps) {
       style={getButtonStyles(isMobile)}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = COLORS.overlay.light;
-        e.currentTarget.style.transform = 'translateX(-50%) scale(1.05)';
+        e.currentTarget.style.transform = 'scale(1.05)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = COLORS.overlay.darker;
-        e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
+        e.currentTarget.style.transform = 'scale(1)';
       }}
     >
       ↓ Return to Gallery
@@ -47,11 +47,13 @@ export function ReturnButton({ onClick }: ReturnButtonProps) {
 function getButtonStyles(isMobile: boolean): React.CSSProperties {
   return {
     position: 'fixed',
-    bottom: isMobile
-      ? `max(${SPACING.sm}, env(safe-area-inset-bottom))`
+    // Position in top-right corner to avoid conflicting with app UI at bottom
+    top: isMobile
+      ? `max(${SPACING.sm}, env(safe-area-inset-top))`
       : SPACING.lg,
-    left: '50%',
-    transform: 'translateX(-50%)',
+    right: isMobile
+      ? `max(${SPACING.sm}, env(safe-area-inset-right))`
+      : SPACING.lg,
     padding: isMobile
       ? `${SPACING.xs} ${SPACING.md}`
       : `${SPACING.sm} ${SPACING.lg}`,

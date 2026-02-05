@@ -203,9 +203,34 @@ export function AppLoader() {
             zIndex: Z_INDEX.BLACK_OVERLAY,
             opacity,
             pointerEvents: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
+        >
+          {/* Loading spinner - only visible during transitioning state */}
+          {state === 'transitioning' && (
+            <div
+              style={{
+                width: '60px',
+                height: '60px',
+                border: '4px solid rgba(255, 255, 255, 0.2)',
+                borderTop: '4px solid #fff',
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite',
+              }}
+            />
+          )}
+        </animated.div>
       )}
+
+      {/* Spinner animation */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }
