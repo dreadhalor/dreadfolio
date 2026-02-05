@@ -102,8 +102,11 @@ export function SplitCameraRenderer({
   const isMobile = useIsMobile();
 
   // Create cameras once (one per room)
+  // NOTE: Only recreate when isMobile changes, NOT on window resize
+  // Aspect ratio is updated dynamically in the render loop
   const cameras = useMemo(() => {
     try {
+      // Use initial aspect ratio (will be updated dynamically during render)
       const aspect = size.width / 2 / size.height;
       // Use wider FOV on mobile to make portals feel smaller and give more spatial context
       const fov = isMobile ? CAMERA_FOV_MOBILE : CAMERA_FOV;
@@ -147,7 +150,7 @@ export function SplitCameraRenderer({
       console.error('Failed to create cameras:', error);
       throw error; // Re-throw to trigger error boundary
     }
-  }, [isMobile, size.width, size.height]);
+  }, [isMobile]); // Removed size.width and size.height - aspect is updated in render loop
 
   // Update camera FOV when mobile state changes (for existing cameras)
   useEffect(() => {
@@ -160,7 +163,6 @@ export function SplitCameraRenderer({
 
   // Add cameras to scene
   useEffect(() => {
-    console.log('Adding', cameras.length, 'cameras to scene');
     cameras.forEach((cam) => scene.add(cam));
 
     return () => {
