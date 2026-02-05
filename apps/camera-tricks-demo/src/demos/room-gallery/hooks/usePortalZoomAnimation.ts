@@ -67,8 +67,8 @@ export function usePortalZoomAnimation({
         material.color.setRGB(1, 1, 1); // White = shows full texture
       }
 
-      // Clear active portal reference only when fully idle (not minimized)
-      if (appLoaderState === 'idle') {
+      // Clear active portal reference only when fully idle or minimized (not during minimizing animation)
+      if (appLoaderState === 'idle' || appLoaderState === 'minimized') {
         activePortalRef.current = null;
       }
     }

@@ -1,6 +1,6 @@
 /**
  * Portal Click Handler Hook
- * 
+ *
  * Manages click/touch detection for portal interactions.
  * Distinguishes clicks from drags and triggers portal zoom animations.
  */
@@ -30,7 +30,7 @@ interface UsePortalClickHandlerProps {
 
 /**
  * Handles portal click detection with drag discrimination
- * 
+ *
  * Features:
  * - Tracks mousedown position to detect drags
  * - Only triggers on actual clicks (movement < CLICK_THRESHOLD)
@@ -38,7 +38,7 @@ interface UsePortalClickHandlerProps {
  * - Raycasting to detect portal intersections
  * - Touch support for mobile
  * - Proper cleanup of event listeners and timeouts
- * 
+ *
  * @returns Cleanup function
  */
 export function usePortalClickHandler({
@@ -175,9 +175,6 @@ export function usePortalClickHandler({
         clearTimeout(loadAppTimeoutRef.current);
         loadAppTimeoutRef.current = null;
       }
-
-      // Clear active portal ref
-      activePortalRef.current = null;
 
       // Remove event listeners
       gl.domElement.removeEventListener('mousedown', handleMouseDown);
