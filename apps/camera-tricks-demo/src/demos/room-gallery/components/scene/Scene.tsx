@@ -13,7 +13,6 @@ import { DrawCallMonitor } from '../../performance/DrawCallMonitor';
 interface SceneProps {
   onFpsUpdate: (fps: number) => void;
   onDrawCallsUpdate: (calls: number) => void;
-  roomProgress: number;
 }
 
 /**
@@ -29,7 +28,7 @@ interface SceneProps {
  * - Procedurally generates vibrant colors from app themes
  * - Room data is memoized to prevent 900+ function calls per second
  */
-export function Scene({ onFpsUpdate, onDrawCallsUpdate, roomProgress }: SceneProps) {
+export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
   // Use consistent black fog for all rooms
   // This eliminates color bleeding between rooms and provides atmospheric depth
   // without complexity or performance overhead

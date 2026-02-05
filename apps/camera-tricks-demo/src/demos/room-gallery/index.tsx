@@ -221,7 +221,6 @@ function RoomGalleryInner() {
         <Scene
           onFpsUpdate={setFps}
           onDrawCallsUpdate={setDrawCalls}
-          roomProgress={roomProgress}
         />
         <SplitCameraRenderer
           targetRoomProgressRef={targetRoomProgressRef}
