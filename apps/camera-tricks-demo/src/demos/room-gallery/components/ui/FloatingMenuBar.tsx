@@ -184,8 +184,8 @@ export function FloatingMenuBar({
     hovered: boolean,
     muted?: boolean,
   ): React.CSSProperties => ({
-    width: '48px',
-    height: '48px',
+    width: '56px',
+    height: '56px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -195,8 +195,9 @@ export function FloatingMenuBar({
     cursor: muted ? 'default' : 'pointer',
     transition: 'all 0.2s ease',
     fontSize: '1.5rem',
+    color: muted ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.9)',
     transform: hovered && !muted ? 'scale(1.1)' : 'scale(1)',
-    opacity: muted ? 0.3 : 1,
+    opacity: 1,
     flexShrink: 0,
   });
 
@@ -370,11 +371,14 @@ export function FloatingMenuBar({
             opacity: shouldHideButtons ? 0 : 1,
             transition: 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             display: 'flex',
-            gap: SPACING.xs,
+            gap: '6px', // Reduced from SPACING.xs (8px) for tighter spacing
             alignItems: 'center',
             pointerEvents: shouldHideButtons ? 'none' : 'auto',
             zIndex: 200, // Above cards
-            padding: SPACING.xs,
+            paddingLeft: SPACING.xs,
+            paddingTop: SPACING.xs,
+            paddingBottom: SPACING.xs,
+            paddingRight: '4px', // Reduced right padding for less gap before cards
             background: isCollapsed ? 'rgba(20, 20, 25, 0.9)' : 'rgba(20, 20, 25, 0.95)',
             backdropFilter: 'blur(20px)',
             borderRadius: '12px 0 0 12px',
@@ -403,7 +407,30 @@ export function FloatingMenuBar({
             onMouseLeave={() => setHoveredButton(null)}
             title={isAtHomepage ? 'Already at Homepage' : 'Go to Homepage'}
           >
-            🏠
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ display: 'block' }}
+            >
+              <path
+                d="M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.5Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+              />
+              <path
+                d="M9 21V12H15V21"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
 
           {/* Spacer */}
@@ -492,11 +519,14 @@ export function FloatingMenuBar({
             opacity: shouldHideButtons || !minimizedAppIconUrl ? 0 : 1,
             transition: 'right 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             display: 'flex',
-            gap: SPACING.xs,
+            gap: '6px', // Reduced from SPACING.xs (8px) for tighter spacing
             alignItems: 'center',
             pointerEvents: shouldHideButtons || !minimizedAppIconUrl ? 'none' : 'auto',
             zIndex: 200, // Above cards
-            padding: SPACING.xs,
+            paddingRight: SPACING.xs,
+            paddingTop: SPACING.xs,
+            paddingBottom: SPACING.xs,
+            paddingLeft: '4px', // Reduced left padding to match home button's right padding
             background: isCollapsed ? 'rgba(20, 20, 25, 0.9)' : 'rgba(20, 20, 25, 0.95)',
             backdropFilter: 'blur(20px)',
             borderRadius: '0 12px 12px 0',

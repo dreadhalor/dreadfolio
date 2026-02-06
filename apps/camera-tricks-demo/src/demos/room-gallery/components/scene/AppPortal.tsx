@@ -83,6 +83,7 @@ export function createPortalGroup(room: RoomData) {
   swirlParticles.forEach((particle) => portalGroup.add(particle));
 
   // Position portal group in camera's local space
+  // Note: Portal text labels are rendered separately in world space (see PortalLabels.tsx)
   portalGroup.position.set(0, 0, PORTAL_DIMENSIONS.CAMERA_SPACE_Z);
 
   // Return the group, animated element refs, and disposal function

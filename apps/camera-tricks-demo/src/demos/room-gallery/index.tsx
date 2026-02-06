@@ -189,15 +189,13 @@ function RoomGalleryInner() {
   const handlePointerUp = useCallback(() => {
     setIsDragging(false);
 
-    // Snap to nearest room for a pleasing "fast travel" effect
+    // Always snap to nearest room after dragging
+    // This ensures even tiny drags are corrected
     const currentProgress = targetRoomProgressRef.current;
     const nearestRoom = Math.round(currentProgress);
 
-    // Only snap if we're not already at a whole number (avoid unnecessary animation)
-    if (Math.abs(currentProgress - nearestRoom) > SNAP_THRESHOLD) {
-      targetRoomProgressRef.current = nearestRoom;
-      setRoomProgress(nearestRoom);
-    }
+    targetRoomProgressRef.current = nearestRoom;
+    setRoomProgress(nearestRoom);
   }, []);
 
   // Mouse event handlers
@@ -339,10 +337,6 @@ function RoomGalleryInner() {
         appLoaderState === 'minimizing' ||
         appLoaderState === 'minimized') && (
         <>
-          <RoomHeader 
-            currentRoom={currentRoom} 
-            showNavigationHint={showNavigationHint}
-          />
           {DEBUG_MODE && <FPSDisplay fps={fps} />}
           {DEBUG_MODE && <DrawCallDisplay calls={drawCalls} />}
         </>

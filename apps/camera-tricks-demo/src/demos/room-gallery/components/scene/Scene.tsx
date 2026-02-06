@@ -7,6 +7,7 @@ import { SceneLighting } from './SceneLighting';
 import { RoomStructure } from './RoomStructure';
 import { DividingWall } from './DividingWall';
 import { AtmosphericFog } from './AtmosphericFog';
+import { PortalLabels } from './PortalLabels';
 import { FPSCounter } from '../ui/FPSCounter';
 import { DrawCallMonitor } from '../../performance/DrawCallMonitor';
 
@@ -53,6 +54,7 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
       
       <SceneLighting />
       <AtmosphericFog color={fogColor} />
+      <PortalLabels />
 
       {/* Render all rooms */}
       {roomDataMemo.map(({ room, index, RoomDecorations, colors }) => (

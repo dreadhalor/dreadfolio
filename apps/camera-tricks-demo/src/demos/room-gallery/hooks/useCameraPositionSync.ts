@@ -40,11 +40,13 @@ export function useCameraPositionSync({
   useFrame(() => {
     const targetProgress = targetRoomProgressRef.current ?? 0;
 
-    // Smooth lerp to target room progress with snap threshold
+    // Smooth lerp to target room progress
     const delta = targetProgress - currentRoomProgressRef.current;
-
-    // If very close to target, snap instantly (prevents slow final approach)
-    if (Math.abs(delta) < CAMERA_SNAP_THRESHOLD) {
+    const distance = Math.abs(delta);
+    
+    // Snap instantly only when imperceptibly close (0.0001 units = ~0.01 pixels on screen)
+    // This prevents floating point precision issues while being completely invisible
+    if (distance < 0.0001) {
       currentRoomProgressRef.current = targetProgress;
     } else {
       currentRoomProgressRef.current += delta * CAMERA_LERP_SPEED;
