@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { RoomData } from '../../types';
 import { SHOW_MINIMAP_DEBUG } from '../../config/constants';
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
@@ -33,6 +34,9 @@ export function RoomMinimap({
   const smoothRoomProgress = useSyncedRefState(
     currentRoomProgressRef,
   ) as number;
+  
+  // Ref for direct DOM manipulation (bypasses React re-renders for better performance)
+  const cardsContainerRef = useRef<HTMLDivElement>(null);
 
   // Calculate all responsive values once at the top
   const cardWidth = isMobile
@@ -49,10 +53,26 @@ export function RoomMinimap({
     : SPACING.xl;
   const padding = isMobile ? SPACING.xs : SPACING.md;
 
-  // Calculate translation offset to center the current position
-  const cardCenterOffset =
-    smoothRoomProgress * (cardWidth + cardGap) + cardWidth / 2;
-  const translateX = -cardCenterOffset;
+  // Use RAF to update minimap position at 60fps via direct DOM manipulation
+  // This bypasses React re-renders and keeps it synchronized with the 3D scene
+  useEffect(() => {
+    let rafId: number;
+
+    const updateMinimapPosition = () => {
+      if (cardsContainerRef.current && currentRoomProgressRef.current !== undefined) {
+        const progress = currentRoomProgressRef.current;
+        const cardCenterOffset = progress * (cardWidth + cardGap) + cardWidth / 2;
+        const translateX = -cardCenterOffset;
+        
+        // Direct DOM manipulation - much faster than React re-renders
+        cardsContainerRef.current.style.transform = `translate(${translateX}px, -50%)`;
+      }
+      rafId = requestAnimationFrame(updateMinimapPosition);
+    };
+
+    rafId = requestAnimationFrame(updateMinimapPosition);
+    return () => cancelAnimationFrame(rafId);
+  }, [currentRoomProgressRef, cardWidth, cardGap]);
 
   return (
     <>
@@ -66,18 +86,21 @@ export function RoomMinimap({
         />
       )}
 
-      {/* Minimap - room navigation cards */}
+      {/* Minimap - room navigation cards (compact, centered design) */}
       <div
         style={{
           position: 'fixed',
           bottom: bottomSpacing,
-          left: 0,
-          right: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: isMobile ? 'calc(100% - 2rem)' : 'auto',
+          maxWidth: isMobile ? 'none' : '800px',
           background: COLORS.overlay.dark,
           padding: padding,
           backdropFilter: 'blur(10px)',
-          borderTop: `2px solid ${COLORS.border.light}`,
-          boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.5)',
+          border: `2px solid ${COLORS.border.light}`,
+          borderRadius: isMobile ? '12px' : '16px',
+          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.6)',
           zIndex: UI_Z_INDEX.MINIMAP,
           minHeight: '60px',
           overflow: 'visible',
@@ -138,14 +161,16 @@ export function RoomMinimap({
 
           {/* Cards container - moves to keep current position centered */}
           <div
+            ref={cardsContainerRef}
             style={{
               position: 'absolute',
               left: '50%',
               top: '50%',
-              transform: `translate(${translateX}px, -50%)`,
+              transform: 'translate(0px, -50%)', // Initial transform, updated via RAF
               display: 'flex',
               gap: `${cardGap}px`,
               alignItems: 'center',
+              willChange: 'transform', // Hint to browser for GPU acceleration
             }}
           >
             {rooms.map((room, index) => {

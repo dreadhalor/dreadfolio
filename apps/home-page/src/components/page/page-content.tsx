@@ -1,13 +1,9 @@
 import { cn } from '@repo/utils';
 import { Section, SectionContent, SectionHeader } from './section/section';
-import { Button, useIframe } from 'dread-ui';
 import { experience, projects } from './info';
 import { ExperienceCard, ProjectCard } from './list-card';
-import { MdArrowDownward } from 'react-icons/md';
 
 const PageContent = () => {
-  const { sendMessageToParent } = useIframe();
-
   return (
     <div
       className={cn(
@@ -51,16 +47,9 @@ const PageContent = () => {
             <ProjectCard key={i} {...project} />
           ))}
         </SectionContent>
-        <Button
-          variant='link'
-          className='group mt-4 text-white'
-          onClick={() =>
-            sendMessageToParent({ type: 'command', payload: 'open-switcher' })
-          }
-        >
-          View All Featured Projects
-          <MdArrowDownward className='ml-2 inline-block transition-transform group-hover:translate-y-1' />
-        </Button>
+        <p className='mt-4 text-center text-sm text-slate-400'>
+          Click any project to explore it in the gallery, or use the minimap at the bottom to navigate
+        </p>
       </Section>
     </div>
   );

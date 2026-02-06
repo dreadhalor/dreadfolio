@@ -2,7 +2,7 @@
 // Note: In a real integration, you'd import from @repo or your actual portfolio
 // For now, we'll define the app data structure here
 
-// Import app screenshots
+// Import app screenshots (for portal display)
 import HomepageImg from '@repo/assets/app-images/homepage.webp';
 import HermitcraftHornsImg from '@repo/assets/app-images/hermitcraft-horns.webp';
 import EnlightImg from '@repo/assets/app-images/enlight.webp';
@@ -19,6 +19,23 @@ import SuDoneKuImg from '@repo/assets/app-images/su-done-ku.webp';
 import SteeringTextImg from '@repo/assets/app-images/steering-text.webp';
 import GifsterImg from '@repo/assets/app-images/gifster.webp';
 
+// Import app icons (for minimap thumbnails)
+import HomepageIcon from '@repo/assets/icons/homepage-icon.svg';
+import HermitcraftHornsIcon from '@repo/assets/icons/hermitcraft-horns-icon.svg';
+import EnlightIcon from '@repo/assets/icons/enlight-icon.svg';
+import DredgedUpIcon from '@repo/assets/icons/dredged-up-icon.svg';
+import MinesweeperIcon from '@repo/assets/icons/minesweeper-icon.svg';
+import RootBeerReviewsIcon from '@repo/assets/icons/root-beer-reviews-icon.svg';
+import PathfinderVisualizerIcon from '@repo/assets/icons/pathfinder-visualizer-icon.svg';
+import AsciiVideoIcon from '@repo/assets/icons/ascii-video-icon.svg';
+import ShareMeIcon from '@repo/assets/icons/shareme-icon.svg';
+import FallcrateIcon from '@repo/assets/icons/fallcrate-icon.svg';
+import DreadUiIcon from '@repo/assets/icons/dread-ui-icon.svg';
+import SketchesIcon from '@repo/assets/icons/sketches-icon.svg';
+import SuDoneKuIcon from '@repo/assets/icons/su-done-ku-icon.svg';
+import SteeringTextIcon from '@repo/assets/icons/steering-text-icon.svg';
+import GifsterIcon from '@repo/assets/icons/gifster-icon.svg';
+
 export interface AppData {
   id: string;
   name: string;
@@ -26,6 +43,7 @@ export interface AppData {
   description: string;
   url?: string;
   imageUrl?: string; // Screenshot/preview image for portal
+  iconUrl?: string; // Icon/thumbnail for minimap
 }
 
 /**
@@ -64,6 +82,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: "Scott Hetrick's official portfolio homepage.",
     url: '/home',
     imageUrl: HomepageImg,
+    iconUrl: HomepageIcon,
   },
   {
     id: 'hermitcraft-horns',
@@ -72,6 +91,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'An app for making & sharing audio clips of Hermitcraft videos.',
     url: 'https://hermitcraft-horns.com',
     imageUrl: HermitcraftHornsImg,
+    iconUrl: HermitcraftHornsIcon,
   },
   {
     id: 'enlight',
@@ -80,6 +100,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'A relaxing playground of shine and shadow.',
     url: '/enlight',
     imageUrl: EnlightImg,
+    iconUrl: EnlightIcon,
   },
   {
     id: 'dredged-up',
@@ -88,6 +109,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'Optimal spatial inventory packing for the game Dredge.',
     url: 'https://dredgedup.com',
     imageUrl: DredgedUpImg,
+    iconUrl: DredgedUpIcon,
   },
   {
     id: 'minesweeper',
@@ -96,6 +118,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: "Ittttttt's Minesweeper!",
     url: '/minesweeper',
     imageUrl: MinesweeperImg,
+    iconUrl: MinesweeperIcon,
   },
   {
     id: 'root-beer-reviews',
@@ -104,6 +127,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'A place to review and discover new root beers.',
     url: 'https://summit.scottjhetrick.com',
     imageUrl: RootBeerReviewsImg,
+    iconUrl: RootBeerReviewsIcon,
   },
   {
     id: 'pathfinder-visualizer',
@@ -112,6 +136,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'A pathfinding visualizer, coded in React.',
     url: '/pathfinder-visualizer',
     imageUrl: PathfinderVisualizerImg,
+    iconUrl: PathfinderVisualizerIcon,
   },
   {
     id: 'ascii-video',
@@ -120,6 +145,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'Vanilla JS app using TensorFlow.js for person detection.',
     url: '/ascii-video',
     imageUrl: AsciiVideoImg,
+    iconUrl: AsciiVideoIcon,
   },
   {
     id: 'shareme',
@@ -128,6 +154,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'A Pinterest-inspired social media app.',
     url: '/shareme',
     imageUrl: ShareMeImg,
+    iconUrl: ShareMeIcon,
   },
   {
     id: 'fallcrate',
@@ -136,6 +163,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'A Dropbox-inspired full-stack web app for sharing and organizing files.',
     url: '/fallcrate',
     imageUrl: FallcrateImg,
+    iconUrl: FallcrateIcon,
   },
   {
     id: 'dread-ui',
@@ -144,6 +172,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'My personal component library I created to use across my projects.',
     url: '/dread-ui',
     imageUrl: DreadUiImg,
+    iconUrl: DreadUiIcon,
   },
   {
     id: 'sketches',
@@ -152,6 +181,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'Various p5 sketches to play around with.',
     url: '/sketches',
     imageUrl: SketchesImg,
+    iconUrl: SketchesIcon,
   },
   {
     id: 'su-done-ku',
@@ -160,6 +190,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'All other Sudoku solvers are worse than this one.',
     url: '/su-done-ku',
     imageUrl: SuDoneKuImg,
+    iconUrl: SuDoneKuIcon,
   },
   {
     id: 'steering-text',
@@ -168,6 +199,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: 'Steering behavior, demonstrated through text.',
     url: '/steering-text',
     imageUrl: SteeringTextImg,
+    iconUrl: SteeringTextIcon,
   },
   {
     id: 'gifster',
@@ -176,6 +208,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     description: "We're not GIPHY, but we do use their API.",
     url: '/gifster',
     imageUrl: GifsterImg,
+    iconUrl: GifsterIcon,
   },
 ];
 

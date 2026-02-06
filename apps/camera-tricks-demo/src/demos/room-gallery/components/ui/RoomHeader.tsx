@@ -4,9 +4,10 @@ import { SPACING, BORDER_RADIUS } from '../../config/styleConstants';
 
 interface RoomHeaderProps {
   currentRoom: RoomData;
+  showNavigationHint?: boolean;
 }
 
-export function RoomHeader({ currentRoom }: RoomHeaderProps) {
+export function RoomHeader({ currentRoom, showNavigationHint }: RoomHeaderProps) {
   const isMobile = useIsMobile();
 
   return (
@@ -40,8 +41,18 @@ export function RoomHeader({ currentRoom }: RoomHeaderProps) {
         {currentRoom.name}
       </div>
       {!isMobile && (
-        <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-          Drag to explore • Click room below to teleport
+        <div 
+          style={{ 
+            fontSize: '0.9rem', 
+            opacity: showNavigationHint ? 1 : 0.8,
+            color: showNavigationHint ? '#4CAF50' : 'white',
+            transition: 'all 0.3s ease',
+          }}
+        >
+          {showNavigationHint 
+            ? '✨ Click portal to open • Press Home to return'
+            : 'Drag to explore • Click room below to teleport'
+          }
         </div>
       )}
     </div>

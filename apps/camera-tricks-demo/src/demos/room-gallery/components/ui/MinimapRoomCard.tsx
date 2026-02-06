@@ -10,6 +10,7 @@ interface MinimapRoomCardProps {
   cardHeight: number;
   isMobile: boolean;
   onClick: (room: RoomData) => void;
+  isCollapsed?: boolean;
 }
 
 // Style constants for this component
@@ -47,6 +48,7 @@ export function MinimapRoomCard({
   cardHeight,
   isMobile,
   onClick,
+  isCollapsed = false,
 }: MinimapRoomCardProps) {
   // Calculate opacity based on distance from current position
   const opacity = Math.max(
@@ -70,19 +72,21 @@ export function MinimapRoomCard({
         height: `${cardHeight}px`,
         flexShrink: 0,
         background: room.color,
-        borderRadius: '0.5rem',
+        borderRadius: isCollapsed ? '6px' : '0.5rem',
         cursor: 'pointer',
-        opacity: opacity,
+        opacity: isCollapsed ? (distance === 0 ? 1 : 0.6) : opacity,
         border: isActive
-          ? isMobile
-            ? '2px solid white'
-            : '3px solid white'
-          : isMobile
-            ? '1px solid rgba(255, 255, 255, 0.3)'
-            : '2px solid rgba(255, 255, 255, 0.3)',
+          ? isCollapsed 
+            ? '1px solid rgba(255, 255, 255, 0.8)' 
+            : '2px solid rgba(255, 255, 255, 0.8)'
+          : 'none',
         boxShadow: isActive
-          ? `0 0 ${isMobile ? '12px' : '20px'} ${room.color}, 0 0 ${isMobile ? '24px' : '40px'} ${room.color}`
-          : '0 4px 8px rgba(0, 0, 0, 0.3)',
+          ? isCollapsed
+            ? '0 0 8px rgba(255, 255, 255, 0.4)'
+            : '0 0 20px rgba(255, 255, 255, 0.5)'
+          : isCollapsed
+            ? '0 2px 4px rgba(0, 0, 0, 0.3)'
+            : '0 4px 12px rgba(0, 0, 0, 0.4)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -95,53 +99,38 @@ export function MinimapRoomCard({
         WebkitUserSelect: 'none',
         transform: 'translateZ(0)', // Force GPU acceleration, prevent jitter
         backfaceVisibility: 'hidden',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
-      {/* Room number - top left corner */}
+      {/* Icon thumbnail - full size */}
+      {room.iconUrl && (
+        <img
+          src={room.iconUrl}
+          alt={room.name}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5))',
+          }}
+        />
+      )}
+      
+      {/* Dark gradient overlay for better icon visibility (same as old app switcher) */}
       <div
         style={{
           position: 'absolute',
-          top: isMobile
-            ? CARD_STYLES.roomNumberTop.mobile
-            : CARD_STYLES.roomNumberTop.desktop,
-          left: isMobile
-            ? CARD_STYLES.roomNumberTop.mobile
-            : CARD_STYLES.roomNumberTop.desktop,
-          fontSize: isMobile
-            ? CARD_STYLES.roomNumberFontSize.mobile
-            : CARD_STYLES.roomNumberFontSize.desktop,
-          fontWeight: 'bold',
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontFamily: 'monospace',
-        }}
-      >
-        {index + 1}
-      </div>
-
-      {/* Room name - centered */}
-      <div
-        style={{
-          color: 'white',
-          fontSize: isMobile
-            ? CARD_STYLES.roomNameFontSize.mobile
-            : CARD_STYLES.roomNameFontSize.desktop,
-          fontWeight: 'bold',
-          textAlign: 'center',
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
-          padding: isMobile
-            ? CARD_STYLES.roomNamePadding.mobile
-            : CARD_STYLES.roomNamePadding.desktop,
-          lineHeight: isMobile
-            ? CARD_STYLES.roomNameLineHeight.mobile
-            : CARD_STYLES.roomNameLineHeight.desktop,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          top: 0,
+          left: 0,
           width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2), transparent)',
+          pointerEvents: 'none',
         }}
-      >
-        {room.name}
-      </div>
+      />
 
       {/* Active indicator pulse */}
       {isActive && (

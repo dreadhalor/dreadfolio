@@ -13,8 +13,9 @@
  * ```
  */
 
-import { useEffect, RefObject } from 'react';
+import { useEffect, useRef, RefObject } from 'react';
 import { ROOMS } from '../config/rooms';
+import { APP_MINIMIZE_DURATION_MS } from '../config/constants';
 
 interface NavigateToAppMessage {
   type: 'NAVIGATE_TO_APP';
@@ -26,6 +27,8 @@ interface UseCrossOriginNavigationProps {
   onRoomProgressChange: (progress: number) => void;
   onMinimizeApp: () => void;
   appLoaderState: string;
+  onNavigationStart?: (roomName: string) => void;
+  onNavigationComplete?: () => void;
 }
 
 /**
@@ -34,13 +37,47 @@ interface UseCrossOriginNavigationProps {
  * When homepage (or other apps) want to showcase another app, they can
  * send a message and the gallery will smoothly navigate to that room.
  * The target app is NOT automatically opened - user maintains control.
+ * 
+ * Sequencing: If app is active, minimizes it FIRST (600ms), THEN navigates.
  */
 export function useCrossOriginNavigation({
   targetRoomProgressRef,
   onRoomProgressChange,
   onMinimizeApp,
   appLoaderState,
+  onNavigationStart,
+  onNavigationComplete,
 }: UseCrossOriginNavigationProps) {
+  const pendingNavigationRef = useRef<number | null>(null);
+  const targetRoomNameRef = useRef<string | null>(null);
+
+  // Handle navigation after minimize completes
+  useEffect(() => {
+    if (
+      appLoaderState === 'minimized' &&
+      pendingNavigationRef.current !== null
+    ) {
+      // Minimize complete - now navigate
+      const targetRoomIndex = pendingNavigationRef.current;
+      targetRoomProgressRef.current = targetRoomIndex;
+      onRoomProgressChange(targetRoomIndex);
+
+      console.log(
+        `[CrossOriginNav] Navigating to room ${targetRoomIndex} (minimize complete)`
+      );
+
+      // Trigger navigation complete after camera arrives (roughly 1 second for lerp)
+      setTimeout(() => {
+        if (onNavigationComplete) {
+          onNavigationComplete();
+        }
+      }, 1200);
+
+      pendingNavigationRef.current = null; // Clear pending navigation
+      targetRoomNameRef.current = null;
+    }
+  }, [appLoaderState, targetRoomProgressRef, onRoomProgressChange, onNavigationComplete]);
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Basic security: validate message structure
@@ -60,19 +97,37 @@ export function useCrossOriginNavigation({
           return;
         }
 
-        // If an app is currently open, minimize it first
-        if (appLoaderState === 'app-active') {
-          onMinimizeApp();
+        const targetRoomName = ROOMS[targetRoomIndex].name;
+        targetRoomNameRef.current = targetRoomName;
+
+        // Show navigation toast
+        if (onNavigationStart) {
+          onNavigationStart(targetRoomName);
         }
 
-        // Navigate to the target room
-        // (Portal will NOT auto-open - user must click)
-        targetRoomProgressRef.current = targetRoomIndex;
-        onRoomProgressChange(targetRoomIndex);
+        // If an app is currently open, minimize it FIRST, then navigate after
+        if (appLoaderState === 'app-active') {
+          console.log(
+            `[CrossOriginNav] Minimizing current app, will navigate to ${message.appId} after`
+          );
+          pendingNavigationRef.current = targetRoomIndex;
+          onMinimizeApp();
+        } else {
+          // No app open - navigate immediately
+          targetRoomProgressRef.current = targetRoomIndex;
+          onRoomProgressChange(targetRoomIndex);
 
-        console.log(
-          `[CrossOriginNav] Navigating to ${message.appId} (room ${targetRoomIndex})`
-        );
+          console.log(
+            `[CrossOriginNav] Navigating to ${message.appId} (room ${targetRoomIndex})`
+          );
+
+          // Trigger navigation complete after camera arrives
+          setTimeout(() => {
+            if (onNavigationComplete) {
+              onNavigationComplete();
+            }
+          }, 1200);
+        }
       }
     };
 

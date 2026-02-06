@@ -3,6 +3,7 @@ import { useSpring, animated } from '@react-spring/web';
 import { useAppLoader } from '../../providers/AppLoaderContext';
 import { usePortalIframeRef } from '../../hooks/usePortalRefs';
 import { Z_INDEX } from '../../config/constants';
+import { LAYOUT } from '../../config/styleConstants';
 
 /**
  * AppLoader - Handles the portal zoom animation and app display
@@ -108,14 +109,14 @@ export function AppLoader() {
       };
     }
 
-    // When active: fully visible at full scale with large circle (effectively no mask)
+    // When active: fully visible with space reserved for collapsed mini bar
     if (state === 'app-active') {
       return {
         position: 'fixed' as const,
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: `calc(100vh - ${LAYOUT.COLLAPSED_MINIMAP_HEIGHT}px)`,
         border: 'none',
         background: '#000', // Black background (app content will cover it)
         zIndex: Z_INDEX.IFRAME_ACTIVE,

@@ -31,6 +31,7 @@ export const UI_Z_INDEX = {
   MINIMAP: 9999, // Must be above canvas
   RETURN_BUTTON: 1002,
   DEBUG_OVERLAY: 1000,
+  TOAST: 1003,
 } as const;
 
 // Border radius scale
@@ -58,4 +59,9 @@ export const COLORS = {
     mobileBorder: 'yellow',
     container: 'rgba(255, 0, 0, 0.1)',
   },
+} as const;
+
+// Layout constants
+export const LAYOUT = {
+  COLLAPSED_MINIMAP_HEIGHT: 50, // Height reserved for collapsed mini bar when app is active
 } as const;

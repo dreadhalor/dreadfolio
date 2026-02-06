@@ -6,6 +6,7 @@
  */
 
 import { useFrame } from '@react-three/fiber';
+import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import {
   PORTAL_GLOW,
@@ -18,6 +19,7 @@ import type { ExtendedCamera, OrbitalParticleMesh, SwirlParticleMesh } from '../
 interface UsePortalVisualEffectsProps {
   cameras: ExtendedCamera[];
   visibleCameraIndices: number[];
+  pulsePortalIndex?: number | null;
 }
 
 /**
@@ -35,7 +37,18 @@ interface UsePortalVisualEffectsProps {
 export function usePortalVisualEffects({
   cameras,
   visibleCameraIndices,
+  pulsePortalIndex,
 }: UsePortalVisualEffectsProps): void {
+  const pulseStartTimeRef = useRef<number | null>(null);
+  const pulseDuration = 3.0; // 3 seconds for pulse effect
+
+  // Track when pulse starts
+  useEffect(() => {
+    if (pulsePortalIndex !== null && pulsePortalIndex !== undefined) {
+      pulseStartTimeRef.current = performance.now() / 1000; // Convert to seconds
+    }
+  }, [pulsePortalIndex]);
+
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
@@ -46,26 +59,47 @@ export function usePortalVisualEffects({
 
       if (!animData) continue;
 
-      // Pulse outer glow (breathing effect)
+      // Calculate navigation pulse effect (if this portal should pulse)
+      let pulseMultiplier = 1.0;
+      if (
+        pulsePortalIndex === i &&
+        pulseStartTimeRef.current !== null
+      ) {
+        const elapsedTime = time - pulseStartTimeRef.current;
+        if (elapsedTime < pulseDuration) {
+          // Smooth decay from 2.5x to 1.0x over pulseDuration
+          const progress = elapsedTime / pulseDuration;
+          const easeOut = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+          pulseMultiplier = 2.5 - (1.5 * easeOut);
+        } else {
+          // Pulse complete
+          pulseStartTimeRef.current = null;
+        }
+      }
+
+      // Pulse outer glow (breathing effect + navigation pulse)
       const outerMaterial = animData.outerGlow
         .material as THREE.MeshBasicMaterial;
-      outerMaterial.opacity =
+      const baseOuterOpacity =
         PORTAL_GLOW.OUTER_BASE_OPACITY +
         Math.sin(time * PORTAL_GLOW.OUTER_PULSE_SPEED) *
           PORTAL_GLOW.OUTER_PULSE_AMPLITUDE;
-      animData.outerGlow.scale.setScalar(
+      outerMaterial.opacity = Math.min(0.8, baseOuterOpacity * pulseMultiplier);
+      
+      const baseOuterScale =
         1 +
-          Math.sin(time * PORTAL_GLOW.OUTER_SCALE_SPEED) *
-            PORTAL_GLOW.OUTER_SCALE_AMPLITUDE,
-      );
+        Math.sin(time * PORTAL_GLOW.OUTER_SCALE_SPEED) *
+          PORTAL_GLOW.OUTER_SCALE_AMPLITUDE;
+      animData.outerGlow.scale.setScalar(baseOuterScale * pulseMultiplier);
 
-      // Pulse inner glow (faster, more intense)
+      // Pulse inner glow (faster, more intense + navigation pulse)
       const innerMaterial = animData.innerGlow
         .material as THREE.MeshBasicMaterial;
-      innerMaterial.opacity =
+      const baseInnerOpacity =
         PORTAL_GLOW.INNER_BASE_OPACITY +
         Math.sin(time * PORTAL_GLOW.INNER_PULSE_SPEED) *
           PORTAL_GLOW.INNER_PULSE_AMPLITUDE;
+      innerMaterial.opacity = Math.min(1.0, baseInnerOpacity * pulseMultiplier);
 
       // Rotate 3D torus frames (slow rotation for depth)
       if (animData.torus) {

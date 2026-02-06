@@ -31,6 +31,7 @@ export const ROOMS: RoomData[] = PORTFOLIO_APPS.map((app, index) => ({
   appId: app.id,
   appUrl: app.url,
   imageUrl: app.imageUrl,
+  iconUrl: app.iconUrl,
   description: app.description,
 }));
 

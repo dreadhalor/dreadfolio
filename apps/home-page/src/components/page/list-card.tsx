@@ -1,6 +1,6 @@
 import { cn } from '@repo/utils';
 import { MdOutlineArrowOutward } from 'react-icons/md';
-import { Badge, useIframe } from 'dread-ui';
+import { Badge } from 'dread-ui';
 import { MouseEvent } from 'react';
 
 type ProjectCardProps = {
@@ -17,19 +17,25 @@ const ProjectCard = ({
   technologies,
   image,
 }: ProjectCardProps) => {
-  const { sendMessageToParent } = useIframe();
+  const handleNavigate = () => {
+    // Navigate to app's room in gallery (portal won't auto-open)
+    if (window.parent !== window) {
+      window.parent.postMessage(
+        {
+          type: 'NAVIGATE_TO_APP',
+          appId: id,
+        },
+        '*'
+      );
+    }
+  };
 
   return (
     <ListCard
       title={title}
       description={description}
       badges={technologies}
-      onClick={() => {
-        sendMessageToParent({
-          type: 'scroll-to-app',
-          id,
-        });
-      }}
+      onClick={handleNavigate}
     >
       <img
         src={image}

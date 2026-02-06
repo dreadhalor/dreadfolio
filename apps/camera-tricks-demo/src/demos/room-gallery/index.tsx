@@ -17,10 +17,10 @@ import { SplitCameraRenderer } from './components/scene/SplitCameraRenderer';
 import { FPSDisplay } from './components/ui/FPSDisplay';
 import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { RoomHeader } from './components/ui/RoomHeader';
-import { RoomMinimap } from './components/ui/RoomMinimap';
+import { FloatingMenuBar } from './components/ui/FloatingMenuBar';
 import { AppLoader } from './components/ui/AppLoader';
-import { ReturnButton } from './components/ui/ReturnButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { NavigationToast } from './components/ui/NavigationToast';
 
 // Providers
 import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
@@ -41,7 +41,13 @@ if (import.meta.env.DEV) {
  * Room Gallery - Inner component with access to AppLoader context
  */
 function RoomGalleryInner() {
-  const { state: appLoaderState, minimizeApp } = useAppLoader();
+  const { 
+    state: appLoaderState, 
+    currentAppUrl, 
+    currentAppName, 
+    loadApp, 
+    minimizeApp 
+  } = useAppLoader();
   // Performance monitoring
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
@@ -49,6 +55,11 @@ function RoomGalleryInner() {
   // PRIMARY STATE: Room progress (0.0 to 14.0)
   const [roomProgress, setRoomProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Navigation feedback state
+  const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
+  const [showNavigationHint, setShowNavigationHint] = useState(false);
+  const [pulsePortalIndex, setPulsePortalIndex] = useState<number | null>(null);
 
   // Debug state
   const [debugInfo, setDebugInfo] = useState<{
@@ -64,6 +75,7 @@ function RoomGalleryInner() {
   const targetRoomProgressRef = useRef(0); // Target position (instant)
   const currentRoomProgressRef = useRef(0); // Current position (lerped, matches camera)
   const lastMouseXRef = useRef(0);
+  const activePortalRef = useRef<number | null>(null); // Track which portal is active for animations
 
   // Cross-origin navigation from iframed apps
   useCrossOriginNavigation({
@@ -74,6 +86,18 @@ function RoomGalleryInner() {
     },
     onMinimizeApp: minimizeApp,
     appLoaderState,
+    onNavigationStart: (roomName) => {
+      setNavigationTarget(roomName);
+    },
+    onNavigationComplete: () => {
+      setShowNavigationHint(true);
+      setPulsePortalIndex(Math.round(targetRoomProgressRef.current));
+      // Hide hint after 5 seconds
+      setTimeout(() => {
+        setShowNavigationHint(false);
+        setPulsePortalIndex(null);
+      }, 5000);
+    },
   });
 
   // Keyboard navigation
@@ -305,6 +329,8 @@ function RoomGalleryInner() {
           currentRoomProgressRef={currentRoomProgressRef}
           onRoomProgressUpdate={setRoomProgress}
           onDebugUpdate={setDebugInfo}
+          pulsePortalIndex={pulsePortalIndex}
+          activePortalRef={activePortalRef}
         />
       </Canvas>
 
@@ -313,33 +339,69 @@ function RoomGalleryInner() {
         appLoaderState === 'minimizing' ||
         appLoaderState === 'minimized') && (
         <>
-          <RoomHeader currentRoom={currentRoom} />
+          <RoomHeader 
+            currentRoom={currentRoom} 
+            showNavigationHint={showNavigationHint}
+          />
           {DEBUG_MODE && <FPSDisplay fps={fps} />}
           {DEBUG_MODE && <DrawCallDisplay calls={drawCalls} />}
         </>
       )}
 
-      {/* Fast Travel Minimap - hide when app is active or transitioning */}
-      {(appLoaderState === 'idle' ||
-        appLoaderState === 'minimizing' ||
-        appLoaderState === 'minimized') && (
-        <RoomMinimap
-          rooms={ROOMS}
-          currentRoom={currentRoom}
-          roomProgress={roomProgress}
-          currentRoomProgressRef={currentRoomProgressRef}
-          onRoomClick={moveTo}
-          onRoomProgressChange={(progress) => {
-            targetRoomProgressRef.current = progress;
-            setRoomProgress(progress);
-          }}
-        />
-      )}
+      {/* Navigation Toast */}
+      <NavigationToast
+        targetRoomName={navigationTarget}
+        onComplete={() => setNavigationTarget(null)}
+      />
 
-      {/* Compact Return Button - only visible when app is active */}
-      {appLoaderState === 'app-active' && (
-        <ReturnButton onClick={minimizeApp} />
-      )}
+      {/* Floating Menu Bar - morphs between full and mini during transitions */}
+      <FloatingMenuBar
+        rooms={ROOMS}
+        currentRoom={currentRoom}
+        roomProgress={roomProgress}
+        currentRoomProgressRef={currentRoomProgressRef}
+        onRoomClick={moveTo}
+        onHomeClick={() => {
+          const homeRoomIndex = 0;
+          targetRoomProgressRef.current = homeRoomIndex;
+          setRoomProgress(homeRoomIndex);
+        }}
+        onRestoreAppClick={
+          currentAppUrl && currentAppName
+            ? () => {
+                const roomIndex = ROOMS.findIndex((room) => room.appUrl === currentAppUrl);
+                if (roomIndex === -1) return;
+
+                const currentProgress = currentRoomProgressRef.current;
+                const isNearby = Math.abs(currentProgress - roomIndex) < 0.5;
+
+                if (isNearby) {
+                  activePortalRef.current = roomIndex;
+                  loadApp(currentAppUrl, currentAppName);
+                } else {
+                  targetRoomProgressRef.current = roomIndex;
+                  setRoomProgress(roomIndex);
+                  setTimeout(() => {
+                    activePortalRef.current = roomIndex;
+                    loadApp(currentAppUrl, currentAppName);
+                  }, 900);
+                }
+              }
+            : undefined
+        }
+        minimizedAppIconUrl={
+          (appLoaderState === 'minimizing' || appLoaderState === 'minimized') && currentAppUrl
+            ? ROOMS.find((room) => room.appUrl === currentAppUrl)?.iconUrl
+            : null
+        }
+        isAtHomepage={Math.round(currentRoomProgressRef.current) === 0}
+        isCollapsed={
+          appLoaderState === 'portal-zooming' ||
+          appLoaderState === 'transitioning' ||
+          appLoaderState === 'app-active'
+        }
+        onExpand={minimizeApp}
+      />
 
       {/* App Loader Overlay */}
       <AppLoader />

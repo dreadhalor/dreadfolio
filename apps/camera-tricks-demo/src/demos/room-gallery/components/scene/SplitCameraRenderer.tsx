@@ -40,6 +40,8 @@ interface SplitCameraRendererProps {
     rightCameraIdx: number;
     viewportSplit: { left: number; right: number };
   }) => void;
+  pulsePortalIndex?: number | null; // Portal to pulse when navigation completes
+  activePortalRef?: React.RefObject<number | null>; // Optional: External active portal ref for restore button
 }
 
 /**
@@ -85,6 +87,8 @@ export function SplitCameraRenderer({
   currentRoomProgressRef: externalCurrentRef,
   onRoomProgressUpdate,
   onDebugUpdate,
+  pulsePortalIndex,
+  activePortalRef: externalActivePortalRef,
 }: SplitCameraRendererProps) {
   const { gl, scene, size } = useThree();
   const internalCurrentRoomProgressRef = useRef(0);
@@ -92,8 +96,9 @@ export function SplitCameraRenderer({
     externalCurrentRef || internalCurrentRoomProgressRef;
   const { loadApp, state: appLoaderState } = useAppLoader();
 
-  // Track active portal for targeted reset
-  const activePortalRef = useRef<number | null>(null);
+  // Track active portal for targeted reset (use external ref if provided, otherwise internal)
+  const internalActivePortalRef = useRef<number | null>(null);
+  const activePortalRef = externalActivePortalRef || internalActivePortalRef;
 
   // Track setTimeout for cleanup
   const loadAppTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -209,6 +214,7 @@ export function SplitCameraRenderer({
   usePortalVisualEffects({
     cameras,
     visibleCameraIndices,
+    pulsePortalIndex,
   });
 
   // Hook 4: Portal click handling
