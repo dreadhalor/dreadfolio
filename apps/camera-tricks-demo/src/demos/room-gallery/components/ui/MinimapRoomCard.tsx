@@ -62,6 +62,10 @@ export function MinimapRoomCard({
     onClick(room);
   };
 
+  // Staggered animation delay based on distance from active card
+  // Cards closer to center animate first, creating a wave effect
+  const animationDelay = `${distance * 0.01}s`;
+
   return (
     <div
       onClick={handleClick}
@@ -76,8 +80,8 @@ export function MinimapRoomCard({
         cursor: 'pointer',
         opacity: isCollapsed ? (distance === 0 ? 1 : 0.6) : opacity,
         border: isActive
-          ? isCollapsed 
-            ? '1px solid rgba(255, 255, 255, 0.8)' 
+          ? isCollapsed
+            ? '1px solid rgba(255, 255, 255, 0.8)'
             : '2px solid rgba(255, 255, 255, 0.8)'
           : 'none',
         boxShadow: isActive
@@ -99,7 +103,17 @@ export function MinimapRoomCard({
         WebkitUserSelect: 'none',
         transform: 'translateZ(0)', // Force GPU acceleration, prevent jitter
         backfaceVisibility: 'hidden',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        // Animate with staggered delay for wave effect
+        transitionDelay: animationDelay,
+        transition: `
+          width 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
+          height 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
+          min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
+          border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
+          opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
+          border 0.3s ease ${animationDelay},
+          box-shadow 0.3s ease ${animationDelay}
+        `,
       }}
     >
       {/* Icon thumbnail - full size */}
@@ -118,7 +132,7 @@ export function MinimapRoomCard({
           }}
         />
       )}
-      
+
       {/* Dark gradient overlay for better icon visibility (same as old app switcher) */}
       <div
         style={{
@@ -127,7 +141,8 @@ export function MinimapRoomCard({
           left: 0,
           width: '100%',
           height: '100%',
-          background: 'linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2), transparent)',
+          background:
+            'linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2), transparent)',
           pointerEvents: 'none',
         }}
       />
