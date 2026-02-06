@@ -20,23 +20,32 @@ export interface PortalTheme {
 /**
  * Gets portal theme configuration based on room data
  * Homepage gets special treatment with brighter colors and RGB ornaments
+ * Minesweeper gets Windows XP blue border to mimic window frames
  */
 export function getPortalTheme(room: RoomData): PortalTheme {
   const isHomepage = room.theme === 'home';
+  const isMinesweeper = room.theme === 'minesweeper';
+  
+  // Minesweeper portal uses Windows XP blue border
+  const portalColor = isHomepage 
+    ? '#ffffff' // White/bright for Homepage
+    : isMinesweeper
+      ? '#0058D6' // Windows XP blue for Minesweeper
+      : room.color;
   
   return {
-    color: isHomepage 
-      ? new THREE.Color('#ffffff') // White/bright for Homepage
-      : new THREE.Color(room.color),
+    color: new THREE.Color(portalColor),
     opacity: {
       outerGlow: isHomepage ? PORTAL_OPACITY.OUTER_GLOW.homepage : PORTAL_OPACITY.OUTER_GLOW.default,
-      torus: isHomepage ? PORTAL_OPACITY.TORUS.homepage : PORTAL_OPACITY.TORUS.default,
+      torus: isHomepage || isMinesweeper ? 0.9 : PORTAL_OPACITY.TORUS.default, // Brighter torus for Minesweeper
       innerGlow: isHomepage ? PORTAL_OPACITY.INNER_GLOW.homepage : PORTAL_OPACITY.INNER_GLOW.default,
     },
     isHomepage,
     ornamentColors: isHomepage 
       ? [...HOMEPAGE_ORNAMENT_COLORS] // RGB + Yellow for Homepage
-      : [room.color, room.color, room.color, room.color],
+      : isMinesweeper
+        ? ['#0058D6', '#0058D6', '#0058D6', '#0058D6'] // All Windows XP blue for Minesweeper
+        : [room.color, room.color, room.color, room.color],
   };
 }
 

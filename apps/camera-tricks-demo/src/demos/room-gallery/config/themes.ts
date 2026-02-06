@@ -71,7 +71,7 @@ export const ROOM_THEMES: Record<RoomTheme, RoomColors> = {
   'hermitcraft-horns': generateAppRoomColors('#6b9fff'),
   'enlight': generateAppRoomColors('#ff6b9d'),
   'dredged-up': generateAppRoomColors('#1a4d2e'),
-  'minesweeper': generateAppRoomColors('#1f2f86'),
+  'minesweeper': generateAppRoomColors('#5EB3E4'), // Windows XP Bliss sky blue
   'root-beer-reviews': generateAppRoomColors('#8b4513'),
   'pathfinder-visualizer': generateAppRoomColors('#6c757d'),
   'ascii-video': generateAppRoomColors('#00ff41'),

@@ -114,7 +114,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
   {
     id: 'minesweeper',
     name: 'Minesweeper',
-    color: '#1f2f86', // Classic minesweeper navy
+    color: '#5EB3E4', // Windows XP Bliss sky blue
     description: "Ittttttt's Minesweeper!",
     url: '/minesweeper',
     imageUrl: MinesweeperImg,

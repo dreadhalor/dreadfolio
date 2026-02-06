@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { useMatcap } from '../shared/useMatcap';
-import { InstancedNumberBlocks } from '../shared/InstancedComponents';
-import { FloatingParticles } from '../shared/RoomParticles';
+import { MINESWEEPER_CONFIG } from './config/MinesweeperConfig';
 
 interface MinesweeperRoomProps {
   colors: RoomColors;
@@ -12,307 +12,484 @@ interface MinesweeperRoomProps {
 }
 
 /**
- * Minesweeper Room - 90s Computer Room / Retro Gaming Den
+ * Minesweeper Room - Giant Minesweeper Board Theme
  * 
  * Features:
- * - CRT monitor on desk with glow
- * - Floppy disks and CDs scattered
- * - Windows XP box/poster
- * - Numbered minesweeper tiles
- * - Retro beige PC tower
+ * - Windows XP "Bliss" inspired colors (green grass floor, blue sky walls/ceiling)
+ * - Large numbered tiles on side walls (classic minesweeper colors)
+ * - Giant floor grid of revealed/unrevealed tiles
+ * - 3D mine sculptures with spikes (positioned to avoid portal/label zones)
+ * - Hanging flag markers from ceiling
+ * - Numbered blocks scattered at varying depths
+ * - Elements positioned close to portal on sides for depth
+ * 
+ * Performance:
+ * - All static geometry merged per material
+ * - No animated particles
+ * - Estimated ~27 draw calls
  */
 export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
   const matcap = useMatcap();
+  
+  // Windows XP "Bliss" colors
+  const BLISS_COLORS = {
+    grass: '#7CFC00', // Vibrant green grass
+    sky: '#5EB3E4',   // Bright sky blue
+  };
 
-  // Merge all static decorations into single geometry
-  const mergedGeometry = useMemo(() => {
-    const geometries: THREE.BufferGeometry[] = [];
+  // WALL TILES - Large numbered tiles on left and right walls
+  const wallTilesGeometries = useMemo(() => {
+    const { WALL_TILES, NUMBER_COLORS } = MINESWEEPER_CONFIG;
     const tempObject = new THREE.Object3D();
     
-    // Computer desk (90s style)
-    const desk = new THREE.BoxGeometry(3, 0.2, 1.8);
-    tempObject.position.set(offsetX, 1, -6);
-    tempObject.updateMatrix();
-    desk.applyMatrix4(tempObject.matrix);
-    geometries.push(desk);
+    // Group geometries by color for merging
+    const colorGroups: Record<string, THREE.BufferGeometry[]> = {};
     
-    // Desk legs
-    for (let i = 0; i < 4; i++) {
-      const leg = new THREE.BoxGeometry(0.15, 1, 0.15);
-      const xOff = i % 2 === 0 ? -1.3 : 1.3;
-      const zOff = i < 2 ? -0.8 : 0.8;
-      tempObject.position.set(offsetX + xOff, 0.5, -6 + zOff);
-      tempObject.updateMatrix();
-      leg.applyMatrix4(tempObject.matrix);
-      geometries.push(leg);
-    }
-    
-    // CRT Monitor (bulky, deep)
-    const monitorScreen = new THREE.BoxGeometry(1.2, 0.9, 0.8);
-    tempObject.position.set(offsetX, 1.6, -6);
-    tempObject.updateMatrix();
-    monitorScreen.applyMatrix4(tempObject.matrix);
-    geometries.push(monitorScreen);
-    
-    // Monitor stand
-    const monitorStand = new THREE.CylinderGeometry(0.2, 0.25, 0.3, 8);
-    tempObject.position.set(offsetX, 1.25, -6);
-    tempObject.updateMatrix();
-    monitorStand.applyMatrix4(tempObject.matrix);
-    geometries.push(monitorStand);
-    
-    // Beige PC tower
-    const tower = new THREE.BoxGeometry(0.5, 1.2, 0.8);
-    tempObject.position.set(offsetX - 2, 1.7, -6);
-    tempObject.updateMatrix();
-    tower.applyMatrix4(tempObject.matrix);
-    geometries.push(tower);
-    
-    // PC tower details (drive slots)
-    for (let i = 0; i < 3; i++) {
-      const slot = new THREE.BoxGeometry(0.4, 0.05, 0.05);
-      tempObject.position.set(offsetX - 2, 1.8 + i * 0.2, -5.6);
-      tempObject.updateMatrix();
-      slot.applyMatrix4(tempObject.matrix);
-      geometries.push(slot);
-    }
-    
-    // Keyboard (flat rectangle)
-    const keyboard = new THREE.BoxGeometry(1.2, 0.05, 0.4);
-    tempObject.position.set(offsetX + 0.2, 1.15, -5);
-    tempObject.updateMatrix();
-    keyboard.applyMatrix4(tempObject.matrix);
-    geometries.push(keyboard);
-    
-    // Mouse
-    const mouse = new THREE.BoxGeometry(0.15, 0.08, 0.2);
-    tempObject.position.set(offsetX + 1.2, 1.15, -5);
-    tempObject.updateMatrix();
-    mouse.applyMatrix4(tempObject.matrix);
-    geometries.push(mouse);
-    
-    // Floppy disks scattered on desk
-    for (let i = 0; i < 5; i++) {
-      const floppy = new THREE.BoxGeometry(0.25, 0.02, 0.25);
-      tempObject.position.set(
-        offsetX + 1 + (i % 3) * 0.3,
-        1.12,
-        -6.5 + Math.floor(i / 3) * 0.3
-      );
-      tempObject.rotation.y = (Math.random() - 0.5) * 0.5;
-      tempObject.updateMatrix();
-      floppy.applyMatrix4(tempObject.matrix);
-      geometries.push(floppy);
-    }
-    
-    tempObject.rotation.y = 0;
-    
-    // CD cases on shelf - moved closer
-    const shelf = new THREE.BoxGeometry(2, 0.1, 0.6);
-    tempObject.position.set(offsetX + 5, 2, -2); // Moved to z=-2 (12 units from camera)
-    tempObject.updateMatrix();
-    shelf.applyMatrix4(tempObject.matrix);
-    geometries.push(shelf);
-    
-    for (let i = 0; i < 8; i++) {
-      const cd = new THREE.BoxGeometry(0.2, 0.3, 0.02);
-      tempObject.position.set(offsetX + 4 + i * 0.25, 2.2, -2); // Moved closer
-      tempObject.updateMatrix();
-      cd.applyMatrix4(tempObject.matrix);
-      geometries.push(cd);
-    }
-    
-    // Windows XP box on floor
-    const xpBox = new THREE.BoxGeometry(0.8, 1, 0.6);
-    tempObject.position.set(offsetX + 3, 0.5, 5);
-    tempObject.updateMatrix();
-    xpBox.applyMatrix4(tempObject.matrix);
-    geometries.push(xpBox);
-    
-    // Speakers on desk (retro style)
-    for (let i = 0; i < 2; i++) {
-      const speaker = new THREE.BoxGeometry(0.3, 0.4, 0.3);
-      tempObject.position.set(offsetX + (i === 0 ? -1.3 : 1.3), 1.3, -6.5);
-      tempObject.updateMatrix();
-      speaker.applyMatrix4(tempObject.matrix);
-      geometries.push(speaker);
+    // Left wall tiles (numbers 1-6)
+    const leftNumbers = [1, 2, 3, 4, 5, 6];
+    leftNumbers.forEach((num, idx) => {
+      const color = NUMBER_COLORS[num as keyof typeof NUMBER_COLORS];
+      if (!colorGroups[color]) colorGroups[color] = [];
       
-      // Speaker cone
-      const cone = new THREE.CylinderGeometry(0.08, 0.08, 0.02, 16);
-      tempObject.position.set(offsetX + (i === 0 ? -1.3 : 1.3), 1.3, -6.35);
-      tempObject.rotation.x = Math.PI / 2;
+      const tile = new THREE.BoxGeometry(WALL_TILES.width, WALL_TILES.height, WALL_TILES.depth);
+      const row = Math.floor(idx / 3);
+      const col = idx % 3;
+      const y = row === 0 ? WALL_TILES.lowerRowY : WALL_TILES.upperRowY;
+      const z = WALL_TILES.zPositions[col];
+      
+      tempObject.position.set(offsetX + WALL_TILES.leftWallX, y, z);
+      tempObject.rotation.y = Math.PI / 2;
       tempObject.updateMatrix();
-      cone.applyMatrix4(tempObject.matrix);
-      geometries.push(cone);
-    }
-    
-    tempObject.rotation.x = 0;
-    
-    // Retro gaming posters - moved to side walls closer to camera
-    for (let i = 0; i < 4; i++) {
-      const poster = new THREE.BoxGeometry(1, 1.3, 0.05);
-      const isLeft = i < 2;
-      const xPos = isLeft ? -13 : 13; // Side walls
-      const zPos = -1 + (i % 2) * 3; // Two per wall
-      tempObject.position.set(offsetX + xPos, 2.5, zPos);
-      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
-      tempObject.updateMatrix();
-      poster.applyMatrix4(tempObject.matrix);
-      geometries.push(poster);
-    }
-    tempObject.rotation.y = 0;
-    
-    // More floppy disks in disk holder
-    const diskHolder = new THREE.BoxGeometry(0.3, 0.3, 0.15);
-    tempObject.position.set(offsetX + 1.3, 1.25, -6.5);
-    tempObject.updateMatrix();
-    diskHolder.applyMatrix4(tempObject.matrix);
-    geometries.push(diskHolder);
-    
-    for (let i = 0; i < 8; i++) {
-      const disk = new THREE.BoxGeometry(0.02, 0.25, 0.25);
-      tempObject.position.set(offsetX + 1.3 + i * 0.025, 1.25, -6.5);
-      tempObject.updateMatrix();
-      disk.applyMatrix4(tempObject.matrix);
-      geometries.push(disk);
-    }
-    
-    // CD jewel cases stack
-    for (let i = 0; i < 10; i++) {
-      const jewelCase = new THREE.BoxGeometry(0.3, 0.02, 0.3);
-      tempObject.position.set(offsetX - 1.3, 1.12 + i * 0.025, -6.5);
-      tempObject.updateMatrix();
-      jewelCase.applyMatrix4(tempObject.matrix);
-      geometries.push(jewelCase);
-    }
-    
-    // Desktop icons (small colorful squares on "desktop")
-    for (let i = 0; i < 8; i++) {
-      const icon = new THREE.BoxGeometry(0.1, 0.1, 0.02);
-      const row = i % 2;
-      const col = Math.floor(i / 2);
-      tempObject.position.set(
-        offsetX - 0.4 + col * 0.15,
-        1.6 + row * 0.12,
-        -5.59
-      );
-      tempObject.updateMatrix();
-      icon.applyMatrix4(tempObject.matrix);
-      geometries.push(icon);
-    }
-    
-    // Taskbar at bottom of screen
-    const taskbar = new THREE.BoxGeometry(1, 0.05, 0.02);
-    tempObject.position.set(offsetX, 1.2, -5.59);
-    tempObject.updateMatrix();
-    taskbar.applyMatrix4(tempObject.matrix);
-    geometries.push(taskbar);
-    
-    // Wood paneling on walls (moved to side walls for visibility)
-    for (let i = 0; i < 6; i++) {
-      const panel = new THREE.BoxGeometry(3, 0.8, 0.08);
-      const isLeft = i < 3;
-      tempObject.position.set(
-        offsetX + (isLeft ? -14 : 14), 
-        2 + (i % 3) * 1.5, 
-        -6 + (i % 3) * 6
-      );
-      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
-      tempObject.updateMatrix();
-      panel.applyMatrix4(tempObject.matrix);
-      geometries.push(panel);
-    }
+      tile.applyMatrix4(tempObject.matrix);
+      colorGroups[color].push(tile);
+    });
     
     tempObject.rotation.y = 0;
     
-    // Power strip under desk
-    const powerStrip = new THREE.BoxGeometry(0.8, 0.08, 0.15);
-    tempObject.position.set(offsetX, 0.15, -6.5);
-    tempObject.updateMatrix();
-    powerStrip.applyMatrix4(tempObject.matrix);
-    geometries.push(powerStrip);
-    
-    // Plug outlets on power strip
-    for (let i = 0; i < 6; i++) {
-      const outlet = new THREE.BoxGeometry(0.08, 0.05, 0.02);
-      tempObject.position.set(offsetX - 0.35 + i * 0.14, 0.15, -6.43);
+    // Right wall tiles (numbers 7,8,1,2,3,4)
+    const rightNumbers = [7, 8, 1, 2, 3, 4];
+    rightNumbers.forEach((num, idx) => {
+      const color = NUMBER_COLORS[num as keyof typeof NUMBER_COLORS];
+      if (!colorGroups[color]) colorGroups[color] = [];
+      
+      const tile = new THREE.BoxGeometry(WALL_TILES.width, WALL_TILES.height, WALL_TILES.depth);
+      const row = Math.floor(idx / 3);
+      const col = idx % 3;
+      const y = row === 0 ? WALL_TILES.lowerRowY : WALL_TILES.upperRowY;
+      const z = WALL_TILES.zPositions[col];
+      
+      tempObject.position.set(offsetX + WALL_TILES.rightWallX, y, z);
+      tempObject.rotation.y = -Math.PI / 2;
       tempObject.updateMatrix();
-      outlet.applyMatrix4(tempObject.matrix);
-      geometries.push(outlet);
-    }
+      tile.applyMatrix4(tempObject.matrix);
+      colorGroups[color].push(tile);
+    });
     
-    return mergeGeometries(geometries);
+    // Merge geometries by color
+    const mergedByColor: Array<{ geometry: THREE.BufferGeometry; color: string }> = [];
+    Object.entries(colorGroups).forEach(([color, geometries]) => {
+      mergedByColor.push({
+        geometry: mergeGeometries(geometries),
+        color,
+      });
+    });
+    
+    return mergedByColor;
   }, [offsetX]);
-  
+
+  // FLOOR GRID - Giant checkerboard of tiles
+  const floorGridGeometries = useMemo(() => {
+    const { FLOOR_GRID } = MINESWEEPER_CONFIG;
+    const tempObject = new THREE.Object3D();
+    const revealedTiles: THREE.BufferGeometry[] = [];
+    const unrevealedTiles: THREE.BufferGeometry[] = [];
+    
+    for (let row = 0; row < FLOOR_GRID.rows; row++) {
+      for (let col = 0; col < FLOOR_GRID.cols; col++) {
+        // Alternating revealed/unrevealed pattern
+        const revealed = (row + col) % 2 === 0;
+        const tileHeight = revealed ? FLOOR_GRID.revealedHeight : FLOOR_GRID.unrevealedHeight;
+        const tileY = revealed ? FLOOR_GRID.revealedHeight / 2 : FLOOR_GRID.unrevealedHeight / 2;
+        
+        const tile = new THREE.BoxGeometry(FLOOR_GRID.tileSize, tileHeight, FLOOR_GRID.tileSize);
+        const x = offsetX + FLOOR_GRID.startX + col * FLOOR_GRID.spacing;
+        const z = FLOOR_GRID.startZ + row * FLOOR_GRID.spacing;
+        
+        tempObject.position.set(x, tileY, z);
+        tempObject.updateMatrix();
+        tile.applyMatrix4(tempObject.matrix);
+        
+        if (revealed) {
+          revealedTiles.push(tile);
+        } else {
+          unrevealedTiles.push(tile);
+        }
+      }
+    }
+    
+    return {
+      revealed: mergeGeometries(revealedTiles),
+      unrevealed: mergeGeometries(unrevealedTiles),
+    };
+  }, [offsetX]);
+
+  // MINE SCULPTURES - Large spheres with spikes
+  const mineGeometries = useMemo(() => {
+    const { MINES } = MINESWEEPER_CONFIG;
+    
+    return MINES.positions.map((mine) => {
+      const geometries: THREE.BufferGeometry[] = [];
+      const tempObject = new THREE.Object3D();
+      
+      // Main sphere body
+      const sphere = new THREE.SphereGeometry(mine.radius, 16, 16);
+      tempObject.position.set(offsetX + mine.x, mine.y, mine.z);
+      tempObject.updateMatrix();
+      sphere.applyMatrix4(tempObject.matrix);
+      geometries.push(sphere);
+      
+      // 12 spikes in spherical arrangement
+      const spikePositions = [
+        // Top and bottom
+        { theta: 0, phi: 0 },
+        { theta: 0, phi: Math.PI },
+        // Middle ring (4 spikes)
+        { theta: 0, phi: Math.PI / 2 },
+        { theta: Math.PI / 2, phi: Math.PI / 2 },
+        { theta: Math.PI, phi: Math.PI / 2 },
+        { theta: 3 * Math.PI / 2, phi: Math.PI / 2 },
+        // Upper ring (3 spikes)
+        { theta: 0, phi: Math.PI / 3 },
+        { theta: 2 * Math.PI / 3, phi: Math.PI / 3 },
+        { theta: 4 * Math.PI / 3, phi: Math.PI / 3 },
+        // Lower ring (3 spikes)
+        { theta: Math.PI / 3, phi: 2 * Math.PI / 3 },
+        { theta: Math.PI, phi: 2 * Math.PI / 3 },
+        { theta: 5 * Math.PI / 3, phi: 2 * Math.PI / 3 },
+      ];
+      
+      spikePositions.forEach(({ theta, phi }) => {
+        const spike = new THREE.ConeGeometry(MINES.spikeRadius, MINES.spikeLength, 8);
+        
+        // Convert spherical to Cartesian coordinates
+        const x = mine.radius * Math.sin(phi) * Math.cos(theta);
+        const y = mine.radius * Math.cos(phi);
+        const z = mine.radius * Math.sin(phi) * Math.sin(theta);
+        
+        tempObject.position.set(offsetX + mine.x + x, mine.y + y, mine.z + z);
+        
+        // Point spike outward from sphere center
+        const direction = new THREE.Vector3(x, y, z).normalize();
+        tempObject.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+        
+        tempObject.updateMatrix();
+        spike.applyMatrix4(tempObject.matrix);
+        geometries.push(spike);
+      });
+      
+      return mergeGeometries(geometries);
+    });
+  }, [offsetX]);
+
+  // FLAG MARKERS - Hanging from ceiling (individual for animation)
+  const flagMarkers = useMemo(() => {
+    const { FLAGS } = MINESWEEPER_CONFIG;
+    
+    return FLAGS.positions.map((pos, idx) => {
+      const geometries: THREE.BufferGeometry[] = [];
+      const tempObject = new THREE.Object3D();
+      
+      // Flag pole (cylinder)
+      const pole = new THREE.CylinderGeometry(
+        FLAGS.poleRadius,
+        FLAGS.poleRadius,
+        FLAGS.poleHeight,
+        8
+      );
+      tempObject.position.set(0, 0, 0); // Center at origin for this flag unit
+      tempObject.updateMatrix();
+      pole.applyMatrix4(tempObject.matrix);
+      geometries.push(pole);
+      
+      // Red triangular flag at bottom of pole
+      const flagShape = new THREE.Shape();
+      flagShape.moveTo(0, 0);
+      flagShape.lineTo(FLAGS.flagWidth, FLAGS.flagHeight / 2);
+      flagShape.lineTo(0, FLAGS.flagHeight);
+      flagShape.lineTo(0, 0);
+      
+      const flagGeometry = new THREE.ShapeGeometry(flagShape);
+      tempObject.position.set(0, -FLAGS.poleHeight / 2, 0); // At bottom of pole
+      tempObject.rotation.y = Math.PI / 4; // Angle flag for visibility
+      tempObject.updateMatrix();
+      flagGeometry.applyMatrix4(tempObject.matrix);
+      geometries.push(flagGeometry);
+      
+      return {
+        geometry: mergeGeometries(geometries),
+        basePosition: [offsetX + pos.x, FLAGS.hangY - FLAGS.poleHeight / 2, pos.z] as [number, number, number],
+        floatOffset: idx * 1.3, // Phase offset for varied animation
+      };
+    });
+  }, [offsetX]);
+
+  // NUMBERED BLOCKS - Large positioned cubes
+  const numberedBlocks = useMemo(() => {
+    const { NUMBER_BLOCKS, NUMBER_COLORS } = MINESWEEPER_CONFIG;
+    
+    return NUMBER_BLOCKS.positions.map((block) => {
+      const geometry = new THREE.BoxGeometry(
+        NUMBER_BLOCKS.size,
+        NUMBER_BLOCKS.size,
+        NUMBER_BLOCKS.size
+      );
+      const color = NUMBER_COLORS[block.num as keyof typeof NUMBER_COLORS];
+      
+      return {
+        geometry,
+        position: [offsetX + block.x, block.y, block.z] as [number, number, number],
+        color,
+      };
+    });
+  }, [offsetX]);
+
+  // PORTAL FRAMING CUBES - Small cubes flanking portal for depth
+  const portalFrameCubes = useMemo(() => {
+    const { PORTAL_FRAME_CUBES, NUMBER_COLORS } = MINESWEEPER_CONFIG;
+    
+    return PORTAL_FRAME_CUBES.positions.map((cube) => {
+      const geometry = new THREE.BoxGeometry(
+        PORTAL_FRAME_CUBES.size,
+        PORTAL_FRAME_CUBES.size,
+        PORTAL_FRAME_CUBES.size
+      );
+      const color = NUMBER_COLORS[cube.num as keyof typeof NUMBER_COLORS];
+      
+      return {
+        geometry,
+        position: [offsetX + cube.x, cube.y, cube.z] as [number, number, number],
+        color,
+      };
+    });
+  }, [offsetX]);
+
+  // Small floating mines - animated for visual interest
+  const smallFloatingMines = useMemo(() => {
+    const { SMALL_FLOATING_MINES } = MINESWEEPER_CONFIG;
+    
+    return SMALL_FLOATING_MINES.positions.map((minePos, mineIdx) => {
+      const geometries: THREE.BufferGeometry[] = [];
+      const tempObject = new THREE.Object3D();
+      
+      // Sphere body
+      const sphere = new THREE.SphereGeometry(SMALL_FLOATING_MINES.radius, 12, 12);
+      geometries.push(sphere);
+      
+      // 8 spikes in ring arrangement
+      for (let i = 0; i < SMALL_FLOATING_MINES.spikeCount; i++) {
+        const angle = (i / SMALL_FLOATING_MINES.spikeCount) * Math.PI * 2;
+        const spike = new THREE.ConeGeometry(
+          SMALL_FLOATING_MINES.spikeRadius,
+          SMALL_FLOATING_MINES.spikeLength,
+          6
+        );
+        
+        const x = Math.cos(angle) * SMALL_FLOATING_MINES.radius;
+        const z = Math.sin(angle) * SMALL_FLOATING_MINES.radius;
+        
+        tempObject.position.set(x, 0, z);
+        const direction = new THREE.Vector3(x, 0, z).normalize();
+        tempObject.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+        tempObject.updateMatrix();
+        spike.applyMatrix4(tempObject.matrix);
+        geometries.push(spike);
+      }
+      
+      return {
+        geometry: mergeGeometries(geometries),
+        basePosition: [offsetX + minePos.x, minePos.y, minePos.z] as [number, number, number],
+        floatOffset: mineIdx * 2, // Phase offset for varied animation
+      };
+    });
+  }, [offsetX]);
+
+  // Floating numbered blocks - above portal area
+  const floatingNumberBlocks = useMemo(() => {
+    const { FLOATING_NUMBER_BLOCKS, NUMBER_COLORS } = MINESWEEPER_CONFIG;
+    
+    return FLOATING_NUMBER_BLOCKS.positions.map((block, idx) => {
+      const geometry = new THREE.BoxGeometry(
+        FLOATING_NUMBER_BLOCKS.size,
+        FLOATING_NUMBER_BLOCKS.size,
+        FLOATING_NUMBER_BLOCKS.size
+      );
+      const color = NUMBER_COLORS[block.num as keyof typeof NUMBER_COLORS];
+      
+      return {
+        geometry,
+        basePosition: [offsetX + block.x, block.y, block.z] as [number, number, number],
+        color,
+        floatOffset: idx * 1.7,
+      };
+    });
+  }, [offsetX]);
+
+  // Animation refs
+  const flagRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const smallMineRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const floatingBlockRefs = useRef<(THREE.Mesh | null)[]>([]);
+
+  // Animate floating elements (flags, small mines, and floating blocks)
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    const { FLAGS, SMALL_FLOATING_MINES, FLOATING_NUMBER_BLOCKS } = MINESWEEPER_CONFIG;
+    
+    // Animate each flag marker (gentle vertical float with phase offset)
+    flagRefs.current.forEach((flag, idx) => {
+      if (flag && flagMarkers[idx]) {
+        const offset = flagMarkers[idx].floatOffset;
+        flag.position.y = 
+          flagMarkers[idx].basePosition[1] + 
+          Math.sin(time * FLAGS.floatSpeed + offset) * FLAGS.floatAmplitude;
+      }
+    });
+    
+    // Animate small mines (float + rotation)
+    smallMineRefs.current.forEach((mine, idx) => {
+      if (mine && smallFloatingMines[idx]) {
+        const offset = smallFloatingMines[idx].floatOffset;
+        mine.position.y = 
+          smallFloatingMines[idx].basePosition[1] + 
+          Math.sin(time * SMALL_FLOATING_MINES.floatSpeed + offset) * SMALL_FLOATING_MINES.floatAmplitude;
+        mine.rotation.y = time * SMALL_FLOATING_MINES.rotationSpeed + offset;
+      }
+    });
+    
+    // Animate floating numbered blocks (float + rotation)
+    floatingBlockRefs.current.forEach((block, idx) => {
+      if (block && floatingNumberBlocks[idx]) {
+        const offset = floatingNumberBlocks[idx].floatOffset;
+        block.position.y = 
+          floatingNumberBlocks[idx].basePosition[1] + 
+          Math.sin(time * FLOATING_NUMBER_BLOCKS.floatSpeed + offset) * FLOATING_NUMBER_BLOCKS.floatAmplitude;
+        block.rotation.x = time * FLOATING_NUMBER_BLOCKS.rotationSpeed + offset;
+        block.rotation.y = time * FLOATING_NUMBER_BLOCKS.rotationSpeed * 1.3 + offset;
+      }
+    });
+  });
+
   return (
     <>
-      {/* Static furniture */}
-      <mesh geometry={mergedGeometry}>
-        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
-      </mesh>
-      
-      {/* CRT monitor screen with minesweeper game glow */}
-      <mesh position={[offsetX, 1.6, -5.61]}>
-        <planeGeometry args={[1, 0.75]} />
-        <meshMatcapMaterial matcap={matcap} color="#c0c0c0" />
-      </mesh>
-      
-      {/* Minesweeper number blocks scattered around room */}
-      <InstancedNumberBlocks offsetX={offsetX} count={9} color="#c0c0c0" />
-      
-      {/* Individual numbered tiles on floor (representing minesweeper tiles) */}
-      <group position={[offsetX - 3, 0.51, 0]}>
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((num, i) => {
-          const x = (i % 4) * 1.2 - 1.8;
-          const z = Math.floor(i / 4) * 1.2 - 0.6;
-          const colors = ['#0000ff', '#008000', '#ff0000', '#000080', '#800000', '#008080', '#000000', '#808080'];
-          
-          return (
-            <mesh key={i} position={[x, 0, z]}>
-              <boxGeometry args={[1, 0.1, 1]} />
-              <meshMatcapMaterial matcap={matcap} color="#c0c0c0" />
-            </mesh>
-          );
-        })}
-      </group>
-      
-      {/* Windows XP logo on box */}
-      <group position={[offsetX + 3, 0.5, 5.31]}>
-        <mesh>
-          <planeGeometry args={[0.6, 0.6]} />
-          <meshMatcapMaterial matcap={matcap} color="#0061fe" />
+      {/* Wall tiles - rendered by color */}
+      {wallTilesGeometries.map(({ geometry, color }, idx) => (
+        <mesh key={`wall-${idx}`} geometry={geometry}>
+          <meshMatcapMaterial matcap={matcap} color={color} />
         </mesh>
-        <mesh position={[0, 0, 0.01]}>
-          <planeGeometry args={[0.4, 0.05]} />
-          <meshMatcapMaterial matcap={matcap} color="#ffffff" />
-        </mesh>
-      </group>
-      
-      {/* Retro carpet (with pattern) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
-        <planeGeometry args={[10, 8]} />
-        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
-      </mesh>
-      
-      {/* Numeric particles - like numbers floating around */}
-      <FloatingParticles offsetX={offsetX} color="#1f2f86" count={35} size={0.12} />
-      
-      {/* Hanging mines (like the game) */}
-      {[{ x: -5, z: 0 }, { x: 0, z: -3 }, { x: 5, z: 1 }].map((pos, i) => (
-        <group key={i} position={[offsetX + pos.x, 7, pos.z]}>
-          <mesh>
-            <sphereGeometry args={[0.3, 8, 8]} />
-            <meshMatcapMaterial matcap={matcap} color="#333333" />
-          </mesh>
-          {/* Spikes on the mine */}
-          {Array.from({ length: 8 }, (_, j) => (
-            <mesh key={j} position={[Math.cos(j * Math.PI / 4) * 0.35, 0, Math.sin(j * Math.PI / 4) * 0.35]} rotation={[0, j * Math.PI / 4, 0]}>
-              <coneGeometry args={[0.08, 0.2, 4]} />
-              <meshMatcapMaterial matcap={matcap} color="#333333" />
-            </mesh>
-          ))}
-        </group>
       ))}
+      
+      {/* Base floor overlay - Windows Bliss grass green */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.001, 0]}>
+        <planeGeometry args={[30, 30]} />
+        <meshMatcapMaterial matcap={matcap} color={BLISS_COLORS.grass} />
+      </mesh>
+      
+      {/* Floor grid - revealed tiles (slightly darker green for contrast) */}
+      <mesh geometry={floorGridGeometries.revealed}>
+        <meshMatcapMaterial matcap={matcap} color="#6DB820" />
+      </mesh>
+      
+      {/* Floor grid - unrevealed tiles (darker green, raised) */}
+      <mesh geometry={floorGridGeometries.unrevealed}>
+        <meshMatcapMaterial matcap={matcap} color="#5FA010" />
+      </mesh>
+      
+      {/* Mine sculptures - dark gray/black */}
+      {mineGeometries.map((geometry, idx) => (
+        <mesh key={`mine-${idx}`} geometry={geometry}>
+          <meshMatcapMaterial matcap={matcap} color="#2C2C2C" />
+        </mesh>
+      ))}
+      
+      {/* Flag markers - individual for proper animation (pole + flag together) */}
+      {flagMarkers.map((flag, idx) => (
+        <mesh
+          key={`flag-${idx}`}
+          ref={(el) => (flagRefs.current[idx] = el)}
+          position={flag.basePosition}
+          geometry={flag.geometry}
+        >
+          <meshMatcapMaterial matcap={matcap} color="#FF0000" />
+        </mesh>
+      ))}
+      
+      {/* Numbered blocks - individual meshes with classic colors */}
+      {numberedBlocks.map((block, idx) => (
+        <mesh key={`block-${idx}`} position={block.position} geometry={block.geometry}>
+          <meshMatcapMaterial matcap={matcap} color={block.color} />
+        </mesh>
+      ))}
+      
+      {/* Portal framing cubes - small cubes flanking portal for depth */}
+      {portalFrameCubes.map((cube, idx) => (
+        <mesh key={`frame-${idx}`} position={cube.position} geometry={cube.geometry}>
+          <meshMatcapMaterial matcap={matcap} color={cube.color} />
+        </mesh>
+      ))}
+      
+      {/* Small floating mines - animated for visual interest */}
+      {smallFloatingMines.map((mine, idx) => (
+        <mesh
+          key={`small-mine-${idx}`}
+          ref={(el) => (smallMineRefs.current[idx] = el)}
+          position={mine.basePosition}
+          geometry={mine.geometry}
+        >
+          <meshMatcapMaterial matcap={matcap} color="#333333" />
+        </mesh>
+      ))}
+      
+      {/* Floating numbered blocks - above portal area */}
+      {floatingNumberBlocks.map((block, idx) => (
+        <mesh
+          key={`floating-block-${idx}`}
+          ref={(el) => (floatingBlockRefs.current[idx] = el)}
+          position={block.basePosition}
+          geometry={block.geometry}
+        >
+          <meshMatcapMaterial matcap={matcap} color={block.color} />
+        </mesh>
+      ))}
+      
+      {/* Wall overlays - Windows Bliss sky blue */}
+      {/* Left wall section - moved closer with wall tiles */}
+      <mesh position={[offsetX - 11, 6, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[30, 12]} />
+        <meshBasicMaterial color={BLISS_COLORS.sky} fog={true} />
+      </mesh>
+      
+      {/* Right wall section - moved closer with wall tiles */}
+      <mesh position={[offsetX + 11, 6, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[30, 12]} />
+        <meshBasicMaterial color={BLISS_COLORS.sky} fog={true} />
+      </mesh>
+      
+      {/* Back wall overlay */}
+      <mesh position={[offsetX, 6, -14.9]}>
+        <planeGeometry args={[30, 12]} />
+        <meshBasicMaterial color={BLISS_COLORS.sky} fog={true} />
+      </mesh>
+      
+      {/* Front wall overlay */}
+      <mesh position={[offsetX, 6, 14.9]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[30, 12]} />
+        <meshBasicMaterial color={BLISS_COLORS.sky} fog={true} />
+      </mesh>
+      
+      {/* Ceiling overlay */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[offsetX, 11.99, 0]}>
+        <planeGeometry args={[30, 30]} />
+        <meshBasicMaterial color={BLISS_COLORS.sky} fog={true} />
+      </mesh>
     </>
   );
 }
