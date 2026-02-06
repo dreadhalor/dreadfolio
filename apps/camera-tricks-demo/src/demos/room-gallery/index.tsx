@@ -30,6 +30,12 @@ import { RoomData } from './types';
 
 // Hooks
 import { useSyncedRefState } from './hooks/useSyncedRefState';
+import { useCrossOriginNavigation } from './hooks/useCrossOriginNavigation';
+
+// Development test utilities (exposed on window for console testing)
+if (import.meta.env.DEV) {
+  import('./utils/testNavigation');
+}
 
 /**
  * Room Gallery - Inner component with access to AppLoader context
@@ -58,6 +64,17 @@ function RoomGalleryInner() {
   const targetRoomProgressRef = useRef(0); // Target position (instant)
   const currentRoomProgressRef = useRef(0); // Current position (lerped, matches camera)
   const lastMouseXRef = useRef(0);
+
+  // Cross-origin navigation from iframed apps
+  useCrossOriginNavigation({
+    targetRoomProgressRef,
+    onRoomProgressChange: (progress) => {
+      targetRoomProgressRef.current = progress;
+      setRoomProgress(progress);
+    },
+    onMinimizeApp: minimizeApp,
+    appLoaderState,
+  });
 
   // Keyboard navigation
   useEffect(() => {

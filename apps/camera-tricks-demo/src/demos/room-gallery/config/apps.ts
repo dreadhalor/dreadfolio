@@ -28,8 +28,35 @@ export interface AppData {
   imageUrl?: string; // Screenshot/preview image for portal
 }
 
+/**
+ * Get the app URL, automatically using localhost in development
+ * 
+ * In dev mode:
+ * - Homepage: http://localhost:5173 (Vite default for home-page)
+ * - Gallery embeds: Use production URLs or relative paths
+ * 
+ * In production:
+ * - Use the configured URLs as-is
+ */
+function getAppUrl(url: string | undefined, isDev: boolean): string | undefined {
+  if (!url || !isDev) return url;
+
+  // Development URL overrides for local testing
+  const DEV_URLS: Record<string, string> = {
+    '/home': 'http://localhost:5173', // home-page Vite dev server
+    // Add more local dev URLs here as needed
+    // '/enlight': 'http://localhost:5175',
+  };
+
+  return DEV_URLS[url] || url;
+}
+
+// Detect development mode
+const IS_DEV = import.meta.env.DEV;
+
 // Portfolio apps with their vibrant themes
-export const PORTFOLIO_APPS: AppData[] = [
+// URLs are automatically adjusted for local development
+const PORTFOLIO_APPS_RAW: AppData[] = [
   {
     id: 'home',
     name: 'Homepage',
@@ -151,3 +178,19 @@ export const PORTFOLIO_APPS: AppData[] = [
     imageUrl: GifsterImg,
   },
 ];
+
+// Export apps with dev URLs applied
+export const PORTFOLIO_APPS: AppData[] = PORTFOLIO_APPS_RAW.map(app => ({
+  ...app,
+  url: getAppUrl(app.url, IS_DEV),
+}));
+
+// Log dev mode URLs for debugging
+if (IS_DEV) {
+  console.log('[Dev Mode] App URLs adjusted for local testing:');
+  PORTFOLIO_APPS.forEach(app => {
+    if (app.url?.startsWith('http://localhost')) {
+      console.log(`  ${app.name}: ${app.url}`);
+    }
+  });
+}
