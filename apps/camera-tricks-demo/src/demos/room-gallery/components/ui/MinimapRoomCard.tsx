@@ -1,5 +1,6 @@
 import { RoomData } from '../../types';
 import { MINIMAP_MOBILE } from '../../config/styleConstants';
+import { useRef } from 'react';
 
 interface MinimapRoomCardProps {
   room: RoomData;
@@ -11,6 +12,9 @@ interface MinimapRoomCardProps {
   isMobile: boolean;
   onClick: (room: RoomData) => void;
   isCollapsed?: boolean;
+  onSceneDragStart?: (clientX: number) => void;
+  onSceneDragMove?: (clientX: number) => void;
+  onSceneDragEnd?: () => void;
 }
 
 // Style constants for this component
@@ -49,27 +53,89 @@ export function MinimapRoomCard({
   isMobile,
   onClick,
   isCollapsed = false,
+  onSceneDragStart,
+  onSceneDragMove,
+  onSceneDragEnd,
 }: MinimapRoomCardProps) {
+  // Track touch start position to detect drag vs click
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const isDraggingSceneRef = useRef(false);
+
   // Calculate opacity based on distance from current position
   const opacity = Math.max(
     CARD_STYLES.minOpacity,
     1 - distance * CARD_STYLES.opacityFadeMultiplier,
   );
 
-  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onClick(room);
   };
 
-  // Staggered animation delay based on distance from active card
-  // Cards closer to center animate first, creating a wave effect
-  const animationDelay = `${distance * 0.01}s`;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Record touch start position
+    const touch = e.touches[0];
+    if (touch) {
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    }
+    isDraggingSceneRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch && touchStartRef.current) {
+      const dx = touch.clientX - touchStartRef.current.x;
+      const dy = touch.clientY - touchStartRef.current.y;
+      const moveDistance = Math.sqrt(dx * dx + dy * dy);
+
+      // If moved >10px, it's a drag - start scene drag
+      if (moveDistance > 10 && !isDraggingSceneRef.current && onSceneDragStart && onSceneDragMove) {
+        isDraggingSceneRef.current = true;
+        onSceneDragStart(touchStartRef.current.x);
+      }
+
+      // Continue scene drag if active
+      if (isDraggingSceneRef.current && onSceneDragMove) {
+        onSceneDragMove(touch.clientX);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // If we were dragging the scene, end the drag
+    if (isDraggingSceneRef.current) {
+      if (onSceneDragEnd) {
+        onSceneDragEnd();
+      }
+      isDraggingSceneRef.current = false;
+      touchStartRef.current = null;
+      return;
+    }
+
+    // Otherwise, check if it's a click
+    const touch = e.changedTouches[0];
+    if (touch && touchStartRef.current) {
+      const dx = touch.clientX - touchStartRef.current.x;
+      const dy = touch.clientY - touchStartRef.current.y;
+      const clickDistance = Math.sqrt(dx * dx + dy * dy);
+
+      // Only treat as click if moved less than 10px
+      if (clickDistance < 10) {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick(room);
+      }
+    }
+    touchStartRef.current = null;
+  };
 
   return (
     <div
       onClick={handleClick}
-      onTouchEnd={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       style={{
         width: `${cardWidth}px`,
         minWidth: `${cardWidth}px`,
@@ -79,11 +145,6 @@ export function MinimapRoomCard({
         borderRadius: isCollapsed ? '6px' : '0.5rem',
         cursor: 'pointer',
         opacity: isCollapsed ? (distance === 0 ? 1 : 0.6) : opacity,
-        border: isActive
-          ? isCollapsed
-            ? '1px solid rgba(255, 255, 255, 0.8)'
-            : '2px solid rgba(255, 255, 255, 0.8)'
-          : 'none',
         boxShadow: isActive
           ? isCollapsed
             ? '0 0 8px rgba(255, 255, 255, 0.4)'
@@ -103,16 +164,14 @@ export function MinimapRoomCard({
         WebkitUserSelect: 'none',
         transform: 'translateZ(0)', // Force GPU acceleration, prevent jitter
         backfaceVisibility: 'hidden',
-        // Animate with staggered delay for wave effect
-        transitionDelay: animationDelay,
+        // Synchronized animation - ease-out for smooth deceleration (no stagger)
+        // Remove opacity transition so it updates instantly with scroll position
         transition: `
-          width 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
-          height 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
-          min-width 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
-          border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
-          opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay},
-          border 0.3s ease ${animationDelay},
-          box-shadow 0.3s ease ${animationDelay}
+          width 0.4s ease-out,
+          height 0.4s ease-out,
+          min-width 0.4s ease-out,
+          border-radius 0.4s ease-out,
+          box-shadow 0.3s ease
         `,
       }}
     >
@@ -129,6 +188,7 @@ export function MinimapRoomCard({
             height: '100%',
             objectFit: 'contain',
             filter: 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5))',
+            borderRadius: isCollapsed ? '6px' : '0.5rem', // Match parent border-radius
           }}
         />
       )}
@@ -144,6 +204,7 @@ export function MinimapRoomCard({
           background:
             'linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.2), transparent)',
           pointerEvents: 'none',
+          borderRadius: isCollapsed ? '6px' : '0.5rem', // Match parent border-radius
         }}
       />
 
@@ -159,6 +220,25 @@ export function MinimapRoomCard({
           }}
         />
       )}
+
+      {/* Border overlay - sits on top, doesn't affect sizing */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          border: isCollapsed
+            ? '1px solid rgba(255, 255, 255, 0.8)'
+            : '2px solid rgba(255, 255, 255, 0.8)',
+          borderRadius: isCollapsed ? '6px' : '0.5rem',
+          pointerEvents: 'none',
+          boxSizing: 'border-box' as const,
+          opacity: isActive ? 1 : 0,
+          transition: 'opacity 0.3s ease, border 0.3s ease',
+        }}
+      />
     </div>
   );
 }

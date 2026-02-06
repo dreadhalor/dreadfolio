@@ -3,11 +3,7 @@ import { useIsMobile } from '../../hooks/useIsMobile';
 import { useSyncedRefState } from '../../hooks/useSyncedRefState';
 import {
   SPACING,
-  MINIMAP_MOBILE,
-  COLORS,
   UI_Z_INDEX,
-  MINIMAP_INDICATOR,
-  BORDER_RADIUS,
   LAYOUT,
 } from '../../config/styleConstants';
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
@@ -26,6 +22,9 @@ interface FloatingMenuBarProps {
   isAtHomepage: boolean;
   isCollapsed?: boolean; // When app is fullscreen, show compact indicator
   onExpand?: () => void; // Called when clicking collapsed indicator
+  onSceneDragStart?: (clientX: number) => void; // For pass-through dragging
+  onSceneDragMove?: (clientX: number) => void;
+  onSceneDragEnd?: () => void;
 }
 
 /**
@@ -48,15 +47,52 @@ export function FloatingMenuBar({
   isAtHomepage,
   isCollapsed = false,
   onExpand,
+  onSceneDragStart,
+  onSceneDragMove,
+  onSceneDragEnd,
 }: FloatingMenuBarProps) {
   const isMobile = useIsMobile();
   const smoothRoomProgress = useSyncedRefState(
     currentRoomProgressRef,
   ) as number;
-  const cardsContainerRef = useRef<HTMLDivElement>(null);
   const cardRefsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
-  const [testButtonsHidden, setTestButtonsHidden] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
+  );
+  // Track touch start position for drag detection
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  // Track if we're passing through a drag to the scene
+  const isDraggingSceneRef = useRef(false);
+
+  // Helper to handle touch start for buttons
+  const handleButtonTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (touch) {
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    }
+  };
+
+  // Helper to check if touch was a click (not a drag)
+  const isTouchClick = (e: React.TouchEvent): boolean => {
+    const touch = e.changedTouches[0];
+    if (touch && touchStartRef.current) {
+      const dx = touch.clientX - touchStartRef.current.x;
+      const dy = touch.clientY - touchStartRef.current.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < 10; // Only treat as click if moved less than 10px
+    }
+    return false;
+  };
+
+  // Update viewport width on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Use desktop values for both mobile and desktop
   const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH;
@@ -65,18 +101,14 @@ export function FloatingMenuBar({
   const miniCardSize = 32;
   const miniCardGap = 4;
 
-  // Animated card spacing - lerps between expanded and collapsed
+  // Animated card spacing - time-based animation matching CSS transition
   const currentCardSpacingRef = useRef(cardWidth + cardGap);
+  const startCardSpacingRef = useRef(cardWidth + cardGap);
   const targetCardSpacingRef = useRef(cardWidth + cardGap);
-  const spacingDelayStartRef = useRef<number | null>(null);
-  const bottomSpacing = isMobile
-    ? `calc(${SPACING.md} + env(safe-area-inset-bottom))`
-    : SPACING.lg;
+  const animationStartTimeRef = useRef<number | null>(null);
 
-  // In dev mode, use test state for button visibility only
-  const shouldHideButtons = import.meta.env.DEV
-    ? testButtonsHidden
-    : isCollapsed;
+  // Button visibility tied to collapse state
+  const shouldHideButtons = isCollapsed;
 
   // Update target spacing when collapsed state changes
   useEffect(() => {
@@ -84,20 +116,23 @@ export function FloatingMenuBar({
       ? miniCardSize + miniCardGap
       : cardWidth + cardGap;
 
-    const isCollapsing = newTargetSpacing < targetCardSpacingRef.current;
-    targetCardSpacingRef.current = newTargetSpacing;
-
-    // When collapsing starts, add a delay to let cards shrink first
-    if (isCollapsing) {
-      spacingDelayStartRef.current = performance.now();
-    } else {
-      spacingDelayStartRef.current = null;
+    // Start animation from current spacing to new target
+    if (newTargetSpacing !== targetCardSpacingRef.current) {
+      startCardSpacingRef.current = currentCardSpacingRef.current;
+      targetCardSpacingRef.current = newTargetSpacing;
+      animationStartTimeRef.current = performance.now();
     }
   }, [isCollapsed, cardWidth, cardGap, miniCardSize, miniCardGap]);
 
-  // Use RAF to update card positions at 60fps with smooth spacing interpolation
+  // Use RAF to update card positions at 60fps with time-based animation
   useEffect(() => {
     let rafId: number;
+    const animationDuration = 400; // Match CSS transition duration (400ms)
+
+    // Ease-out timing function for smooth deceleration
+    const easeOut = (t: number): number => {
+      return 1 - Math.pow(1 - t, 3); // cubic ease-out
+    };
 
     const updateCardPositions = () => {
       if (currentRoomProgressRef.current === undefined) {
@@ -107,31 +142,28 @@ export function FloatingMenuBar({
 
       const progress = currentRoomProgressRef.current;
 
-      // Smoothly lerp current spacing towards target spacing
-      const targetSpacing = targetCardSpacingRef.current;
-      const currentSpacing = currentCardSpacingRef.current;
-      const spacingDiff = targetSpacing - currentSpacing;
+      // Time-based animation matching CSS transition exactly
+      if (animationStartTimeRef.current !== null) {
+        const elapsedTime = performance.now() - animationStartTimeRef.current;
+        const animationProgress = Math.min(elapsedTime / animationDuration, 1);
 
-      // Check if we're in a delay period (collapsing)
-      const isInDelayPeriod =
-        spacingDelayStartRef.current !== null &&
-        performance.now() - spacingDelayStartRef.current < 100; // 200ms delay
-
-      // Use slower lerp when collapsing to match visual card shrink
-      // Faster lerp when expanding since cards grow and don't overlap
-      const isCollapsing = targetSpacing < currentSpacing;
-      const lerpSpeed = isCollapsing ? 0.1 : 0.18;
-
-      // Only lerp if not in delay period
-      if (!isInDelayPeriod && Math.abs(spacingDiff) > 0.01) {
-        currentCardSpacingRef.current += spacingDiff * lerpSpeed;
-      } else if (Math.abs(spacingDiff) <= 0.01) {
-        currentCardSpacingRef.current = targetSpacing;
+        if (animationProgress < 1) {
+          // Apply ease-out easing (smooth deceleration)
+          const easedProgress = easeOut(animationProgress);
+          const startSpacing = startCardSpacingRef.current;
+          const targetSpacing = targetCardSpacingRef.current;
+          currentCardSpacingRef.current =
+            startSpacing + (targetSpacing - startSpacing) * easedProgress;
+        } else {
+          // Animation complete
+          currentCardSpacingRef.current = targetCardSpacingRef.current;
+          animationStartTimeRef.current = null;
+        }
       }
 
       const cardSpacing = currentCardSpacingRef.current;
 
-      // Update each card's position using interpolated spacing
+      // Update each card's position using animated spacing
       rooms.forEach((_, index) => {
         const cardElement = cardRefsRef.current[index];
         if (cardElement) {
@@ -169,52 +201,48 @@ export function FloatingMenuBar({
   });
 
   // Calculate explicit dimensions for smooth animation
-  const expandedWidth = isMobile ? 300 + 48 + 48 + 32 : 450 + 48 + 48 + 32; // cards + buttons + spacing
-  const collapsedWidth =
-    typeof window !== 'undefined' ? window.innerWidth : 1200;
+  // Margins only on expanded state for narrow viewports
+  const isNarrowViewport = viewportWidth < 768;
+  const expandedMargin = isNarrowViewport ? 16 : 0; // 16px margin when expanded on narrow screens
+  const minExpandedWidth = 400;
+  const maxExpandedWidth = 1200;
+  const expandedWidthPercent = 0.7; // 70% of viewport
+  // Expanded: use percentage or available width with margins on narrow viewports
+  const expandedWidth = isNarrowViewport 
+    ? viewportWidth - (expandedMargin * 2)
+    : Math.max(minExpandedWidth, Math.min(maxExpandedWidth, viewportWidth * expandedWidthPercent));
+  // Collapsed: always full-width
+  const collapsedWidth = viewportWidth;
 
   // Fixed height prevents content-based resizing
   const expandedHeight = cardHeight + 16; // Card height + padding (8px top/bottom)
   const collapsedHeight = LAYOUT.COLLAPSED_MINIMAP_HEIGHT;
 
-  // Bottom position: expanded gets normal spacing, collapsed sits at screen bottom
-  const expandedBottom = parseInt(bottomSpacing) || 24;
-  const bottom = isCollapsed ? 0 : expandedBottom;
+  // Bottom position: Minimap sits at absolute bottom when collapsed
+  // Iframe will reserve space above it (including safe area)
+  // 24px on mobile (plus safe area), 32px on desktop for floating effect
+  const expandedBottomBase = isMobile ? 24 : 32;
+  const bottom = isCollapsed 
+    ? 0 
+    : isMobile 
+      ? `calc(${expandedBottomBase}px + env(safe-area-inset-bottom))` 
+      : expandedBottomBase;
 
   const width = isCollapsed ? collapsedWidth : expandedWidth;
   const height = isCollapsed ? collapsedHeight : expandedHeight;
+  // Collapsed: always flat (full-width). Expanded: rounded
   const borderRadiusValue = isCollapsed ? '0px' : '24px';
   const paddingValue = isCollapsed ? '0' : `${SPACING.xs} ${SPACING.md}`;
 
+
   return (
     <>
-      {/* DEBUG: Test button to isolate animation */}
-      {import.meta.env.DEV && (
-        <button
-          onClick={() => setTestButtonsHidden(!testButtonsHidden)}
-          style={{
-            position: 'fixed',
-            top: '20px',
-            right: '20px',
-            padding: '12px 24px',
-            background: 'rgba(255, 0, 0, 0.8)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            zIndex: 10000,
-            fontWeight: 'bold',
-          }}
-        >
-          TEST: {testButtonsHidden ? 'Hidden' : 'Visible'}
-        </button>
-      )}
-
       <div
         onClick={isCollapsed ? onExpand : undefined}
+        onTouchEnd={isCollapsed ? (e) => { e.preventDefault(); onExpand?.(); } : undefined}
         style={{
           position: 'fixed',
-          bottom: `${bottom}px`,
+          bottom: typeof bottom === 'number' ? `${bottom}px` : bottom,
           left: '50%',
           transform: 'translateX(-50%)',
           width: `${width}px`,
@@ -223,10 +251,11 @@ export function FloatingMenuBar({
             ? 'rgba(20, 20, 25, 0.9)'
             : 'rgba(20, 20, 25, 0.95)',
           backdropFilter: 'blur(20px)',
-          border: isCollapsed ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
-          borderTop: isCollapsed
-            ? '1px solid rgba(255, 255, 255, 0.1)'
-            : 'none',
+          border: isCollapsed ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+          borderBottom: 'none',
+          borderLeft: 'none',
+          borderRight: 'none',
+          boxSizing: 'border-box' as const,
           borderRadius: borderRadiusValue,
           boxShadow: isCollapsed
             ? '0 -4px 16px rgba(0, 0, 0, 0.3)'
@@ -237,11 +266,12 @@ export function FloatingMenuBar({
           justifyContent: isCollapsed ? 'center' : 'flex-start',
           gap: isCollapsed ? 0 : SPACING.sm,
           zIndex: UI_Z_INDEX.MINIMAP,
-          touchAction: 'none',
+          touchAction: isCollapsed ? 'manipulation' : 'none', // Allow touch when collapsed for click to expand
           pointerEvents: 'auto',
           cursor: isCollapsed ? 'pointer' : 'default',
-          // Smooth transition for all properties
-          transition: `
+          overflow: 'hidden', // Clip all content outside bounds
+        // Smooth transition for all properties
+        transition: `
           bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1),
           left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
           right 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -255,11 +285,65 @@ export function FloatingMenuBar({
           background 0.3s ease,
           box-shadow 0.3s ease
         `,
+      }}
+        onClick={isCollapsed ? onExpand : undefined}
+        onTouchStart={(e) => {
+          if (isCollapsed) {
+            handleButtonTouchStart(e);
+          } else {
+            // Record touch start for drag detection, but don't stop propagation yet
+            const touch = e.touches[0];
+            if (touch) {
+              touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+            }
+            isDraggingSceneRef.current = false;
+            e.stopPropagation();
+          }
         }}
-        onMouseDown={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        onMouseMove={(e) => e.stopPropagation()}
-        onTouchMove={(e) => e.stopPropagation()}
+        onTouchMove={(e) => {
+          if (!isCollapsed) {
+            const touch = e.touches[0];
+            if (touch && touchStartRef.current) {
+              const dx = touch.clientX - touchStartRef.current.x;
+              const dy = touch.clientY - touchStartRef.current.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              // If moved >10px, it's a drag - start scene drag
+              if (distance > 10 && !isDraggingSceneRef.current && onSceneDragStart && onSceneDragMove) {
+                isDraggingSceneRef.current = true;
+                onSceneDragStart(touchStartRef.current.x);
+              }
+
+              // Continue scene drag if active
+              if (isDraggingSceneRef.current && onSceneDragMove) {
+                onSceneDragMove(touch.clientX);
+              }
+            }
+            e.stopPropagation();
+          }
+        }}
+        onTouchEnd={
+          isCollapsed
+            ? (e) => {
+                if (isTouchClick(e)) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onExpand?.();
+                }
+                touchStartRef.current = null;
+              }
+            : (e) => {
+                // If we were dragging the scene, end the drag
+                if (isDraggingSceneRef.current && onSceneDragEnd) {
+                  onSceneDragEnd();
+                }
+                isDraggingSceneRef.current = false;
+                touchStartRef.current = null;
+                e.stopPropagation();
+              }
+        }
+        onMouseDown={(e) => !isCollapsed && e.stopPropagation()}
+        onMouseMove={(e) => !isCollapsed && e.stopPropagation()}
         onMouseEnter={
           isCollapsed
             ? (e) => {
@@ -280,23 +364,35 @@ export function FloatingMenuBar({
         <div
           style={{
             position: 'absolute',
-            left: shouldHideButtons ? '-80px' : SPACING.md,
+            left: shouldHideButtons ? '-80px' : '0px',
             top: '50%',
             transform: 'translateY(-50%)',
             opacity: shouldHideButtons ? 0 : 1,
-            transition:
-              'left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
+            transition: 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             display: 'flex',
             gap: SPACING.xs,
             alignItems: 'center',
             pointerEvents: shouldHideButtons ? 'none' : 'auto',
             zIndex: 200, // Above cards
+            padding: SPACING.xs,
+            background: isCollapsed ? 'rgba(20, 20, 25, 0.9)' : 'rgba(20, 20, 25, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '12px 0 0 12px',
           }}
         >
           <button
             onClick={
               isAtHomepage || shouldHideButtons ? undefined : onHomeClick
             }
+            onTouchStart={handleButtonTouchStart}
+            onTouchEnd={(e) => {
+              if (!isAtHomepage && !shouldHideButtons && isTouchClick(e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                onHomeClick();
+              }
+              touchStartRef.current = null;
+            }}
             style={{
               ...iconButtonStyle(hoveredButton === 'home', isAtHomepage),
               pointerEvents: shouldHideButtons ? 'none' : 'auto',
@@ -329,31 +425,12 @@ export function FloatingMenuBar({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            overflow: isCollapsed ? 'visible' : 'hidden',
+            overflow: 'hidden', // Always clip cards outside bounds
             width: '100%',
             flexShrink: 1,
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
-          {/* Center indicator line - hide when collapsed */}
-          {!isCollapsed && (
-            <div
-              style={{
-                position: 'absolute',
-                left: '50%',
-                top: '0',
-                bottom: '0',
-                width: `${MINIMAP_INDICATOR.WIDTH}px`,
-                background: 'rgba(76, 175, 80, 0.8)',
-                transform: `translateX(-${MINIMAP_INDICATOR.WIDTH / 2}px)`,
-                zIndex: 100,
-                borderRadius: '2px',
-                opacity: isCollapsed ? 0 : 1,
-                transition: 'opacity 0.2s ease',
-              }}
-            />
-          )}
-
           {/* Cards container - absolute positioning for each card with RAF updates */}
           <div
             style={{
@@ -363,6 +440,7 @@ export function FloatingMenuBar({
               transform: 'translate(-50%, -50%)',
               width: '100%',
               height: '100%',
+              pointerEvents: isCollapsed ? 'none' : 'auto', // Disable card clicks when collapsed
             }}
           >
             {rooms.map((room, index) => {
@@ -393,6 +471,9 @@ export function FloatingMenuBar({
                     isMobile={isMobile}
                     onClick={onRoomClick}
                     isCollapsed={isCollapsed}
+                    onSceneDragStart={onSceneDragStart}
+                    onSceneDragMove={onSceneDragMove}
+                    onSceneDragEnd={onSceneDragEnd}
                   />
                 </div>
               );
@@ -401,76 +482,89 @@ export function FloatingMenuBar({
         </div>
 
         {/* Restore app button container - absolutely positioned, slides out without affecting layout */}
-        {minimizedAppIconUrl && (
+        {/* Always render to allow smooth fade out animation */}
+        <div
+          style={{
+            position: 'absolute',
+            right: shouldHideButtons || !minimizedAppIconUrl ? '-80px' : '0px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            opacity: shouldHideButtons || !minimizedAppIconUrl ? 0 : 1,
+            transition: 'right 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            display: 'flex',
+            gap: SPACING.xs,
+            alignItems: 'center',
+            pointerEvents: shouldHideButtons || !minimizedAppIconUrl ? 'none' : 'auto',
+            zIndex: 200, // Above cards
+            padding: SPACING.xs,
+            background: isCollapsed ? 'rgba(20, 20, 25, 0.9)' : 'rgba(20, 20, 25, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '0 12px 12px 0',
+          }}
+        >
+          {/* Spacer */}
           <div
             style={{
-              position: 'absolute',
-              right: shouldHideButtons ? '-80px' : SPACING.md,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              opacity: shouldHideButtons ? 0 : 1,
-              transition:
-                'right 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
-              display: 'flex',
-              gap: SPACING.xs,
-              alignItems: 'center',
-              pointerEvents: shouldHideButtons ? 'none' : 'auto',
-              zIndex: 200, // Above cards
+              width: '1px',
+              height: '32px',
+              background: 'rgba(255, 255, 255, 0.15)',
+              flexShrink: 0,
             }}
-          >
-            {/* Spacer */}
-            <div
-              style={{
-                width: '1px',
-                height: '32px',
-                background: 'rgba(255, 255, 255, 0.15)',
-                flexShrink: 0,
-              }}
-            />
+          />
 
-            {onRestoreAppClick && (
-              <button
-                onClick={shouldHideButtons ? undefined : onRestoreAppClick}
+          {/* Always render button to prevent instant disappear - use visibility */}
+          <button
+            onClick={shouldHideButtons || !minimizedAppIconUrl || !onRestoreAppClick ? undefined : onRestoreAppClick}
+            onTouchStart={handleButtonTouchStart}
+            onTouchEnd={(e) => {
+              if (!shouldHideButtons && minimizedAppIconUrl && onRestoreAppClick && isTouchClick(e)) {
+                e.preventDefault();
+                e.stopPropagation();
+                onRestoreAppClick();
+              }
+              touchStartRef.current = null;
+            }}
+            style={{
+              width: '56px',
+              height: '56px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(76, 175, 80, 0.15)',
+              border: '2px solid rgba(76, 175, 80, 0.6)',
+              borderRadius: '12px',
+              cursor: minimizedAppIconUrl && onRestoreAppClick ? 'pointer' : 'default',
+              transform:
+                hoveredButton === 'restore' ? 'scale(1.1)' : 'scale(1)',
+              boxShadow:
+                '0 0 20px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
+              animation: shouldHideButtons || !minimizedAppIconUrl
+                ? 'none'
+                : 'minimizedAppPulse 2s ease-in-out infinite',
+              flexShrink: 0,
+              padding: '6px',
+              transition: 'transform 0.2s ease, opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              pointerEvents: shouldHideButtons || !minimizedAppIconUrl ? 'none' : 'auto',
+              opacity: minimizedAppIconUrl ? 1 : 0,
+            }}
+            onMouseEnter={() => !isCollapsed && minimizedAppIconUrl && setHoveredButton('restore')}
+            onMouseLeave={() => setHoveredButton(null)}
+            title={minimizedAppIconUrl ? 'Return to minimized app' : ''}
+          >
+            {minimizedAppIconUrl && (
+              <img
+                src={minimizedAppIconUrl}
+                alt='Minimized app'
                 style={{
-                  width: '56px',
-                  height: '56px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(76, 175, 80, 0.15)',
-                  border: '2px solid rgba(76, 175, 80, 0.6)',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transform:
-                    hoveredButton === 'restore' ? 'scale(1.1)' : 'scale(1)',
-                  boxShadow:
-                    '0 0 20px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
-                  animation: shouldHideButtons
-                    ? 'none'
-                    : 'minimizedAppPulse 2s ease-in-out infinite',
-                  flexShrink: 0,
-                  padding: '6px',
-                  transition: 'transform 0.2s ease',
-                  pointerEvents: shouldHideButtons ? 'none' : 'auto',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
                 }}
-                onMouseEnter={() => !isCollapsed && setHoveredButton('restore')}
-                onMouseLeave={() => setHoveredButton(null)}
-                title='Return to minimized app'
-              >
-                <img
-                  src={minimizedAppIconUrl}
-                  alt='Minimized app'
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
-                  }}
-                />
-              </button>
+              />
             )}
-          </div>
-        )}
+          </button>
+        </div>
 
         {/* CSS animations and utilities */}
         <style>{`

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useAppLoader } from '../../providers/AppLoaderContext';
 import { usePortalIframeRef } from '../../hooks/usePortalRefs';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { Z_INDEX } from '../../config/constants';
 import { LAYOUT } from '../../config/styleConstants';
 
@@ -24,6 +25,7 @@ export function AppLoader() {
   const { state, currentAppUrl, currentAppName } = useAppLoader();
   const [showIframe, setShowIframe] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const isMobile = useIsMobile();
 
   // Register iframe ref with portal ref manager (replaces window object pollution)
   usePortalIframeRef(iframeRef);
@@ -55,7 +57,7 @@ export function AppLoader() {
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         border: 'none',
         background: '#000',
         zIndex: Z_INDEX.IFRAME_ACTIVE,
@@ -77,7 +79,7 @@ export function AppLoader() {
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         border: 'none',
         background: '#000',
         zIndex: Z_INDEX.IFRAME_HIDDEN,
@@ -94,7 +96,7 @@ export function AppLoader() {
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         border: 'none',
         background: '#000', // Black background during load
         zIndex: Z_INDEX.IFRAME_TRANSITIONING,
@@ -110,13 +112,16 @@ export function AppLoader() {
     }
 
     // When active: fully visible with space reserved for collapsed mini bar
+    // Use dvh (dynamic viewport height) for mobile Safari - it accounts for address bar
+    // This ensures iframe and canvas use the same viewport measurement
     if (state === 'app-active') {
+      const calculatedHeight = `calc(100dvh - ${LAYOUT.COLLAPSED_MINIMAP_HEIGHT}px)`;
       return {
         position: 'fixed' as const,
         top: 0,
         left: 0,
         width: '100vw',
-        height: `calc(100vh - ${LAYOUT.COLLAPSED_MINIMAP_HEIGHT}px)`,
+        height: calculatedHeight,
         border: 'none',
         background: '#000', // Black background (app content will cover it)
         zIndex: Z_INDEX.IFRAME_ACTIVE,
@@ -137,7 +142,7 @@ export function AppLoader() {
       top: 0,
       left: 0,
       width: '100vw',
-      height: '100vh',
+      height: '100dvh',
       border: 'none',
       background: '#000',
       zIndex: Z_INDEX.IFRAME_HIDDEN,
@@ -199,7 +204,7 @@ export function AppLoader() {
             top: 0,
             left: 0,
             width: '100vw',
-            height: '100vh',
+            height: '100dvh',
             background: '#000',
             zIndex: Z_INDEX.BLACK_OVERLAY,
             opacity,

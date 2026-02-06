@@ -288,7 +288,7 @@ function RoomGalleryInner() {
       style={
         {
           width: '100vw',
-          height: '100vh',
+          height: '100dvh', // Use dynamic viewport height for mobile Safari
           background: '#000',
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: 'none',
@@ -401,6 +401,9 @@ function RoomGalleryInner() {
           appLoaderState === 'app-active'
         }
         onExpand={minimizeApp}
+        onSceneDragStart={handlePointerDown}
+        onSceneDragMove={handlePointerMove}
+        onSceneDragEnd={handlePointerUp}
       />
 
       {/* App Loader Overlay */}
