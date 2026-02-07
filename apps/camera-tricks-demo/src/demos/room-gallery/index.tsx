@@ -39,12 +39,12 @@ if (import.meta.env.DEV) {
  * Room Gallery - Inner component with access to AppLoader context
  */
 function RoomGalleryInner() {
-  const { 
-    state: appLoaderState, 
-    currentAppUrl, 
-    currentAppName, 
-    loadApp, 
-    minimizeApp 
+  const {
+    state: appLoaderState,
+    currentAppUrl,
+    currentAppName,
+    loadApp,
+    minimizeApp,
   } = useAppLoader();
   // Performance monitoring
   const [fps, setFps] = useState(60);
@@ -58,7 +58,7 @@ function RoomGalleryInner() {
   const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
   const [_showNavigationHint, setShowNavigationHint] = useState(false);
   const [pulsePortalIndex, setPulsePortalIndex] = useState<number | null>(null);
-  
+
   // Memoize callback to prevent NavigationToast infinite loop
   const handleNavigationComplete = useCallback(() => {
     setNavigationTarget(null);
@@ -75,12 +75,13 @@ function RoomGalleryInner() {
   } | null>(null);
 
   // Track if we should keep scene paused for matrix-cam cleanup
-  const [keepScenePausedForCleanup, setKeepScenePausedForCleanup] = useState(false);
+  const [keepScenePausedForCleanup, setKeepScenePausedForCleanup] =
+    useState(false);
 
   // Delay 3D scene resume after matrix-cam unmounts to allow cleanup
   useEffect(() => {
     const isMatrixCam = currentAppUrl?.includes('/ascii-video');
-    
+
     // No need to track fading-to-black anymore (handled in frameloop condition)
     if (appLoaderState === 'minimizing' && isMatrixCam) {
       // RESUME during minimize animation so gallery can come back!
@@ -97,7 +98,10 @@ function RoomGalleryInner() {
   }, [appLoaderState, currentAppUrl]);
 
   // Log when frameloop actually changes
-  const frameloopMode = appLoaderState === 'app-active' || keepScenePausedForCleanup ? 'never' : 'always';
+  const frameloopMode =
+    appLoaderState === 'app-active' || keepScenePausedForCleanup
+      ? 'never'
+      : 'always';
   useEffect(() => {
     console.log(`[Canvas Frameloop] Mode changed to: ${frameloopMode}`);
   }, [frameloopMode]);
@@ -146,7 +150,10 @@ function RoomGalleryInner() {
         case 'ArrowLeft':
           e.preventDefault();
           // Move to previous room
-          const prevRoom = Math.max(0, Math.floor(targetRoomProgressRef.current) - 1);
+          const prevRoom = Math.max(
+            0,
+            Math.floor(targetRoomProgressRef.current) - 1,
+          );
           targetRoomProgressRef.current = prevRoom;
           setRoomProgress(prevRoom);
           break;
@@ -337,10 +344,10 @@ function RoomGalleryInner() {
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
         frameloop={
-          appLoaderState === 'app-active' || 
-          appLoaderState === 'fading-to-black' || 
+          appLoaderState === 'app-active' ||
+          appLoaderState === 'fading-to-black' ||
           keepScenePausedForCleanup
-            ? 'never' 
+            ? 'never'
             : 'always'
         } // Pause rendering when app is fullscreen or fading, keep paused during matrix-cam cleanup
         gl={{
@@ -350,15 +357,16 @@ function RoomGalleryInner() {
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
         style={{
-          visibility: appLoaderState === 'app-active' || appLoaderState === 'fading-to-black' ? 'hidden' : 'visible',
+          visibility:
+            appLoaderState === 'app-active' ||
+            appLoaderState === 'fading-to-black'
+              ? 'hidden'
+              : 'visible',
           position: 'relative',
           background: 'transparent',
         }}
       >
-        <Scene
-          onFpsUpdate={setFps}
-          onDrawCallsUpdate={setDrawCalls}
-        />
+        <Scene onFpsUpdate={setFps} onDrawCallsUpdate={setDrawCalls} />
         <SplitCameraRenderer
           targetRoomProgressRef={targetRoomProgressRef}
           currentRoomProgressRef={currentRoomProgressRef}
@@ -400,7 +408,9 @@ function RoomGalleryInner() {
         onRestoreAppClick={
           currentAppUrl && currentAppName
             ? () => {
-                const roomIndex = ROOMS.findIndex((room) => room.appUrl === currentAppUrl);
+                const roomIndex = ROOMS.findIndex(
+                  (room) => room.appUrl === currentAppUrl,
+                );
                 if (roomIndex === -1) return;
 
                 const currentProgress = currentRoomProgressRef.current;
@@ -421,7 +431,8 @@ function RoomGalleryInner() {
             : undefined
         }
         minimizedAppIconUrl={
-          (appLoaderState === 'minimizing' || appLoaderState === 'minimized') && currentAppUrl
+          (appLoaderState === 'minimizing' || appLoaderState === 'minimized') &&
+          currentAppUrl
             ? ROOMS.find((room) => room.appUrl === currentAppUrl)?.iconUrl
             : null
         }
