@@ -7,14 +7,16 @@ import {
   TRANSITION_RESTORE_MS,
   APP_MINIMIZE_DURATION_MS,
   APP_ZOOM_OUT_DURATION_MS,
+  MATRIX_CAM_FADE_TO_BLACK_MS,
 } from '../config/constants';
 
-type AppLoaderState = 
+export type AppLoaderState = 
   | 'idle' 
   | 'portal-zooming'  // Portal animates, screen stays visible
   | 'transitioning'   // Portal done, fade to black
   | 'app-active'      // App visible
   | 'zooming-out' 
+  | 'fading-to-black' // Matrix-cam: fade to black before unmount
   | 'minimizing'
   | 'minimized';
 
@@ -96,13 +98,37 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
   }, [state, currentAppUrl, safeSetTimeout, clearAllTimeouts]);
 
   const minimizeApp = useCallback(() => {
-    setState('minimizing');
+    // For matrix-cam: fade to black FIRST, then unmount, then animate
+    const isMatrixCam = currentAppUrl?.includes('/ascii-video');
     
-    // Transition to minimized (keep app loaded in background)
-    safeSetTimeout(() => {
-      setState('minimized');
-    }, APP_MINIMIZE_DURATION_MS);
-  }, [safeSetTimeout]);
+    if (isMatrixCam) {
+      // Phase 1: Fade to black AND stop Matrix-Cam processing
+      console.log('[AppLoaderContext] Phase 1: Setting state to fading-to-black');
+      setState('fading-to-black');
+      console.log('[AppLoaderContext] Phase 1: Queued fade-to-black transition');
+      
+      // Wait for fade to complete, then start async unmount + animation
+      safeSetTimeout(() => {
+        console.log('[AppLoaderContext] Phase 2: Setting state to minimizing (iframe will unmount async)');
+        // Don't use flushSync - let React unmount async while animation plays
+        setState('minimizing');
+        console.log('[AppLoaderContext] Phase 2: Unmount queued, animation starting');
+        
+        // Phase 3: Complete minimize animation  
+        safeSetTimeout(() => {
+          console.log('[AppLoaderContext] Phase 3: Setting state to minimized');
+          setState('minimized');
+        }, APP_MINIMIZE_DURATION_MS);
+      }, MATRIX_CAM_FADE_TO_BLACK_MS); // Wait for fade-to-black to complete
+    } else {
+      setState('minimizing');
+      
+      // Transition to minimized (keep app loaded in background)
+      safeSetTimeout(() => {
+        setState('minimized');
+      }, APP_MINIMIZE_DURATION_MS);
+    }
+  }, [currentAppUrl, safeSetTimeout]);
 
   const closeApp = useCallback(() => {
     setState('zooming-out');

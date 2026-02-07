@@ -58,6 +58,11 @@ function RoomGalleryInner() {
   const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
   const [_showNavigationHint, setShowNavigationHint] = useState(false);
   const [pulsePortalIndex, setPulsePortalIndex] = useState<number | null>(null);
+  
+  // Memoize callback to prevent NavigationToast infinite loop
+  const handleNavigationComplete = useCallback(() => {
+    setNavigationTarget(null);
+  }, []);
 
   // Debug state
   const [debugInfo, setDebugInfo] = useState<{
@@ -68,6 +73,34 @@ function RoomGalleryInner() {
     rightCameraIdx: number;
     viewportSplit: { left: number; right: number };
   } | null>(null);
+
+  // Track if we should keep scene paused for matrix-cam cleanup
+  const [keepScenePausedForCleanup, setKeepScenePausedForCleanup] = useState(false);
+
+  // Delay 3D scene resume after matrix-cam unmounts to allow cleanup
+  useEffect(() => {
+    const isMatrixCam = currentAppUrl?.includes('/ascii-video');
+    
+    // No need to track fading-to-black anymore (handled in frameloop condition)
+    if (appLoaderState === 'minimizing' && isMatrixCam) {
+      // RESUME during minimize animation so gallery can come back!
+      console.log('[3D Scene] RESUMING - starting minimize animation');
+      setKeepScenePausedForCleanup(false);
+    } else if (appLoaderState === 'minimized' && isMatrixCam) {
+      // Already playing, no change needed
+      console.log('[3D Scene] ACTIVE - minimize complete');
+      setKeepScenePausedForCleanup(false);
+    } else if (!isMatrixCam) {
+      // Not matrix-cam, no special handling needed
+      setKeepScenePausedForCleanup(false);
+    }
+  }, [appLoaderState, currentAppUrl]);
+
+  // Log when frameloop actually changes
+  const frameloopMode = appLoaderState === 'app-active' || keepScenePausedForCleanup ? 'never' : 'always';
+  useEffect(() => {
+    console.log(`[Canvas Frameloop] Mode changed to: ${frameloopMode}`);
+  }, [frameloopMode]);
 
   // Refs for smooth updates
   const targetRoomProgressRef = useRef(0); // Target position (instant)
@@ -303,7 +336,13 @@ function RoomGalleryInner() {
       <Canvas
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
-        frameloop={appLoaderState === 'app-active' ? 'never' : 'always'} // Pause rendering when app is fullscreen
+        frameloop={
+          appLoaderState === 'app-active' || 
+          appLoaderState === 'fading-to-black' || 
+          keepScenePausedForCleanup
+            ? 'never' 
+            : 'always'
+        } // Pause rendering when app is fullscreen or fading, keep paused during matrix-cam cleanup
         gl={{
           antialias: false, // Disabled for 20-30% performance gain
           powerPreference: 'high-performance',
@@ -311,7 +350,7 @@ function RoomGalleryInner() {
         }}
         dpr={[1, 2]} // Adaptive DPR based on device
         style={{
-          visibility: appLoaderState === 'app-active' ? 'hidden' : 'visible',
+          visibility: appLoaderState === 'app-active' || appLoaderState === 'fading-to-black' ? 'hidden' : 'visible',
           position: 'relative',
           background: 'transparent',
         }}
@@ -330,7 +369,7 @@ function RoomGalleryInner() {
         />
       </Canvas>
 
-      {/* UI Overlays - show when idle, minimizing, or when app is minimized */}
+      {/* UI Overlays - show when idle, minimizing, or when app is minimized (hide during fading-to-black) */}
       {(appLoaderState === 'idle' ||
         appLoaderState === 'minimizing' ||
         appLoaderState === 'minimized') && (
@@ -343,7 +382,7 @@ function RoomGalleryInner() {
       {/* Navigation Toast */}
       <NavigationToast
         targetRoomName={navigationTarget}
-        onComplete={() => setNavigationTarget(null)}
+        onComplete={handleNavigationComplete}
       />
 
       {/* Floating Menu Bar - morphs between full and mini during transitions */}
@@ -390,7 +429,9 @@ function RoomGalleryInner() {
         isCollapsed={
           appLoaderState === 'portal-zooming' ||
           appLoaderState === 'transitioning' ||
-          appLoaderState === 'app-active'
+          appLoaderState === 'app-active' ||
+          appLoaderState === 'fading-to-black'
+          // During 'minimizing': minibar expands for ALL apps (Matrix-Cam iframe already shut down during fade)
         }
         onExpand={minimizeApp}
         onSceneDragStart={handlePointerDown}

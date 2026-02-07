@@ -251,7 +251,7 @@ export function FloatingMenuBar({
             ? 'rgba(20, 20, 25, 0.9)'
             : 'rgba(20, 20, 25, 0.95)',
           backdropFilter: 'blur(20px)',
-          border: isCollapsed ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+          borderTop: isCollapsed ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
           borderBottom: 'none',
           borderLeft: 'none',
           borderRight: 'none',

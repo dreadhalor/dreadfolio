@@ -50,12 +50,16 @@ export const CLICK_THRESHOLD = 5; // Pixels - movement less than this is a click
 
 // App loader animation timing (orchestrated phases)
 export const PORTAL_ZOOM_PHASE_MS = 1000; // Phase 1: Portal physically zooms (new app)
-export const TRANSITION_FADE_MS = 300;     // Phase 2: Fade to black after portal zoom (new app)
+export const TRANSITION_FADE_MS = 300; // Phase 2: Fade to black after portal zoom (new app)
 export const PORTAL_RESTORE_PHASE_MS = 400; // Phase 1: Quick portal zoom (restoring minimized app)
-export const TRANSITION_RESTORE_MS = 100;   // Phase 2: Quick fade (restoring minimized app)
+export const TRANSITION_RESTORE_MS = 100; // Phase 2: Quick fade (restoring minimized app)
 export const APP_MINIMIZE_DURATION_MS = 600; // Minimize animation - shorter for better UX
 export const APP_ZOOM_OUT_DURATION_MS = 500; // App close zoom-out
 export const APP_SWITCH_CLEANUP_DELAY_MS = 100; // Delay between closing old app and opening new
+
+// Matrix-Cam specific timing (heavy TensorFlow.js app)
+export const MATRIX_CAM_FADE_TO_BLACK_MS = 150; // Fade to black duration before unmounting
+export const MATRIX_CAM_FADE_OUT_MS = 150; // Fade out duration after unmounting
 
 // Dividing wall dimensions
 export const WALL_THICKNESS = 0.3;

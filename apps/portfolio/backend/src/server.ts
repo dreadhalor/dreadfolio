@@ -1,6 +1,8 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
+import https from 'https';
+import fs from 'fs';
 import randomRouter from '@repo/su-done-ku-backend/src/routes/random';
 
 const app: Express = express();
@@ -100,6 +102,42 @@ app.use('*', (req: Request, res: Response) => {
   res.status(404).send('App not found');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
-});
+// Check if HTTPS should be used
+const certPath = path.join(rootDirectory, 'localhost+2.pem');
+const keyPath = path.join(rootDirectory, 'localhost+2-key.pem');
+const certsExist = fs.existsSync(certPath) && fs.existsSync(keyPath);
+
+// Check if HTTPS is explicitly disabled via env var
+const httpsDisabled = process.env.USE_HTTPS === 'false';
+const useHttps = certsExist && !httpsDisabled;
+
+if (httpsDisabled) {
+  console.log('HTTPS disabled via USE_HTTPS=false');
+} else if (!certsExist) {
+  console.log('HTTPS certificates not found, using HTTP');
+  console.log(`  Expected cert: ${certPath}`);
+  console.log(`  Expected key: ${keyPath}`);
+} else {
+  console.log(`Found certificates at:`);
+  console.log(`  Cert: ${certPath}`);
+  console.log(`  Key: ${keyPath}`);
+}
+
+if (useHttps) {
+  const httpsOptions = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
+  
+  https.createServer(httpsOptions, app).listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running at https://localhost:${PORT}`);
+    console.log(`Network access: https://<your-ip>:${PORT}`);
+    console.log('✓ HTTPS enabled with mkcert certificates');
+  });
+} else {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Network access: http://<your-ip>:${PORT}`);
+    console.log('ℹ Running in HTTP mode');
+  });
+}

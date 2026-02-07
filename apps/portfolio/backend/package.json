@@ -7,7 +7,9 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "dotenvx run --env-file=../../../.env -- ts-node --transpile-only ./src/server.ts",
-    "dev": "dotenvx run --env-file=../../../.env -- nodemon --exec ts-node ./src/server.ts"
+    "start:http": "USE_HTTPS=false dotenvx run --env-file=../../../.env -- ts-node --transpile-only ./src/server.ts",
+    "dev": "dotenvx run --env-file=../../../.env -- nodemon --exec ts-node ./src/server.ts",
+    "dev:http": "USE_HTTPS=false dotenvx run --env-file=../../../.env -- nodemon --exec ts-node ./src/server.ts"
   },
   "dependencies": {
     "@repo/su-done-ku-backend": "workspace:*",

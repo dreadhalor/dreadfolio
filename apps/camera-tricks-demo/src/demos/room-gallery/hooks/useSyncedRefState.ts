@@ -35,18 +35,25 @@ export function useSyncedRefState<T, U = T>(
 
   useEffect(() => {
     let rafId: number;
+    let lastValue: U | T | undefined;
 
     const update = () => {
       if (ref.current !== undefined && ref.current !== null) {
         const newValue = transform ? transform(ref.current) : ref.current;
-        setValue(newValue);
+        // Only update state if value actually changed (prevents infinite loops)
+        if (newValue !== lastValue) {
+          lastValue = newValue;
+          setValue(newValue);
+        }
       }
       rafId = requestAnimationFrame(update);
     };
 
     rafId = requestAnimationFrame(update);
     return () => cancelAnimationFrame(rafId);
-  }, [ref, transform]);
+    // Intentionally omit transform from deps to prevent restart when it's recreated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref]);
 
   return value;
 }
