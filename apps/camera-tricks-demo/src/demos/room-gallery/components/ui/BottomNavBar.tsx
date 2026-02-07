@@ -56,8 +56,8 @@ export function BottomNavBar({
     let rafId: number;
 
     const updateMinimapPosition = () => {
-      if (cardsContainerRef.current && currentRoomProgressRef.current !== undefined) {
-        const progress = currentRoomProgressRef.current;
+      if (cardsContainerRef.current && currentRoomProgressRef.current !== undefined && currentRoomProgressRef.current !== null) {
+        const progress = currentRoomProgressRef.current ?? 0;
         const cardCenterOffset = progress * (cardWidth + cardGap) + cardWidth / 2;
         const translateX = -cardCenterOffset;
         

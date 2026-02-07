@@ -89,7 +89,7 @@ export const IntroProvider = ({ children }: IntroProviderProps) => {
         const nextIndex = currentIndex + 1;
         if (nextIndex === steps.length) {
           setStartAnimating(false);
-          return steps.at(-1)!.key;
+          return steps[steps.length - 1]!.key;
         }
         return steps[nextIndex]!.key;
       });

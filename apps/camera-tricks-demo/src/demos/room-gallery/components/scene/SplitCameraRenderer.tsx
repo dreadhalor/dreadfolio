@@ -29,8 +29,8 @@ const CAMERA_NEAR_PLANE = 0.1;
 const CAMERA_FAR_PLANE = 1000;
 
 interface SplitCameraRendererProps {
-  targetRoomProgressRef: React.RefObject<number>;
-  currentRoomProgressRef?: React.RefObject<number>; // Optional: Expose actual camera position for UI sync
+  targetRoomProgressRef: React.MutableRefObject<number>;
+  currentRoomProgressRef?: React.MutableRefObject<number>; // Optional: Expose actual camera position for UI sync
   onRoomProgressUpdate: (progress: number) => void;
   onDebugUpdate?: (info: {
     roomProgress: number;
@@ -41,7 +41,7 @@ interface SplitCameraRendererProps {
     viewportSplit: { left: number; right: number };
   }) => void;
   pulsePortalIndex?: number | null; // Portal to pulse when navigation completes
-  activePortalRef?: React.RefObject<number | null>; // Optional: External active portal ref for restore button
+  activePortalRef?: React.MutableRefObject<number | null>; // Optional: External active portal ref for restore button
 }
 
 /**
@@ -199,7 +199,7 @@ export function SplitCameraRenderer({
   });
 
   // Calculate visible camera indices for visual effects optimization
-  const currentRoom = Math.floor(currentRoomProgressRef.current);
+  const currentRoom = Math.floor(currentRoomProgressRef.current ?? 0);
   const leftCameraIndex = Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom));
   const rightCameraIndex = Math.max(
     0,
@@ -231,7 +231,7 @@ export function SplitCameraRenderer({
   // Hook 5: Split viewport rendering
   useSplitViewportRenderer({
     cameras,
-    currentRoomProgress: currentRoomProgressRef.current,
+    currentRoomProgress: currentRoomProgressRef.current ?? 0,
     appLoaderState,
     onDebugUpdate,
   });

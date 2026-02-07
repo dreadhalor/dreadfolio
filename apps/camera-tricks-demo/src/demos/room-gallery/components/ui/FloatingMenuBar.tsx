@@ -140,7 +140,7 @@ export function FloatingMenuBar({
         return;
       }
 
-      const progress = currentRoomProgressRef.current;
+      const progress = currentRoomProgressRef.current ?? 0;
 
       // Time-based animation matching CSS transition exactly
       if (animationStartTimeRef.current !== null) {

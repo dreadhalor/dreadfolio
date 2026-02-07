@@ -36,6 +36,12 @@
   "engines": {
     "node": ">=18"
   },
+  "pnpm": {
+    "overrides": {
+      "csstype": "^3.1.3",
+      "@types/react": "^18.3.18"
+    }
+  },
   "dependencies": {
     "@dotenvx/dotenvx": "^0.34.0",
     "@repo/assets": "workspace:*",

@@ -54,7 +54,7 @@ export function AppCard({ app, state, onDragStart, onDrag, onDragEnd }: AppCardP
   }, [state.x, state.y, state.rotation, state.isDragging, api]);
 
   const bind = useDrag(
-    ({ offset: [x, y], down, velocity: [vx, vy], tap }) => {
+    ({ offset: [x, y], down, velocity: [_vx, _vy], tap }) => {
       if (tap) {
         // Single click - select app
         handleSelect();

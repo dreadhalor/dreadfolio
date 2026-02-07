@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import {
-  ActiveModifiers,
   DateRange,
-  DayPickerBase,
+  DayPickerProps,
   DayPickerRangeProps,
   DayPickerSingleProps,
 } from 'react-day-picker';
@@ -21,9 +20,10 @@ export type DatePickerMode = 'single' | 'range';
 export type DateSelection = Date | DateRange | undefined;
 interface DatePickerPropsBase {
   disabled?: boolean;
-  disabledDates?: DayPickerBase['disabled'];
+  disabledDates?: DayPickerProps['disabled'];
   selected?: DateSelection;
   mode?: DatePickerMode;
+  className?: string;
 }
 
 export type DatePickerSingleProps = Omit<
@@ -62,11 +62,11 @@ export const DatePicker = ({
 
   function _onSelect(
     selection: (Date & DateRange) | undefined,
-    selectedDay: Date,
-    activeModifiers: ActiveModifiers,
-    e: React.MouseEvent,
+    selectedDay?: Date,
+    activeModifiers?: any,
+    e?: React.MouseEvent,
   ) {
-    if (onSelect) onSelect(selection, selectedDay, activeModifiers, e);
+    if (onSelect) onSelect(selection, selectedDay!, activeModifiers, e!);
     else _setSelected(selection);
   }
   function handleProgrammaticSelection(selection: DateSelection) {
@@ -74,8 +74,8 @@ export const DatePicker = ({
       onSelect(
         selection as (Date & DateRange) | undefined,
         selection as Date,
-        {},
-        {} as React.MouseEvent,
+        {} as any,
+        {} as any,
       );
     else _setSelected(selection);
   }
@@ -144,9 +144,9 @@ export const DatePicker = ({
       </PopoverTrigger>
       <PopoverContent className='w-auto p-0' align='start'>
         {mode === 'single' ? (
-          <Calendar {...(newProps as DatePickerSingleProps)} />
+          <Calendar {...(newProps as DayPickerSingleProps)} />
         ) : (
-          <Calendar {...(newProps as DatePickerRangeProps)} />
+          <Calendar {...(newProps as DayPickerRangeProps)} />
         )}
       </PopoverContent>
     </Popover>

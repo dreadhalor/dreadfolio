@@ -6,15 +6,15 @@
  */
 
 import { useFrame } from '@react-three/fiber';
-import type { RefObject } from 'react';
+import type { MutableRefObject } from 'react';
 import { calculateCameraPosition } from '../utils/cameraCalculations';
 import { CAMERA_LERP_SPEED, CAMERA_SPACING } from '../config/constants';
 import type { ExtendedCamera } from '../types/portalTypes';
 
 interface UseCameraPositionSyncProps {
   cameras: ExtendedCamera[];
-  targetRoomProgressRef: RefObject<number>;
-  currentRoomProgressRef: RefObject<number>;
+  targetRoomProgressRef: MutableRefObject<number>;
+  currentRoomProgressRef: MutableRefObject<number>;
   onRoomProgressUpdate: (progress: number) => void;
 }
 
@@ -40,7 +40,7 @@ export function useCameraPositionSync({
     const targetProgress = targetRoomProgressRef.current ?? 0;
 
     // Smooth lerp to target room progress
-    const delta = targetProgress - currentRoomProgressRef.current;
+    const delta = targetProgress - (currentRoomProgressRef.current ?? 0);
     const distance = Math.abs(delta);
     
     // Snap instantly only when imperceptibly close (0.0001 units = ~0.01 pixels on screen)
@@ -48,10 +48,10 @@ export function useCameraPositionSync({
     if (distance < 0.0001) {
       currentRoomProgressRef.current = targetProgress;
     } else {
-      currentRoomProgressRef.current += delta * CAMERA_LERP_SPEED;
+      currentRoomProgressRef.current = (currentRoomProgressRef.current ?? 0) + delta * CAMERA_LERP_SPEED;
     }
 
-    currentProgress = currentRoomProgressRef.current;
+    currentProgress = currentRoomProgressRef.current ?? 0;
 
     // Notify parent of room progress for UI updates
     onRoomProgressUpdate(currentProgress);

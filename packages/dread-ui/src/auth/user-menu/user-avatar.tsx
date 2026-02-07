@@ -18,7 +18,7 @@ const UserAvatar = ({ loading, uid, signedIn, className }: UserAvatarProps) => {
     translateY: -10,
   });
 
-  const svg = avatar.toDataUriSync();
+  const svg = avatar.toDataUri();
 
   return (
     <>

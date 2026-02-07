@@ -13,7 +13,7 @@
  * ```
  */
 
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef, MutableRefObject } from 'react';
 import { ROOMS } from '../config/rooms';
 
 interface NavigateToAppMessage {
@@ -22,7 +22,7 @@ interface NavigateToAppMessage {
 }
 
 interface UseCrossOriginNavigationProps {
-  targetRoomProgressRef: RefObject<number>;
+  targetRoomProgressRef: MutableRefObject<number>;
   onRoomProgressChange: (progress: number) => void;
   onMinimizeApp: () => void;
   appLoaderState: string;

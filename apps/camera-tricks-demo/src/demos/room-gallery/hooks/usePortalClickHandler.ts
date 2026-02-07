@@ -5,7 +5,7 @@
  * Distinguishes clicks from drags and triggers portal zoom animations.
  */
 
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useRef, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import { CLICK_THRESHOLD } from '../config/constants';
 import { getPrimaryCameraIndex } from '../utils/viewportRenderer';
@@ -14,10 +14,10 @@ import type { ExtendedCamera } from '../types/portalTypes';
 interface UsePortalClickHandlerProps {
   cameras: ExtendedCamera[];
   gl: THREE.WebGLRenderer;
-  currentRoomProgressRef: RefObject<number>;
+  currentRoomProgressRef: MutableRefObject<number>;
   appLoaderState: string;
-  activePortalRef: RefObject<number | null>;
-  loadAppTimeoutRef: RefObject<NodeJS.Timeout | null>;
+  activePortalRef: MutableRefObject<number | null>;
+  loadAppTimeoutRef: MutableRefObject<NodeJS.Timeout | null>;
   onPortalClick: (roomUrl: string, roomName: string) => void;
 }
 
@@ -77,7 +77,7 @@ export function usePortalClickHandler({
       const y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
       // Get current active camera (use the one taking up more screen space)
-      const currentProgress = currentRoomProgressRef.current;
+      const currentProgress = currentRoomProgressRef.current ?? 0;
       const currentRoom = Math.floor(currentProgress);
       const transitionProgress = currentProgress - currentRoom;
 

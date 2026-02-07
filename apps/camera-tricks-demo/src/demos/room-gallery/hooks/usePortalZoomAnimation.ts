@@ -6,7 +6,7 @@
  */
 
 import { useFrame } from '@react-three/fiber';
-import { useEffect, type RefObject } from 'react';
+import { useEffect, type MutableRefObject } from 'react';
 import * as THREE from 'three';
 import {
   PORTAL_DEFAULT_Z,
@@ -25,7 +25,7 @@ import type { ExtendedCamera } from '../types/portalTypes';
 interface UsePortalZoomAnimationProps {
   cameras: ExtendedCamera[];
   appLoaderState: string;
-  activePortalRef: RefObject<number | null>;
+  activePortalRef: MutableRefObject<number | null>;
 }
 
 /**
