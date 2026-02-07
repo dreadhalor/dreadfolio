@@ -33,7 +33,7 @@ export function PortalLabels() {
     // Responsive sizing: larger on mobile, smaller on desktop
     const scaleFactor = isMobile ? 1.5 : 0.85;
     // Text wrapping: wrap sooner on mobile to prevent edge clipping
-    const maxTitleWidth = isMobile ? 700 : 800;
+    const maxTitleWidth = 800;
     const maxDescWidth = isMobile ? 700 : 800;
 
     const allSprites: Array<{ sprite: THREE.Sprite; roomId: string }> = [];
