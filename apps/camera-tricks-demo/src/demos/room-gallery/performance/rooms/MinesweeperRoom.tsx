@@ -211,7 +211,7 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
       pole.applyMatrix4(tempObject.matrix);
       geometries.push(pole);
       
-      // Red triangular flag at bottom of pole
+      // Red triangular flag at top of pole (top of triangle flush with top of cylinder)
       const flagShape = new THREE.Shape();
       flagShape.moveTo(0, 0);
       flagShape.lineTo(FLAGS.flagWidth, FLAGS.flagHeight / 2);
@@ -219,7 +219,7 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
       flagShape.lineTo(0, 0);
       
       const flagGeometry = new THREE.ShapeGeometry(flagShape);
-      tempObject.position.set(0, -FLAGS.poleHeight / 2, 0); // At bottom of pole
+      tempObject.position.set(0, FLAGS.poleHeight / 2 - FLAGS.flagHeight, 0); // Top of flag aligns with top of pole
       tempObject.rotation.y = Math.PI / 4; // Angle flag for visibility
       tempObject.updateMatrix();
       flagGeometry.applyMatrix4(tempObject.matrix);
@@ -340,42 +340,57 @@ export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
   const floatingBlockRefs = useRef<(THREE.Mesh | null)[]>([]);
 
   // Animate floating elements (flags, small mines, and floating blocks)
+  // Optimized: single loop with direct array access and cached config values
   useFrame((state) => {
     const time = state.clock.elapsedTime;
-    const { FLAGS, SMALL_FLOATING_MINES, FLOATING_NUMBER_BLOCKS } = MINESWEEPER_CONFIG;
     
-    // Animate each flag marker (gentle vertical float with phase offset)
-    flagRefs.current.forEach((flag, idx) => {
-      if (flag && flagMarkers[idx]) {
-        const offset = flagMarkers[idx].floatOffset;
-        flag.position.y = 
-          flagMarkers[idx].basePosition[1] + 
-          Math.sin(time * FLAGS.floatSpeed + offset) * FLAGS.floatAmplitude;
-      }
-    });
+    // Cache config values outside loops
+    const flagSpeed = MINESWEEPER_CONFIG.FLAGS.floatSpeed;
+    const flagAmp = MINESWEEPER_CONFIG.FLAGS.floatAmplitude;
+    const mineSpeed = MINESWEEPER_CONFIG.SMALL_FLOATING_MINES.floatSpeed;
+    const mineAmp = MINESWEEPER_CONFIG.SMALL_FLOATING_MINES.floatAmplitude;
+    const mineRotSpeed = MINESWEEPER_CONFIG.SMALL_FLOATING_MINES.rotationSpeed;
+    const blockSpeed = MINESWEEPER_CONFIG.FLOATING_NUMBER_BLOCKS.floatSpeed;
+    const blockAmp = MINESWEEPER_CONFIG.FLOATING_NUMBER_BLOCKS.floatAmplitude;
+    const blockRotSpeed = MINESWEEPER_CONFIG.FLOATING_NUMBER_BLOCKS.rotationSpeed;
     
-    // Animate small mines (float + rotation)
-    smallMineRefs.current.forEach((mine, idx) => {
-      if (mine && smallFloatingMines[idx]) {
-        const offset = smallFloatingMines[idx].floatOffset;
-        mine.position.y = 
-          smallFloatingMines[idx].basePosition[1] + 
-          Math.sin(time * SMALL_FLOATING_MINES.floatSpeed + offset) * SMALL_FLOATING_MINES.floatAmplitude;
-        mine.rotation.y = time * SMALL_FLOATING_MINES.rotationSpeed + offset;
+    // Animate flags - direct loop for better performance
+    const flagRefsArray = flagRefs.current;
+    const flagMarkersArray = flagMarkers;
+    for (let i = 0; i < flagRefsArray.length; i++) {
+      const flag = flagRefsArray[i];
+      if (flag) {
+        const marker = flagMarkersArray[i];
+        flag.position.y = marker.basePosition[1] + Math.sin(time * flagSpeed + marker.floatOffset) * flagAmp;
       }
-    });
+    }
     
-    // Animate floating numbered blocks (float + rotation)
-    floatingBlockRefs.current.forEach((block, idx) => {
-      if (block && floatingNumberBlocks[idx]) {
-        const offset = floatingNumberBlocks[idx].floatOffset;
-        block.position.y = 
-          floatingNumberBlocks[idx].basePosition[1] + 
-          Math.sin(time * FLOATING_NUMBER_BLOCKS.floatSpeed + offset) * FLOATING_NUMBER_BLOCKS.floatAmplitude;
-        block.rotation.x = time * FLOATING_NUMBER_BLOCKS.rotationSpeed + offset;
-        block.rotation.y = time * FLOATING_NUMBER_BLOCKS.rotationSpeed * 1.3 + offset;
+    // Animate small mines - direct loop
+    const mineRefsArray = smallMineRefs.current;
+    const minesArray = smallFloatingMines;
+    for (let i = 0; i < mineRefsArray.length; i++) {
+      const mine = mineRefsArray[i];
+      if (mine) {
+        const mineData = minesArray[i];
+        const offset = mineData.floatOffset;
+        mine.position.y = mineData.basePosition[1] + Math.sin(time * mineSpeed + offset) * mineAmp;
+        mine.rotation.y = time * mineRotSpeed + offset;
       }
-    });
+    }
+    
+    // Animate floating blocks - direct loop
+    const blockRefsArray = floatingBlockRefs.current;
+    const blocksArray = floatingNumberBlocks;
+    for (let i = 0; i < blockRefsArray.length; i++) {
+      const block = blockRefsArray[i];
+      if (block) {
+        const blockData = blocksArray[i];
+        const offset = blockData.floatOffset;
+        block.position.y = blockData.basePosition[1] + Math.sin(time * blockSpeed + offset) * blockAmp;
+        block.rotation.x = time * blockRotSpeed + offset;
+        block.rotation.y = time * blockRotSpeed * 1.3 + offset;
+      }
+    }
   });
 
   return (

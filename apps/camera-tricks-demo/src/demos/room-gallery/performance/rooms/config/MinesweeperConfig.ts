@@ -50,20 +50,17 @@ export const MINESWEEPER_CONFIG = {
   
   // Flag markers - hanging from ceiling, closer to center for mobile (will float)
   FLAGS: {
-    count: 8,
+    count: 5, // Reduced from 8 for better performance
     poleHeight: 2.5,
     poleRadius: 0.06,
     flagWidth: 0.9,
     flagHeight: 0.7,
     positions: [
-      { x: -7, z: -4 },
-      { x: -5, z: 1 },
+      { x: -6, z: -4 },
+      { x: -4.5, z: 1 },
       { x: 5, z: -5 },
-      { x: 7, z: 0 },
-      { x: -6, z: -8 },
-      { x: 6, z: -8 },
-      { x: -4.5, z: -2 },
-      { x: 4.5, z: -3 },
+      { x: 6.5, z: 0 },
+      { x: -5.5, z: -7 },
     ],
     hangY: 8.5, // Lower for better visibility
     floatAmplitude: 0.3, // Vertical float distance
@@ -127,18 +124,14 @@ export const MINESWEEPER_CONFIG = {
     spikeCount: 8,
     spikeLength: 0.2,
     spikeRadius: 0.06,
-    count: 8,
+    count: 4, // Reduced from 8 for better performance
     positions: [
-      // Existing positions
-      { x: -6, y: 5, z: 2 },
-      { x: 6, y: 4, z: -3 },
-      { x: -4.5, y: 6, z: -1 },
-      { x: 5, y: 3, z: 1 },
-      { x: -5.5, y: 7, z: -4 },
-      // New positions above portal (closer to camera, Z=3-7)
+      // Key positions for visual interest
+      { x: -5, y: 5, z: 2 },
+      { x: 5.5, y: 6, z: -2 },
+      // Above portal (closer to camera, Z=4-5)
       { x: -2.5, y: 7.5, z: 5 },  // Left above portal
       { x: 2.5, y: 7.5, z: 5 },   // Right above portal
-      { x: 0, y: 8.5, z: 4 },     // Center high above portal
     ],
     floatAmplitude: 0.4,
     floatSpeed: 1.0,
@@ -148,12 +141,11 @@ export const MINESWEEPER_CONFIG = {
   // Floating numbered blocks - above portal area for visual interest
   FLOATING_NUMBER_BLOCKS: {
     size: 0.6,
-    count: 4,
+    count: 3, // Reduced from 4 for better performance
     positions: [
       { num: 1, x: -3, y: 8, z: 6 },
       { num: 2, x: 3, y: 7, z: 6 },
-      { num: 3, x: -1.5, y: 6.5, z: 7 },
-      { num: 4, x: 1.5, y: 7.5, z: 5.5 },
+      { num: 3, x: 0, y: 8.5, z: 7 }, // Centered for better visibility
     ],
     floatAmplitude: 0.35,
     floatSpeed: 0.8,
