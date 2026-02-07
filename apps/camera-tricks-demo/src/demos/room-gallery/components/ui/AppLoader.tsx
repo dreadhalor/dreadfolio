@@ -51,13 +51,15 @@ export function AppLoader() {
   // Calculate iframe styles based on state
   const getIframeStyles = () => {
     // When minimizing: fade to black, scale down, and apply circular mask
+    // Keep same height as app-active to prevent scroll jump
     if (state === 'minimizing') {
+      const calculatedHeight = `calc(100dvh - ${LAYOUT.COLLAPSED_MINIMAP_HEIGHT}px)`;
       return {
         position: 'fixed' as const,
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100dvh',
+        height: calculatedHeight, // Same as app-active to prevent scroll jump
         border: 'none',
         background: '#000',
         zIndex: Z_INDEX.IFRAME_ACTIVE,
