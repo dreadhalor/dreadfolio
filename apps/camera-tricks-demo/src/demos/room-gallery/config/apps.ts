@@ -48,25 +48,44 @@ export interface AppData {
 
 /**
  * Get the app URL, automatically using localhost in development
- * 
+ *
  * In dev mode:
- * - Homepage: http://localhost:5173 (Vite default for home-page)
- * - Gallery embeds: Use production URLs or relative paths
- * 
+ * - Relative paths (starting with /) → Portfolio backend (current hostname:3000)
+ * - Absolute URLs (http/https) → Use as-is
+ * - Override specific apps in DEV_URLS if running their dev server
+ *
  * In production:
  * - Use the configured URLs as-is
  */
-function getAppUrl(url: string | undefined, isDev: boolean): string | undefined {
+function getAppUrl(
+  url: string | undefined,
+  isDev: boolean,
+): string | undefined {
   if (!url || !isDev) return url;
 
-  // Development URL overrides for local testing
+  // Development URL overrides for apps running their own dev server
   const DEV_URLS: Record<string, string> = {
-    '/home': 'http://localhost:5173', // home-page Vite dev server
-    // Add more local dev URLs here as needed
-    // '/enlight': 'http://localhost:5175',
+    // '/home': 'http://localhost:5173', // Uncomment if running home-page dev server
+    // '/enlight': 'http://localhost:5175', // Uncomment if running enlight dev server
   };
 
-  return DEV_URLS[url] || url;
+  // Check for override first
+  if (DEV_URLS[url]) {
+    return DEV_URLS[url];
+  }
+
+  // Convert relative paths to portfolio backend in dev
+  // Use current hostname and protocol (works for localhost, 192.168.x.x, etc.)
+  if (url.startsWith('/')) {
+    const hostname =
+      typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+    const protocol =
+      typeof window !== 'undefined' ? window.location.protocol : 'http:';
+    return `${protocol}//${hostname}:3000${url}`;
+  }
+
+  // Return absolute URLs as-is (external apps like hermitcraft-horns.com)
+  return url;
 }
 
 // Detect development mode
@@ -88,7 +107,8 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     id: 'hermitcraft-horns',
     name: 'HermitCraft Horns',
     color: '#6b9fff', // Bright sky blue
-    description: 'An app for making & sharing audio clips of Hermitcraft videos.',
+    description:
+      'An app for making & sharing audio clips of Hermitcraft videos.',
     url: 'https://hermitcraft-horns.com',
     imageUrl: HermitcraftHornsImg,
     iconUrl: HermitcraftHornsIcon,
@@ -143,7 +163,8 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     name: 'Matrix-Cam',
     color: '#00ff41', // Matrix green
     description: 'Vanilla JS app using TensorFlow.js for person detection.',
-    url: '/ascii-video',
+    // url: '/ascii-video',
+    url: 'https://scottjhetrick.com/ascii-video',
     imageUrl: AsciiVideoImg,
     iconUrl: AsciiVideoIcon,
   },
@@ -160,7 +181,8 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     id: 'fallcrate',
     name: 'Fallcrate',
     color: '#0061fe', // Dropbox blue
-    description: 'A Dropbox-inspired full-stack web app for sharing and organizing files.',
+    description:
+      'A Dropbox-inspired full-stack web app for sharing and organizing files.',
     url: '/fallcrate',
     imageUrl: FallcrateImg,
     iconUrl: FallcrateIcon,
@@ -169,7 +191,8 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
     id: 'dread-ui',
     name: 'DreadUI',
     color: '#8b5cf6', // Purple for UI library
-    description: 'My personal component library I created to use across my projects.',
+    description:
+      'My personal component library I created to use across my projects.',
     url: '/dread-ui',
     imageUrl: DreadUiImg,
     iconUrl: DreadUiIcon,
@@ -213,7 +236,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
 ];
 
 // Export apps with dev URLs applied
-export const PORTFOLIO_APPS: AppData[] = PORTFOLIO_APPS_RAW.map(app => ({
+export const PORTFOLIO_APPS: AppData[] = PORTFOLIO_APPS_RAW.map((app) => ({
   ...app,
   url: getAppUrl(app.url, IS_DEV),
 }));
@@ -221,7 +244,7 @@ export const PORTFOLIO_APPS: AppData[] = PORTFOLIO_APPS_RAW.map(app => ({
 // Log dev mode URLs for debugging
 if (IS_DEV) {
   console.log('[Dev Mode] App URLs adjusted for local testing:');
-  PORTFOLIO_APPS.forEach(app => {
+  PORTFOLIO_APPS.forEach((app) => {
     if (app.url?.startsWith('http://localhost')) {
       console.log(`  ${app.name}: ${app.url}`);
     }
