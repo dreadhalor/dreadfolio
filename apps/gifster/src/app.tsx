@@ -50,7 +50,9 @@ const App = () => {
     <div className='flex h-full w-full flex-col items-center gap-2 overflow-auto px-8 py-12 sm:px-24 md:px-32'>
       <div className='flex w-full'>
         <div className='mx-auto flex flex-col items-center gap-2'>
-          <h1>GIFster by Scott Hetrick</h1>
+          <h1 className='font-serif text-[44px] font-bold leading-[48px]'>
+            GIFster by Scott Hetrick
+          </h1>
           <span>We're not GIPHY, damn it</span>
         </div>
         <UserMenu />

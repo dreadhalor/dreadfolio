@@ -27,13 +27,17 @@ function App() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- Only run on mount to initialize board
 
   return (
-    <div className='flex min-h-screen w-full flex-col bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-100'>
+    <div className='flex min-h-screen w-full flex-col bg-slate-100'>
       {/* Top Toolbar */}
       <div className='border-b bg-white/95 shadow-sm'>
         <div className='mx-auto flex max-w-[1600px] items-center justify-between px-4 py-4 sm:px-6'>
           <div className='flex items-center gap-2 sm:gap-3'>
-            <div className='text-xl font-bold text-blue-600 sm:text-2xl'>Su-Done-Ku</div>
-            <div className='hidden text-sm text-slate-500 sm:block'>Sudoku Solver & Helper</div>
+            <div className='text-xl font-bold text-blue-600 sm:text-2xl'>
+              Su-Done-Ku
+            </div>
+            <div className='hidden text-sm text-slate-500 sm:block'>
+              Sudoku Solver & Helper
+            </div>
           </div>
           <div className='flex items-center gap-3'>
             <UserMenu className='h-9 w-9 sm:h-10 sm:w-10' />
@@ -125,7 +129,7 @@ function App() {
           </Card>
         </div>
       </div>
-      
+
       {/* Success Celebration */}
       <SuccessCelebration />
     </div>
