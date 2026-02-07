@@ -242,14 +242,13 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
       </mesh>
       
       {/* Sudoku grid cubes (main centerpiece) */}
-      <InstancedGridCubes offsetX={offsetX} count={9} gridSize={3} color={colors.accent} />
+      <InstancedGridCubes offsetX={offsetX} count={9} gridSize={3} />
       
       {/* Number blocks on pedestals around the room */}
       <group>
         {Array.from({ length: 9 }, (_, i) => {
           const angle = (i / 9) * Math.PI * 2;
           const radius = 7;
-          const number = i + 1;
           
           return (
             <mesh

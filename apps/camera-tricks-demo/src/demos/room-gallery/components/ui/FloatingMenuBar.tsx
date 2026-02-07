@@ -38,7 +38,7 @@ interface FloatingMenuBarProps {
 export function FloatingMenuBar({
   rooms,
   currentRoom,
-  roomProgress,
+  roomProgress: _roomProgress,
   currentRoomProgressRef,
   onRoomClick,
   onHomeClick,
@@ -240,7 +240,6 @@ export function FloatingMenuBar({
     <>
       <div
         onClick={isCollapsed ? onExpand : undefined}
-        onTouchEnd={isCollapsed ? (e) => { e.preventDefault(); onExpand?.(); } : undefined}
         style={{
           position: 'fixed',
           bottom: typeof bottom === 'number' ? `${bottom}px` : bottom,
@@ -287,7 +286,6 @@ export function FloatingMenuBar({
           box-shadow 0.3s ease
         `,
       }}
-        onClick={isCollapsed ? onExpand : undefined}
         onTouchStart={(e) => {
           if (isCollapsed) {
             handleButtonTouchStart(e);

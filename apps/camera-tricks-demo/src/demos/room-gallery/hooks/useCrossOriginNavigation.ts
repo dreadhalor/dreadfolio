@@ -15,7 +15,6 @@
 
 import { useEffect, useRef, RefObject } from 'react';
 import { ROOMS } from '../config/rooms';
-import { APP_MINIMIZE_DURATION_MS } from '../config/constants';
 
 interface NavigateToAppMessage {
   type: 'NAVIGATE_TO_APP';

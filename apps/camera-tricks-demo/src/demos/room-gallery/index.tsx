@@ -7,7 +7,6 @@ import {
   MIN_ROOM_PROGRESS,
   MAX_ROOM_PROGRESS,
   DRAG_SENSITIVITY,
-  SNAP_THRESHOLD,
   DEBUG_MODE,
 } from './config/constants';
 
@@ -16,7 +15,6 @@ import { Scene } from './components/scene/Scene';
 import { SplitCameraRenderer } from './components/scene/SplitCameraRenderer';
 import { FPSDisplay } from './components/ui/FPSDisplay';
 import { DrawCallDisplay } from './performance/DrawCallMonitor';
-import { RoomHeader } from './components/ui/RoomHeader';
 import { FloatingMenuBar } from './components/ui/FloatingMenuBar';
 import { AppLoader } from './components/ui/AppLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -58,7 +56,7 @@ function RoomGalleryInner() {
 
   // Navigation feedback state
   const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
-  const [showNavigationHint, setShowNavigationHint] = useState(false);
+  const [_showNavigationHint, setShowNavigationHint] = useState(false);
   const [pulsePortalIndex, setPulsePortalIndex] = useState<number | null>(null);
 
   // Debug state

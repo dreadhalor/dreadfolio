@@ -45,12 +45,12 @@ const CARD_STYLES = {
 
 export function MinimapRoomCard({
   room,
-  index,
+  index: _index,
   isActive,
   distance,
   cardWidth,
   cardHeight,
-  isMobile,
+  isMobile: _isMobile,
   onClick,
   isCollapsed = false,
   onSceneDragStart,

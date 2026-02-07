@@ -38,7 +38,7 @@ export function PortalLabels() {
 
     const allSprites: Array<{ sprite: THREE.Sprite; roomId: string }> = [];
 
-    ROOMS.forEach((room, index) => {
+    ROOMS.forEach((room) => {
       // Title ABOVE portal, description BELOW portal
 
       // Create title sprite with responsive scaling and wrapping

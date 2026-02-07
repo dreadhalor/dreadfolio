@@ -11,7 +11,6 @@ import {
   BORDER_RADIUS,
   COLORS,
   UI_Z_INDEX,
-  MINIMAP_MOBILE,
 } from '../../config/styleConstants';
 
 interface MinimapDebugVisualizationProps {

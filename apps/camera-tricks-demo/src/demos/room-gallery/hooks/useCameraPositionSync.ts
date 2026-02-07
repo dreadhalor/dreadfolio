@@ -9,7 +9,6 @@ import { useFrame } from '@react-three/fiber';
 import type { RefObject } from 'react';
 import { calculateCameraPosition } from '../utils/cameraCalculations';
 import { CAMERA_LERP_SPEED, CAMERA_SPACING } from '../config/constants';
-import { CAMERA_SNAP_THRESHOLD } from '../config/portalAnimationConstants';
 import type { ExtendedCamera } from '../types/portalTypes';
 
 interface UseCameraPositionSyncProps {

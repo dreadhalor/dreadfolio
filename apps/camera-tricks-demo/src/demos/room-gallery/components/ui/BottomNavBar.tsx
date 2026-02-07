@@ -29,7 +29,7 @@ interface BottomNavBarProps {
 export function BottomNavBar({
   rooms,
   currentRoom,
-  roomProgress,
+  roomProgress: _roomProgress,
   currentRoomProgressRef,
   onRoomClick,
 }: BottomNavBarProps) {

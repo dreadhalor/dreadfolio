@@ -315,7 +315,7 @@ export function InstancedMonitors({ offsetX, count = 3, color = '#1a1a1a' }: Ins
     offsetX,
     color,
     positionData: positions,
-    setupInstance: (obj, data, i, offsetX) => {
+    setupInstance: (obj, data, _i, offsetX) => {
       obj.position.set(offsetX + data.x, data.y, data.z);
       obj.rotation.y = data.rotation!;
     },
@@ -374,7 +374,7 @@ export function InstancedCrates({ offsetX, count = 9, color = '#8b7355' }: Insta
     offsetX,
     color,
     positionData: positions,
-    setupInstance: (obj, data, i, offsetX) => {
+    setupInstance: (obj, data, _i, offsetX) => {
       obj.position.set(offsetX + data.x, data.y, data.z);
       obj.rotation.y = data.rotation!;
     },

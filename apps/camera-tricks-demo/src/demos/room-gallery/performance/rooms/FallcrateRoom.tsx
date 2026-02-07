@@ -255,7 +255,7 @@ export function FallcrateRoom({ colors, offsetX }: FallcrateRoomProps) {
         <group
           key={i}
           ref={(el) => {
-            if (el) cloudRefs.current[i] = el as THREE.Mesh;
+            if (el) cloudRefs.current[i] = el as unknown as THREE.Mesh;
           }}
         >
           {/* Cloud made of spheres */}

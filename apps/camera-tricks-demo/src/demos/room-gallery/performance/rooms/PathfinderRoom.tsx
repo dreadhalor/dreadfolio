@@ -207,7 +207,7 @@ export function PathfinderRoom({ colors, offsetX }: PathfinderRoomProps) {
       </mesh>
       
       {/* Grid cubes for visualization */}
-      <InstancedGridCubes offsetX={offsetX} count={16} gridSize={4} color={colors.accent} />
+      <InstancedGridCubes offsetX={offsetX} count={16} gridSize={4} />
       
       {/* Path nodes showing pathfinding algorithm */}
       {pathNodes.map((node, i) => (

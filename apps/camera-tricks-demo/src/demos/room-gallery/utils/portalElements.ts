@@ -143,7 +143,7 @@ export function createOrbitalParticles(
     });
     materials.push(particleMaterial);
     
-    const particle = new THREE.Mesh(SHARED_GEOMETRIES.orbitalParticle, particleMaterial) as OrbitalParticleMesh;
+    const particle = new THREE.Mesh(SHARED_GEOMETRIES.orbitalParticle, particleMaterial) as unknown as OrbitalParticleMesh;
     const angle = (i / PORTAL_CONFIG.ORBITAL_PARTICLES) * Math.PI * 2;
     
     // Store initial angle and radius for animation
@@ -214,7 +214,7 @@ export function createSwirlParticles(
     });
     materials.push(swirlMaterial);
     
-    const particle = new THREE.Mesh(SHARED_GEOMETRIES.swirlParticle, swirlMaterial) as SwirlParticleMesh;
+    const particle = new THREE.Mesh(SHARED_GEOMETRIES.swirlParticle, swirlMaterial) as unknown as SwirlParticleMesh;
     const angle = (i / PORTAL_CONFIG.SWIRL_PARTICLES) * Math.PI * 2;
     const radius = PORTAL_DIMENSIONS.SWIRL_RADIUS_BASE + Math.random() * PORTAL_DIMENSIONS.SWIRL_RADIUS_VARIANCE;
     const depth = (Math.random() - 0.5) * PORTAL_DIMENSIONS.SWIRL_DEPTH_RANGE;

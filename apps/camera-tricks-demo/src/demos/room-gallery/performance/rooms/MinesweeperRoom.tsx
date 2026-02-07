@@ -28,7 +28,7 @@ interface MinesweeperRoomProps {
  * - No animated particles
  * - Estimated ~27 draw calls
  */
-export function MinesweeperRoom({ colors, offsetX }: MinesweeperRoomProps) {
+export function MinesweeperRoom({ colors: _colors, offsetX }: MinesweeperRoomProps) {
   const matcap = useMatcap();
   
   // Windows XP "Bliss" colors
