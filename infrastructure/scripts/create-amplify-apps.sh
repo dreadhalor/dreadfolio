@@ -60,12 +60,10 @@ for APP_ENTRY in "${APPS[@]}"; do
     echo "Creating Amplify app: dreadfolio-$APP_NAME"
     echo "  App Root: $APP_ROOT"
     
-    # Create the Amplify app
+    # Create the Amplify app (without GitHub connection - connect manually in console)
     APP_ID=$(aws amplify create-app \
         --name "dreadfolio-$APP_NAME" \
-        --repository "$GITHUB_REPO" \
         --platform WEB \
-        --enable-branch-auto-build \
         --region "$AWS_REGION" \
         --query 'app.appId' \
         --output text)
@@ -135,9 +133,17 @@ echo "================================================"
 echo "✓ All Amplify apps created successfully!"
 echo "================================================"
 echo ""
-echo "Next steps:"
-echo "1. Configure environment variables for each app in the Amplify Console"
-echo "2. Connect GitHub repository to trigger builds"
-echo "3. Configure custom domains for staging and production"
+echo "IMPORTANT - Manual Steps Required:"
 echo ""
-echo "View your apps: https://console.aws.amazon.com/amplify/home?region=$AWS_REGION"
+echo "For EACH app, you must:"
+echo "1. Go to: https://console.aws.amazon.com/amplify/home?region=$AWS_REGION"
+echo "2. Open the app"
+echo "3. Click 'Connect branch' or 'Host web app'"
+echo "4. Select GitHub and authorize AWS Amplify"
+echo "5. Select repository: $GITHUB_REPO"
+echo "6. Configure the branch (staging or main)"
+echo "7. Set build settings to use the app's amplify.yml file"
+echo "8. Configure environment variables"
+echo "9. Deploy"
+echo ""
+echo "See DEPLOYMENT.md for detailed instructions."
