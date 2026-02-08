@@ -57,10 +57,10 @@ The su-done-ku backend API needs to be deployed first so the frontend can refere
 cd infrastructure/lambda/sudoku-api
 
 # Install dependencies
-npm install
+pnpm install
 
 # Build the function
-npm run build
+pnpm build
 
 # Deploy to staging
 sam deploy \

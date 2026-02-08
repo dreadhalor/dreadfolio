@@ -166,7 +166,7 @@ These tasks require AWS credentials and user decisions:
 
 ```bash
 cd infrastructure/lambda/sudoku-api
-npm install && npm run build
+pnpm install && pnpm build
 sam deploy --guided
 ```
 
@@ -328,7 +328,7 @@ open MIGRATION_CHECKLIST.md
 
 # 3. Deploy Lambda API
 cd infrastructure/lambda/sudoku-api
-npm install && npm run build
+pnpm install && pnpm build
 sam deploy --guided
 
 # 4. Create Amplify apps

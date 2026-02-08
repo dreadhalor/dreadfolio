@@ -15,8 +15,8 @@ Use this checklist to track progress during the migration from EC2 to AWS Amplif
 ### Sudoku API Lambda
 
 - [ ] Navigate to `infrastructure/lambda/sudoku-api`
-- [ ] Run `npm install`
-- [ ] Run `npm run build` (verify no errors)
+- [ ] Run `pnpm install`
+- [ ] Run `pnpm build` (verify no errors)
 - [ ] Deploy to staging: `sam deploy --guided`
   - [ ] Stack name: `sudoku-api-staging`
   - [ ] Environment: `staging`

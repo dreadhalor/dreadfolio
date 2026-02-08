@@ -15,19 +15,19 @@ This Lambda function replaces the Express backend endpoint for serving random Su
 
 - AWS CLI configured with credentials
 - AWS SAM CLI installed (`brew install aws-sam-cli`)
-- Node.js 20+ and npm/pnpm
+- Node.js 20+ and pnpm 8.15.1+
 
 ### Install Dependencies
 
 ```bash
 cd infrastructure/lambda/sudoku-api
-npm install
+pnpm install
 ```
 
 ### Build the Function
 
 ```bash
-npm run build
+pnpm build
 ```
 
 This compiles TypeScript to JavaScript in the `dist/` directory.
@@ -62,7 +62,7 @@ curl "http://localhost:3000/random?difficulty=hard"
 
 ```bash
 # Build and package
-npm run build
+pnpm build
 
 # Deploy to staging
 sam deploy \
