@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Create AWS Amplify Apps for Dreadfolio Monorepo
 # This script creates 15 separate Amplify apps, one for each static application
@@ -9,23 +9,24 @@ set -e
 GITHUB_REPO="https://github.com/dreadhalor/dreadfolio"  # Update with your actual repo URL
 AWS_REGION="us-east-1"
 
-# Array of apps with their configuration
-declare -A APPS=(
-    ["camera-tricks-demo"]="apps/camera-tricks-demo"
-    ["portfolio-frontend"]="apps/portfolio/frontend"
-    ["home-page"]="apps/home-page"
-    ["sketches"]="apps/sketches"
-    ["resume"]="apps/resume"
-    ["ascii-video"]="apps/ascii-video"
-    ["steering-text"]="apps/steering-text"
-    ["minesweeper"]="apps/minesweeper"
-    ["pathfinder-visualizer"]="apps/pathfinder-visualizer"
-    ["enlight"]="apps/enlight"
-    ["gifster"]="apps/gifster"
-    ["quipster"]="apps/quipster"
-    ["su-done-ku"]="apps/su-done-ku/frontend"
-    ["fallcrate"]="apps/fallcrate"
-    ["shareme"]="apps/shareme/frontend"
+# Array of apps with their configuration (app-name:app-root)
+# Using simple arrays instead of associative arrays for zsh compatibility
+APPS=(
+    "camera-tricks-demo:apps/camera-tricks-demo"
+    "portfolio-frontend:apps/portfolio/frontend"
+    "home-page:apps/home-page"
+    "sketches:apps/sketches"
+    "resume:apps/resume"
+    "ascii-video:apps/ascii-video"
+    "steering-text:apps/steering-text"
+    "minesweeper:apps/minesweeper"
+    "pathfinder-visualizer:apps/pathfinder-visualizer"
+    "enlight:apps/enlight"
+    "gifster:apps/gifster"
+    "quipster:apps/quipster"
+    "su-done-ku:apps/su-done-ku/frontend"
+    "fallcrate:apps/fallcrate"
+    "shareme:apps/shareme/frontend"
 )
 
 echo "================================================"
@@ -51,8 +52,10 @@ echo "✓ AWS CLI configured"
 echo ""
 
 # Create each Amplify app
-for APP_NAME in "${!APPS[@]}"; do
-    APP_ROOT="${APPS[$APP_NAME]}"
+for APP_ENTRY in "${APPS[@]}"; do
+    # Split the entry into name and root
+    APP_NAME="${APP_ENTRY%%:*}"
+    APP_ROOT="${APP_ENTRY#*:}"
     
     echo "Creating Amplify app: dreadfolio-$APP_NAME"
     echo "  App Root: $APP_ROOT"
