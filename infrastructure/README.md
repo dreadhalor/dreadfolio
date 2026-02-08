@@ -26,8 +26,8 @@ infrastructure/
 
 ```bash
 cd lambda/sudoku-api
-npm install
-npm run build
+pnpm install
+pnpm build
 sam deploy --guided
 ```
 
