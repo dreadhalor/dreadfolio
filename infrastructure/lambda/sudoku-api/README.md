@@ -1,4 +1,4 @@
-# Sudoku API Lambda Function
+pnpm # Sudoku API Lambda Function
 
 This Lambda function replaces the Express backend endpoint for serving random Sudoku puzzles.
 
@@ -19,16 +19,24 @@ This Lambda function replaces the Express backend endpoint for serving random Su
 
 ### Install Dependencies
 
+The Lambda function has its own isolated dependencies (separate from the monorepo):
+
 ```bash
 cd infrastructure/lambda/sudoku-api
-pnpm install
+
+# Install dependencies independently (ignore workspace)
+pnpm install --ignore-workspace
 ```
+
+**Note**: We use `--ignore-workspace` because this Lambda function needs its own `node_modules` with AWS-specific dependencies.
 
 ### Build the Function
 
 ```bash
 pnpm build
 ```
+
+This compiles TypeScript to JavaScript in the `dist/` directory.
 
 This compiles TypeScript to JavaScript in the `dist/` directory.
 
