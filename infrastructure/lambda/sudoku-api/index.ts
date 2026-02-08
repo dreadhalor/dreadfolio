@@ -37,7 +37,7 @@ const getRandomPuzzle = (difficulty: DifficultySetting): Puzzle => {
   return { sha, rating, puzzle };
 };
 
-export const handler: APIGatewayProxyHandlerV2<ApiResponseBody> = async (event) => {
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   try {
     const difficulty = event.queryStringParameters?.difficulty as DifficultySetting | undefined;
     
@@ -72,6 +72,8 @@ export const handler: APIGatewayProxyHandlerV2<ApiResponseBody> = async (event) 
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
       },
       body: JSON.stringify({
         error: 'An error occurred while fetching a puzzle.',

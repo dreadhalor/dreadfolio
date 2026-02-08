@@ -176,7 +176,7 @@ aws route53 list-resource-record-sets \
 
 ```bash
 cd lambda/sudoku-api
-npm run build
+pnpm build
 sam deploy
 ```
 
