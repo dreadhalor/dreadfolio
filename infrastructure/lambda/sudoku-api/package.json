@@ -4,8 +4,9 @@
   "description": "Lambda function for serving random Sudoku puzzles",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "package": "pnpm build && cp -r puzzles dist/ && cd dist && zip -r ../sudoku-api.zip ."
+    "build": "tsc && cp -r puzzles dist/",
+    "package": "pnpm build && cd dist && zip -r ../sudoku-api.zip .",
+    "clean": "rm -rf dist"
   },
   "dependencies": {},
   "devDependencies": {
