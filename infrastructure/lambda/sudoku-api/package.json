@@ -1,0 +1,16 @@
+{
+  "name": "sudoku-api-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function for serving random Sudoku puzzles",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "package": "npm run build && cp -r puzzles dist/ && cd dist && zip -r ../sudoku-api.zip ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.9.3",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Sudoku API Lambda Function
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 256
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+
+Parameters:
+  Environment:
+    Type: String
+    Default: staging
+    AllowedValues:
+      - staging
+      - production
+    Description: Environment name
+
+Resources:
+  SudokuApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'sudoku-api-${Environment}'
+      CodeUri: dist/
+      Handler: index.handler
+      Description: Returns random Sudoku puzzles by difficulty
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Events:
+        GetRandomPuzzle:
+          Type: Api
+          Properties:
+            Path: /random
+            Method: get
+            RestApiId: !Ref SudokuApiGateway
+
+  SudokuApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub 'sudoku-api-${Environment}'
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET, OPTIONS'"
+        AllowHeaders: "'Content-Type'"
+        AllowOrigin: "'*'"
+
+Outputs:
+  SudokuApiUrl:
+    Description: API Gateway endpoint URL for Sudoku API
+    Value: !Sub 'https://${SudokuApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/random'
+    Export:
+      Name: !Sub '${AWS::StackName}-ApiUrl'
+  
+  SudokuApiFunctionArn:
+    Description: Sudoku API Lambda Function ARN
+    Value: !GetAtt SudokuApiFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionArn'

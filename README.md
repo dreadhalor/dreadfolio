@@ -81,10 +81,10 @@ dreadfolio/
 ## 🛠️ Tech Stack
 
 **Frontend**: React, TypeScript, Vite, Tailwind CSS  
-**Backend**: Node.js, Express, Firebase  
+**Backend**: Node.js, AWS Lambda, Firebase  
 **Monorepo**: pnpm workspaces, Turborepo  
-**Infrastructure**: Docker, AWS (EC2, ECR), nginx  
-**CI/CD**: GitHub Actions  
+**Infrastructure**: AWS (Amplify, Lambda, CloudFront, Route 53, API Gateway)  
+**CI/CD**: AWS Amplify (Git-based), AWS SAM  
 **Tools**: ESLint, Prettier, Sass
 
 ---
@@ -157,30 +157,72 @@ pnpm run pull-submodules    # Update all submodules
 
 ## 🚢 Deployment
 
-### Primary Deployment (Portfolio Backend)
+### Current Architecture (2026)
 
-The main portfolio app is deployed to AWS EC2 via Docker:
+Dreadfolio uses a modern, cloud-native deployment architecture with independent app deployments:
 
-```bash
-# Build and deploy to EC2
-./deploy.sh
+**Static Apps** (15 apps) → AWS Amplify Hosting + CloudFront CDN  
+**Backend API** → AWS Lambda + API Gateway  
+**DNS** → Route 53 with staging and production environments
 
-# Or use GitHub Actions workflow
-# Trigger: Manual workflow_dispatch
+```
+GitHub Repository
+    ├── Push to staging branch → Deploys to staging.scottjhetrick.com/*
+    └── Push to main branch → Deploys to scottjhetrick.com/*
 ```
 
-### CI/CD Pipeline
+### Key Benefits
 
-GitHub Actions workflow builds and deploys to:
-- Docker image → Amazon ECR
-- Deploy → EC2 instance
-- Nginx reverse proxy for routing
+- **Independent Deployments**: Update one app without rebuilding all 15 apps
+- **Zero Downtime**: Rolling deployments with instant rollback
+- **Global CDN**: CloudFront edge locations for <100ms TTFB worldwide
+- **Cost Effective**: ~$31/month (same as previous EC2, but faster & more reliable)
+- **Staging Environment**: Test changes before production
+
+### Deployment Guide
+
+See comprehensive documentation:
+
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide (8 phases)
+- **[MIGRATION_CHECKLIST.md](./MIGRATION_CHECKLIST.md)** - Step-by-step migration checklist
+- **[infrastructure/README.md](./infrastructure/README.md)** - Infrastructure details
+
+Quick deployment:
+
+```bash
+# Deploy Lambda API
+cd infrastructure/lambda/sudoku-api
+npm install && npm run build
+sam deploy --guided
+
+# Create Amplify apps (automated)
+./infrastructure/scripts/create-amplify-apps.sh
+
+# Configure DNS
+./infrastructure/scripts/setup-route53.sh
+
+# Push to staging for testing
+git checkout staging
+git push origin staging
+
+# Deploy to production
+git checkout main
+git merge staging
+git push origin main
+```
+
+### Legacy Deployment (Deprecated)
+
+Previous EC2/Docker deployment has been replaced. See `DEPLOYMENT.md` for migration guide.
 
 ---
 
 ## 📚 Documentation
 
-- **[Infrastructure Audit](./INFRASTRUCTURE_AUDIT.md)** - Comprehensive analysis of current issues and improvement roadmap
+- **[Deployment Guide](./DEPLOYMENT.md)** - Complete AWS Amplify + Lambda deployment guide
+- **[Migration Checklist](./MIGRATION_CHECKLIST.md)** - Step-by-step migration checklist
+- **[Infrastructure README](./infrastructure/README.md)** - Infrastructure as code documentation
+- **[Infrastructure Audit](./INFRASTRUCTURE_AUDIT.md)** - Historical technical debt analysis (2026)
 - **[Individual App READMEs](./apps/)** - Each app has its own documentation
 
 ---
@@ -203,12 +245,15 @@ Each project captures the skills and knowledge at that point in time. The ongoin
 
 **Active Modernization** (2026): Currently implementing industry-standard monorepo patterns and resolving technical debt identified in infrastructure audit.
 
-**Priority improvements**:
-1. ✅ Security: Fixed hardcoded API keys
-2. ✅ Documentation: Added .env.example and comprehensive README
-3. 🚧 Architecture: Migrating from git submodules to true monorepo
-4. 🚧 Dependencies: Standardizing versions across all packages
-5. 🚧 Type Safety: Reducing `any` usage and improving TypeScript strictness
+**Recent improvements** (2026):
+1. ✅ **Deployment**: Migrated to AWS Amplify + Lambda architecture
+2. ✅ **Infrastructure**: Independent app deployments with zero downtime
+3. ✅ **Performance**: Global CDN with <100ms TTFB worldwide
+4. ✅ **DevOps**: Staging environment for testing before production
+5. ✅ **Documentation**: Comprehensive deployment guides and checklists
+6. ✅ **Security**: Fixed hardcoded API keys, improved secret management
+7. 🚧 **Architecture**: Migrating from git submodules to true monorepo
+8. 🚧 **Dependencies**: Standardizing versions across all packages
 
 See [INFRASTRUCTURE_AUDIT.md](./INFRASTRUCTURE_AUDIT.md) for complete improvement roadmap.
 

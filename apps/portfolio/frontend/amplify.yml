@@ -1,0 +1,20 @@
+version: 1
+applications:
+  - appRoot: apps/portfolio/frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - cd ../../..
+            - npm install -g pnpm@8.15.1
+            - pnpm install
+        build:
+          commands:
+            - pnpm build --filter=portfolio-frontend
+      artifacts:
+        baseDirectory: apps/portfolio/frontend/dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
