@@ -31,7 +31,7 @@ CHANGED_APPS=()
 
 # Check if any shared packages changed (rebuild all apps if so)
 if echo "$CHANGED_FILES" | grep -q "^packages/"; then
-  echo "Shared packages changed, building all apps"
+  echo "Shared packages changed, building all apps" >&2
   for app in "${APPS[@]}"; do
     APP_NAME="${app%%:*}"
     CHANGED_APPS+=("\"$APP_NAME\"")
@@ -44,17 +44,17 @@ else
     
     # Check if any files in the app directory changed
     if echo "$CHANGED_FILES" | grep -q "^$APP_PATH/"; then
-      echo "App changed: $APP_NAME"
+      echo "App changed: $APP_NAME" >&2
       CHANGED_APPS+=("\"$APP_NAME\"")
     fi
   done
 fi
 
-# Output JSON array
+# Output JSON array (properly escaped for GitHub Actions)
 if [ ${#CHANGED_APPS[@]} -eq 0 ]; then
-  echo "[]"
+  printf '[]'
 else
-  # Join array elements with commas
-  APPS_JSON=$(IFS=,; echo "${CHANGED_APPS[*]}")
-  echo "[$APPS_JSON]"
+  # Join array elements with commas and output as single line
+  APPS_JSON=$(IFS=,; printf '%s' "${CHANGED_APPS[*]}")
+  printf '[%s]' "$APPS_JSON"
 fi
