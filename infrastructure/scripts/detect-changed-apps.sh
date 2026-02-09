@@ -34,7 +34,7 @@ if echo "$CHANGED_FILES" | grep -q "^packages/"; then
   echo "Shared packages changed, building all apps" >&2
   for app in "${APPS[@]}"; do
     APP_NAME="${app%%:*}"
-    CHANGED_APPS+=("\"$APP_NAME\"")
+    CHANGED_APPS+=("$APP_NAME")
   done
 else
   # Check each app individually
@@ -45,16 +45,15 @@ else
     # Check if any files in the app directory changed
     if echo "$CHANGED_FILES" | grep -q "^$APP_PATH/"; then
       echo "App changed: $APP_NAME" >&2
-      CHANGED_APPS+=("\"$APP_NAME\"")
+      CHANGED_APPS+=("$APP_NAME")
     fi
   done
 fi
 
-# Output JSON array (properly escaped for GitHub Actions)
+# Output JSON array using jq for proper escaping (compact single-line format)
 if [ ${#CHANGED_APPS[@]} -eq 0 ]; then
   printf '[]'
 else
-  # Join array elements with commas and output as single line
-  APPS_JSON=$(IFS=,; printf '%s' "${CHANGED_APPS[*]}")
-  printf '[%s]' "$APPS_JSON"
+  # Use jq to properly JSON-encode the array as single-line compact JSON
+  printf '%s\n' "${CHANGED_APPS[@]}" | jq -R . | jq -sc .
 fi
