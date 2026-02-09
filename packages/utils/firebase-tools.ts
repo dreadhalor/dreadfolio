@@ -16,38 +16,29 @@ const firebaseConfig = {
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-let db: ReturnType<typeof getFirestore>;
-let auth: ReturnType<typeof getAuth>;
-let storage: ReturnType<typeof getStorage>;
+const db = getFirestore(app);
+const auth = getAuth(app);
+const storage = getStorage(app);
 
-try {
-  db = getFirestore(app);
-  auth = getAuth(app);
-  storage = getStorage(app);
+// Only connect to emulators if explicitly enabled
+const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
 
-  // Only connect to emulators if explicitly enabled
-  const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
-
-  // Connect to Firebase emulators if enabled and on localhost
-  if (location.hostname === 'localhost' && useEmulators) {
-    try {
-      connectAuthEmulator(auth, 'http://localhost:9099', {
-        disableWarnings: true,
-      });
-      connectFirestoreEmulator(db, 'localhost', 8080);
-      connectStorageEmulator(storage, 'localhost', 9199);
-      console.log('Connected to Firebase emulators');
-    } catch (emulatorError) {
-      console.warn(
-        'Failed to connect to Firebase emulators (they may not be running):',
-        emulatorError,
-      );
-      console.log('Continuing with production Firebase...');
-    }
+// Connect to Firebase emulators if enabled and on localhost
+if (location.hostname === 'localhost' && useEmulators) {
+  try {
+    connectAuthEmulator(auth, 'http://localhost:9099', {
+      disableWarnings: true,
+    });
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectStorageEmulator(storage, 'localhost', 9199);
+    console.log('Connected to Firebase emulators');
+  } catch (emulatorError) {
+    console.warn(
+      'Failed to connect to Firebase emulators (they may not be running):',
+      emulatorError,
+    );
+    console.log('Continuing with production Firebase...');
   }
-} catch (error) {
-  console.warn('Firebase services not available:', error);
-  // Services will be undefined, consuming code should handle this
 }
 
 export { auth, db, storage };
