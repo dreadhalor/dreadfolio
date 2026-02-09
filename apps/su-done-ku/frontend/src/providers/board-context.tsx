@@ -181,14 +181,15 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
   };
 
   const generatePuzzleWithApi = async (difficulty?: string) => {
-    const base = getBackendBaseUrl(import.meta.env.PROD);
     setIsGenerating(true);
     
     try {
+      // Use Lambda API URL in production, fallback to local Express server in dev
+      const apiUrl = import.meta.env.VITE_SUDOKU_API_URL || 
+                     `${getBackendBaseUrl(import.meta.env.PROD)}/su-done-ku/api/random`;
+      
       const response = await fetch(
-        `${base}/su-done-ku/api/random${
-          difficulty ? `?difficulty=${difficulty}` : ''
-        }`,
+        `${apiUrl}${difficulty ? `?difficulty=${difficulty}` : ''}`,
       );
       
       if (!response.ok) {

@@ -1,476 +1,750 @@
 # Dreadfolio Deployment Guide
 
-This guide walks through deploying the Dreadfolio monorepo using AWS Amplify Hosting for static apps and AWS Lambda for the backend API.
+This guide covers the deployment of the Dreadfolio portfolio using **AWS CloudFront + S3 + Terraform**.
 
 ## Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    GitHub Repository                     │
-│                   dreadfolio monorepo                    │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            │ Git push triggers builds
-                            │
-        ┌───────────────────┴───────────────────┐
-        │                                       │
-        ▼                                       ▼
-┌──────────────────┐                  ┌──────────────────┐
-│  AWS Amplify     │                  │  AWS Lambda      │
-│  (15 apps)       │                  │  + API Gateway   │
-│                  │                  │                  │
-│ • camera-tricks  │                  │ • su-done-ku API │
-│ • portfolio      │                  │                  │
-│ • su-done-ku     │◄─────API calls───┤                  │
-│ • sketches       │                  │                  │
-│ • ... (11 more)  │                  │                  │
-└──────────────────┘                  └──────────────────┘
-        │                                       │
-        │ CloudFront CDN                        │
-        │                                       │
-        ▼                                       ▼
-┌─────────────────────────────────────────────────────────┐
-│                      Route 53 DNS                        │
-│                                                          │
-│  staging.scottjhetrick.com/* → Staging apps              │
-│  scottjhetrick.com/* → Production apps                   │
-└─────────────────────────────────────────────────────────┘
-```
+**Infrastructure:**
+- **CloudFront**: CDN for global content delivery with path-based routing
+- **S3**: 15 static site buckets (one per app) for staging and production
+- **Lambda**: Sudoku API backend
+- **Route 53**: DNS management
+- **ACM**: SSL certificates
+- **IAM**: GitHub Actions deployment role (OIDC)
+
+**CI/CD:**
+- **GitHub Actions**: Automated build and deployment
+- **Terraform**: Infrastructure as Code
+
+**URL Structure:**
+- **Production**: `scottjhetrick.com/*`
+- **Staging**: `staging.scottjhetrick.com/*`
+
+All apps are hosted at path-based routes (e.g., `/gifster`, `/fallcrate`) enabling shared Firebase authentication across all apps.
 
 ## Prerequisites
 
-- AWS Account with appropriate permissions
-- AWS CLI installed and configured (`aws configure`)
-- AWS SAM CLI installed (`brew install aws-sam-cli` or see [AWS SAM docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html))
-- GitHub repository connected to AWS Amplify
-- Domain registered (scottjhetrick.com) with Route 53
+### Required Tools
 
-## Deployment Phases
+1. **Terraform** >= 1.0
+   ```bash
+   brew install terraform
+   ```
 
-### Phase 1: Setup Lambda API (30 minutes)
+2. **AWS CLI** >= 2.0
+   ```bash
+   brew install awscli
+   aws configure
+   ```
 
-The su-done-ku backend API needs to be deployed first so the frontend can reference it.
+3. **Node.js** >= 20 and **pnpm** 8.15.1
+   ```bash
+   brew install node
+   corepack enable
+   corepack prepare pnpm@8.15.1 --activate
+   ```
 
-#### 1.1 Deploy Sudoku API Lambda
+### AWS Account Setup
+
+You need:
+- AWS account with admin access
+- AWS CLI configured with credentials
+- Route 53 hosted zone for `scottjhetrick.com`
+
+## Initial Setup
+
+### 1. Create Terraform State Backend
+
+The Terraform state backend stores infrastructure state remotely with locking.
+
+```bash
+# Create S3 bucket for state
+aws s3api create-bucket \
+  --bucket dreadfolio-terraform-state \
+  --region us-east-1
+
+# Enable versioning
+aws s3api put-bucket-versioning \
+  --bucket dreadfolio-terraform-state \
+  --versioning-configuration Status=Enabled
+
+# Enable encryption
+aws s3api put-bucket-encryption \
+  --bucket dreadfolio-terraform-state \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+      }
+    }]
+  }'
+
+# Create DynamoDB table for state locking
+aws dynamodb create-table \
+  --table-name dreadfolio-terraform-locks \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region us-east-1
+```
+
+### 2. Request ACM Certificates
+
+ACM certificates **must** be in `us-east-1` region for CloudFront.
+
+**Staging certificate:**
+
+```bash
+aws acm request-certificate \
+  --domain-name staging.scottjhetrick.com \
+  --validation-method DNS \
+  --region us-east-1
+
+# Note the certificate ARN from output
+```
+
+**Production certificate:**
+
+```bash
+aws acm request-certificate \
+  --domain-name scottjhetrick.com \
+  --subject-alternative-names "*.scottjhetrick.com" \
+  --validation-method DNS \
+  --region us-east-1
+
+# Note the certificate ARN from output
+```
+
+**Validate certificates:**
+
+1. Get validation records:
+   ```bash
+   aws acm describe-certificate \
+     --certificate-arn <certificate-arn> \
+     --region us-east-1 \
+     --query 'Certificate.DomainValidationOptions'
+   ```
+
+2. Add the CNAME records to Route 53:
+   ```bash
+   # Via console or CLI
+   aws route53 change-resource-record-sets \
+     --hosted-zone-id <zone-id> \
+     --change-batch file://validation-record.json
+   ```
+
+3. Wait for validation (5-30 minutes):
+   ```bash
+   aws acm wait certificate-validated \
+     --certificate-arn <certificate-arn> \
+     --region us-east-1
+   ```
+
+### 3. Update Terraform Variables
+
+Edit certificate ARNs in:
+
+**`infrastructure/terraform/staging.tfvars`:**
+```hcl
+certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID"
+```
+
+**`infrastructure/terraform/production.tfvars`:**
+```hcl
+certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERT_ID"
+```
+
+Replace `ACCOUNT_ID` and `CERT_ID` with actual values from step 2.
+
+### 4. Initialize Terraform
+
+```bash
+cd infrastructure/terraform
+terraform init
+```
+
+This will:
+- Download AWS provider
+- Configure remote state backend
+- Prepare modules
+
+### 5. Deploy Staging Infrastructure
+
+```bash
+# Plan (see what will be created)
+terraform plan -var-file=staging.tfvars
+
+# Apply (create resources)
+terraform apply -var-file=staging.tfvars
+```
+
+This creates:
+- 15 S3 buckets (*-staging)
+- 1 CloudFront distribution
+- Route 53 DNS record
+- IAM role for GitHub Actions
+- Origin Access Control
+
+**Save outputs:**
+
+```bash
+terraform output > staging-outputs.txt
+```
+
+You'll need:
+- `cloudfront_distribution_id` for GitHub secrets
+- `github_actions_role_arn` for GitHub secrets
+
+### 6. Configure GitHub Secrets
+
+Add these secrets to your GitHub repository (Settings → Secrets):
+
+**Required for both environments:**
+- `AWS_ROLE_ARN`: IAM role ARN from Terraform output
+- `STAGING_CLOUDFRONT_ID`: Staging distribution ID
+- `PROD_CLOUDFRONT_ID`: Production distribution ID (after prod deployment)
+
+**Build-time environment variables:**
+- `VITE_GIPHY_API_KEY`: Giphy API key (for Gifster)
+- `VITE_FIREBASE_API_KEY`: Firebase API key
+- `VITE_FIREBASE_AUTH_DOMAIN`: Firebase auth domain
+- `VITE_FIREBASE_PROJECT_ID`: Firebase project ID
+- `VITE_FIREBASE_STORAGE_BUCKET`: Firebase storage bucket
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`: Firebase messaging sender ID
+- `VITE_FIREBASE_APP_ID`: Firebase app ID
+- `VITE_VERCEL_TOKEN`: Vercel token (for deployment features)
+- `VITE_SUDOKU_API_URL`: Lambda API URL
+
+**Terraform-specific (for infrastructure workflow):**
+- `AWS_TERRAFORM_ROLE_ARN`: IAM role ARN for Terraform operations
+
+### 7. Deploy Lambda API (Sudoku)
+
+The Sudoku API is deployed separately using AWS SAM:
 
 ```bash
 cd infrastructure/lambda/sudoku-api
 
-# Install dependencies
-pnpm install
+# Install dependencies (isolated from monorepo)
+pnpm install --ignore-workspace
 
-# Build the function
+# Build and package
 pnpm build
 
-# Deploy to staging
-sam deploy \
-  --template-file template.yaml \
-  --stack-name sudoku-api-staging \
-  --parameter-overrides Environment=staging \
-  --capabilities CAPABILITY_IAM \
-  --region us-east-1 \
-  --guided
-
-# Get the API URL
-aws cloudformation describe-stacks \
-  --stack-name sudoku-api-staging \
-  --query 'Stacks[0].Outputs[?OutputKey==`SudokuApiUrl`].OutputValue' \
-  --output text
+# Deploy with SAM
+sam deploy --guided
 ```
 
-Save the API URL - you'll need it for the frontend configuration.
+Follow prompts:
+- Stack name: `sudoku-api-prod` or `sudoku-api-staging`
+- Region: `us-east-1`
+- Confirm changes: Yes
 
-#### 1.2 Test the Lambda API
+**Save API URL:**
 
-```bash
-# Test with curl (replace with your actual API URL)
-curl "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/staging/random?difficulty=easy"
-```
+After deployment, note the API Gateway URL and add to GitHub secrets as `VITE_SUDOKU_API_URL`.
 
-Expected response:
-```json
-{
-  "difficulty": "easy",
-  "puzzle": {
-    "sha": "...",
-    "rating": "...",
-    "puzzle": "4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......"
-  }
-}
-```
+## Deployment Workflow
 
-### Phase 2: Create Amplify Apps (1-2 hours)
+### Standard Workflow
 
-#### 2.1 Automated Creation (Recommended)
+1. **Develop on feature branch**
+   ```bash
+   git checkout -b feature/new-feature
+   # Make changes
+   git commit -m "Add feature"
+   git push origin feature/new-feature
+   ```
 
-```bash
-# Run the automated setup script
-./infrastructure/scripts/create-amplify-apps.sh
-```
+2. **Merge to staging branch**
+   ```bash
+   git checkout staging
+   git merge feature/new-feature
+   git push origin staging
+   ```
 
-This creates 15 Amplify apps with proper configuration.
+3. **Automatic deployment to staging**
+   - GitHub Actions detects changed apps
+   - Builds only changed apps
+   - Deploys to S3 staging buckets
+   - Invalidates CloudFront paths
+   - Test at `staging.scottjhetrick.com/*`
 
-#### 2.2 Manual Creation (Alternative)
-
-If the script doesn't work, manually create apps via AWS Console:
-
-1. Go to [AWS Amplify Console](https://console.aws.amazon.com/amplify/)
-2. For each app, click "New app" → "Host web app"
-3. Select GitHub and connect your repository
-4. Configure:
-   - App name: `dreadfolio-[app-name]`
-   - Branch: `staging` and `main`
-   - Build settings: Use the `amplify.yml` in each app directory
-5. Deploy
-
-### Phase 3: Configure Environment Variables (30 minutes)
-
-For each Amplify app, configure required environment variables:
-
-#### 3.1 Gifster
-
-```
-VITE_GIPHY_API_KEY=<your-giphy-api-key>
-```
-
-#### 3.2 Su-done-ku
-
-```
-VITE_SUDOKU_API_URL=https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/staging/random
-```
-
-#### 3.3 Fallcrate & ShareMe (Firebase apps)
-
-```
-VITE_FIREBASE_API_KEY=<your-firebase-key>
-VITE_FIREBASE_AUTH_DOMAIN=<your-project>.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=<your-project>
-VITE_FIREBASE_STORAGE_BUCKET=<your-project>.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
-VITE_FIREBASE_APP_ID=<your-app-id>
-```
-
-#### 3.4 Turborepo Remote Caching (Optional)
-
-For faster builds, configure Vercel Remote Caching:
-
-```
-TURBO_TOKEN=<your-vercel-token>
-TURBO_TEAM=<your-team-slug>
-```
-
-### Phase 4: Setup Custom Domains (1 hour)
-
-#### 4.1 Staging Environment
-
-For each Amplify app:
-
-1. Open the app in Amplify Console
-2. Go to "Domain management"
-3. Click "Add domain"
-4. Enter: `staging.scottjhetrick.com`
-5. Configure subpath:
-   - App: `camera-tricks-demo` → Path: `/camera-tricks`
-   - App: `su-done-ku` → Path: `/su-done-ku`
-   - App: `sketches` → Path: `/sketches`
-   - etc.
-
-Amplify will automatically:
-- Create Route 53 DNS records
-- Provision SSL certificates
-- Configure CloudFront
-
-#### 4.2 Production Environment
-
-Same process, but use `scottjhetrick.com` instead of staging subdomain.
-
-**Domain mapping example:**
-
-| App | Staging URL | Production URL |
-|-----|------------|----------------|
-| portfolio-frontend | staging.scottjhetrick.com | scottjhetrick.com |
-| camera-tricks-demo | staging.scottjhetrick.com/camera-tricks | scottjhetrick.com/camera-tricks |
-| su-done-ku | staging.scottjhetrick.com/su-done-ku | scottjhetrick.com/su-done-ku |
-| sketches | staging.scottjhetrick.com/sketches | scottjhetrick.com/sketches |
-
-### Phase 5: Branch Strategy & Deployment Workflow
-
-#### 5.1 Git Branch Setup
-
-```bash
-# Create staging branch if it doesn't exist
-git checkout -b staging
-
-# Push to remote
-git push -u origin staging
-```
-
-#### 5.2 Development Workflow
-
-```mermaid
-graph LR
-    A[Feature Branch] -->|Merge| B[Staging Branch]
-    B -->|Auto-deploy| C[Staging Environment]
-    C -->|Test & Verify| D{Tests Pass?}
-    D -->|Yes| E[Merge to Main]
-    D -->|No| F[Fix Issues]
-    F -->|Commit| B
-    E -->|Auto-deploy| G[Production]
-```
-
-**Workflow steps:**
-
-1. **Develop**: Work on feature branches
-2. **Staging**: Merge to `staging` → auto-deploys to staging.scottjhetrick.com
-3. **Test**: Verify all functionality in staging
-4. **Production**: Merge `staging` → `main` → auto-deploys to scottjhetrick.com
-
-### Phase 6: Testing Staging Deployment (1-2 hours)
-
-#### 6.1 Test Each App
-
-Go through each app and verify:
-
-- [ ] camera-tricks-demo: `https://staging.scottjhetrick.com/camera-tricks`
-- [ ] portfolio-frontend: `https://staging.scottjhetrick.com`
-- [ ] su-done-ku: `https://staging.scottjhetrick.com/su-done-ku`
-  - Test API calls work correctly
-  - Verify puzzles load
-- [ ] sketches: `https://staging.scottjhetrick.com/sketches`
-- [ ] All other apps...
-
-#### 6.2 Verify SSL/HTTPS
-
-All apps should:
-- Use HTTPS
-- Have valid SSL certificates
-- Redirect HTTP → HTTPS automatically
-
-#### 6.3 Performance Testing
-
-Check CloudFront CDN is working:
-
-```bash
-# Test TTFB (Time To First Byte) from different locations
-curl -w "\nTime to first byte: %{time_starttransfer}s\n" \
-  -o /dev/null -s \
-  "https://staging.scottjhetrick.com/camera-tricks"
-```
-
-Expected: <200ms globally (vs 500ms+ from EC2)
-
-### Phase 7: Production Cutover (30 minutes)
-
-#### 7.1 Pre-Cutover Checklist
-
-- [ ] All apps tested in staging
-- [ ] API endpoints verified
-- [ ] Environment variables configured
-- [ ] Custom domains configured
-- [ ] DNS TTL lowered to 300s (5 min)
-
-#### 7.2 Lower DNS TTL (24h before cutover)
-
-```bash
-# Lower TTL to 300 seconds for fast rollback
-# This needs to be done manually in Route 53 Console
-# Go to your hosted zone → Edit the A record → Set TTL to 300
-```
-
-#### 7.3 Execute Cutover
-
-1. **Merge staging to main:**
+4. **Merge to main for production**
    ```bash
    git checkout main
    git merge staging
    git push origin main
    ```
 
-2. **Verify builds complete:**
-   - Check Amplify Console
-   - All apps should auto-deploy to production branches
+5. **Automatic deployment to production**
+   - Same process for production buckets
+   - Deploys to `scottjhetrick.com/*`
 
-3. **Update DNS (if needed):**
-   - Amplify handles this automatically if domains are configured
-   - Verify in Route 53 that DNS points to Amplify CloudFront distributions
+### Manual Deployment
 
-4. **Monitor:**
-   - Watch Amplify build logs
-   - Check CloudWatch Logs for Lambda
-   - Monitor Route 53 traffic
+You can manually trigger deployments via GitHub Actions:
 
-#### 7.4 Rollback Plan
+1. Go to **Actions** tab in GitHub
+2. Select **Deploy to CloudFront** workflow
+3. Click **Run workflow**
+4. Enter comma-separated app names (or leave empty for all changed)
+5. Click **Run workflow**
 
-If issues occur:
+### Deploy Specific Apps
 
-**Option 1: Revert git commit**
-```bash
-git checkout main
-git revert HEAD
-git push origin main
-```
-
-**Option 2: Use Amplify rollback**
-- Go to Amplify Console → App → Deployments
-- Click "Redeploy" on previous version
-
-**Option 3: Revert DNS to EC2** (emergency only)
-- Keep EC2 instance running for 1 week
-- Can revert DNS in Route 53 in ~5 minutes
-
-### Phase 8: Decommission Old Infrastructure (After 1 week)
-
-Once production is stable:
-
-#### 8.1 Stop EC2 Instance
+To deploy specific apps without waiting for changes:
 
 ```bash
-# Get instance ID
-aws ec2 describe-instances \
-  --filters "Name=ip-address,Values=54.164.173.195" \
-  --query 'Reservations[0].Instances[0].InstanceId' \
-  --output text
-
-# Stop instance (keep for a few more days)
-aws ec2 stop-instances --instance-ids <instance-id>
-
-# After confidence period, terminate
-aws ec2 terminate-instances --instance-ids <instance-id>
+# Via GitHub Actions UI
+# Workflow: Deploy to CloudFront
+# Input: gifster,fallcrate,minesweeper
 ```
 
-#### 8.2 Remove ECR Repository
+Or push changes to specific app directories.
+
+## Selective Deployment
+
+The deployment system is smart about which apps to build:
+
+**Triggers:**
+- Changes in `apps/{app-name}/**` → Deploy that app only
+- Changes in `packages/**` → Deploy all apps (shared dependencies)
+- Manual trigger with app list → Deploy specified apps
+
+**Benefits:**
+- Fast deploys (~4 min for single app vs 20+ min for all)
+- Parallel builds via GitHub Actions matrix
+- Cost-effective (only invalidate changed paths)
+
+**Example:**
+
+```
+Commit touches: apps/gifster/src/App.tsx
+Result: Only gifster is built and deployed
+Time: ~4 minutes
+```
+
+## App URL Structure
+
+All apps are available at path-based routes:
+
+**Production (`scottjhetrick.com`):**
+```
+/                         → portfolio (main app switcher)
+/home/                    → home-page
+/camera-tricks/           → camera-tricks-demo
+/gifster/                 → gifster
+/fallcrate/               → fallcrate
+/shareme/                 → shareme
+/su-done-ku/              → su-done-ku
+/sketches/                → p5 sketches
+/resume/                  → resume
+/ascii-video/             → ascii-video
+/steering-text/           → steering-text
+/minesweeper/             → minesweeper
+/pathfinder-visualizer/   → pathfinder-visualizer
+/enlight/                 → enlight
+/quipster/                → quipster
+```
+
+**Staging** has identical structure at `staging.scottjhetrick.com/*`
+
+### Shared Authentication
+
+Because all apps share the same origin domain, Firebase authentication and achievements work across all apps seamlessly.
+
+Apps with achievements:
+- home-page
+- minesweeper
+- pathfinder-visualizer
+- shareme
+- fallcrate
+- su-done-ku
+- gifster
+
+## Infrastructure Management
+
+### View Current Infrastructure
 
 ```bash
-# Delete ECR repository
-aws ecr delete-repository \
-  --repository-name portfolio \
-  --force \
-  --region us-east-1
+cd infrastructure/terraform
+
+# List all resources
+terraform state list
+
+# Show specific resource
+terraform state show module.app_buckets[\"gifster\"].aws_s3_bucket.app
+
+# View outputs
+terraform output
+terraform output cloudfront_distribution_id
 ```
 
-#### 8.3 Clean Up GitHub Actions
-
-Delete or archive old deployment workflow:
+### Update Infrastructure
 
 ```bash
-git mv .github/workflows/build-and-deploy.yml .github/workflows/OLD_build-and-deploy.yml
-git commit -m "Archive old EC2 deployment workflow"
-git push
+# Make changes to .tf files
+
+# Plan changes
+terraform plan -var-file=staging.tfvars
+
+# Apply changes
+terraform apply -var-file=staging.tfvars
 ```
 
-#### 8.4 Remove Unused Files
+### Add a New App
 
-Optional - clean up deprecated files:
+1. **Update Terraform variables:**
 
-```bash
-git rm Dockerfile docker-compose.yml docker-compose.override.yml deploy.sh
-git commit -m "Remove deprecated Docker deployment files"
-git push
-```
+   Edit `infrastructure/terraform/variables.tf`:
+   ```hcl
+   variable "apps" {
+     default = [
+       # ... existing apps
+       { name = "new-app", path = "/new-app/" }
+     ]
+   }
+   ```
 
-## Monitoring & Maintenance
+2. **Apply Terraform:**
+   ```bash
+   terraform apply -var-file=staging.tfvars
+   ```
 
-### CloudWatch Dashboards
+3. **Configure app's `vite.config.ts`:**
+   ```typescript
+   export default defineConfig({
+     base: '/new-app/',
+     // ... other config
+   });
+   ```
 
-Monitor your deployment:
+4. **Deploy:**
+   ```bash
+   git add .
+   git commit -m "Add new-app"
+   git push origin staging
+   ```
 
-1. **Amplify**: View build logs and deployment history
-2. **Lambda**: Check invocation metrics and errors
-3. **CloudFront**: Monitor cache hit rates and traffic
+### Remove an App
 
-### Cost Monitoring
-
-Set up billing alerts:
-
-```bash
-# Create billing alarm for $50/month
-aws cloudwatch put-metric-alarm \
-  --alarm-name dreadfolio-billing-alert \
-  --alarm-description "Alert when monthly costs exceed $50" \
-  --metric-name EstimatedCharges \
-  --namespace AWS/Billing \
-  --statistic Maximum \
-  --period 21600 \
-  --evaluation-periods 1 \
-  --threshold 50 \
-  --comparison-operator GreaterThanThreshold
-```
-
-### Backup Strategy
-
-- **Code**: Backed up in GitHub
-- **DNS**: Export Route 53 zone files monthly
-- **Lambda**: Version controlled via SAM template
-- **Amplify**: Automatic deployment history (last 5)
+1. Remove from `variables.tf` apps list
+2. Run `terraform apply`
+3. Manually delete S3 bucket contents:
+   ```bash
+   aws s3 rm s3://app-name-staging --recursive
+   aws s3 rm s3://app-name-prod --recursive
+   ```
 
 ## Troubleshooting
 
-### Build Failures
+### Certificate Validation Stuck
 
-**Problem**: Amplify build fails with dependency errors
+**Problem:** ACM certificate stuck in "Pending validation"
 
-**Solution**:
+**Solution:**
 ```bash
-# Test build locally first
-cd apps/[app-name]
-pnpm install
-pnpm build
+# Check validation records
+aws acm describe-certificate \
+  --certificate-arn <arn> \
+  --region us-east-1 \
+  --query 'Certificate.DomainValidationOptions'
+
+# Verify DNS records exist in Route 53
+aws route53 list-resource-record-sets \
+  --hosted-zone-id <zone-id> \
+  --query "ResourceRecordSets[?Type=='CNAME']"
 ```
 
-**Problem**: pnpm workspace resolution issues
+### Build Failures
 
-**Solution**: Check `amplify.yml` has correct `cd ../..` to monorepo root
+**Problem:** pnpm build fails in GitHub Actions
 
-### API Issues
+**Solution:**
+```bash
+# Test locally first
+pnpm install
+pnpm build --filter=app-name
 
-**Problem**: su-done-ku can't reach Lambda API
+# Check for missing environment variables
+# Add to GitHub secrets if needed
+```
 
-**Solution**:
-1. Check CORS configuration in Lambda
-2. Verify API Gateway URL in frontend env vars
-3. Check Lambda CloudWatch logs
+### CloudFront Cache Not Updating
 
-### Domain Issues
+**Problem:** Changes deployed but old content still showing
 
-**Problem**: Custom domain not resolving
+**Solution:**
+```bash
+# Manually invalidate entire distribution
+aws cloudfront create-invalidation \
+  --distribution-id <dist-id> \
+  --paths "/*"
 
-**Solution**:
-1. Wait 15-30 minutes for DNS propagation
-2. Check Route 53 records are created by Amplify
-3. Verify SSL certificate is provisioned (can take up to 30 min)
+# Check invalidation status
+aws cloudfront get-invalidation \
+  --distribution-id <dist-id> \
+  --id <invalidation-id>
+```
 
-### Performance Issues
+**Note:** `index.html` has `cache-control: no-cache` so should update immediately. If not, check S3 file metadata.
 
-**Problem**: Slow loading times
+### SPA Routes Return 404
 
-**Solution**:
-1. Check CloudFront cache hit rate
-2. Verify assets are being served from CDN
-3. Enable Amplify performance mode
+**Problem:** `/app/route` returns 404 instead of serving app
 
-## Cost Breakdown
+**Solution:**
+1. Verify CloudFront custom error responses are configured (404 → 200, `/index.html`)
+2. Check app's `vite.config.ts` has correct `base` path
+3. Test build locally:
+   ```bash
+   pnpm build --filter=app-name
+   cd apps/app-name/dist
+   python3 -m http.server 8000
+   # Visit http://localhost:8000/app-name/
+   ```
 
-Expected monthly costs:
+### Permission Denied in GitHub Actions
 
-| Service | Usage | Cost |
-|---------|-------|------|
-| Amplify Hosting | 15 apps, ~10GB bandwidth | ~$30 |
-| Lambda | ~1,000 invocations/month | ~$0.20 |
-| API Gateway | ~1,000 requests/month | ~$0.50 |
-| Route 53 | 1 hosted zone | $0.50 |
-| CloudFront | Included with Amplify | $0 |
-| **Total** | | **~$31/month** |
+**Problem:** AWS permissions errors during deployment
 
-Same cost as EC2, but with:
-- Global CDN (10x faster)
-- Zero-downtime deployments
-- Independent app deploys
-- Automatic scaling
-- Better reliability
+**Solution:**
+```bash
+# Verify IAM role ARN in GitHub secrets matches Terraform output
+terraform output github_actions_role_arn
 
-## Support Resources
+# Check IAM role trust policy includes GitHub OIDC
+aws iam get-role --role-name dreadfolio-github-actions-deploy
 
-- [AWS Amplify Documentation](https://docs.aws.amazon.com/amplify/)
-- [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/)
-- [AWS SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/)
-- [Turborepo Deployment Guide](https://turbo.build/repo/docs/handbook/deploying-with-docker)
+# Verify IAM policies attached to role
+aws iam list-attached-role-policies \
+  --role-name dreadfolio-github-actions-deploy
+```
+
+### Terraform State Locked
+
+**Problem:** `terraform apply` fails with "state locked"
+
+**Solution:**
+```bash
+# Check who has the lock
+aws dynamodb get-item \
+  --table-name dreadfolio-terraform-locks \
+  --key '{"LockID": {"S": "dreadfolio-terraform-state/terraform.tfstate"}}'
+
+# Force unlock (only if you're sure no one else is running terraform)
+terraform force-unlock <lock-id>
+```
+
+## Cost Optimization
+
+### Current Costs
+
+**Estimated monthly costs:**
+- CloudFront (staging + prod): ~$3.00
+- S3 storage (30 buckets): ~$0.70
+- Route 53 hosted zone: $0.50
+- Lambda (Sudoku API): ~$0.20
+- Data transfer: ~$0.50
+- **Total: ~$4.90/month**
+
+**Savings:** ~$26/month vs previous EC2 setup ($31/month)
+
+### Optimization Tips
+
+1. **CloudFront caching:**
+   - Assets cached for 1 year (31536000s)
+   - Only invalidate changed paths
+   - Use versioned filenames (Vite does this automatically)
+
+2. **S3 lifecycle:**
+   - Old versions deleted after 30 days
+   - Reduces storage costs
+
+3. **GitHub Actions:**
+   - Selective builds save minutes
+   - Use cache for node_modules
+   - Free tier: 2000 minutes/month
+
+## Rollback Procedure
+
+### Rollback via S3 Versioning
+
+```bash
+# List versions
+aws s3api list-object-versions \
+  --bucket app-name-prod \
+  --prefix index.html
+
+# Copy previous version to current
+aws s3api copy-object \
+  --bucket app-name-prod \
+  --copy-source app-name-prod/index.html?versionId=<version-id> \
+  --key index.html
+
+# Invalidate CloudFront
+aws cloudfront create-invalidation \
+  --distribution-id <dist-id> \
+  --paths "/app-name/*"
+```
+
+### Rollback via Git Revert
+
+```bash
+# Revert commit
+git revert <commit-hash>
+git push origin main
+
+# GitHub Actions will auto-deploy reverted version
+```
+
+### Emergency Rollback (Manual)
+
+```bash
+# Build previous version locally
+git checkout <previous-commit>
+pnpm install
+pnpm build --filter=app-name
+
+# Upload to S3
+aws s3 sync apps/app-name/dist/ s3://app-name-prod/ --delete
+
+# Invalidate CloudFront
+aws cloudfront create-invalidation \
+  --distribution-id <dist-id> \
+  --paths "/app-name/*"
+```
+
+## Security
+
+### IAM Role Best Practices
+
+- ✅ OIDC authentication (no long-lived keys)
+- ✅ Principle of least privilege (S3 + CloudFront only)
+- ✅ Scoped to specific repository
+- ✅ Separate role for Terraform operations
+
+### S3 Bucket Security
+
+- ✅ All buckets private (no public access)
+- ✅ CloudFront OAC (Origin Access Control)
+- ✅ Encryption at rest (AES256)
+- ✅ Versioning enabled (for rollbacks)
+
+### CloudFront Security
+
+- ✅ HTTPS only (HTTP → HTTPS redirect)
+- ✅ TLS 1.2+ enforced
+- ✅ Custom SSL certificates (not default)
+- ✅ Geographic restrictions: none (global access)
+
+### Secrets Management
+
+- ✅ GitHub Secrets (encrypted at rest)
+- ✅ No secrets in code or Terraform files
+- ✅ Build-time environment variables only
+- ✅ Firebase API keys restricted to domains
+
+## Monitoring
+
+### CloudFront Metrics
+
+View in AWS Console → CloudFront → Distribution → Monitoring
+
+Key metrics:
+- **Requests**: Total requests per minute
+- **Bytes downloaded**: Bandwidth usage
+- **Error rate**: 4xx/5xx errors
+- **Cache hit rate**: % of requests served from cache
+
+### GitHub Actions Logs
+
+View in GitHub → Actions → Workflow runs
+
+Includes:
+- Build output
+- Deployment logs
+- CloudFront invalidation status
+- S3 sync details
+
+### Cost Monitoring
+
+View in AWS Console → Cost Management → Cost Explorer
+
+Set up:
+- Budget alerts ($10/month threshold)
+- Cost anomaly detection
+- Monthly cost reports
+
+## Maintenance
+
+### Regular Tasks
+
+**Weekly:**
+- Review GitHub Actions logs for failures
+- Check CloudFront cache hit rate
+- Monitor AWS costs
+
+**Monthly:**
+- Review S3 storage usage
+- Check for unused resources
+- Update Terraform provider versions
+
+**Quarterly:**
+- Audit IAM permissions
+- Review CloudFront behaviors
+- Test rollback procedures
+- Update Node.js/pnpm versions
+
+### Updating Dependencies
+
+```bash
+# Update all packages
+pnpm update --recursive
+
+# Test locally
+pnpm build
+
+# Deploy to staging first
+git push origin staging
+# Test thoroughly
+git push origin main
+```
+
+## Production Deployment Checklist
+
+Before deploying to production for the first time:
+
+- [ ] Terraform backend created and configured
+- [ ] ACM certificates validated
+- [ ] Staging environment tested end-to-end
+- [ ] All apps tested in staging
+- [ ] Firebase authentication working in staging
+- [ ] GitHub secrets configured for production
+- [ ] Backup current production site
+- [ ] DNS TTL lowered (24h before cutover)
+- [ ] Production Terraform applied
+- [ ] All apps deployed to production
+- [ ] Smoke tests passed
+- [ ] SSL certificate verified
+- [ ] Performance tested (Lighthouse)
+- [ ] Monitoring configured
+- [ ] Rollback procedure documented
+
+## Additional Resources
+
+- [Terraform AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+- [CloudFront Documentation](https://docs.aws.amazon.com/cloudfront/)
+- [GitHub Actions OIDC](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+- [Vite Base Path](https://vitejs.dev/guide/build.html#public-base-path)
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+
+## Support
+
+For issues:
+1. Check this documentation
+2. Review Terraform module READMEs in `infrastructure/terraform/`
+3. Check GitHub Actions logs
+4. Review AWS CloudWatch logs
+5. Consult AWS documentation

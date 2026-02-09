@@ -1,0 +1,204 @@
+name: Deploy to CloudFront
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: 'Comma-separated list of apps to deploy (leave empty for changed apps only)'
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.set-apps.outputs.apps }}
+      environment: ${{ steps.set-env.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Determine environment
+        id: set-env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect changed apps
+        id: detect
+        run: |
+          chmod +x ./infrastructure/scripts/detect-changed-apps.sh
+          CHANGED_APPS=$(./infrastructure/scripts/detect-changed-apps.sh)
+          echo "changed_apps=$CHANGED_APPS" >> $GITHUB_OUTPUT
+
+      - name: Set apps to deploy
+        id: set-apps
+        run: |
+          # Use manual input if provided, otherwise use detected changes
+          if [[ -n "${{ github.event.inputs.apps }}" ]]; then
+            # Convert comma-separated string to JSON array
+            APPS_INPUT="${{ github.event.inputs.apps }}"
+            APPS_JSON=$(echo "$APPS_INPUT" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+            echo "apps=$APPS_JSON" >> $GITHUB_OUTPUT
+            echo "Deploying manually specified apps: $APPS_JSON"
+          else
+            echo "apps=${{ steps.detect.outputs.changed_apps }}" >> $GITHUB_OUTPUT
+            echo "Deploying changed apps: ${{ steps.detect.outputs.changed_apps }}"
+          fi
+
+  build-and-deploy:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.detect-changes.outputs.apps) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Determine app path
+        id: app-config
+        run: |
+          APP="${{ matrix.app }}"
+          ENV="${{ needs.detect-changes.outputs.environment }}"
+          
+          # Map app names to their build paths
+          case $APP in
+            "portfolio")
+              DIST_PATH="apps/portfolio/frontend/dist"
+              BUCKET_NAME="portfolio-$ENV"
+              ;;
+            "shareme")
+              DIST_PATH="apps/shareme/frontend/dist"
+              BUCKET_NAME="shareme-$ENV"
+              ;;
+            "su-done-ku")
+              DIST_PATH="apps/su-done-ku/frontend/dist"
+              BUCKET_NAME="su-done-ku-$ENV"
+              ;;
+            *)
+              DIST_PATH="apps/$APP/dist"
+              BUCKET_NAME="$APP-$ENV"
+              ;;
+          esac
+          
+          echo "dist_path=$DIST_PATH" >> $GITHUB_OUTPUT
+          echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+
+      - name: Build app
+        run: pnpm build --filter=${{ matrix.app }}
+        env:
+          VITE_GIPHY_API_KEY: ${{ secrets.VITE_GIPHY_API_KEY }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_VERCEL_TOKEN: ${{ secrets.VITE_VERCEL_TOKEN }}
+          VITE_SUDOKU_API_URL: ${{ secrets.VITE_SUDOKU_API_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Sync to S3
+        run: |
+          # Upload all files except index.html with long cache
+          aws s3 sync ${{ steps.app-config.outputs.dist_path }} \
+            s3://${{ steps.app-config.outputs.bucket_name }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html"
+          
+          # Upload index.html with no cache (for immediate updates)
+          aws s3 cp ${{ steps.app-config.outputs.dist_path }}/index.html \
+            s3://${{ steps.app-config.outputs.bucket_name }}/index.html \
+            --cache-control "public, max-age=0, must-revalidate"
+
+      - name: Invalidate CloudFront
+        run: |
+          if [[ "${{ steps.app-config.outputs.environment }}" == "prod" ]]; then
+            DISTRIBUTION_ID="${{ secrets.PROD_CLOUDFRONT_ID }}"
+            DOMAIN="scottjhetrick.com"
+          else
+            DISTRIBUTION_ID="${{ secrets.STAGING_CLOUDFRONT_ID }}"
+            DOMAIN="staging.scottjhetrick.com"
+          fi
+          
+          # Determine invalidation path
+          if [[ "${{ matrix.app }}" == "portfolio" ]]; then
+            INVALIDATION_PATH="/*"
+          else
+            # Map app name to URL path
+            case "${{ matrix.app }}" in
+              "camera-tricks-demo")
+                INVALIDATION_PATH="/camera-tricks/*"
+                ;;
+              "home-page")
+                INVALIDATION_PATH="/home/*"
+                ;;
+              *)
+                INVALIDATION_PATH="/${{ matrix.app }}/*"
+                ;;
+            esac
+          fi
+          
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "$INVALIDATION_PATH"
+          
+          echo "✅ Deployed ${{ matrix.app }} to ${{ steps.app-config.outputs.environment }}"
+          echo "🔗 URL: https://$DOMAIN$INVALIDATION_PATH"
+
+      - name: Comment on commit (optional)
+        if: github.event_name == 'push'
+        run: |
+          echo "Deployed ${{ matrix.app }} to ${{ steps.app-config.outputs.environment }}"
+
+  summary:
+    needs: [detect-changes, build-and-deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ needs.detect-changes.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Apps deployed:** ${{ needs.detect-changes.outputs.apps }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ needs.build-and-deploy.result }}" >> $GITHUB_STEP_SUMMARY

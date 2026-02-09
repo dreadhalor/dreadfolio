@@ -1,0 +1,98 @@
+name: Terraform Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      action:
+        description: 'Terraform action'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: infrastructure/terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: infrastructure/terraform
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
+            terraform plan -var-file=production.tfvars -out=tfplan
+          else
+            terraform plan -var-file=staging.tfvars -out=tfplan
+          fi
+
+      - name: Terraform Apply
+        if: github.event.inputs.action == 'apply'
+        working-directory: infrastructure/terraform
+        run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        working-directory: infrastructure/terraform
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "production" ]]; then
+            terraform destroy -var-file=production.tfvars -auto-approve
+          else
+            terraform destroy -var-file=staging.tfvars -auto-approve
+          fi
+
+      - name: Terraform Outputs
+        if: github.event.inputs.action == 'apply'
+        working-directory: infrastructure/terraform
+        run: |
+          echo "## Terraform Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          terraform output -json | jq -r 'to_entries[] | "- **\(.key):** \(.value.value)"' >> $GITHUB_STEP_SUMMARY
+
+      - name: Save outputs to artifacts
+        if: github.event.inputs.action == 'apply'
+        working-directory: infrastructure/terraform
+        run: |
+          terraform output -json > terraform-outputs.json
+
+      - name: Upload outputs
+        if: github.event.inputs.action == 'apply'
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-outputs-${{ github.event.inputs.environment }}
+          path: infrastructure/terraform/terraform-outputs.json

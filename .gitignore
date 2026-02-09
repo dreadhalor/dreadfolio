@@ -45,3 +45,10 @@ yarn-error.log*
 
 # docker image tar
 portfolio.tar
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/tfplan
+**/terraform.tfstate
+**/terraform.tfstate.backup
