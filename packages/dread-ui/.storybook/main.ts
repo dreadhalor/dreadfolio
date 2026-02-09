@@ -27,6 +27,8 @@ const config: StorybookConfig = {
   viteFinal: async (config) => {
     config.plugins = config.plugins || [];
     config.plugins.push(tailwindcss());
+    // Set base path for deployment to /dread-ui/
+    config.base = '/dread-ui/';
     return config;
   },
 };

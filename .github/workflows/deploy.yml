@@ -117,6 +117,10 @@ jobs:
               DIST_PATH="apps/su-done-ku/frontend/dist"
               BUCKET_NAME="su-done-ku-$ENV-2026"
               ;;
+            "dread-ui")
+              DIST_PATH="packages/dread-ui/dist"
+              BUCKET_NAME="dread-ui-$ENV-2026"
+              ;;
             *)
               DIST_PATH="apps/$APP/dist"
               BUCKET_NAME="$APP-$ENV-2026"

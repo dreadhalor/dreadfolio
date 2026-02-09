@@ -33,6 +33,7 @@ variable "apps" {
     { name = "portfolio", path = "/portfolio/" },
     { name = "camera-tricks-demo", path = "/" },
     { name = "home-page", path = "/home/" },
+    { name = "dread-ui", path = "/dread-ui/" },
     { name = "gifster", path = "/gifster/" },
     { name = "fallcrate", path = "/fallcrate/" },
     { name = "shareme", path = "/shareme/" },

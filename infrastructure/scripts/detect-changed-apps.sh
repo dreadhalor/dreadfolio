@@ -12,6 +12,7 @@ declare -a APPS=(
   "portfolio:apps/portfolio/frontend"
   "camera-tricks-demo:apps/camera-tricks-demo"
   "home-page:apps/home-page"
+  "dread-ui:packages/dread-ui"
   "gifster:apps/gifster"
   "fallcrate:apps/fallcrate"
   "shareme:apps/shareme/frontend"
