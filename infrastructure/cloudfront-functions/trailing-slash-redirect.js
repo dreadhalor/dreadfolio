@@ -14,6 +14,7 @@ function handler(event) {
     '/portfolio',
     '/camera-tricks',
     '/home',
+    '/dread-ui',
     '/gifster',
     '/fallcrate',
     '/shareme',
