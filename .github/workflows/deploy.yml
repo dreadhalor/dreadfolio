@@ -103,22 +103,23 @@ jobs:
           ENV="${{ needs.detect-changes.outputs.environment }}"
           
           # Map app names to their build paths
+          # NOTE: Bucket names must match Terraform: ${app}-${env}-2026
           case $APP in
             "portfolio")
               DIST_PATH="apps/portfolio/frontend/dist"
-              BUCKET_NAME="portfolio-$ENV"
+              BUCKET_NAME="portfolio-$ENV-2026"
               ;;
             "shareme")
               DIST_PATH="apps/shareme/frontend/dist"
-              BUCKET_NAME="shareme-$ENV"
+              BUCKET_NAME="shareme-$ENV-2026"
               ;;
             "su-done-ku")
               DIST_PATH="apps/su-done-ku/frontend/dist"
-              BUCKET_NAME="su-done-ku-$ENV"
+              BUCKET_NAME="su-done-ku-$ENV-2026"
               ;;
             *)
               DIST_PATH="apps/$APP/dist"
-              BUCKET_NAME="$APP-$ENV"
+              BUCKET_NAME="$APP-$ENV-2026"
               ;;
           esac
           
