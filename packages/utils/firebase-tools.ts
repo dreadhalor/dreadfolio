@@ -14,16 +14,30 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+console.log('Firebase config:', {
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasProjectId: !!firebaseConfig.projectId,
+  projectId: firebaseConfig.projectId,
+});
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+console.log('Firebase app initialized:', app.name, app.options.projectId);
 
 let db: ReturnType<typeof getFirestore>;
 let auth: ReturnType<typeof getAuth>;
 let storage: ReturnType<typeof getStorage>;
 
 try {
+  console.log('Getting Firestore...');
   db = getFirestore(app);
+  console.log('Firestore initialized');
+  
   auth = getAuth(app);
+  console.log('Auth initialized');
+  
   storage = getStorage(app);
+  console.log('Storage initialized');
 
   // Only connect to emulators if explicitly enabled
   const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
