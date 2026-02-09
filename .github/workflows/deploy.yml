@@ -59,8 +59,10 @@ jobs:
             echo "apps=$APPS_JSON" >> $GITHUB_OUTPUT
             echo "Deploying manually specified apps: $APPS_JSON"
           else
-            echo "apps=${{ steps.detect.outputs.changed_apps }}" >> $GITHUB_OUTPUT
-            echo "Deploying changed apps: ${{ steps.detect.outputs.changed_apps }}"
+            # Pass the JSON directly without expansion issues
+            APPS='${{ steps.detect.outputs.changed_apps }}'
+            echo "apps=$APPS" >> $GITHUB_OUTPUT
+            echo "Deploying changed apps: $APPS"
           fi
 
   build-and-deploy:
