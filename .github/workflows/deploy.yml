@@ -65,12 +65,12 @@ jobs:
 
   build-and-deploy:
     needs: detect-changes
-    if: needs.detect-changes.outputs.apps != '[]'
+    if: needs.detect-changes.outputs.apps != '[]' && needs.detect-changes.outputs.apps != ''
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        app: ${{ fromJson(needs.detect-changes.outputs.apps) }}
+        app: ${{fromJson(needs.detect-changes.outputs.apps)}}
 
     steps:
       - name: Checkout code
