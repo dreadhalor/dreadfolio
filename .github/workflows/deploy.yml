@@ -2,7 +2,7 @@ name: Deploy to CloudFront
 
 on:
   push:
-    branches: [staging, main]
+    branches: [main]  # Temporarily deploy main to staging until production is ready
     paths:
       - 'apps/**'
       - 'packages/**'
@@ -32,11 +32,14 @@ jobs:
       - name: Determine environment
         id: set-env
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "environment=prod" >> $GITHUB_OUTPUT
-          else
-            echo "environment=staging" >> $GITHUB_OUTPUT
-          fi
+          # TEMPORARY: Always deploy to staging until production infrastructure is ready
+          echo "environment=staging" >> $GITHUB_OUTPUT
+          # TODO: Uncomment when production is ready
+          # if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          #   echo "environment=prod" >> $GITHUB_OUTPUT
+          # else
+          #   echo "environment=staging" >> $GITHUB_OUTPUT
+          # fi
 
       - name: Detect changed apps
         id: detect
