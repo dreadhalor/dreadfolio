@@ -25,22 +25,25 @@ try {
   auth = getAuth(app);
   storage = getStorage(app);
 
-  // Connect to Firebase auth emulator if the host is localhost
-  if (location.hostname === 'localhost') {
-    connectAuthEmulator(auth, 'http://localhost:9099', {
-      disableWarnings: true,
-    });
-  }
+  // Only connect to emulators if explicitly enabled
+  const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
 
-  // Connect to Firestore emulator if the host is localhost
-  if (location.hostname === 'localhost') {
-    connectFirestoreEmulator(db, 'localhost', 8080);
-  }
-
-  // Connect to Firebase storage emulator if the host is localhost
-  if (location.hostname === 'localhost') {
-    // Point to the emulators running on localhost.
-    connectStorageEmulator(storage, 'localhost', 9199);
+  // Connect to Firebase emulators if enabled and on localhost
+  if (location.hostname === 'localhost' && useEmulators) {
+    try {
+      connectAuthEmulator(auth, 'http://localhost:9099', {
+        disableWarnings: true,
+      });
+      connectFirestoreEmulator(db, 'localhost', 8080);
+      connectStorageEmulator(storage, 'localhost', 9199);
+      console.log('Connected to Firebase emulators');
+    } catch (emulatorError) {
+      console.warn(
+        'Failed to connect to Firebase emulators (they may not be running):',
+        emulatorError,
+      );
+      console.log('Continuing with production Firebase...');
+    }
   }
 } catch (error) {
   console.warn('Firebase services not available:', error);
