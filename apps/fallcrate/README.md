@@ -1,5 +1,7 @@
 # Fallcrate
 
+Cloud file storage application with Firebase backend.
+
 Cloud-based file storage and management application with drag-and-drop functionality, Firebase backend, and advanced file organization features.
 
 ## Overview
