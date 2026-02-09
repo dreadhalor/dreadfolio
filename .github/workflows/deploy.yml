@@ -53,9 +53,9 @@ jobs:
         run: |
           # Use manual input if provided, otherwise use detected changes
           if [[ -n "${{ github.event.inputs.apps }}" ]]; then
-            # Convert comma-separated string to JSON array
+            # Convert comma-separated string to JSON array (compact single-line format)
             APPS_INPUT="${{ github.event.inputs.apps }}"
-            APPS_JSON=$(echo "$APPS_INPUT" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+            APPS_JSON=$(echo "$APPS_INPUT" | jq -Rc 'split(",") | map(gsub("^\\s+|\\s+$";""))')
             echo "apps=$APPS_JSON" >> $GITHUB_OUTPUT
             echo "Deploying manually specified apps: $APPS_JSON"
           else
