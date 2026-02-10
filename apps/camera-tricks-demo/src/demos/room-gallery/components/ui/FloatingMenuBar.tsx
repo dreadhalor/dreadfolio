@@ -6,7 +6,6 @@ import { useViewportDimensions } from '../../hooks/useViewportDimensions';
 import { SPACING, UI_Z_INDEX, LAYOUT } from '../../config/styleConstants';
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
 import { AppGridModal } from './AppGridModal';
-import { HomeButton } from './HomeButton';
 import { GridButton } from './GridButton';
 import { RestoreAppButton } from './RestoreAppButton';
 import { LeftButtonContainer } from './LeftButtonContainer';
@@ -48,10 +47,10 @@ export function FloatingMenuBar({
   roomProgress: _roomProgress,
   currentRoomProgressRef,
   onRoomClick,
-  onHomeClick,
+  onHomeClick: _onHomeClick,
   onRestoreAppClick,
   minimizedAppIconUrl,
-  isAtHomepage,
+  isAtHomepage: _isAtHomepage,
   isCollapsed = false,
   skipInitialAnimation = false,
   onExpand,
@@ -304,31 +303,22 @@ export function FloatingMenuBar({
         }
         title={isCollapsed ? 'Show navigation menu' : undefined}
       >
-        {/* Home button container - absolutely positioned, collapses without affecting layout */}
-        <LeftButtonContainer>
-          <HomeButton isAtHomepage={isAtHomepage} onClick={onHomeClick} />
+        {/* Minimized app button - left side, only when app is minimized */}
+        <LeftButtonContainer visible={!shouldHideButtons && !!minimizedAppIconUrl}>
+          <RestoreAppButton
+            minimizedAppIconUrl={minimizedAppIconUrl}
+            onClick={onRestoreAppClick}
+          />
           <ButtonSpacer />
         </LeftButtonContainer>
 
         {/* Room navigation cards container - centered, full width when collapsed */}
         <CardsContainer />
 
-        {/* Grid button - only shows when in app switcher (expanded) */}
+        {/* Grid button - right side, always visible in app switcher */}
         <RightButtonContainer visible={!shouldHideButtons}>
           <ButtonSpacer />
           <GridButton onClick={() => setIsGridModalOpen(true)} />
-        </RightButtonContainer>
-
-        {/* Restore app button container - absolutely positioned, slides out without affecting layout */}
-        {/* Always render to allow smooth fade out animation */}
-        <RightButtonContainer
-          visible={!shouldHideButtons && !!minimizedAppIconUrl}
-        >
-          <ButtonSpacer />
-          <RestoreAppButton
-            minimizedAppIconUrl={minimizedAppIconUrl}
-            onClick={onRestoreAppClick}
-          />
         </RightButtonContainer>
 
         {/* CSS animations and utilities */}

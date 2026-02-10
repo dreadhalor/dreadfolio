@@ -4,25 +4,26 @@ import { SPACING } from '../../config/styleConstants';
 
 interface LeftButtonContainerProps {
   children: ReactNode;
+  visible: boolean;
 }
 
-export function LeftButtonContainer({ children }: LeftButtonContainerProps) {
-  const { isCollapsed, shouldHideButtons } = useFloatingMenuBarContext();
+export function LeftButtonContainer({ children, visible }: LeftButtonContainerProps) {
+  const { isCollapsed } = useFloatingMenuBarContext();
 
   return (
     <div
       style={{
         position: 'absolute',
-        left: shouldHideButtons ? '-80px' : '0px',
+        left: visible ? '0px' : '-80px',
         top: '50%',
         transform: 'translateY(-50%)',
-        opacity: shouldHideButtons ? 0 : 1,
+        opacity: visible ? 1 : 0,
         transition:
           'left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         gap: '6px', // Reduced from SPACING.xs (8px) for tighter spacing
         alignItems: 'center',
-        pointerEvents: shouldHideButtons ? 'none' : 'auto',
+        pointerEvents: visible ? 'auto' : 'none',
         zIndex: 200, // Above cards
         paddingLeft: SPACING.xs,
         paddingTop: SPACING.xs,
