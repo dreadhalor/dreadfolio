@@ -112,7 +112,7 @@ export function AppGridModal({
           console.log('[AppGridModal] Blocked drawer open - fast traveling');
           return;
         }
-        
+
         if (!isOpen) {
           // Blur search input before closing
           if (searchInputRef.current) {

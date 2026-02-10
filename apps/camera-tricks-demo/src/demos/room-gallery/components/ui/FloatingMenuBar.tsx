@@ -5,7 +5,6 @@ import { useCardAnimation } from '../../hooks/useCardAnimation';
 import { useViewportDimensions } from '../../hooks/useViewportDimensions';
 import { SPACING, UI_Z_INDEX, LAYOUT } from '../../config/styleConstants';
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
-import { AppGridModal } from './AppGridModal';
 import { GridButton } from './GridButton';
 import { RestoreAppButton } from './RestoreAppButton';
 import { LeftButtonContainer } from './LeftButtonContainer';
@@ -13,9 +12,8 @@ import { RightButtonContainer } from './RightButtonContainer';
 import { ButtonSpacer } from './ButtonSpacer';
 import { CardsContainer } from './CardsContainer';
 import { FloatingMenuBarProvider } from './FloatingMenuBarContext';
-import { useRef, useState, useCallback, useEffect, MutableRefObject } from 'react';
+import { useRef, useState, MutableRefObject } from 'react';
 import { useDrag } from '@use-gesture/react';
-import { AppLoaderState } from '../../providers/AppLoaderContext';
 
 interface FloatingMenuBarProps {
   rooms: RoomData[];
@@ -33,9 +31,8 @@ interface FloatingMenuBarProps {
   onExpand?: () => void; // Called when clicking collapsed indicator
   onDrag?: (deltaProgress: number) => void; // Direct drag callback (updates room progress)
   onDragEnd?: () => void; // Called when drag ends (for snapping)
-  onModalStateChange?: (isOpen: boolean) => void; // Called when modal opens/closes
-  appLoaderState?: AppLoaderState; // Current app loader state (to auto-close drawer)
-  isFastTraveling?: boolean; // Fast traveling to room (to auto-close drawer)
+  isGridModalOpen: boolean; // Controlled drawer state (for drag blocking)
+  onGridModalOpen: () => void; // Callback to open grid modal
 }
 
 /**
@@ -62,44 +59,15 @@ export function FloatingMenuBar({
   onExpand,
   onDrag,
   onDragEnd,
-  onModalStateChange,
-  appLoaderState,
-  isFastTraveling,
+  isGridModalOpen,
+  onGridModalOpen,
 }: FloatingMenuBarProps) {
   const isMobile = useIsMobile();
   const smoothRoomProgress = useSyncedRefState(
     currentRoomProgressRef,
   ) as number;
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
-  const [isGridModalOpen, setIsGridModalOpen] = useState(false);
   const { viewportWidth } = useViewportDimensions();
-
-  // Notify parent when modal state changes (synchronously)
-  const handleGridModalOpen = useCallback(() => {
-    setIsGridModalOpen(true);
-    onModalStateChange?.(true);
-  }, [onModalStateChange]);
-
-  const handleGridModalClose = useCallback(() => {
-    setIsGridModalOpen(false);
-    onModalStateChange?.(false);
-  }, [onModalStateChange]);
-
-  // Auto-close drawer when app starts loading (handles browser navigation edge case)
-  useEffect(() => {
-    if (appLoaderState === 'portal-zooming' && isGridModalOpen) {
-      console.log('[FloatingMenuBar] Auto-closing drawer - app loading started');
-      handleGridModalClose();
-    }
-  }, [appLoaderState, isGridModalOpen, handleGridModalClose]);
-
-  // Auto-close drawer when fast traveling (prevents drawer from reopening during travel)
-  useEffect(() => {
-    if (isFastTraveling && isGridModalOpen) {
-      console.log('[FloatingMenuBar] Auto-closing drawer - fast travel started');
-      handleGridModalClose();
-    }
-  }, [isFastTraveling, isGridModalOpen, handleGridModalClose]);
 
   // Use desktop values for both mobile and desktop
   const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH; // 60px
@@ -364,7 +332,7 @@ export function FloatingMenuBar({
         {/* Grid button - right side, always visible in app switcher */}
         <RightButtonContainer visible={!shouldHideButtons}>
           <ButtonSpacer />
-          <GridButton onClick={handleGridModalOpen} />
+          <GridButton onClick={onGridModalOpen} />
         </RightButtonContainer>
 
         {/* CSS animations and utilities */}
@@ -382,18 +350,6 @@ export function FloatingMenuBar({
         }
       `}</style>
       </div>
-
-      {/* Grid Modal */}
-      <AppGridModal
-        rooms={rooms}
-        currentRoom={currentRoom}
-        minimizedAppIconUrl={minimizedAppIconUrl}
-        onRoomClick={onRoomClick}
-        onLoadApp={onLoadApp}
-        onClose={handleGridModalClose}
-        open={isGridModalOpen}
-        isFastTraveling={isFastTraveling}
-      />
     </FloatingMenuBarProvider>
   );
 }

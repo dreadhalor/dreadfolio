@@ -11,6 +11,7 @@ import { SplitCameraRenderer } from './components/scene/SplitCameraRenderer';
 import { FPSDisplay } from './components/ui/FPSDisplay';
 import { DrawCallDisplay } from './performance/DrawCallMonitor';
 import { FloatingMenuBar } from './components/ui/FloatingMenuBar';
+import { AppGridModal } from './components/ui/AppGridModal';
 import { AppLoader } from './components/ui/AppLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NavigationToast } from './components/ui/NavigationToast';
@@ -68,9 +69,6 @@ function RoomGalleryInner() {
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
 
-  // Modal state for blocking scene interaction
-  const [isModalBlockingInteraction, setIsModalBlockingInteraction] = useState(false);
-
   // PRIMARY STATE: Room progress (0.0 to 14.0)
   // Initialize with correct room if loading via URL parameter
   const [roomProgress, setRoomProgress] = useState(initialRoomIndex);
@@ -88,18 +86,50 @@ function RoomGalleryInner() {
     activePortal: number | null;
   } | null>(null);
   
+  // Modal state for blocking scene interaction
+  const [isModalBlockingInteraction, setIsModalBlockingInteraction] = useState(false);
+  
+  // App grid drawer state (lifted from FloatingMenuBar for independent rendering)
+  const [isGridModalOpen, setIsGridModalOpen] = useState(false);
+  
+  // Track if we're fast-traveling before app load (use state so hooks can react)
+  const [isFastTravelingToApp, setIsFastTravelingToApp] = useState(false);
+  
   // Refs for smooth updates (need to declare before routing callbacks)
   // Initialize with correct room if loading via URL parameter
   const targetRoomProgressRef = useRef(initialRoomIndex); // Target position (instant)
   const currentRoomProgressRef = useRef(initialRoomIndex); // Current position (lerped, matches camera)
   const activePortalRef = useRef<number | null>(null); // Track which portal is active for animations
   const fastTravelRafRef = useRef<number | null>(null); // RAF ID for fast travel polling
-  
-  // Track if we're fast-traveling before app load (use state so hooks can react)
-  const [isFastTravelingToApp, setIsFastTravelingToApp] = useState(false);
 
   // Combine blocking conditions: modal open OR fast traveling to app
   const isNavigationBlocked = isModalBlockingInteraction || isFastTravelingToApp;
+  
+  const handleGridModalOpen = useCallback(() => {
+    setIsGridModalOpen(true);
+    setIsModalBlockingInteraction(true);
+  }, []);
+
+  const handleGridModalClose = useCallback(() => {
+    setIsGridModalOpen(false);
+    setIsModalBlockingInteraction(false);
+  }, []);
+
+  // Auto-close drawer when app starts loading
+  useEffect(() => {
+    if (appLoaderState === 'portal-zooming' && isGridModalOpen) {
+      console.log('[RoomGallery] Auto-closing drawer - app loading started');
+      handleGridModalClose();
+    }
+  }, [appLoaderState, isGridModalOpen, handleGridModalClose]);
+
+  // Auto-close drawer when fast traveling
+  useEffect(() => {
+    if (isFastTravelingToApp && isGridModalOpen) {
+      console.log('[RoomGallery] Auto-closing drawer - fast travel started');
+      handleGridModalClose();
+    }
+  }, [isFastTravelingToApp, isGridModalOpen, handleGridModalClose]);
 
   // Mouse and touch drag navigation
   const { isDragging, handleMouseDown, handleTouchStart } = useDragNavigation({
@@ -485,8 +515,8 @@ function RoomGalleryInner() {
         roomProgress={roomProgress}
         currentRoomProgressRef={currentRoomProgressRef}
         onRoomClick={moveTo}
-        appLoaderState={appLoaderState}
-        isFastTraveling={isFastTravelingToApp}
+        isGridModalOpen={isGridModalOpen}
+        onGridModalOpen={handleGridModalOpen}
         onLoadApp={(url: string, name: string, roomIndex: number) => {
           // CRITICAL: Snap camera to exact room position before loading
           // Otherwise, if camera is mid-lerp (e.g., 0.8 traveling to 0),
@@ -599,7 +629,31 @@ function RoomGalleryInner() {
           targetRoomProgressRef.current = nearestRoom;
           setRoomProgress(nearestRoom);
         }}
-        onModalStateChange={setIsModalBlockingInteraction}
+      />
+      
+      {/* App Grid Modal - Sibling to FloatingMenuBar for independent rendering */}
+      <AppGridModal
+        rooms={ROOMS}
+        currentRoom={currentRoom}
+        minimizedAppIconUrl={
+          (appLoaderState === 'minimizing' || appLoaderState === 'minimized') &&
+          currentAppUrl
+            ? ROOMS.find((room) => room.appUrl === currentAppUrl)?.iconUrl
+            : null
+        }
+        onRoomClick={moveTo}
+        onLoadApp={(url: string, name: string, roomIndex: number) => {
+          // CRITICAL: Snap camera to exact room position before loading
+          targetRoomProgressRef.current = roomIndex;
+          currentRoomProgressRef.current = roomIndex;
+          setRoomProgress(roomIndex);
+          
+          activePortalRef.current = roomIndex;
+          loadApp(url, name);
+        }}
+        onClose={handleGridModalClose}
+        open={isGridModalOpen}
+        isFastTraveling={isFastTravelingToApp}
       />
 
       {/* Debug Overlay */}
