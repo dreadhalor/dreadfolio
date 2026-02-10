@@ -38,6 +38,7 @@ export function AppGridModal({
   const [searchQuery, setSearchQuery] = useState('');
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const cardRefsRef = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const handleRoomClick = (room: RoomData) => {
     // Blur search input to close keyboard and reset viewport
@@ -102,6 +103,29 @@ export function AppGridModal({
       });
     }
   }, [open, rooms]);
+
+  // Scroll to centered app when drawer opens (instant, before animation completes)
+  useEffect(() => {
+    if (open) {
+      // Minimal delay to let DOM render, then instant scroll
+      const timer = setTimeout(() => {
+        const centeredIndex = rooms.findIndex(
+          (room) => room.offsetX === currentRoom.offsetX,
+        );
+        if (centeredIndex !== -1) {
+          const cardElement = cardRefsRef.current.get(centeredIndex);
+          if (cardElement) {
+            cardElement.scrollIntoView({
+              behavior: 'auto', // Instant scroll (no animation)
+              block: 'center',
+              inline: 'center',
+            });
+          }
+        }
+      }, 50); // Just enough time for DOM to render
+      return () => clearTimeout(timer);
+    }
+  }, [open, currentRoom, rooms]);
 
   return (
     <Drawer.Root
@@ -294,17 +318,30 @@ export function AppGridModal({
                   const isActive = minimizedAppIconUrl
                     ? room.iconUrl === minimizedAppIconUrl
                     : false;
+                  const isCentered = room.offsetX === currentRoom.offsetX;
+                  const originalIndex = rooms.findIndex((r) => r.name === room.name);
 
                   return (
-                    <AppCard
+                    <div
                       key={room.name}
-                      room={room}
-                      isActive={isActive}
-                      animationProgress={1}
-                      index={index}
-                      shouldAnimate={!hasAnimatedIn}
-                      onClick={() => handleRoomClick(room)}
-                    />
+                      ref={(el) => {
+                        if (el) {
+                          cardRefsRef.current.set(originalIndex, el);
+                        } else {
+                          cardRefsRef.current.delete(originalIndex);
+                        }
+                      }}
+                    >
+                      <AppCard
+                        room={room}
+                        isActive={isActive}
+                        isCentered={isCentered}
+                        animationProgress={1}
+                        index={index}
+                        shouldAnimate={!hasAnimatedIn}
+                        onClick={() => handleRoomClick(room)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -433,6 +470,22 @@ export function AppGridModal({
           }
           50% {
             box-shadow: 0 0 30px rgba(76, 175, 80, 0.8), 0 4px 12px rgba(0, 0, 0, 0.3);
+          }
+        }
+
+        /* Hover effects only on devices that support true hover (not touch devices) */
+        @media (hover: hover) and (pointer: fine) {
+          /* Regular cards (including centered) - full hover effect */
+          .app-card:not(.app-card-active):hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: rgba(255, 255, 255, 0.25) !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+          }
+          
+          /* Minimized app - just scale on hover */
+          .app-card.app-card-active:hover {
+            transform: scale(1.05);
           }
         }
 
