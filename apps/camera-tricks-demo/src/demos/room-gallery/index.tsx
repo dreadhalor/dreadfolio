@@ -93,13 +93,20 @@ function RoomGalleryInner() {
   const targetRoomProgressRef = useRef(initialRoomIndex); // Target position (instant)
   const currentRoomProgressRef = useRef(initialRoomIndex); // Current position (lerped, matches camera)
   const activePortalRef = useRef<number | null>(null); // Track which portal is active for animations
+  const fastTravelRafRef = useRef<number | null>(null); // RAF ID for fast travel polling
+  
+  // Track if we're fast-traveling before app load (use state so hooks can react)
+  const [isFastTravelingToApp, setIsFastTravelingToApp] = useState(false);
+
+  // Combine blocking conditions: modal open OR fast traveling to app
+  const isNavigationBlocked = isModalBlockingInteraction || isFastTravelingToApp;
 
   // Mouse and touch drag navigation
   const { isDragging, handleMouseDown, handleTouchStart } = useDragNavigation({
     targetRoomProgressRef,
     setRoomProgress,
     appLoaderState,
-    isBlocked: isModalBlockingInteraction,
+    isBlocked: isNavigationBlocked,
   });
 
   // URL/History Routing - mediates between browser URL and app state
@@ -109,13 +116,13 @@ function RoomGalleryInner() {
       console.log(`[Routing] Request to open app: ${appId} (room ${roomIndex})${isInitialLoad ? ' [initial load - skip animation]' : ''}`);
       const room = ROOMS[roomIndex];
       
-      // Set room position instantly (no animation needed for URLs)
-      targetRoomProgressRef.current = roomIndex;
-      currentRoomProgressRef.current = roomIndex; // Skip lerp animation
-      setRoomProgress(roomIndex);
-      
       if (isInitialLoad) {
         // Initial page load: Open app immediately, skip all animations
+        // Set room position instantly (no animation)
+        targetRoomProgressRef.current = roomIndex;
+        currentRoomProgressRef.current = roomIndex;
+        setRoomProgress(roomIndex);
+        
         // Set activePortalRef so minimize animation knows which portal to zoom out from
         activePortalRef.current = roomIndex;
         // Set instant zoom portal index (will be used by SplitCameraRenderer to position portal)
@@ -125,23 +132,69 @@ function RoomGalleryInner() {
           loadAppInstantInternal(room.appUrl, room.name);
         }
       } else {
-        // Browser navigation: Brief delay to show room transition with portal animation
-        setTimeout(() => {
-          activePortalRef.current = roomIndex;
-          if (room.appUrl) {
-            loadAppInternal(room.appUrl, room.name);
+        // Browser navigation: Fast travel to room first, THEN enter portal
+        const currentPos = currentRoomProgressRef.current ?? 0;
+        const distance = Math.abs(currentPos - roomIndex);
+        
+        console.log(`[Routing] Fast traveling from ${currentPos.toFixed(2)} to ${roomIndex} (distance: ${distance.toFixed(2)})`);
+        
+        // Mark that we're fast-traveling to load an app (prevents premature minibar & blocks manual nav)
+        setIsFastTravelingToApp(true);
+        
+        // Set target only - let camera lerp smoothly to destination
+        targetRoomProgressRef.current = roomIndex;
+        setRoomProgress(roomIndex);
+        
+        // Poll for arrival: check every frame if we've reached destination
+        const checkArrival = () => {
+          const currentDistance = Math.abs((currentRoomProgressRef.current ?? 0) - roomIndex);
+          
+          // Arrived when within 0.05 units (visually imperceptible, but before snap)
+          if (currentDistance < 0.05) {
+            console.log(`[Routing] Fast travel complete - entering portal`);
+            // Fast travel complete - now we can show minibar & allow manual nav
+            setIsFastTravelingToApp(false);
+            fastTravelRafRef.current = null;
+            activePortalRef.current = roomIndex;
+            if (room.appUrl) {
+              loadAppInternal(room.appUrl, room.name);
+            }
+          } else {
+            // Not there yet, check again next frame
+            fastTravelRafRef.current = requestAnimationFrame(checkArrival);
           }
-        }, 100);
+        };
+        
+        // Cancel any existing fast travel polling
+        if (fastTravelRafRef.current !== null) {
+          cancelAnimationFrame(fastTravelRafRef.current);
+        }
+        
+        // Start polling
+        fastTravelRafRef.current = requestAnimationFrame(checkArrival);
       }
     }, [loadAppInternal, loadAppInstantInternal]),
     onRequestCloseApp: useCallback(() => {
       console.log(`[Routing] Request to close app (from browser back button)`);
+      // Cancel any pending fast travel
+      setIsFastTravelingToApp(false);
+      if (fastTravelRafRef.current !== null) {
+        cancelAnimationFrame(fastTravelRafRef.current);
+        fastTravelRafRef.current = null;
+      }
       minimizeAppInternal();
     }, [minimizeAppInternal]),
   });
 
   // Wrapped loadApp that also updates URL
   const loadApp = useCallback((url: string, name: string) => {
+    // Clear fast travel flag (in case this is called outside browser navigation)
+    setIsFastTravelingToApp(false);
+    // Cancel any pending fast travel polling
+    if (fastTravelRafRef.current !== null) {
+      cancelAnimationFrame(fastTravelRafRef.current);
+      fastTravelRafRef.current = null;
+    }
     loadAppInternal(url, name);
     
     // Find app ID and update URL
@@ -253,7 +306,7 @@ function RoomGalleryInner() {
     setRoomProgress,
     appLoaderState,
     minimizeApp,
-    isBlocked: isModalBlockingInteraction,
+    isBlocked: isNavigationBlocked,
   });
 
   // Horizontal scroll wheel / trackpad navigation
@@ -261,18 +314,24 @@ function RoomGalleryInner() {
     targetRoomProgressRef,
     setRoomProgress,
     appLoaderState,
-    isBlocked: isModalBlockingInteraction,
+    isBlocked: isNavigationBlocked,
   });
 
 
   // Fast travel to specific room (simple!)
   const moveTo = useCallback((room: RoomData) => {
+    // Block navigation if fast traveling to app
+    if (isFastTravelingToApp) {
+      console.log('[moveTo] Blocked - fast traveling to app');
+      return;
+    }
+
     const roomIndex = ROOMS.indexOf(room);
 
     // Just set room progress to the room index
     targetRoomProgressRef.current = roomIndex;
     setRoomProgress(roomIndex);
-  }, []);
+  }, [isFastTravelingToApp]);
 
   // Derive current room from lerped camera position (smooth, jitter-free)
   // Using useSyncedRefState hook to eliminate RAF boilerplate
@@ -281,6 +340,16 @@ function RoomGalleryInner() {
     Math.round,
   ) as number;
   const currentRoom = ROOMS[currentRoomIndex] || ROOMS[0];
+
+  // Cleanup: Cancel any pending fast travel polling on unmount
+  useEffect(() => {
+    return () => {
+      if (fastTravelRafRef.current !== null) {
+        cancelAnimationFrame(fastTravelRafRef.current);
+        fastTravelRafRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div
@@ -384,6 +453,7 @@ function RoomGalleryInner() {
         roomProgress={roomProgress}
         currentRoomProgressRef={currentRoomProgressRef}
         onRoomClick={moveTo}
+        appLoaderState={appLoaderState}
         onLoadApp={(url: string, name: string, roomIndex: number) => {
           // CRITICAL: Snap camera to exact room position before loading
           // Otherwise, if camera is mid-lerp (e.g., 0.8 traveling to 0),
@@ -422,12 +492,39 @@ function RoomGalleryInner() {
                   activePortalRef.current = roomIndex;
                   loadApp(currentAppUrl, currentAppName);
                 } else {
+                  // Far away: Fast travel + poll for arrival (same logic as browser nav)
+                  console.log(`[RestoreApp] Starting fast travel to room ${roomIndex}`);
+                  
+                  // Mark that we're fast-traveling (blocks manual navigation)
+                  setIsFastTravelingToApp(true);
+                  
                   targetRoomProgressRef.current = roomIndex;
                   setRoomProgress(roomIndex);
-                  setTimeout(() => {
-                    activePortalRef.current = roomIndex;
-                    loadApp(currentAppUrl, currentAppName);
-                  }, 900);
+                  
+                  // Poll for arrival: check every frame if we've reached destination
+                  const checkArrival = () => {
+                    const currentDistance = Math.abs((currentRoomProgressRef.current ?? 0) - roomIndex);
+                    
+                    // Arrived when within 0.05 units (visually imperceptible, but before snap)
+                    if (currentDistance < 0.05) {
+                      console.log(`[RestoreApp] Fast travel complete - entering portal`);
+                      setIsFastTravelingToApp(false);
+                      fastTravelRafRef.current = null;
+                      activePortalRef.current = roomIndex;
+                      loadApp(currentAppUrl, currentAppName);
+                    } else {
+                      // Not there yet, check again next frame
+                      fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+                    }
+                  };
+                  
+                  // Cancel any existing fast travel polling
+                  if (fastTravelRafRef.current !== null) {
+                    cancelAnimationFrame(fastTravelRafRef.current);
+                  }
+                  
+                  // Start polling
+                  fastTravelRafRef.current = requestAnimationFrame(checkArrival);
                 }
               }
             : undefined
@@ -440,12 +537,14 @@ function RoomGalleryInner() {
         }
         isAtHomepage={Math.round(currentRoomProgressRef.current) === 0}
         isCollapsed={
-          hasAppParam || // Start collapsed if loading with ?app=X param
-          appLoaderState === 'portal-zooming' ||
-          appLoaderState === 'transitioning' ||
-          appLoaderState === 'app-active' ||
-          appLoaderState === 'fading-to-black'
-          // During 'minimizing': minibar expands for ALL apps (Matrix-Cam iframe already shut down during fade)
+          !isFastTravelingToApp && ( // Don't collapse during fast travel (browser nav/restore button)
+            hasAppParam || // Start collapsed if loading with ?app=X param
+            appLoaderState === 'portal-zooming' ||
+            appLoaderState === 'transitioning' ||
+            appLoaderState === 'app-active' ||
+            appLoaderState === 'fading-to-black'
+            // During 'minimizing': minibar expands for ALL apps (Matrix-Cam iframe already shut down during fade)
+          )
         }
         skipInitialAnimation={hasAppParam} // Skip card spacing animation on direct URL loads
         onExpand={minimizeApp}

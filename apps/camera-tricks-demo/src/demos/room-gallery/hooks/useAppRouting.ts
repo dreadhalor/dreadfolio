@@ -136,8 +136,9 @@ export function useAppRouting({
       console.log(`[AppRouting] Browser navigation detected - URL app: ${appIdFromUrl}, Current app: ${currentAppId}`);
       
       // URL changed via back/forward button
-      if (appIdFromUrl && appIdFromUrl !== currentAppId) {
-        // URL has an app, but it's different from current - open the new app
+      if (appIdFromUrl) {
+        // URL has an app - always request to open it
+        // The loadApp function will handle smart restore if the same app is minimized
         const roomIndex = ROOMS.findIndex(room => room.appId === appIdFromUrl);
         if (roomIndex !== -1 && onRequestOpenApp) {
           console.log(`[AppRouting] Opening app from browser navigation: ${appIdFromUrl}`);

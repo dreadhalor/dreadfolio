@@ -13,8 +13,9 @@ import { RightButtonContainer } from './RightButtonContainer';
 import { ButtonSpacer } from './ButtonSpacer';
 import { CardsContainer } from './CardsContainer';
 import { FloatingMenuBarProvider } from './FloatingMenuBarContext';
-import { useRef, useState, useCallback, MutableRefObject } from 'react';
+import { useRef, useState, useCallback, useEffect, MutableRefObject } from 'react';
 import { useDrag } from '@use-gesture/react';
+import { AppLoaderState } from '../../providers/AppLoaderContext';
 
 interface FloatingMenuBarProps {
   rooms: RoomData[];
@@ -33,6 +34,7 @@ interface FloatingMenuBarProps {
   onDrag?: (deltaProgress: number) => void; // Direct drag callback (updates room progress)
   onDragEnd?: () => void; // Called when drag ends (for snapping)
   onModalStateChange?: (isOpen: boolean) => void; // Called when modal opens/closes
+  appLoaderState?: AppLoaderState; // Current app loader state (to auto-close drawer)
 }
 
 /**
@@ -60,6 +62,7 @@ export function FloatingMenuBar({
   onDrag,
   onDragEnd,
   onModalStateChange,
+  appLoaderState,
 }: FloatingMenuBarProps) {
   const isMobile = useIsMobile();
   const smoothRoomProgress = useSyncedRefState(
@@ -79,6 +82,14 @@ export function FloatingMenuBar({
     setIsGridModalOpen(false);
     onModalStateChange?.(false);
   }, [onModalStateChange]);
+
+  // Auto-close drawer when app starts loading (handles browser navigation edge case)
+  useEffect(() => {
+    if (appLoaderState === 'portal-zooming' && isGridModalOpen) {
+      console.log('[FloatingMenuBar] Auto-closing drawer - app loading started');
+      handleGridModalClose();
+    }
+  }, [appLoaderState, isGridModalOpen, handleGridModalClose]);
 
   // Use desktop values for both mobile and desktop
   const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH; // 60px
