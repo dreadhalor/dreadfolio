@@ -132,7 +132,22 @@ jobs:
           echo "environment=$ENV" >> $GITHUB_OUTPUT
 
       - name: Build app
-        run: pnpm build --filter=${{ matrix.app }}
+        run: |
+          # Map app names to package names (some apps have -frontend suffix)
+          case "${{ matrix.app }}" in
+            "portfolio")
+              pnpm build --filter=portfolio-frontend
+              ;;
+            "shareme")
+              pnpm build --filter=shareme-frontend
+              ;;
+            "su-done-ku")
+              pnpm build --filter=su-done-ku-frontend
+              ;;
+            *)
+              pnpm build --filter=${{ matrix.app }}
+              ;;
+          esac
         env:
           VITE_GIPHY_API_KEY: ${{ secrets.VITE_GIPHY_API_KEY }}
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
