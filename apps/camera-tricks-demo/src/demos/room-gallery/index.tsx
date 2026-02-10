@@ -3,12 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Configuration
 import { ROOMS } from './config/rooms';
-import {
-  MIN_ROOM_PROGRESS,
-  MAX_ROOM_PROGRESS,
-  DRAG_SENSITIVITY,
-  DEBUG_MODE,
-} from './config/constants';
+import { DEBUG_MODE } from './config/constants';
 
 // Components
 import { Scene } from './components/scene/Scene';

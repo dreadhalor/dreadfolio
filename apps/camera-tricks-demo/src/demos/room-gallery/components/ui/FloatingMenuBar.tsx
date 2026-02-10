@@ -6,14 +6,14 @@ import { useViewportDimensions } from '../../hooks/useViewportDimensions';
 import { SPACING, UI_Z_INDEX, LAYOUT } from '../../config/styleConstants';
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
 import { MinimapRoomCard } from './MinimapRoomCard';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, MutableRefObject } from 'react';
 import { useDrag } from '@use-gesture/react';
 
 interface FloatingMenuBarProps {
   rooms: RoomData[];
   currentRoom: RoomData;
   roomProgress: number;
-  currentRoomProgressRef: React.RefObject<number>;
+  currentRoomProgressRef: MutableRefObject<number>;
   onRoomClick: (room: RoomData) => void;
   onHomeClick: () => void;
   onRestoreAppClick?: () => void;

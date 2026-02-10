@@ -1,5 +1,5 @@
-import { useEffect, useRef, MutableRefObject } from 'react';
-import { MIN_ROOM_PROGRESS, MAX_ROOM_PROGRESS } from '../config/constants';
+import { useEffect, MutableRefObject } from 'react';
+import { MAX_ROOM_PROGRESS } from '../config/constants';
 
 interface UseKeyboardNavigationProps {
   targetRoomProgressRef: MutableRefObject<number>;
