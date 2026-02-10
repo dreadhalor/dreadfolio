@@ -30,6 +30,9 @@ import { RoomData } from './types';
 import { useSyncedRefState } from './hooks/useSyncedRefState';
 import { useCrossOriginNavigation } from './hooks/useCrossOriginNavigation';
 import { useAppRouting } from './hooks/useAppRouting';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
+import { useHorizontalScroll } from './hooks/useHorizontalScroll';
+import { useDragNavigation } from './hooks/useDragNavigation';
 
 // Development test utilities (exposed on window for console testing)
 if (import.meta.env.DEV) {
@@ -72,7 +75,6 @@ function RoomGalleryInner() {
   // PRIMARY STATE: Room progress (0.0 to 14.0)
   // Initialize with correct room if loading via URL parameter
   const [roomProgress, setRoomProgress] = useState(initialRoomIndex);
-  const [isDragging, setIsDragging] = useState(false);
   
   // Track instant zoom portal (for URL loads - set once then cleared)
   const [instantZoomPortalIndex, setInstantZoomPortalIndex] = useState<number | null>(
@@ -91,8 +93,14 @@ function RoomGalleryInner() {
   // Initialize with correct room if loading via URL parameter
   const targetRoomProgressRef = useRef(initialRoomIndex); // Target position (instant)
   const currentRoomProgressRef = useRef(initialRoomIndex); // Current position (lerped, matches camera)
-  const lastMouseXRef = useRef(0);
   const activePortalRef = useRef<number | null>(null); // Track which portal is active for animations
+
+  // Mouse and touch drag navigation
+  const { isDragging, handleMouseDown, handleTouchStart } = useDragNavigation({
+    targetRoomProgressRef,
+    setRoomProgress,
+    appLoaderState,
+  });
 
   // URL/History Routing - mediates between browser URL and app state
   const { setAppInUrl, clearAppFromUrl } = useAppRouting({
@@ -237,259 +245,21 @@ function RoomGalleryInner() {
     },
   });
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't interfere with typing in inputs
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          // Move to previous room
-          const prevRoom = Math.max(
-            0,
-            Math.floor(targetRoomProgressRef.current) - 1,
-          );
-          targetRoomProgressRef.current = prevRoom;
-          setRoomProgress(prevRoom);
-          break;
-
-        case 'ArrowRight':
-          e.preventDefault();
-          // Move to next room
-          const nextRoom = Math.min(
-            MAX_ROOM_PROGRESS,
-            Math.floor(targetRoomProgressRef.current) + 1,
-          );
-          targetRoomProgressRef.current = nextRoom;
-          setRoomProgress(nextRoom);
-          break;
-
-        case 'Escape':
-          e.preventDefault();
-          // Minimize app if active
-          if (appLoaderState === 'app-active') {
-            minimizeApp();
-          }
-          break;
-
-        case 'Home':
-          e.preventDefault();
-          // Jump to first room
-          targetRoomProgressRef.current = 0;
-          setRoomProgress(0);
-          break;
-
-        case 'End':
-          e.preventDefault();
-          // Jump to last room
-          targetRoomProgressRef.current = MAX_ROOM_PROGRESS;
-          setRoomProgress(MAX_ROOM_PROGRESS);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [appLoaderState, minimizeApp]);
+  // Keyboard navigation (arrow keys, home, end, escape)
+  useKeyboardNavigation({
+    targetRoomProgressRef,
+    setRoomProgress,
+    appLoaderState,
+    minimizeApp,
+  });
 
   // Horizontal scroll wheel / trackpad navigation
-  useEffect(() => {
-    let wheelEndTimeoutRef: number | null = null;
+  useHorizontalScroll({
+    targetRoomProgressRef,
+    setRoomProgress,
+    appLoaderState,
+  });
 
-    const handleWheel = (e: WheelEvent) => {
-      // Don't interfere when app is active
-      if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
-        return;
-      }
-
-      // Best practice thresholds for horizontal scroll detection:
-      // 1. Minimum absolute threshold to ignore tiny unintentional drift
-      const MIN_HORIZONTAL_THRESHOLD = 2; // pixels
-      // 2. Ratio threshold - horizontal must be significantly larger than vertical
-      const HORIZONTAL_RATIO_THRESHOLD = 2.0;
-      
-      const absDeltaX = Math.abs(e.deltaX);
-      const absDeltaY = Math.abs(e.deltaY);
-      
-      // Check if this is an intentional horizontal scroll:
-      // - Horizontal delta must exceed minimum threshold
-      // - Horizontal delta must be at least 2x the vertical delta (or vertical is near-zero)
-      const isHorizontalScroll = 
-        absDeltaX >= MIN_HORIZONTAL_THRESHOLD && 
-        (absDeltaY === 0 || absDeltaX / absDeltaY >= HORIZONTAL_RATIO_THRESHOLD);
-      
-      if (isHorizontalScroll) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Use deltaX for horizontal scrolling
-        const wheelDelta = e.deltaX;
-        
-        // Convert wheel delta to progress delta
-        // Wheel events have larger values than drag movements, so reduce sensitivity
-        // Note: No negative sign here because natural scroll (macOS default) already provides
-        // the correct direction: swipe right → positive deltaX → move right through rooms
-        const WHEEL_SENSITIVITY = DRAG_SENSITIVITY * 0.5;
-        const deltaProgress = wheelDelta * WHEEL_SENSITIVITY;
-        
-        // Update room progress
-        const newProgress = Math.max(
-          MIN_ROOM_PROGRESS,
-          Math.min(MAX_ROOM_PROGRESS, targetRoomProgressRef.current + deltaProgress),
-        );
-        targetRoomProgressRef.current = newProgress;
-        setRoomProgress(newProgress);
-
-        // Snap to nearest room after scrolling stops
-        // Using 200ms timeout to accommodate trackpad momentum scrolling
-        if (wheelEndTimeoutRef) {
-          clearTimeout(wheelEndTimeoutRef);
-        }
-        wheelEndTimeoutRef = window.setTimeout(() => {
-          const currentProgress = targetRoomProgressRef.current;
-          const nearestRoom = Math.round(currentProgress);
-          targetRoomProgressRef.current = nearestRoom;
-          setRoomProgress(nearestRoom);
-        }, 200);
-      }
-    };
-
-    // Use passive: false to allow preventDefault()
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    
-    return () => {
-      if (wheelEndTimeoutRef) {
-        clearTimeout(wheelEndTimeoutRef);
-      }
-      window.removeEventListener('wheel', handleWheel);
-    };
-  }, [appLoaderState]);
-
-  // Drag handlers (room-space) - works for both mouse and touch
-  // Accepts optional flag to allow pass-through from menu bar when expanded
-  const handlePointerDown = useCallback((clientX: number, isPassThrough = false) => {
-    // Block ALL dragging when app is visible (even pass-through from minibar)
-    if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
-      console.log(`[Drag] Blocked - app is ${appLoaderState}, pass-through: ${isPassThrough}`);
-      return;
-    }
-    // Allow pass-through from expanded menu bar when app is NOT active
-    console.log(`[Drag] Started - pass-through: ${isPassThrough}`);
-    setIsDragging(true);
-    lastMouseXRef.current = clientX;
-  }, [appLoaderState]);
-
-  const handlePointerMove = useCallback(
-    (clientX: number) => {
-      if (!isDragging) return;
-      
-      // Extra safety: Stop dragging if app becomes active mid-drag
-      if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
-        setIsDragging(false);
-        return;
-      }
-
-      const deltaX = clientX - lastMouseXRef.current;
-      lastMouseXRef.current = clientX;
-
-      // Update room progress (negative because dragging right moves left)
-      const newProgress =
-        targetRoomProgressRef.current - deltaX * DRAG_SENSITIVITY;
-      const clampedProgress = Math.max(
-        MIN_ROOM_PROGRESS,
-        Math.min(MAX_ROOM_PROGRESS, newProgress),
-      );
-
-      targetRoomProgressRef.current = clampedProgress;
-      setRoomProgress(clampedProgress);
-    },
-    [isDragging, appLoaderState],
-  );
-
-  const handlePointerUp = useCallback(() => {
-    setIsDragging(false);
-
-    // Always snap to nearest room after dragging
-    // This ensures even tiny drags are corrected
-    const currentProgress = targetRoomProgressRef.current;
-    const nearestRoom = Math.round(currentProgress);
-
-    targetRoomProgressRef.current = nearestRoom;
-    setRoomProgress(nearestRoom);
-  }, []);
-
-  // Mouse event handlers
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      handlePointerDown(e.clientX);
-    },
-    [handlePointerDown],
-  );
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      handlePointerMove(e.clientX);
-    },
-    [handlePointerMove],
-  );
-
-  const handleMouseUp = useCallback(() => {
-    handlePointerUp();
-  }, [handlePointerUp]);
-
-  // Touch event handlers
-  const handleTouchStart = useCallback(
-    (e: React.TouchEvent) => {
-      if (e.touches.length === 1) {
-        e.preventDefault(); // Prevent iOS scrolling/zooming
-        handlePointerDown(e.touches[0].clientX);
-      }
-    },
-    [handlePointerDown],
-  );
-
-  const handleTouchMove = useCallback(
-    (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        e.preventDefault(); // Prevent iOS scrolling
-        handlePointerMove(e.touches[0].clientX);
-      }
-    },
-    [handlePointerMove],
-  );
-
-  const handleTouchEnd = useCallback(
-    (e: TouchEvent) => {
-      e.preventDefault(); // Prevent iOS delayed click events
-      handlePointerUp();
-    },
-    [handlePointerUp],
-  );
-
-  // Attach mouse and touch event listeners
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    // passive: false is critical for preventDefault() to work on iOS
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd, { passive: false });
-    window.addEventListener('touchcancel', handleTouchEnd, { passive: false }); // iOS can cancel touches
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   // Fast travel to specific room (simple!)
   const moveTo = useCallback((room: RoomData) => {
