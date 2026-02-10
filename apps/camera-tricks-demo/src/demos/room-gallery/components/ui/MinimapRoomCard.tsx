@@ -12,9 +12,6 @@ interface MinimapRoomCardProps {
   isMobile: boolean;
   onClick: (room: RoomData) => void;
   isCollapsed?: boolean;
-  onSceneDragStart?: (clientX: number) => void;
-  onSceneDragMove?: (clientX: number) => void;
-  onSceneDragEnd?: () => void;
 }
 
 // Style constants for this component
@@ -53,13 +50,9 @@ export function MinimapRoomCard({
   isMobile: _isMobile,
   onClick,
   isCollapsed = false,
-  onSceneDragStart,
-  onSceneDragMove,
-  onSceneDragEnd,
 }: MinimapRoomCardProps) {
-  // Track touch start position to detect drag vs click
+  // Track touch start position to detect drag vs click (parent handles dragging)
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const isDraggingSceneRef = useRef(false);
 
   // Calculate opacity based on distance from current position
   const opacity = Math.max(
@@ -73,47 +66,22 @@ export function MinimapRoomCard({
     onClick(room);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Stop propagation to prevent menu bar from starting a drag
+    console.log(`[Card ${room.name}] mousedown - STOPPING propagation`);
+    e.stopPropagation();
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Record touch start position
+    // Record touch start position for click detection
     const touch = e.touches[0];
     if (touch) {
       touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     }
-    isDraggingSceneRef.current = false;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    if (touch && touchStartRef.current) {
-      const dx = touch.clientX - touchStartRef.current.x;
-      const dy = touch.clientY - touchStartRef.current.y;
-      const moveDistance = Math.sqrt(dx * dx + dy * dy);
-
-      // If moved >10px, it's a drag - start scene drag
-      if (moveDistance > 10 && !isDraggingSceneRef.current && onSceneDragStart && onSceneDragMove) {
-        isDraggingSceneRef.current = true;
-        onSceneDragStart(touchStartRef.current.x);
-      }
-
-      // Continue scene drag if active
-      if (isDraggingSceneRef.current && onSceneDragMove) {
-        onSceneDragMove(touch.clientX);
-      }
-    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    // If we were dragging the scene, end the drag
-    if (isDraggingSceneRef.current) {
-      if (onSceneDragEnd) {
-        onSceneDragEnd();
-      }
-      isDraggingSceneRef.current = false;
-      touchStartRef.current = null;
-      return;
-    }
-
-    // Otherwise, check if it's a click
+    // Check if it's a tap/click (not a drag)
     const touch = e.changedTouches[0];
     if (touch && touchStartRef.current) {
       const dx = touch.clientX - touchStartRef.current.x;
@@ -133,8 +101,8 @@ export function MinimapRoomCard({
   return (
     <div
       onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
         width: `${cardWidth}px`,
@@ -180,9 +148,13 @@ export function MinimapRoomCard({
         <img
           src={room.iconUrl}
           alt={room.name}
+          draggable={false}
           style={{
             position: 'absolute',
             top: 0,
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            pointerEvents: isCollapsed ? 'none' : 'auto', // Disable interaction when collapsed
             left: 0,
             width: '100%',
             height: '100%',

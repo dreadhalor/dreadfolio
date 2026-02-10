@@ -25,6 +25,7 @@ interface AppLoaderContextValue {
   currentAppUrl: string | null;
   currentAppName: string | null;
   loadApp: (url: string, name: string) => void;
+  loadAppInstant: (url: string, name: string) => void; // Skip all animations
   closeApp: () => void;
   minimizeApp: () => void;
 }
@@ -97,6 +98,20 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
     }, PORTAL_ZOOM_PHASE_MS);
   }, [state, currentAppUrl, safeSetTimeout, clearAllTimeouts]);
 
+  const loadAppInstant = useCallback((url: string, name: string) => {
+    console.log('[AppLoaderContext] Loading app instantly (skipping animations):', name);
+    
+    // Clear any pending timeouts
+    clearAllTimeouts();
+    
+    // Set app info and state immediately
+    // Note: State goes directly to 'app-active', which will trigger portal zoom
+    // via usePortalZoomAnimation (if activePortalRef is set)
+    setCurrentAppUrl(url);
+    setCurrentAppName(name);
+    setState('app-active');
+  }, [clearAllTimeouts]);
+
   const minimizeApp = useCallback(() => {
     // For matrix-cam: fade to black FIRST, then unmount, then animate
     const isMatrixCam = currentAppUrl?.includes('/ascii-video');
@@ -158,6 +173,7 @@ export function AppLoaderProvider({ children }: { children: ReactNode }) {
         currentAppUrl,
         currentAppName,
         loadApp,
+        loadAppInstant,
         closeApp,
         minimizeApp,
       }}

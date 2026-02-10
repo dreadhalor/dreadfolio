@@ -9,6 +9,7 @@ import {
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
 import { MinimapRoomCard } from './MinimapRoomCard';
 import { useEffect, useRef, useState } from 'react';
+import { useDrag } from '@use-gesture/react';
 
 interface FloatingMenuBarProps {
   rooms: RoomData[];
@@ -21,10 +22,10 @@ interface FloatingMenuBarProps {
   minimizedAppIconUrl?: string | null;
   isAtHomepage: boolean;
   isCollapsed?: boolean; // When app is fullscreen, show compact indicator
+  skipInitialAnimation?: boolean; // Skip spacing animation on mount (for direct URL loads)
   onExpand?: () => void; // Called when clicking collapsed indicator
-  onSceneDragStart?: (clientX: number) => void; // For pass-through dragging
-  onSceneDragMove?: (clientX: number) => void;
-  onSceneDragEnd?: () => void;
+  onDrag?: (deltaProgress: number) => void; // Direct drag callback (updates room progress)
+  onDragEnd?: () => void; // Called when drag ends (for snapping)
 }
 
 /**
@@ -46,10 +47,10 @@ export function FloatingMenuBar({
   minimizedAppIconUrl,
   isAtHomepage,
   isCollapsed = false,
+  skipInitialAnimation = false,
   onExpand,
-  onSceneDragStart,
-  onSceneDragMove,
-  onSceneDragEnd,
+  onDrag,
+  onDragEnd,
 }: FloatingMenuBarProps) {
   const isMobile = useIsMobile();
   const smoothRoomProgress = useSyncedRefState(
@@ -60,10 +61,71 @@ export function FloatingMenuBar({
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1200
   );
-  // Track touch start position for drag detection
+  // Use desktop values for both mobile and desktop
+  const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH; // 60px
+  const cardHeight = MINIMAP_CONFIG.ROOM_CARD_HEIGHT;
+  const cardGap = MINIMAP_CONFIG.ROOM_CARD_GAP; // 8px
+  const miniCardSize = 32;
+  const miniCardGap = 4;
+  
+  // Calculate drag sensitivity based on card spacing (center to center)
+  // Goal: Dragging from one thumbnail center to the next = exactly 1 room movement
+  // Card spacing = cardWidth + cardGap = 60 + 8 = 68px
+  const cardSpacing = cardWidth + cardGap; // 68px
+  const MENU_BAR_DRAG_SENSITIVITY = 1 / cardSpacing; // ~0.01471
+
+  // Track drag state for debugging
+  const [isDraggingDebug, setIsDraggingDebug] = useState(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  // Track if we're passing through a drag to the scene
-  const isDraggingSceneRef = useRef(false);
+  const lastMovementXRef = useRef(0);
+
+  // Use @use-gesture/react for robust drag handling
+  const bind = useDrag(
+    ({ down, movement: [mx], first, last, event }) => {
+      console.log(`[useDrag] down: ${down}, mx: ${mx.toFixed(2)}, first: ${first}, last: ${last}`);
+      
+      // Update debug state
+      setIsDraggingDebug(down);
+
+      // Only handle drag when menu bar is expanded
+      if (isCollapsed) return;
+
+      // Prevent default to avoid text selection, etc.
+      event.preventDefault();
+
+      // Reset on first frame
+      if (first) {
+        lastMovementXRef.current = 0;
+        console.log(`[useDrag] First frame - resetting`);
+      }
+
+      // Calculate delta movement since last frame
+      const deltaMx = mx - lastMovementXRef.current;
+      lastMovementXRef.current = mx;
+
+      // Calculate progress delta from movement delta
+      const deltaProgress = -deltaMx * MENU_BAR_DRAG_SENSITIVITY;
+      
+      if (onDrag && down && !first) {
+        console.log(`[useDrag] Calling onDrag - deltaMx: ${deltaMx.toFixed(2)}, deltaProgress: ${deltaProgress.toFixed(4)}`);
+        onDrag(deltaProgress);
+      }
+
+      // Snap to nearest room on drag end (matches scene drag behavior)
+      if (last && onDragEnd) {
+        console.log(`[useDrag] Last frame - calling onDragEnd for snap`);
+        onDragEnd();
+      }
+    },
+    {
+      // Only track pointer (mouse/touch) on this element
+      pointer: { capture: true },
+      // Prevent click events from firing after drag
+      filterTaps: true,
+      // Make drag feel responsive
+      threshold: 0,
+    }
+  );
 
   // Helper to handle touch start for buttons
   const handleButtonTouchStart = (e: React.TouchEvent) => {
@@ -94,17 +156,14 @@ export function FloatingMenuBar({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Use desktop values for both mobile and desktop
-  const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH;
-  const cardHeight = MINIMAP_CONFIG.ROOM_CARD_HEIGHT;
-  const cardGap = MINIMAP_CONFIG.ROOM_CARD_GAP;
-  const miniCardSize = 32;
-  const miniCardGap = 4;
-
   // Animated card spacing - time-based animation matching CSS transition
-  const currentCardSpacingRef = useRef(cardWidth + cardGap);
-  const startCardSpacingRef = useRef(cardWidth + cardGap);
-  const targetCardSpacingRef = useRef(cardWidth + cardGap);
+  // Initialize with collapsed spacing if skipping initial animation
+  const initialSpacing = (skipInitialAnimation && isCollapsed) 
+    ? miniCardSize + miniCardGap 
+    : cardWidth + cardGap;
+  const currentCardSpacingRef = useRef(initialSpacing);
+  const startCardSpacingRef = useRef(initialSpacing);
+  const targetCardSpacingRef = useRef(initialSpacing);
   const animationStartTimeRef = useRef<number | null>(null);
 
   // Button visibility tied to collapse state
@@ -268,9 +327,9 @@ export function FloatingMenuBar({
           zIndex: UI_Z_INDEX.MINIMAP,
           touchAction: isCollapsed ? 'manipulation' : 'none', // Allow touch when collapsed for click to expand
           pointerEvents: 'auto',
-          cursor: isCollapsed ? 'pointer' : 'default',
+          cursor: isCollapsed ? 'pointer' : 'grab',
           overflow: 'hidden', // Clip all content outside bounds
-        // Smooth transition for all properties
+          // Smooth transition for all properties
         transition: `
           bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1),
           left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -286,63 +345,16 @@ export function FloatingMenuBar({
           box-shadow 0.3s ease
         `,
       }}
-        onTouchStart={(e) => {
-          if (isCollapsed) {
-            handleButtonTouchStart(e);
-          } else {
-            // Record touch start for drag detection, but don't stop propagation yet
-            const touch = e.touches[0];
-            if (touch) {
-              touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-            }
-            isDraggingSceneRef.current = false;
+        {...(!isCollapsed ? bind() : {})}
+        onTouchStart={isCollapsed ? handleButtonTouchStart : undefined}
+        onTouchEnd={isCollapsed ? (e) => {
+          if (isTouchClick(e)) {
+            e.preventDefault();
             e.stopPropagation();
+            onExpand?.();
           }
-        }}
-        onTouchMove={(e) => {
-          if (!isCollapsed) {
-            const touch = e.touches[0];
-            if (touch && touchStartRef.current) {
-              const dx = touch.clientX - touchStartRef.current.x;
-              const dy = touch.clientY - touchStartRef.current.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-
-              // If moved >10px, it's a drag - start scene drag
-              if (distance > 10 && !isDraggingSceneRef.current && onSceneDragStart && onSceneDragMove) {
-                isDraggingSceneRef.current = true;
-                onSceneDragStart(touchStartRef.current.x);
-              }
-
-              // Continue scene drag if active
-              if (isDraggingSceneRef.current && onSceneDragMove) {
-                onSceneDragMove(touch.clientX);
-              }
-            }
-            e.stopPropagation();
-          }
-        }}
-        onTouchEnd={
-          isCollapsed
-            ? (e) => {
-                if (isTouchClick(e)) {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onExpand?.();
-                }
-                touchStartRef.current = null;
-              }
-            : (e) => {
-                // If we were dragging the scene, end the drag
-                if (isDraggingSceneRef.current && onSceneDragEnd) {
-                  onSceneDragEnd();
-                }
-                isDraggingSceneRef.current = false;
-                touchStartRef.current = null;
-                e.stopPropagation();
-              }
-        }
-        onMouseDown={(e) => !isCollapsed && e.stopPropagation()}
-        onMouseMove={(e) => !isCollapsed && e.stopPropagation()}
+          touchStartRef.current = null;
+        } : undefined}
         onMouseEnter={
           isCollapsed
             ? (e) => {
@@ -386,6 +398,7 @@ export function FloatingMenuBar({
             onClick={
               isAtHomepage || shouldHideButtons ? undefined : onHomeClick
             }
+            onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
             onTouchStart={handleButtonTouchStart}
             onTouchEnd={(e) => {
               if (!isAtHomepage && !shouldHideButtons && isTouchClick(e)) {
@@ -466,6 +479,8 @@ export function FloatingMenuBar({
               width: '100%',
               height: '100%',
               pointerEvents: isCollapsed ? 'none' : 'auto', // Disable card clicks when collapsed
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
             }}
           >
             {rooms.map((room, index) => {
@@ -496,9 +511,6 @@ export function FloatingMenuBar({
                     isMobile={isMobile}
                     onClick={onRoomClick}
                     isCollapsed={isCollapsed}
-                    onSceneDragStart={onSceneDragStart}
-                    onSceneDragMove={onSceneDragMove}
-                    onSceneDragEnd={onSceneDragEnd}
                   />
                 </div>
               );
@@ -543,6 +555,7 @@ export function FloatingMenuBar({
           {/* Always render button to prevent instant disappear - use visibility */}
           <button
             onClick={shouldHideButtons || !minimizedAppIconUrl || !onRestoreAppClick ? undefined : onRestoreAppClick}
+            onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
             onTouchStart={handleButtonTouchStart}
             onTouchEnd={(e) => {
               if (!shouldHideButtons && minimizedAppIconUrl && onRestoreAppClick && isTouchClick(e)) {
@@ -583,11 +596,15 @@ export function FloatingMenuBar({
               <img
                 src={minimizedAppIconUrl}
                 alt='Minimized app'
+                draggable={false}
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  pointerEvents: 'none', // Click handler is on parent button
                 }}
               />
             )}

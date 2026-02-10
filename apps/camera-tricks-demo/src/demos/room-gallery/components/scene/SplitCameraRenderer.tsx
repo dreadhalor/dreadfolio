@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react';
-import { useThree } from '@react-three/fiber';
+import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
   CAMERA_HEIGHT,
@@ -23,6 +23,7 @@ import { usePortalZoomAnimation } from '../../hooks/usePortalZoomAnimation';
 import { usePortalVisualEffects } from '../../hooks/usePortalVisualEffects';
 import { usePortalClickHandler } from '../../hooks/usePortalClickHandler';
 import { useSplitViewportRenderer } from '../../hooks/useSplitViewportRenderer';
+import { PortalDollyUtils } from '../../hooks/usePortalDolly';
 
 // Camera projection constants
 const CAMERA_NEAR_PLANE = 0.1;
@@ -40,8 +41,16 @@ interface SplitCameraRendererProps {
     rightCameraIdx: number;
     viewportSplit: { left: number; right: number };
   }) => void;
+  onPortalDebugUpdate?: (info: {
+    cameraZ: number;
+    portalZ: number;
+    distance: number;
+    activePortal: number | null;
+  }) => void;
   pulsePortalIndex?: number | null; // Portal to pulse when navigation completes
   activePortalRef?: React.MutableRefObject<number | null>; // Optional: External active portal ref for restore button
+  instantZoomPortalIndex?: number | null; // If set, instantly positions portal at zoomed-in state (for URL loads)
+  onPortalClick?: (url: string, name: string) => void; // Callback when portal is clicked (for URL updates)
 }
 
 /**
@@ -87,14 +96,20 @@ export function SplitCameraRenderer({
   currentRoomProgressRef: externalCurrentRef,
   onRoomProgressUpdate,
   onDebugUpdate,
+  onPortalDebugUpdate,
   pulsePortalIndex,
   activePortalRef: externalActivePortalRef,
+  instantZoomPortalIndex,
+  onPortalClick,
 }: SplitCameraRendererProps) {
   const { gl, scene, size } = useThree();
   const internalCurrentRoomProgressRef = useRef(0);
   const currentRoomProgressRef =
     externalCurrentRef || internalCurrentRoomProgressRef;
-  const { loadApp, state: appLoaderState } = useAppLoader();
+  const { loadApp: loadAppInternal, state: appLoaderState } = useAppLoader();
+  
+  // Use external onPortalClick if provided (for URL updates), otherwise use internal loadApp
+  const loadApp = onPortalClick || loadAppInternal;
 
   // Track active portal for targeted reset (use external ref if provided, otherwise internal)
   const internalActivePortalRef = useRef<number | null>(null);
@@ -198,6 +213,43 @@ export function SplitCameraRenderer({
     activePortalRef,
   });
 
+  // Instant portal zoom for URL loads (skip animation, set position directly)
+  useEffect(() => {
+    if (instantZoomPortalIndex !== null && instantZoomPortalIndex !== undefined) {
+      console.log(`[SplitCameraRenderer] Instant zoom requested for portal ${instantZoomPortalIndex}`);
+      console.log(`[SplitCameraRenderer] Cameras array length: ${cameras.length}`);
+      
+      const camera = cameras[instantZoomPortalIndex];
+      if (!camera) {
+        console.warn(`[SplitCameraRenderer] Camera ${instantZoomPortalIndex} not found!`);
+        return;
+      }
+      
+      if (!camera.portalGroup) {
+        console.warn(`[SplitCameraRenderer] Camera ${instantZoomPortalIndex} has no portal group!`);
+        return;
+      }
+      
+      console.log(`[SplitCameraRenderer] BEFORE instant zoom - Camera Z: ${camera.position.z.toFixed(2)}, Portal Z: ${camera.portalGroup.position.z.toFixed(2)}`);
+      
+      // Use centralized dolly utility to ensure correct positioning
+      PortalDollyUtils.setZoomedInstant(camera);
+      
+      console.log(`[SplitCameraRenderer] AFTER instant zoom - Camera Z: ${camera.position.z.toFixed(2)}, Portal Z: ${camera.portalGroup.position.z.toFixed(2)}`);
+      
+      // Immediately report debug info (since useFrame won't run when app is active)
+      if (onPortalDebugUpdate && camera.portalGroup) {
+        const distance = Math.abs(camera.portalGroup.position.z);
+        onPortalDebugUpdate({
+          cameraZ: camera.position.z,
+          portalZ: camera.portalGroup.position.z,
+          distance,
+          activePortal: instantZoomPortalIndex,
+        });
+      }
+    }
+  }, [instantZoomPortalIndex, cameras, onPortalDebugUpdate]);
+
   // Calculate visible camera indices for visual effects optimization
   const currentRoom = Math.floor(currentRoomProgressRef.current ?? 0);
   const leftCameraIndex = Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom));
@@ -234,6 +286,32 @@ export function SplitCameraRenderer({
     currentRoomProgress: currentRoomProgressRef.current ?? 0,
     appLoaderState,
     onDebugUpdate,
+  });
+
+  // Debug: Report portal-camera distance (throttled to avoid performance impact)
+  useFrame(() => {
+    if (!onPortalDebugUpdate) return;
+    
+    const activeIndex = activePortalRef.current;
+    if (activeIndex !== null) {
+      const camera = cameras[activeIndex];
+      if (camera && camera.portalGroup) {
+        const distance = Math.abs(camera.portalGroup.position.z);
+        onPortalDebugUpdate({
+          cameraZ: camera.position.z,
+          portalZ: camera.portalGroup.position.z,
+          distance,
+          activePortal: activeIndex,
+        });
+      }
+    } else {
+      onPortalDebugUpdate({
+        cameraZ: 0,
+        portalZ: 0,
+        distance: 0,
+        activePortal: null,
+      });
+    }
   });
 
   return null; // This component only manages rendering, no visual elements

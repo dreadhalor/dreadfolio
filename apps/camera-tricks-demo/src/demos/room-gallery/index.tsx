@@ -29,6 +29,7 @@ import { RoomData } from './types';
 // Hooks
 import { useSyncedRefState } from './hooks/useSyncedRefState';
 import { useCrossOriginNavigation } from './hooks/useCrossOriginNavigation';
+import { useAppRouting } from './hooks/useAppRouting';
 
 // Development test utilities (exposed on window for console testing)
 if (import.meta.env.DEV) {
@@ -43,16 +44,112 @@ function RoomGalleryInner() {
     state: appLoaderState,
     currentAppUrl,
     currentAppName,
-    loadApp,
-    minimizeApp,
+    loadApp: loadAppInternal,
+    loadAppInstant: loadAppInstantInternal,
+    minimizeApp: minimizeAppInternal,
   } = useAppLoader();
+  
+  // Get current app ID from ROOMS (for URL routing)
+  const currentAppId = currentAppUrl
+    ? ROOMS.find((room) => room.appUrl === currentAppUrl)?.appId ?? null
+    : null;
+
+  // Check if we're loading with an app parameter (for initial minibar state)
+  const appParamFromUrl = new URLSearchParams(window.location.search).get('app');
+  const hasAppParam = appParamFromUrl !== null;
+  
+  // Calculate initial room position based on URL parameter
+  const initialRoomIndex = (() => {
+    if (!appParamFromUrl) return 0;
+    const roomIndex = ROOMS.findIndex(room => room.appId === appParamFromUrl);
+    return roomIndex !== -1 ? roomIndex : 0;
+  })();
+
   // Performance monitoring
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
 
   // PRIMARY STATE: Room progress (0.0 to 14.0)
-  const [roomProgress, setRoomProgress] = useState(0);
+  // Initialize with correct room if loading via URL parameter
+  const [roomProgress, setRoomProgress] = useState(initialRoomIndex);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Track instant zoom portal (for URL loads - set once then cleared)
+  const [instantZoomPortalIndex, setInstantZoomPortalIndex] = useState<number | null>(
+    hasAppParam ? initialRoomIndex : null
+  );
+  
+  // Debug: Track portal/camera distance
+  const [portalDebug, setPortalDebug] = useState<{
+    cameraZ: number;
+    portalZ: number;
+    distance: number;
+    activePortal: number | null;
+  } | null>(null);
+  
+  // Refs for smooth updates (need to declare before routing callbacks)
+  // Initialize with correct room if loading via URL parameter
+  const targetRoomProgressRef = useRef(initialRoomIndex); // Target position (instant)
+  const currentRoomProgressRef = useRef(initialRoomIndex); // Current position (lerped, matches camera)
+  const lastMouseXRef = useRef(0);
+  const activePortalRef = useRef<number | null>(null); // Track which portal is active for animations
+
+  // URL/History Routing - mediates between browser URL and app state
+  const { setAppInUrl, clearAppFromUrl } = useAppRouting({
+    currentAppId,
+    onRequestOpenApp: useCallback((appId: string, roomIndex: number, isInitialLoad: boolean) => {
+      console.log(`[Routing] Request to open app: ${appId} (room ${roomIndex})${isInitialLoad ? ' [initial load - skip animation]' : ''}`);
+      const room = ROOMS[roomIndex];
+      
+      // Set room position instantly (no animation needed for URLs)
+      targetRoomProgressRef.current = roomIndex;
+      currentRoomProgressRef.current = roomIndex; // Skip lerp animation
+      setRoomProgress(roomIndex);
+      
+      if (isInitialLoad) {
+        // Initial page load: Open app immediately, skip all animations
+        // Set activePortalRef so minimize animation knows which portal to zoom out from
+        activePortalRef.current = roomIndex;
+        // Set instant zoom portal index (will be used by SplitCameraRenderer to position portal)
+        setInstantZoomPortalIndex(roomIndex);
+        // Use loadAppInstant to bypass the animation state machine
+        if (room.appUrl) {
+          loadAppInstantInternal(room.appUrl, room.name);
+        }
+      } else {
+        // Browser navigation: Brief delay to show room transition with portal animation
+        setTimeout(() => {
+          activePortalRef.current = roomIndex;
+          if (room.appUrl) {
+            loadAppInternal(room.appUrl, room.name);
+          }
+        }, 100);
+      }
+    }, [loadAppInternal, loadAppInstantInternal]),
+    onRequestCloseApp: useCallback(() => {
+      console.log(`[Routing] Request to close app (from browser back button)`);
+      minimizeAppInternal();
+    }, [minimizeAppInternal]),
+  });
+
+  // Wrapped loadApp that also updates URL
+  const loadApp = useCallback((url: string, name: string) => {
+    loadAppInternal(url, name);
+    
+    // Find app ID and update URL
+    const room = ROOMS.find((r) => r.appUrl === url);
+    if (room?.appId) {
+      console.log(`[Routing] Setting URL to: ?app=${room.appId}`);
+      setAppInUrl(room.appId);
+    }
+  }, [loadAppInternal, setAppInUrl]);
+
+  // Wrapped minimizeApp that also clears URL
+  const minimizeApp = useCallback(() => {
+    minimizeAppInternal();
+    console.log(`[Routing] Clearing URL params`);
+    clearAppFromUrl();
+  }, [minimizeAppInternal, clearAppFromUrl]);
 
   // Navigation feedback state
   const [navigationTarget, setNavigationTarget] = useState<string | null>(null);
@@ -106,11 +203,16 @@ function RoomGalleryInner() {
     console.log(`[Canvas Frameloop] Mode changed to: ${frameloopMode}`);
   }, [frameloopMode]);
 
-  // Refs for smooth updates
-  const targetRoomProgressRef = useRef(0); // Target position (instant)
-  const currentRoomProgressRef = useRef(0); // Current position (lerped, matches camera)
-  const lastMouseXRef = useRef(0);
-  const activePortalRef = useRef<number | null>(null); // Track which portal is active for animations
+  // Clear instant zoom portal index after it's been applied
+  useEffect(() => {
+    if (instantZoomPortalIndex !== null) {
+      // Clear after a short delay to ensure SplitCameraRenderer has processed it
+      const timer = setTimeout(() => {
+        setInstantZoomPortalIndex(null);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [instantZoomPortalIndex]);
 
   // Cross-origin navigation from iframed apps
   useCrossOriginNavigation({
@@ -198,14 +300,28 @@ function RoomGalleryInner() {
   }, [appLoaderState, minimizeApp]);
 
   // Drag handlers (room-space) - works for both mouse and touch
-  const handlePointerDown = useCallback((clientX: number) => {
+  // Accepts optional flag to allow pass-through from menu bar when expanded
+  const handlePointerDown = useCallback((clientX: number, isPassThrough = false) => {
+    // Block ALL dragging when app is visible (even pass-through from minibar)
+    if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
+      console.log(`[Drag] Blocked - app is ${appLoaderState}, pass-through: ${isPassThrough}`);
+      return;
+    }
+    // Allow pass-through from expanded menu bar when app is NOT active
+    console.log(`[Drag] Started - pass-through: ${isPassThrough}`);
     setIsDragging(true);
     lastMouseXRef.current = clientX;
-  }, []);
+  }, [appLoaderState]);
 
   const handlePointerMove = useCallback(
     (clientX: number) => {
       if (!isDragging) return;
+      
+      // Extra safety: Stop dragging if app becomes active mid-drag
+      if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
+        setIsDragging(false);
+        return;
+      }
 
       const deltaX = clientX - lastMouseXRef.current;
       lastMouseXRef.current = clientX;
@@ -221,7 +337,7 @@ function RoomGalleryInner() {
       targetRoomProgressRef.current = clampedProgress;
       setRoomProgress(clampedProgress);
     },
-    [isDragging],
+    [isDragging, appLoaderState],
   );
 
   const handlePointerUp = useCallback(() => {
@@ -372,8 +488,11 @@ function RoomGalleryInner() {
           currentRoomProgressRef={currentRoomProgressRef}
           onRoomProgressUpdate={setRoomProgress}
           onDebugUpdate={setDebugInfo}
+          onPortalDebugUpdate={setPortalDebug}
           pulsePortalIndex={pulsePortalIndex}
           activePortalRef={activePortalRef}
+          instantZoomPortalIndex={instantZoomPortalIndex}
+          onPortalClick={loadApp}
         />
       </Canvas>
 
@@ -438,16 +557,33 @@ function RoomGalleryInner() {
         }
         isAtHomepage={Math.round(currentRoomProgressRef.current) === 0}
         isCollapsed={
+          hasAppParam || // Start collapsed if loading with ?app=X param
           appLoaderState === 'portal-zooming' ||
           appLoaderState === 'transitioning' ||
           appLoaderState === 'app-active' ||
           appLoaderState === 'fading-to-black'
           // During 'minimizing': minibar expands for ALL apps (Matrix-Cam iframe already shut down during fade)
         }
+        skipInitialAnimation={hasAppParam} // Skip card spacing animation on direct URL loads
         onExpand={minimizeApp}
-        onSceneDragStart={handlePointerDown}
-        onSceneDragMove={handlePointerMove}
-        onSceneDragEnd={handlePointerUp}
+        onDrag={(deltaProgress) => {
+          // Direct drag handling from menu bar (more responsive than scene drag)
+          const newProgress = Math.max(
+            0,
+            Math.min(ROOMS.length - 1, targetRoomProgressRef.current + deltaProgress),
+          );
+          console.log(`[MenuBar Drag Handler] deltaProgress: ${deltaProgress.toFixed(4)}, old: ${targetRoomProgressRef.current.toFixed(2)}, new: ${newProgress.toFixed(2)}`);
+          targetRoomProgressRef.current = newProgress;
+          setRoomProgress(newProgress);
+        }}
+        onDragEnd={() => {
+          // Snap to nearest room after menu bar drag (matches scene drag behavior)
+          const currentProgress = targetRoomProgressRef.current;
+          const nearestRoom = Math.round(currentProgress);
+          console.log(`[MenuBar Drag End] Snapping from ${currentProgress.toFixed(2)} to ${nearestRoom}`);
+          targetRoomProgressRef.current = nearestRoom;
+          setRoomProgress(nearestRoom);
+        }}
       />
 
       {/* App Loader Overlay */}
@@ -501,6 +637,7 @@ function RoomGalleryInner() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
