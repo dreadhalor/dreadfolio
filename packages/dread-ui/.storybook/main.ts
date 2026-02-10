@@ -29,6 +29,10 @@ const config: StorybookConfig = {
     config.plugins.push(tailwindcss());
     // Set base path for deployment to /dread-ui/
     config.base = '/dread-ui/';
+    // Disable modulePreload to fix iOS Safari CSS preload issues
+    // https://github.com/vitejs/vite/issues/5120
+    config.build = config.build || {};
+    config.build.modulePreload = false;
     return config;
   },
 };
