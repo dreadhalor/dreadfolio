@@ -155,6 +155,9 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
           VITE_VERCEL_TOKEN: ${{ secrets.VITE_VERCEL_TOKEN }}
           VITE_SUDOKU_API_URL: ${{ secrets.VITE_SUDOKU_API_URL }}
+          VITE_REACT_APP_SANITY_PROJECT_ID: ${{ secrets.VITE_REACT_APP_SANITY_PROJECT_ID }}
+          VITE_REACT_APP_SANITY_TOKEN: ${{ secrets.VITE_REACT_APP_SANITY_TOKEN }}
+          VITE_REACT_APP_GOOGLE_API_TOKEN: ${{ secrets.VITE_REACT_APP_GOOGLE_API_TOKEN }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
