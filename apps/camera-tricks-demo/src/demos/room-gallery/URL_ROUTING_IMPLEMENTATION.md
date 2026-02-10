@@ -5,11 +5,20 @@
 
 ## Overview
 
-Implemented client-side routing using query parameters (`?app=minesweeper`) to enable:
+Implemented client-side routing using query parameters to enable:
 - Direct links to specific apps in the gallery
+- Explicit switcher view mode
+- Default homepage on initial visit
 - Browser back/forward navigation
 - URL updates without page reloads
 - Clean separation between routing logic and app loading logic
+
+### URL Scheme
+
+- **`/`** → Initial visit: Client-side redirect to `?app=home`
+- **`?app=X`** → Load app X (active or minimized)
+- **`?view=switcher`** → Switcher mode (no app loaded)
+- **`?view=switcher&app=X`** → Invalid: Automatically sanitized to `?view=switcher`
 
 ## Architecture
 
@@ -106,37 +115,63 @@ minimizeAppInternal() or loadAppInternal() with 100ms transition
 
 ## User Experience
 
-### 1. **Direct Navigation (Initial Page Load)**
+### 1. **Initial Visit (Root URL)**
+- User visits `scottjhetrick.com/camera-tricks/` (clean root)
+- Automatically redirected to `?app=home` via client-side routing
+- Homepage loads immediately in fullscreen
+- Natural starting point for portfolio browsing
+
+### 2. **Direct App Navigation**
 - User can visit `scottjhetrick.com/camera-tricks?app=minesweeper`
 - App loads **immediately** in fullscreen (skips 3D gallery animation)
 - Gallery scene is positioned in background for when user closes app
 - URL remains stable (no redirects)
 - **Optimized for instant app access via shareable links**
 
-### 2. **In-Gallery Navigation**
+### 3. **Switcher View Mode**
+- User minimizes an app → URL updates to `?view=switcher`
+- User can refresh page → Stays in switcher (no app loads)
+- User can share switcher view URL (app-agnostic portfolio view)
+- Minimized app state is transient (lost on refresh)
+
+### 4. **In-Gallery Navigation**
 - User clicks a portal to open an app
 - URL updates to `?app=minesweeper` (no page reload)
 - User can copy/share this URL
 
-### 3. **Browser Back/Forward**
+### 5. **Browser Back/Forward**
 - User opens Minesweeper (URL: `?app=minesweeper`)
+- User minimizes it (URL: `?view=switcher`)
 - User opens Fallcrate (URL: `?app=fallcrate`)
-- User clicks back button
-- Gallery closes Fallcrate, briefly shows transition, then reopens Minesweeper
-- URL changes back to `?app=minesweeper`
-- **Note:** Browser navigation includes brief transition animation (100ms) for visual continuity
+- User clicks back button → Returns to `?view=switcher` (no app open)
+- User clicks back again → Returns to `?app=minesweeper`
+- **Note:** Browser navigation includes brief transition animation for visual continuity
 
-### 4. **URL History Preservation**
+### 6. **URL History Preservation**
 - Each app open creates a new history entry
+- Minimize actions create switcher view entries
 - User can navigate through their session using browser controls
 - Works with standard browser shortcuts (Cmd+[ / Cmd+])
 
 ## Implementation Details
 
 ### Query Parameter Format
+
+**App Parameter:**
 - **Parameter name:** `app`
 - **Values:** App IDs from `ROOMS` config (e.g., `minesweeper`, `fallcrate`, `home`)
 - **Example:** `https://scottjhetrick.com/camera-tricks?app=home`
+
+**View Parameter:**
+- **Parameter name:** `view`
+- **Values:** `switcher` (only valid value)
+- **Example:** `https://scottjhetrick.com/camera-tricks?view=switcher`
+- **Note:** `view=switcher` and `app=X` are mutually exclusive
+
+**Default Behavior:**
+- Clean root URL (`/`) redirects to `?app=home` on initial visit
+- Minimizing an app sets URL to `?view=switcher`
+- Refreshing on `?view=switcher` preserves switcher mode (no app loaded)
 
 ### State Synchronization
 The system maintains three synchronized states:
@@ -153,26 +188,37 @@ The system maintains three synchronized states:
 
 1. **Invalid App ID in URL**
    - Hook validates against `ROOMS` config
-   - Invalid params are cleared from URL
-   - User sees gallery home view
+   - Invalid params are sanitized to `?view=switcher`
+   - User sees gallery switcher view
 
-2. **Race Conditions**
+2. **Invalid URL Combinations**
+   - `?view=switcher&app=X` is automatically sanitized to `?view=switcher`
+   - Prevents conflicting state (can't be in switcher and app simultaneously)
+   - Works on both initial load and browser navigation
+
+3. **Root URL Default**
+   - Clean `/` redirects to `?app=homepage` on first visit
+   - Ensures new users always start at homepage
+   - Client-side redirect (no server round-trip)
+
+4. **Race Conditions**
    - Existing `AppLoaderContext` guards prevent multiple simultaneous app loads
    - URL updates are throttled by app state machine
 
-3. **Rapid Navigation**
+5. **Rapid Navigation**
    - Browser back/forward navigation is debounced by React rendering
    - State changes are queued and processed sequentially
 
-4. **Initial Load with App Param**
+6. **Initial Load with App Param**
    - **Optimization:** App opens immediately (0ms delay)
    - Camera position set instantly (skips lerp animation)
    - 3D scene rendered in background at correct position
    - Gallery visible only when user closes/minimizes app
 
-5. **Browser Navigation (back/forward)**
-   - 100ms delay to show brief room transition
+7. **Browser Navigation (back/forward)**
+   - Fast travel with uninterruptible animation
    - Provides visual feedback that navigation occurred
+   - Respects all URL scheme rules
 
 ## Separation of Concerns
 
@@ -206,17 +252,25 @@ Each component can be tested independently:
 For debugging, each component logs key events:
 
 ```
-[AppRouting] Initial load - requesting app: minesweeper (room 4)
+[AppRouting] Initial visit to / - redirecting to ?app=home
+[AppRouting] Initial load - requesting app: home (room 0) [skip animation]
+
+[AppRouting] Initial load - explicit switcher view
+
+[AppRouting] Invalid URL: ?view=switcher&app=X - removing app param
+
 [Routing] Request to open app: minesweeper (room 4)
 [Routing] Setting URL to: ?app=minesweeper
 
-[AppRouting] Browser navigation detected - URL app: fallcrate, Current app: minesweeper
-[AppRouting] Opening app from browser navigation: fallcrate
-[Routing] Setting URL to: ?app=fallcrate
-
-[AppRouting] Browser navigation detected - URL app: null, Current app: fallcrate
-[AppRouting] Closing app from browser navigation
 [Routing] Clearing URL params
+
+[AppRouting] Browser navigation detected - URL app: fallcrate, view: null, Current app: minesweeper
+[AppRouting] Opening app from browser navigation: fallcrate
+
+[AppRouting] Browser navigation detected - URL app: null, view: switcher, Current app: fallcrate
+[AppRouting] Returning to switcher from browser navigation
+
+[AppRouting] Invalid URL combo - cleaning to ?view=switcher
 ```
 
 ## Future Enhancements

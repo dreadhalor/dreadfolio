@@ -48,20 +48,22 @@ function RoomGalleryInner() {
     loadAppInstant: loadAppInstantInternal,
     minimizeApp: minimizeAppInternal,
   } = useAppLoader();
-  
+
   // Get current app ID from ROOMS (for URL routing)
   const currentAppId = currentAppUrl
     ? ROOMS.find((room) => room.appUrl === currentAppUrl)?.appId ?? null
     : null;
 
   // Check if we're loading with an app parameter (for initial minibar state)
-  const appParamFromUrl = new URLSearchParams(window.location.search).get('app');
+  const appParamFromUrl = new URLSearchParams(window.location.search).get(
+    'app',
+  );
   const hasAppParam = appParamFromUrl !== null;
-  
+
   // Calculate initial room position based on URL parameter
   const initialRoomIndex = (() => {
     if (!appParamFromUrl) return 0;
-    const roomIndex = ROOMS.findIndex(room => room.appId === appParamFromUrl);
+    const roomIndex = ROOMS.findIndex((room) => room.appId === appParamFromUrl);
     return roomIndex !== -1 ? roomIndex : 0;
   })();
 
@@ -72,12 +74,12 @@ function RoomGalleryInner() {
   // PRIMARY STATE: Room progress (0.0 to 14.0)
   // Initialize with correct room if loading via URL parameter
   const [roomProgress, setRoomProgress] = useState(initialRoomIndex);
-  
+
   // Track instant zoom portal (for URL loads - set once then cleared)
-  const [instantZoomPortalIndex, setInstantZoomPortalIndex] = useState<number | null>(
-    hasAppParam ? initialRoomIndex : null
-  );
-  
+  const [instantZoomPortalIndex, setInstantZoomPortalIndex] = useState<
+    number | null
+  >(hasAppParam ? initialRoomIndex : null);
+
   // Debug: Track portal/camera distance (currently disabled)
   const [_portalDebug, setPortalDebug] = useState<{
     cameraZ: number;
@@ -85,16 +87,17 @@ function RoomGalleryInner() {
     distance: number;
     activePortal: number | null;
   } | null>(null);
-  
+
   // Modal state for blocking scene interaction
-  const [isModalBlockingInteraction, setIsModalBlockingInteraction] = useState(false);
-  
+  const [isModalBlockingInteraction, setIsModalBlockingInteraction] =
+    useState(false);
+
   // App grid drawer state (lifted from FloatingMenuBar for independent rendering)
   const [isGridModalOpen, setIsGridModalOpen] = useState(false);
-  
+
   // Track if we're fast-traveling before app load (use state so hooks can react)
   const [isFastTravelingToApp, setIsFastTravelingToApp] = useState(false);
-  
+
   // Refs for smooth updates (need to declare before routing callbacks)
   // Initialize with correct room if loading via URL parameter
   const targetRoomProgressRef = useRef(initialRoomIndex); // Target position (instant)
@@ -103,8 +106,9 @@ function RoomGalleryInner() {
   const fastTravelRafRef = useRef<number | null>(null); // RAF ID for fast travel polling
 
   // Combine blocking conditions: modal open OR fast traveling to app
-  const isNavigationBlocked = isModalBlockingInteraction || isFastTravelingToApp;
-  
+  const isNavigationBlocked =
+    isModalBlockingInteraction || isFastTravelingToApp;
+
   const handleGridModalOpen = useCallback(() => {
     setIsGridModalOpen(true);
     setIsModalBlockingInteraction(true);
@@ -142,68 +146,77 @@ function RoomGalleryInner() {
   // URL/History Routing - mediates between browser URL and app state
   const { setAppInUrl, clearAppFromUrl } = useAppRouting({
     currentAppId,
-    onRequestOpenApp: useCallback((appId: string, roomIndex: number, isInitialLoad: boolean) => {
-      console.log(`[Routing] Request to open app: ${appId} (room ${roomIndex})${isInitialLoad ? ' [initial load - skip animation]' : ''}`);
-      const room = ROOMS[roomIndex];
-      
-      if (isInitialLoad) {
-        // Initial page load: Open app immediately, skip all animations
-        // Set room position instantly (no animation)
-        targetRoomProgressRef.current = roomIndex;
-        currentRoomProgressRef.current = roomIndex;
-        setRoomProgress(roomIndex);
-        
-        // Set activePortalRef so minimize animation knows which portal to zoom out from
-        activePortalRef.current = roomIndex;
-        // Set instant zoom portal index (will be used by SplitCameraRenderer to position portal)
-        setInstantZoomPortalIndex(roomIndex);
-        // Use loadAppInstant to bypass the animation state machine
-        if (room.appUrl) {
-          loadAppInstantInternal(room.appUrl, room.name);
-        }
-      } else {
-        // Browser navigation: Fast travel to room first, THEN enter portal
-        const currentPos = currentRoomProgressRef.current ?? 0;
-        const distance = Math.abs(currentPos - roomIndex);
-        
-        console.log(`[Routing] Fast traveling from ${currentPos.toFixed(2)} to ${roomIndex} (distance: ${distance.toFixed(2)})`);
-        
-        // Mark that we're fast-traveling to load an app (prevents premature minibar & blocks manual nav)
-        setIsFastTravelingToApp(true);
-        
-        // Set target only - let camera lerp smoothly to destination
-        targetRoomProgressRef.current = roomIndex;
-        setRoomProgress(roomIndex);
-        
-        // Poll for arrival: check every frame if we've reached destination
-        const checkArrival = () => {
-          const currentDistance = Math.abs((currentRoomProgressRef.current ?? 0) - roomIndex);
-          
-          // Arrived when within 0.05 units (visually imperceptible, but before snap)
-          if (currentDistance < 0.05) {
-            console.log(`[Routing] Fast travel complete - entering portal`);
-            // Fast travel complete - now we can show minibar & allow manual nav
-            setIsFastTravelingToApp(false);
-            fastTravelRafRef.current = null;
-            activePortalRef.current = roomIndex;
-            if (room.appUrl) {
-              loadAppInternal(room.appUrl, room.name);
-            }
-          } else {
-            // Not there yet, check again next frame
-            fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+    onRequestOpenApp: useCallback(
+      (appId: string, roomIndex: number, isInitialLoad: boolean) => {
+        console.log(
+          `[Routing] Request to open app: ${appId} (room ${roomIndex})${isInitialLoad ? ' [initial load - skip animation]' : ''}`,
+        );
+        const room = ROOMS[roomIndex];
+
+        if (isInitialLoad) {
+          // Initial page load: Open app immediately, skip all animations
+          // Set room position instantly (no animation)
+          targetRoomProgressRef.current = roomIndex;
+          currentRoomProgressRef.current = roomIndex;
+          setRoomProgress(roomIndex);
+
+          // Set activePortalRef so minimize animation knows which portal to zoom out from
+          activePortalRef.current = roomIndex;
+          // Set instant zoom portal index (will be used by SplitCameraRenderer to position portal)
+          setInstantZoomPortalIndex(roomIndex);
+          // Use loadAppInstant to bypass the animation state machine
+          if (room.appUrl) {
+            loadAppInstantInternal(room.appUrl, room.name);
           }
-        };
-        
-        // Cancel any existing fast travel polling
-        if (fastTravelRafRef.current !== null) {
-          cancelAnimationFrame(fastTravelRafRef.current);
+        } else {
+          // Browser navigation: Fast travel to room first, THEN enter portal
+          const currentPos = currentRoomProgressRef.current ?? 0;
+          const distance = Math.abs(currentPos - roomIndex);
+
+          console.log(
+            `[Routing] Fast traveling from ${currentPos.toFixed(2)} to ${roomIndex} (distance: ${distance.toFixed(2)})`,
+          );
+
+          // Mark that we're fast-traveling to load an app (prevents premature minibar & blocks manual nav)
+          setIsFastTravelingToApp(true);
+
+          // Set target only - let camera lerp smoothly to destination
+          targetRoomProgressRef.current = roomIndex;
+          setRoomProgress(roomIndex);
+
+          // Poll for arrival: check every frame if we've reached destination
+          const checkArrival = () => {
+            const currentDistance = Math.abs(
+              (currentRoomProgressRef.current ?? 0) - roomIndex,
+            );
+
+            // Arrived when within 0.05 units (visually imperceptible, but before snap)
+            if (currentDistance < 0.05) {
+              console.log(`[Routing] Fast travel complete - entering portal`);
+              // Fast travel complete - now we can show minibar & allow manual nav
+              setIsFastTravelingToApp(false);
+              fastTravelRafRef.current = null;
+              activePortalRef.current = roomIndex;
+              if (room.appUrl) {
+                loadAppInternal(room.appUrl, room.name);
+              }
+            } else {
+              // Not there yet, check again next frame
+              fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+            }
+          };
+
+          // Cancel any existing fast travel polling
+          if (fastTravelRafRef.current !== null) {
+            cancelAnimationFrame(fastTravelRafRef.current);
+          }
+
+          // Start polling
+          fastTravelRafRef.current = requestAnimationFrame(checkArrival);
         }
-        
-        // Start polling
-        fastTravelRafRef.current = requestAnimationFrame(checkArrival);
-      }
-    }, [loadAppInternal, loadAppInstantInternal]),
+      },
+      [loadAppInternal, loadAppInstantInternal],
+    ),
     onRequestCloseApp: useCallback(() => {
       console.log(`[Routing] Request to close app (from browser back button)`);
       // Cancel any pending fast travel
@@ -217,23 +230,26 @@ function RoomGalleryInner() {
   });
 
   // Wrapped loadApp that also updates URL
-  const loadApp = useCallback((url: string, name: string) => {
-    // Clear fast travel flag (in case this is called outside browser navigation)
-    setIsFastTravelingToApp(false);
-    // Cancel any pending fast travel polling
-    if (fastTravelRafRef.current !== null) {
-      cancelAnimationFrame(fastTravelRafRef.current);
-      fastTravelRafRef.current = null;
-    }
-    loadAppInternal(url, name);
-    
-    // Find app ID and update URL
-    const room = ROOMS.find((r) => r.appUrl === url);
-    if (room?.appId) {
-      console.log(`[Routing] Setting URL to: ?app=${room.appId}`);
-      setAppInUrl(room.appId);
-    }
-  }, [loadAppInternal, setAppInUrl]);
+  const loadApp = useCallback(
+    (url: string, name: string) => {
+      // Clear fast travel flag (in case this is called outside browser navigation)
+      setIsFastTravelingToApp(false);
+      // Cancel any pending fast travel polling
+      if (fastTravelRafRef.current !== null) {
+        cancelAnimationFrame(fastTravelRafRef.current);
+        fastTravelRafRef.current = null;
+      }
+      loadAppInternal(url, name);
+
+      // Find app ID and update URL
+      const room = ROOMS.find((r) => r.appUrl === url);
+      if (room?.appId) {
+        console.log(`[Routing] Setting URL to: ?app=${room.appId}`);
+        setAppInUrl(room.appId);
+      }
+    },
+    [loadAppInternal, setAppInUrl],
+  );
 
   // Wrapped minimizeApp that also clears URL
   const minimizeApp = useCallback(() => {
@@ -347,53 +363,59 @@ function RoomGalleryInner() {
     isBlocked: isNavigationBlocked,
   });
 
-
   // Fast travel to specific room (with blocking to prevent interruption)
-  const moveTo = useCallback((room: RoomData) => {
-    // Block navigation if already fast traveling
-    if (isFastTravelingToApp) {
-      console.log('[moveTo] Blocked - already fast traveling');
-      return;
-    }
+  const moveTo = useCallback(
+    (room: RoomData) => {
+      // Block navigation if already fast traveling
+      if (isFastTravelingToApp) {
+        console.log('[moveTo] Blocked - already fast traveling');
+        return;
+      }
 
-    const roomIndex = ROOMS.indexOf(room);
-    const currentPos = currentRoomProgressRef.current ?? 0;
-    const distance = Math.abs(currentPos - roomIndex);
+      const roomIndex = ROOMS.indexOf(room);
+      const currentPos = currentRoomProgressRef.current ?? 0;
+      const distance = Math.abs(currentPos - roomIndex);
 
-    // If very close, just snap instantly
-    if (distance < 0.5) {
+      // If very close, just snap instantly
+      if (distance < 0.5) {
+        targetRoomProgressRef.current = roomIndex;
+        setRoomProgress(roomIndex);
+        return;
+      }
+
+      // Far away: Block navigation during fast travel
+      console.log(
+        `[moveTo] Fast traveling to room ${roomIndex} (distance: ${distance.toFixed(2)})`,
+      );
+      setIsFastTravelingToApp(true);
+
       targetRoomProgressRef.current = roomIndex;
       setRoomProgress(roomIndex);
-      return;
-    }
 
-    // Far away: Block navigation during fast travel
-    console.log(`[moveTo] Fast traveling to room ${roomIndex} (distance: ${distance.toFixed(2)})`);
-    setIsFastTravelingToApp(true);
-    
-    targetRoomProgressRef.current = roomIndex;
-    setRoomProgress(roomIndex);
+      // Poll for arrival
+      const checkArrival = () => {
+        const currentDistance = Math.abs(
+          (currentRoomProgressRef.current ?? 0) - roomIndex,
+        );
 
-    // Poll for arrival
-    const checkArrival = () => {
-      const currentDistance = Math.abs((currentRoomProgressRef.current ?? 0) - roomIndex);
-      
-      if (currentDistance < 0.05) {
-        console.log(`[moveTo] Fast travel complete`);
-        setIsFastTravelingToApp(false);
-        fastTravelRafRef.current = null;
-      } else {
-        fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+        if (currentDistance < 0.05) {
+          console.log(`[moveTo] Fast travel complete`);
+          setIsFastTravelingToApp(false);
+          fastTravelRafRef.current = null;
+        } else {
+          fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+        }
+      };
+
+      // Cancel any existing polling
+      if (fastTravelRafRef.current !== null) {
+        cancelAnimationFrame(fastTravelRafRef.current);
       }
-    };
 
-    // Cancel any existing polling
-    if (fastTravelRafRef.current !== null) {
-      cancelAnimationFrame(fastTravelRafRef.current);
-    }
-
-    fastTravelRafRef.current = requestAnimationFrame(checkArrival);
-  }, [isFastTravelingToApp]);
+      fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+    },
+    [isFastTravelingToApp],
+  );
 
   // Derive current room from lerped camera position (smooth, jitter-free)
   // Using useSyncedRefState hook to eliminate RAF boilerplate
@@ -524,7 +546,7 @@ function RoomGalleryInner() {
           targetRoomProgressRef.current = roomIndex;
           currentRoomProgressRef.current = roomIndex;
           setRoomProgress(roomIndex);
-          
+
           // Set active portal to trigger zoom animation, then load app
           activePortalRef.current = roomIndex;
           loadApp(url, name);
@@ -551,43 +573,51 @@ function RoomGalleryInner() {
                   targetRoomProgressRef.current = roomIndex;
                   currentRoomProgressRef.current = roomIndex;
                   setRoomProgress(roomIndex);
-                  
+
                   activePortalRef.current = roomIndex;
                   loadApp(currentAppUrl, currentAppName);
                 } else {
                   // Far away: Fast travel + poll for arrival (same logic as browser nav)
-                  console.log(`[RestoreApp] Starting fast travel to room ${roomIndex}`);
-                  
+                  console.log(
+                    `[RestoreApp] Starting fast travel to room ${roomIndex}`,
+                  );
+
                   // Mark that we're fast-traveling (blocks manual navigation)
                   setIsFastTravelingToApp(true);
-                  
+
                   targetRoomProgressRef.current = roomIndex;
                   setRoomProgress(roomIndex);
-                  
+
                   // Poll for arrival: check every frame if we've reached destination
                   const checkArrival = () => {
-                    const currentDistance = Math.abs((currentRoomProgressRef.current ?? 0) - roomIndex);
-                    
+                    const currentDistance = Math.abs(
+                      (currentRoomProgressRef.current ?? 0) - roomIndex,
+                    );
+
                     // Arrived when within 0.05 units (visually imperceptible, but before snap)
                     if (currentDistance < 0.05) {
-                      console.log(`[RestoreApp] Fast travel complete - entering portal`);
+                      console.log(
+                        `[RestoreApp] Fast travel complete - entering portal`,
+                      );
                       setIsFastTravelingToApp(false);
                       fastTravelRafRef.current = null;
                       activePortalRef.current = roomIndex;
                       loadApp(currentAppUrl, currentAppName);
                     } else {
                       // Not there yet, check again next frame
-                      fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+                      fastTravelRafRef.current =
+                        requestAnimationFrame(checkArrival);
                     }
                   };
-                  
+
                   // Cancel any existing fast travel polling
                   if (fastTravelRafRef.current !== null) {
                     cancelAnimationFrame(fastTravelRafRef.current);
                   }
-                  
+
                   // Start polling
-                  fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+                  fastTravelRafRef.current =
+                    requestAnimationFrame(checkArrival);
                 }
               }
             : undefined
@@ -600,14 +630,13 @@ function RoomGalleryInner() {
         }
         isAtHomepage={Math.round(currentRoomProgressRef.current) === 0}
         isCollapsed={
-          !isFastTravelingToApp && ( // Don't collapse during fast travel (browser nav/restore button)
-            hasAppParam || // Start collapsed if loading with ?app=X param
+          !isFastTravelingToApp && // Don't collapse during fast travel (browser nav/restore button)
+          (hasAppParam || // Start collapsed if loading with ?app=X param
             appLoaderState === 'portal-zooming' ||
             appLoaderState === 'transitioning' ||
             appLoaderState === 'app-active' ||
-            appLoaderState === 'fading-to-black'
-            // During 'minimizing': minibar expands for ALL apps (Matrix-Cam iframe already shut down during fade)
-          )
+            appLoaderState === 'fading-to-black')
+          // During 'minimizing': minibar expands for ALL apps (Matrix-Cam iframe already shut down during fade)
         }
         skipInitialAnimation={hasAppParam} // Skip card spacing animation on direct URL loads
         onExpand={minimizeApp}
@@ -615,9 +644,14 @@ function RoomGalleryInner() {
           // Direct drag handling from menu bar (more responsive than scene drag)
           const newProgress = Math.max(
             0,
-            Math.min(ROOMS.length - 1, targetRoomProgressRef.current + deltaProgress),
+            Math.min(
+              ROOMS.length - 1,
+              targetRoomProgressRef.current + deltaProgress,
+            ),
           );
-          console.log(`[MenuBar Drag Handler] deltaProgress: ${deltaProgress.toFixed(4)}, old: ${targetRoomProgressRef.current.toFixed(2)}, new: ${newProgress.toFixed(2)}`);
+          console.log(
+            `[MenuBar Drag Handler] deltaProgress: ${deltaProgress.toFixed(4)}, old: ${targetRoomProgressRef.current.toFixed(2)}, new: ${newProgress.toFixed(2)}`,
+          );
           targetRoomProgressRef.current = newProgress;
           setRoomProgress(newProgress);
         }}
@@ -625,12 +659,14 @@ function RoomGalleryInner() {
           // Snap to nearest room after menu bar drag (matches scene drag behavior)
           const currentProgress = targetRoomProgressRef.current;
           const nearestRoom = Math.round(currentProgress);
-          console.log(`[MenuBar Drag End] Snapping from ${currentProgress.toFixed(2)} to ${nearestRoom}`);
+          console.log(
+            `[MenuBar Drag End] Snapping from ${currentProgress.toFixed(2)} to ${nearestRoom}`,
+          );
           targetRoomProgressRef.current = nearestRoom;
           setRoomProgress(nearestRoom);
         }}
       />
-      
+
       {/* App Grid Modal - Sibling to FloatingMenuBar for independent rendering */}
       <AppGridModal
         rooms={ROOMS}
@@ -647,7 +683,7 @@ function RoomGalleryInner() {
           targetRoomProgressRef.current = roomIndex;
           currentRoomProgressRef.current = roomIndex;
           setRoomProgress(roomIndex);
-          
+
           activePortalRef.current = roomIndex;
           loadApp(url, name);
         }}
@@ -704,7 +740,6 @@ function RoomGalleryInner() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
