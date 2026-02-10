@@ -59,94 +59,28 @@ export function GridButton({ onClick }: GridButtonProps) {
       title='View all apps'
     >
       <svg
-        width='32'
-        height='32'
+        width='28'
+        height='28'
         viewBox='0 0 24 24'
         fill='none'
         xmlns='http://www.w3.org/2000/svg'
         style={{ display: 'block' }}
       >
-        {/* 3x3 grid icon */}
-        <rect
-          x='3'
-          y='3'
-          width='6'
-          height='6'
-          rx='1'
-          stroke='currentColor'
-          strokeWidth='2'
-          fill='none'
-        />
-        <rect
-          x='11'
-          y='3'
-          width='6'
-          height='6'
-          rx='1'
-          stroke='currentColor'
-          strokeWidth='2'
-          fill='none'
-        />
-        <rect
-          x='19'
-          y='3'
-          width='2'
-          height='6'
-          rx='1'
-          fill='currentColor'
-        />
-        <rect
-          x='3'
-          y='11'
-          width='6'
-          height='6'
-          rx='1'
-          stroke='currentColor'
-          strokeWidth='2'
-          fill='none'
-        />
-        <rect
-          x='11'
-          y='11'
-          width='6'
-          height='6'
-          rx='1'
-          stroke='currentColor'
-          strokeWidth='2'
-          fill='none'
-        />
-        <rect
-          x='19'
-          y='11'
-          width='2'
-          height='6'
-          rx='1'
-          fill='currentColor'
-        />
-        <rect
-          x='3'
-          y='19'
-          width='6'
-          height='2'
-          rx='1'
-          fill='currentColor'
-        />
-        <rect
-          x='11'
-          y='19'
-          width='6'
-          height='2'
-          rx='1'
-          fill='currentColor'
-        />
-        <rect
-          x='19'
-          y='19'
-          width='2'
-          height='2'
-          rx='1'
-          fill='currentColor'
-        />
+        {/* Clean 3x3 grid icon */}
+        {/* Top row */}
+        <rect x='3' y='3' width='5' height='5' rx='1.5' fill='currentColor' />
+        <rect x='9.5' y='3' width='5' height='5' rx='1.5' fill='currentColor' />
+        <rect x='16' y='3' width='5' height='5' rx='1.5' fill='currentColor' />
+        
+        {/* Middle row */}
+        <rect x='3' y='9.5' width='5' height='5' rx='1.5' fill='currentColor' />
+        <rect x='9.5' y='9.5' width='5' height='5' rx='1.5' fill='currentColor' />
+        <rect x='16' y='9.5' width='5' height='5' rx='1.5' fill='currentColor' />
+        
+        {/* Bottom row */}
+        <rect x='3' y='16' width='5' height='5' rx='1.5' fill='currentColor' />
+        <rect x='9.5' y='16' width='5' height='5' rx='1.5' fill='currentColor' />
+        <rect x='16' y='16' width='5' height='5' rx='1.5' fill='currentColor' />
       </svg>
     </button>
   );

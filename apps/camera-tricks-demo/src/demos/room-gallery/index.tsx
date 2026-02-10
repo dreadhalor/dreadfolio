@@ -67,6 +67,9 @@ function RoomGalleryInner() {
   const [fps, setFps] = useState(60);
   const [drawCalls, setDrawCalls] = useState(0);
 
+  // Modal state for blocking scene interaction
+  const [isModalBlockingInteraction, setIsModalBlockingInteraction] = useState(false);
+
   // PRIMARY STATE: Room progress (0.0 to 14.0)
   // Initialize with correct room if loading via URL parameter
   const [roomProgress, setRoomProgress] = useState(initialRoomIndex);
@@ -95,6 +98,7 @@ function RoomGalleryInner() {
     targetRoomProgressRef,
     setRoomProgress,
     appLoaderState,
+    isBlocked: isModalBlockingInteraction,
   });
 
   // URL/History Routing - mediates between browser URL and app state
@@ -246,6 +250,7 @@ function RoomGalleryInner() {
     setRoomProgress,
     appLoaderState,
     minimizeApp,
+    isBlocked: isModalBlockingInteraction,
   });
 
   // Horizontal scroll wheel / trackpad navigation
@@ -253,6 +258,7 @@ function RoomGalleryInner() {
     targetRoomProgressRef,
     setRoomProgress,
     appLoaderState,
+    isBlocked: isModalBlockingInteraction,
   });
 
 
@@ -275,8 +281,12 @@ function RoomGalleryInner() {
 
   return (
     <div
+      data-vaul-drawer-wrapper
       style={
         {
+          position: 'fixed', // CRITICAL: Prevents viewport shifts from mobile keyboard
+          top: 0,
+          left: 0,
           width: '100vw',
           height: '100dvh', // Use dynamic viewport height for mobile Safari
           background: '#000',
@@ -290,13 +300,14 @@ function RoomGalleryInner() {
           paddingBottom: 'env(safe-area-inset-bottom)', // Account for iOS bottom bar
         } as React.CSSProperties
       }
-      onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
+      onMouseDown={isModalBlockingInteraction ? undefined : handleMouseDown}
+      onTouchStart={isModalBlockingInteraction ? undefined : handleTouchStart}
       onContextMenu={(e) => e.preventDefault()} // Prevent long-press context menu on iOS
     >
       <Canvas
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
         shadows={false} // Shadows completely disabled for performance
+        resize={{ scroll: false, debounce: 0 }} // Disable scroll-based ResizeObserver to prevent firing during drawer animations
         frameloop={
           appLoaderState === 'app-active' ||
           appLoaderState === 'fading-to-black' ||
@@ -350,7 +361,10 @@ function RoomGalleryInner() {
         onComplete={handleNavigationComplete}
       />
 
-      {/* Floating Menu Bar - morphs between full and mini during transitions */}
+      {/* App Loader Overlay */}
+      <AppLoader />
+
+      {/* Floating Menu Bar - OUTSIDE scale wrapper so it stays on top */}
       <FloatingMenuBar
         rooms={ROOMS}
         currentRoom={currentRoom}
@@ -422,10 +436,8 @@ function RoomGalleryInner() {
           targetRoomProgressRef.current = nearestRoom;
           setRoomProgress(nearestRoom);
         }}
+        onModalStateChange={setIsModalBlockingInteraction}
       />
-
-      {/* App Loader Overlay */}
-      <AppLoader />
 
       {/* Debug Overlay */}
       {DEBUG_MODE && debugInfo && (

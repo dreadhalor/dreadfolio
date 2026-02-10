@@ -13,7 +13,7 @@ import { RightButtonContainer } from './RightButtonContainer';
 import { ButtonSpacer } from './ButtonSpacer';
 import { CardsContainer } from './CardsContainer';
 import { FloatingMenuBarProvider } from './FloatingMenuBarContext';
-import { useRef, useState, MutableRefObject } from 'react';
+import { useRef, useState, useCallback, MutableRefObject } from 'react';
 import { useDrag } from '@use-gesture/react';
 
 interface FloatingMenuBarProps {
@@ -31,6 +31,7 @@ interface FloatingMenuBarProps {
   onExpand?: () => void; // Called when clicking collapsed indicator
   onDrag?: (deltaProgress: number) => void; // Direct drag callback (updates room progress)
   onDragEnd?: () => void; // Called when drag ends (for snapping)
+  onModalStateChange?: (isOpen: boolean) => void; // Called when modal opens/closes
 }
 
 /**
@@ -56,6 +57,7 @@ export function FloatingMenuBar({
   onExpand,
   onDrag,
   onDragEnd,
+  onModalStateChange,
 }: FloatingMenuBarProps) {
   const isMobile = useIsMobile();
   const smoothRoomProgress = useSyncedRefState(
@@ -64,6 +66,18 @@ export function FloatingMenuBar({
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [isGridModalOpen, setIsGridModalOpen] = useState(false);
   const { viewportWidth } = useViewportDimensions();
+
+  // Notify parent when modal state changes (synchronously)
+  const handleGridModalOpen = useCallback(() => {
+    setIsGridModalOpen(true);
+    onModalStateChange?.(true);
+  }, [onModalStateChange]);
+
+  const handleGridModalClose = useCallback(() => {
+    setIsGridModalOpen(false);
+    onModalStateChange?.(false);
+  }, [onModalStateChange]);
+
   // Use desktop values for both mobile and desktop
   const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH; // 60px
   const cardHeight = MINIMAP_CONFIG.ROOM_CARD_HEIGHT;
@@ -96,11 +110,16 @@ export function FloatingMenuBar({
   const bind = useDrag(
     ({ down, movement: [mx], first, last, event }) => {
       console.log(
-        `[useDrag] down: ${down}, mx: ${mx.toFixed(2)}, first: ${first}, last: ${last}`,
+        `[useDrag FloatingMenuBar] down: ${down}, mx: ${mx.toFixed(2)}, first: ${first}, last: ${last}, isCollapsed: ${isCollapsed}, isGridModalOpen: ${isGridModalOpen}`,
       );
 
-      // Only handle drag when menu bar is expanded
-      if (isCollapsed) return;
+      // Only handle drag when menu bar is expanded AND modal is closed
+      if (isCollapsed || isGridModalOpen) {
+        console.log(
+          `[useDrag FloatingMenuBar] Ignoring - ${isCollapsed ? 'collapsed' : 'modal open'}`,
+        );
+        return;
+      }
 
       // Prevent default to avoid text selection, etc.
       event.preventDefault();
@@ -143,6 +162,7 @@ export function FloatingMenuBar({
 
   // Helper to handle touch start for buttons
   const handleButtonTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation(); // Prevent touch from triggering drag handlers
     const touch = e.touches[0];
     if (touch) {
       touchStartRef.current = { x: touch.clientX, y: touch.clientY };
@@ -304,7 +324,9 @@ export function FloatingMenuBar({
         title={isCollapsed ? 'Show navigation menu' : undefined}
       >
         {/* Minimized app button - left side, only when app is minimized */}
-        <LeftButtonContainer visible={!shouldHideButtons && !!minimizedAppIconUrl}>
+        <LeftButtonContainer
+          visible={!shouldHideButtons && !!minimizedAppIconUrl}
+        >
           <RestoreAppButton
             minimizedAppIconUrl={minimizedAppIconUrl}
             onClick={onRestoreAppClick}
@@ -318,7 +340,7 @@ export function FloatingMenuBar({
         {/* Grid button - right side, always visible in app switcher */}
         <RightButtonContainer visible={!shouldHideButtons}>
           <ButtonSpacer />
-          <GridButton onClick={() => setIsGridModalOpen(true)} />
+          <GridButton onClick={handleGridModalOpen} />
         </RightButtonContainer>
 
         {/* CSS animations and utilities */}
@@ -338,14 +360,14 @@ export function FloatingMenuBar({
       </div>
 
       {/* Grid Modal */}
-      {isGridModalOpen && (
-        <AppGridModal
-          rooms={rooms}
-          currentRoom={currentRoom}
-          onRoomClick={onRoomClick}
-          onClose={() => setIsGridModalOpen(false)}
-        />
-      )}
+      <AppGridModal
+        rooms={rooms}
+        currentRoom={currentRoom}
+        minimizedAppIconUrl={minimizedAppIconUrl}
+        onRoomClick={onRoomClick}
+        onClose={handleGridModalClose}
+        open={isGridModalOpen}
+      />
     </FloatingMenuBarProvider>
   );
 }

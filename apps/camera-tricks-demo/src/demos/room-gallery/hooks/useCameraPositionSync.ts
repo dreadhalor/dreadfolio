@@ -36,19 +36,22 @@ export function useCameraPositionSync({
 }: UseCameraPositionSyncProps): number {
   let currentProgress = 0;
 
-  useFrame(() => {
+  useFrame((_, deltaTime) => {
     const targetProgress = targetRoomProgressRef.current ?? 0;
 
-    // Smooth lerp to target room progress
-    const delta = targetProgress - (currentRoomProgressRef.current ?? 0);
-    const distance = Math.abs(delta);
+    // Smooth lerp to target room progress (time-based, framerate-independent)
+    const positionDelta = targetProgress - (currentRoomProgressRef.current ?? 0);
+    const distance = Math.abs(positionDelta);
     
     // Snap instantly only when imperceptibly close (0.0001 units = ~0.01 pixels on screen)
     // This prevents floating point precision issues while being completely invisible
     if (distance < 0.0001) {
       currentRoomProgressRef.current = targetProgress;
     } else {
-      currentRoomProgressRef.current = (currentRoomProgressRef.current ?? 0) + delta * CAMERA_LERP_SPEED;
+      // Convert frame-based lerp (0.1 per frame at 60fps) to time-based (6.0 per second)
+      // This ensures consistent speed regardless of framerate
+      const timeBasedLerpSpeed = CAMERA_LERP_SPEED * 60;
+      currentRoomProgressRef.current = (currentRoomProgressRef.current ?? 0) + positionDelta * timeBasedLerpSpeed * deltaTime;
     }
 
     currentProgress = currentRoomProgressRef.current ?? 0;

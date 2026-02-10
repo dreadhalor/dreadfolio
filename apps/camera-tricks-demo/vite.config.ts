@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   base: '/',
   server: {
     port: 5174,
@@ -14,17 +15,17 @@ export default defineConfig({
         console.log('HTTPS disabled via USE_HTTPS=false');
         return false;
       }
-      
+
       // Check if certificates exist
       const certPath = path.resolve(__dirname, '../../localhost+2.pem');
       const keyPath = path.resolve(__dirname, '../../localhost+2-key.pem');
       const certsExist = fs.existsSync(certPath) && fs.existsSync(keyPath);
-      
+
       if (!certsExist) {
         console.log('HTTPS certificates not found, using HTTP');
         return false;
       }
-      
+
       // Use HTTPS by default if certs exist (unless explicitly disabled)
       console.log('Using HTTPS with mkcert certificates');
       return {
@@ -34,7 +35,13 @@ export default defineConfig({
     })(),
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@react-three/fiber', '@react-three/drei', 'three'],
+    include: [
+      'react',
+      'react-dom',
+      '@react-three/fiber',
+      '@react-three/drei',
+      'three',
+    ],
     exclude: [],
   },
   resolve: {
