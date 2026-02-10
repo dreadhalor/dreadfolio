@@ -74,8 +74,6 @@ export function FloatingMenuBar({
   const cardSpacing = cardWidth + cardGap; // 68px
   const MENU_BAR_DRAG_SENSITIVITY = 1 / cardSpacing; // ~0.01471
 
-  // Track drag state for debugging
-  const [isDraggingDebug, setIsDraggingDebug] = useState(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastMovementXRef = useRef(0);
 
@@ -83,9 +81,6 @@ export function FloatingMenuBar({
   const bind = useDrag(
     ({ down, movement: [mx], first, last, event }) => {
       console.log(`[useDrag] down: ${down}, mx: ${mx.toFixed(2)}, first: ${first}, last: ${last}`);
-      
-      // Update debug state
-      setIsDraggingDebug(down);
 
       // Only handle drag when menu bar is expanded
       if (isCollapsed) return;

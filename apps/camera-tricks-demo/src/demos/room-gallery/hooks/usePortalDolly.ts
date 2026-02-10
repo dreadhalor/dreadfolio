@@ -5,7 +5,6 @@
  * Ensures consistency between animated and instant positioning.
  */
 
-import { MutableRefObject } from 'react';
 import { calculateDollyPositions } from '../utils/portalDollyCalculations';
 import { PORTAL_DEFAULT_Z, PORTAL_ZOOM_TARGET_Z } from '../config/constants';
 import type { ExtendedCamera } from '../types/portalTypes';

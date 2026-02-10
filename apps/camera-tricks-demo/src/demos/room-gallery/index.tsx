@@ -79,8 +79,8 @@ function RoomGalleryInner() {
     hasAppParam ? initialRoomIndex : null
   );
   
-  // Debug: Track portal/camera distance
-  const [portalDebug, setPortalDebug] = useState<{
+  // Debug: Track portal/camera distance (currently disabled)
+  const [_portalDebug, setPortalDebug] = useState<{
     cameraZ: number;
     portalZ: number;
     distance: number;
