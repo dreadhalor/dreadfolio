@@ -167,17 +167,20 @@ jobs:
 
       - name: Sync to S3
         run: |
-          # Upload all files except index.html with long cache
+          # Upload all files except HTML files with long cache
           aws s3 sync ${{ steps.app-config.outputs.dist_path }} \
             s3://${{ steps.app-config.outputs.bucket_name }}/ \
             --delete \
             --cache-control "public, max-age=31536000, immutable" \
-            --exclude "index.html"
+            --exclude "*.html"
           
-          # Upload index.html with no cache (for immediate updates)
-          aws s3 cp ${{ steps.app-config.outputs.dist_path }}/index.html \
-            s3://${{ steps.app-config.outputs.bucket_name }}/index.html \
-            --cache-control "public, max-age=0, must-revalidate"
+          # Upload HTML files with no cache (for immediate updates)
+          # This includes index.html and iframe.html (for Storybook apps like dread-ui)
+          aws s3 sync ${{ steps.app-config.outputs.dist_path }} \
+            s3://${{ steps.app-config.outputs.bucket_name }}/ \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --exclude "*" \
+            --include "*.html"
 
       - name: Invalidate CloudFront
         run: |
