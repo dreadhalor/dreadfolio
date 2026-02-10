@@ -76,6 +76,38 @@ export function FloatingMenuBar({
 
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const lastMovementXRef = useRef(0);
+  const wheelEndTimeoutRef = useRef<number | null>(null);
+
+  // Handle horizontal scroll wheel / trackpad gestures
+  const handleWheel = (e: React.WheelEvent) => {
+    if (isCollapsed) return;
+    
+    // Only handle horizontal scroll (trackpad horizontal swipe or shift+wheel)
+    // deltaX is positive when scrolling right, negative when scrolling left
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      
+      // Convert wheel delta to progress delta
+      // Similar sensitivity to drag, but wheel events have larger delta values
+      const WHEEL_SENSITIVITY = MENU_BAR_DRAG_SENSITIVITY * 0.5; // Make it less sensitive
+      const deltaProgress = -e.deltaX * WHEEL_SENSITIVITY;
+      
+      if (onDrag) {
+        onDrag(deltaProgress);
+      }
+
+      // Snap to nearest room after scrolling stops
+      // Clear existing timeout and set new one
+      if (wheelEndTimeoutRef.current) {
+        clearTimeout(wheelEndTimeoutRef.current);
+      }
+      wheelEndTimeoutRef.current = window.setTimeout(() => {
+        if (onDragEnd) {
+          onDragEnd();
+        }
+      }, 150); // Snap after 150ms of no scrolling
+    }
+  };
 
   // Use @use-gesture/react for robust drag handling
   const bind = useDrag(
@@ -149,6 +181,15 @@ export function FloatingMenuBar({
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Cleanup wheel snap timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (wheelEndTimeoutRef.current) {
+        clearTimeout(wheelEndTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Animated card spacing - time-based animation matching CSS transition
@@ -341,6 +382,7 @@ export function FloatingMenuBar({
         `,
       }}
         {...(!isCollapsed ? bind() : {})}
+        onWheel={!isCollapsed ? handleWheel : undefined}
         onTouchStart={isCollapsed ? handleButtonTouchStart : undefined}
         onTouchEnd={isCollapsed ? (e) => {
           if (isTouchClick(e)) {
