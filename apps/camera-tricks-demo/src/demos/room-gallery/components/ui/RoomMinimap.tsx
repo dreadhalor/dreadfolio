@@ -188,6 +188,7 @@ export function RoomMinimap({
                   cardHeight={cardHeight}
                   isMobile={isMobile}
                   onClick={onRoomClick}
+                  onLoadApp={() => {}} // Legacy component - no-op (3 params)
                 />
               );
             })}

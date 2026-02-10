@@ -19,6 +19,7 @@ interface FloatingMenuBarContextValue {
   cardWidth: number;
   isMobile: boolean;
   onRoomClick: (room: RoomData) => void;
+  onLoadApp: (url: string, name: string, roomIndex: number) => void;
 }
 
 const FloatingMenuBarContext = createContext<FloatingMenuBarContextValue | null>(null);

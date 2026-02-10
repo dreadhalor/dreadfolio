@@ -22,6 +22,7 @@ interface FloatingMenuBarProps {
   roomProgress: number;
   currentRoomProgressRef: MutableRefObject<number>;
   onRoomClick: (room: RoomData) => void;
+  onLoadApp: (url: string, name: string, roomIndex: number) => void; // Open an app with portal animation
   onHomeClick: () => void;
   onRestoreAppClick?: () => void;
   minimizedAppIconUrl?: string | null;
@@ -48,6 +49,7 @@ export function FloatingMenuBar({
   roomProgress: _roomProgress,
   currentRoomProgressRef,
   onRoomClick,
+  onLoadApp,
   onHomeClick: _onHomeClick,
   onRestoreAppClick,
   minimizedAppIconUrl,
@@ -241,6 +243,7 @@ export function FloatingMenuBar({
         cardWidth,
         isMobile,
         onRoomClick,
+        onLoadApp,
       }}
     >
       <div
@@ -365,6 +368,7 @@ export function FloatingMenuBar({
         currentRoom={currentRoom}
         minimizedAppIconUrl={minimizedAppIconUrl}
         onRoomClick={onRoomClick}
+        onLoadApp={onLoadApp}
         onClose={handleGridModalClose}
         open={isGridModalOpen}
       />

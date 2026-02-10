@@ -9,6 +9,7 @@ interface AppGridModalProps {
   currentRoom: RoomData;
   minimizedAppIconUrl?: string | null;
   onRoomClick: (room: RoomData) => void;
+  onLoadApp: (url: string, name: string, roomIndex: number) => void;
   onClose: () => void;
   open: boolean; // Controlled open state
 }
@@ -25,9 +26,10 @@ interface AppGridModalProps {
  */
 export function AppGridModal({
   rooms,
-  currentRoom: _currentRoom,
+  currentRoom,
   minimizedAppIconUrl,
   onRoomClick,
+  onLoadApp,
   onClose,
   open,
 }: AppGridModalProps) {
@@ -40,9 +42,17 @@ export function AppGridModal({
     if (searchInputRef.current) {
       searchInputRef.current.blur();
     }
-    // Close drawer and start navigation simultaneously for smoother transition
+    // Close drawer
     onClose();
-    onRoomClick(room);
+    
+    // If clicking the current room and it has an app, open it directly
+    if (room.offsetX === currentRoom.offsetX && room.appUrl) {
+      const roomIndex = rooms.findIndex((r) => r.offsetX === room.offsetX);
+      onLoadApp(room.appUrl, room.name, roomIndex);
+    } else {
+      // Otherwise, navigate to the room
+      onRoomClick(room);
+    }
   };
 
   const filteredRooms = rooms.filter((room) =>

@@ -14,6 +14,7 @@ import { FloatingMenuBar } from './components/ui/FloatingMenuBar';
 import { AppLoader } from './components/ui/AppLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NavigationToast } from './components/ui/NavigationToast';
+import { CameraDebugDisplay } from './components/ui/CameraDebugDisplay';
 
 // Providers
 import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
@@ -224,12 +225,14 @@ function RoomGalleryInner() {
   // Cross-origin navigation from iframed apps
   useCrossOriginNavigation({
     targetRoomProgressRef,
+    currentRoomProgressRef,
     onRoomProgressChange: (progress) => {
       targetRoomProgressRef.current = progress;
       setRoomProgress(progress);
     },
     onMinimizeApp: minimizeApp,
     appLoaderState,
+    currentAppUrl,
     onNavigationStart: (roomName) => {
       setNavigationTarget(roomName);
     },
@@ -355,6 +358,16 @@ function RoomGalleryInner() {
         </>
       )}
 
+      {/* Camera Debug Display - Always visible for debugging positioning issues */}
+      <CameraDebugDisplay
+        currentRoomProgressRef={currentRoomProgressRef}
+        targetRoomProgressRef={targetRoomProgressRef}
+        roomProgress={roomProgress}
+        currentRoomIndex={currentRoom ? ROOMS.indexOf(currentRoom) : 0}
+        appLoaderState={appLoaderState}
+        activePortalRef={activePortalRef}
+      />
+
       {/* Navigation Toast */}
       <NavigationToast
         targetRoomName={navigationTarget}
@@ -371,6 +384,18 @@ function RoomGalleryInner() {
         roomProgress={roomProgress}
         currentRoomProgressRef={currentRoomProgressRef}
         onRoomClick={moveTo}
+        onLoadApp={(url: string, name: string, roomIndex: number) => {
+          // CRITICAL: Snap camera to exact room position before loading
+          // Otherwise, if camera is mid-lerp (e.g., 0.8 traveling to 0),
+          // the portal zoom will start from the wrong position
+          targetRoomProgressRef.current = roomIndex;
+          currentRoomProgressRef.current = roomIndex;
+          setRoomProgress(roomIndex);
+          
+          // Set active portal to trigger zoom animation, then load app
+          activePortalRef.current = roomIndex;
+          loadApp(url, name);
+        }}
         onHomeClick={() => {
           const homeRoomIndex = 0;
           targetRoomProgressRef.current = homeRoomIndex;
@@ -388,6 +413,12 @@ function RoomGalleryInner() {
                 const isNearby = Math.abs(currentProgress - roomIndex) < 0.5;
 
                 if (isNearby) {
+                  // CRITICAL: Even when nearby, snap camera to exact room position
+                  // Otherwise, time-based lerping may leave us slightly off (e.g., -0.2 instead of 0)
+                  targetRoomProgressRef.current = roomIndex;
+                  currentRoomProgressRef.current = roomIndex;
+                  setRoomProgress(roomIndex);
+                  
                   activePortalRef.current = roomIndex;
                   loadApp(currentAppUrl, currentAppName);
                 } else {

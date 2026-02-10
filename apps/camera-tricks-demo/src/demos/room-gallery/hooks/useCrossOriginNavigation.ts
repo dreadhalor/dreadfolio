@@ -23,9 +23,11 @@ interface NavigateToAppMessage {
 
 interface UseCrossOriginNavigationProps {
   targetRoomProgressRef: MutableRefObject<number>;
+  currentRoomProgressRef: MutableRefObject<number>;
   onRoomProgressChange: (progress: number) => void;
   onMinimizeApp: () => void;
   appLoaderState: string;
+  currentAppUrl: string | null;
   onNavigationStart?: (roomName: string) => void;
   onNavigationComplete?: () => void;
 }
@@ -41,9 +43,11 @@ interface UseCrossOriginNavigationProps {
  */
 export function useCrossOriginNavigation({
   targetRoomProgressRef,
+  currentRoomProgressRef,
   onRoomProgressChange,
   onMinimizeApp,
   appLoaderState,
+  currentAppUrl,
   onNavigationStart,
   onNavigationComplete,
 }: UseCrossOriginNavigationProps) {
@@ -109,6 +113,23 @@ export function useCrossOriginNavigation({
           console.log(
             `[CrossOriginNav] Minimizing current app, will navigate to ${message.appId} after`
           );
+          
+          // CRITICAL: Ensure camera is at the current app's room before minimizing
+          // Otherwise, when we zoom out of the portal, we'll be at the wrong position
+          if (currentAppUrl) {
+            const currentAppRoomIndex = ROOMS.findIndex(
+              (room) => room.appUrl === currentAppUrl
+            );
+            if (currentAppRoomIndex !== -1) {
+              console.log(
+                `[CrossOriginNav] Setting camera to current app room ${currentAppRoomIndex} before minimize`
+              );
+              targetRoomProgressRef.current = currentAppRoomIndex;
+              currentRoomProgressRef.current = currentAppRoomIndex;
+              onRoomProgressChange(currentAppRoomIndex);
+            }
+          }
+          
           pendingNavigationRef.current = targetRoomIndex;
           onMinimizeApp();
         } else {
@@ -137,8 +158,11 @@ export function useCrossOriginNavigation({
     };
   }, [
     targetRoomProgressRef,
+    currentRoomProgressRef,
     onRoomProgressChange,
     onMinimizeApp,
     appLoaderState,
+    currentAppUrl,
+    onNavigationStart,
   ]);
 }

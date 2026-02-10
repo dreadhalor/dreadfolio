@@ -13,6 +13,7 @@ export function CardsContainer() {
     cardWidth,
     isMobile,
     onRoomClick,
+    onLoadApp,
   } = useFloatingMenuBarContext();
 
   return (
@@ -70,6 +71,7 @@ export function CardsContainer() {
                 cardHeight={isCollapsed ? miniCardSize : cardHeight}
                 isMobile={isMobile}
                 onClick={onRoomClick}
+                onLoadApp={onLoadApp}
                 isCollapsed={isCollapsed}
               />
             </div>

@@ -39,6 +39,12 @@ export function useCameraPositionSync({
   useFrame((_, deltaTime) => {
     const targetProgress = targetRoomProgressRef.current ?? 0;
 
+    // CRITICAL: Clamp deltaTime to prevent huge jumps when frameloop resumes
+    // When canvas goes from "never" to "always" mode, first frame can have deltaTime > 1 second
+    // This causes the time-based lerp to wildly overshoot (e.g., 0.0001 -> -18.92)
+    // Max 1/30 second = 33ms per frame (handles even slow 30fps devices)
+    const clampedDeltaTime = Math.min(deltaTime, 1 / 30);
+
     // Smooth lerp to target room progress (time-based, framerate-independent)
     const positionDelta = targetProgress - (currentRoomProgressRef.current ?? 0);
     const distance = Math.abs(positionDelta);
@@ -51,7 +57,7 @@ export function useCameraPositionSync({
       // Convert frame-based lerp (0.1 per frame at 60fps) to time-based (6.0 per second)
       // This ensures consistent speed regardless of framerate
       const timeBasedLerpSpeed = CAMERA_LERP_SPEED * 60;
-      currentRoomProgressRef.current = (currentRoomProgressRef.current ?? 0) + positionDelta * timeBasedLerpSpeed * deltaTime;
+      currentRoomProgressRef.current = (currentRoomProgressRef.current ?? 0) + positionDelta * timeBasedLerpSpeed * clampedDeltaTime;
     }
 
     currentProgress = currentRoomProgressRef.current ?? 0;

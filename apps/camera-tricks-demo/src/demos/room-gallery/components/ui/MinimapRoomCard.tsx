@@ -11,6 +11,7 @@ interface MinimapRoomCardProps {
   cardHeight: number;
   isMobile: boolean;
   onClick: (room: RoomData) => void;
+  onLoadApp: (url: string, name: string, roomIndex: number) => void;
   isCollapsed?: boolean;
 }
 
@@ -42,13 +43,14 @@ const CARD_STYLES = {
 
 export function MinimapRoomCard({
   room,
-  index: _index,
+  index,
   isActive,
   distance,
   cardWidth,
   cardHeight,
   isMobile: _isMobile,
   onClick,
+  onLoadApp,
   isCollapsed = false,
 }: MinimapRoomCardProps) {
   // Track touch start position to detect drag vs click (parent handles dragging)
@@ -63,7 +65,14 @@ export function MinimapRoomCard({
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onClick(room);
+    
+    // If clicking the current room and it has an app, open it
+    if (isActive && room.appUrl) {
+      onLoadApp(room.appUrl, room.name, index);
+    } else {
+      // Otherwise, navigate to the room
+      onClick(room);
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -92,7 +101,14 @@ export function MinimapRoomCard({
       if (clickDistance < 10) {
         e.preventDefault();
         e.stopPropagation();
-        onClick(room);
+        
+        // If clicking the current room and it has an app, open it
+        if (isActive && room.appUrl) {
+          onLoadApp(room.appUrl, room.name, index);
+        } else {
+          // Otherwise, navigate to the room
+          onClick(room);
+        }
       }
     }
     touchStartRef.current = null;
