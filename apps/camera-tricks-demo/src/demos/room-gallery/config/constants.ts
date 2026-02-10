@@ -77,9 +77,7 @@ export const CAMERA_SAFE_ZONE = {
   maxZ: ROOM_VISUAL_DEPTH / 2 - 1, // Keep away from front wall
   minY: 0,
   maxY: CAMERA_HEIGHT + 2, // Keep tall objects away from camera height
-} as const;
-
-// Z-index layering for portal punch-through effect
+} as const;// Z-index layering for portal punch-through effect
 export const Z_INDEX = {
   IFRAME_HIDDEN: -999, // Iframe when minimized and hidden
   IFRAME_BACKGROUND: 1, // Iframe visible through portal hole during minimize

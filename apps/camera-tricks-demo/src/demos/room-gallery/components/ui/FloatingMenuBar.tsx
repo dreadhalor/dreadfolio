@@ -5,7 +5,15 @@ import { useCardAnimation } from '../../hooks/useCardAnimation';
 import { useViewportDimensions } from '../../hooks/useViewportDimensions';
 import { SPACING, UI_Z_INDEX, LAYOUT } from '../../config/styleConstants';
 import { MINIMAP_CONFIG } from '../../utils/minimapMapping';
-import { MinimapRoomCard } from './MinimapRoomCard';
+import { AppGridModal } from './AppGridModal';
+import { HomeButton } from './HomeButton';
+import { GridButton } from './GridButton';
+import { RestoreAppButton } from './RestoreAppButton';
+import { LeftButtonContainer } from './LeftButtonContainer';
+import { RightButtonContainer } from './RightButtonContainer';
+import { ButtonSpacer } from './ButtonSpacer';
+import { CardsContainer } from './CardsContainer';
+import { FloatingMenuBarProvider } from './FloatingMenuBarContext';
 import { useRef, useState, MutableRefObject } from 'react';
 import { useDrag } from '@use-gesture/react';
 
@@ -55,6 +63,7 @@ export function FloatingMenuBar({
     currentRoomProgressRef,
   ) as number;
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+  const [isGridModalOpen, setIsGridModalOpen] = useState(false);
   const { viewportWidth } = useViewportDimensions();
   // Use desktop values for both mobile and desktop
   const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH; // 60px
@@ -153,30 +162,8 @@ export function FloatingMenuBar({
     return false;
   };
 
-
   // Button visibility tied to collapse state
   const shouldHideButtons = isCollapsed;
-
-  const iconButtonStyle = (
-    hovered: boolean,
-    muted?: boolean,
-  ): React.CSSProperties => ({
-    width: '56px',
-    height: '56px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: hovered && !muted ? 'rgba(76, 175, 80, 0.2)' : 'transparent',
-    border: 'none',
-    borderRadius: '12px',
-    cursor: muted ? 'default' : 'pointer',
-    transition: 'all 0.2s ease',
-    fontSize: '1.5rem',
-    color: muted ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.9)',
-    transform: hovered && !muted ? 'scale(1.1)' : 'scale(1)',
-    opacity: 1,
-    flexShrink: 0,
-  });
 
   // Calculate explicit dimensions for smooth animation
   // Margins only on expanded state for narrow viewports
@@ -216,7 +203,27 @@ export function FloatingMenuBar({
   const paddingValue = isCollapsed ? '0' : `${SPACING.xs} ${SPACING.md}`;
 
   return (
-    <>
+    <FloatingMenuBarProvider
+      value={{
+        isCollapsed: isCollapsed ?? false,
+        shouldHideButtons,
+        hoveredButton,
+        setHoveredButton,
+        touchStartRef,
+        handleButtonTouchStart,
+        isTouchClick,
+        // Cards container props
+        rooms,
+        currentRoom,
+        smoothRoomProgress,
+        cardRefsRef,
+        cardHeight,
+        miniCardSize,
+        cardWidth,
+        isMobile,
+        onRoomClick,
+      }}
+    >
       <div
         onClick={isCollapsed ? onExpand : undefined}
         style={{
@@ -298,268 +305,31 @@ export function FloatingMenuBar({
         title={isCollapsed ? 'Show navigation menu' : undefined}
       >
         {/* Home button container - absolutely positioned, collapses without affecting layout */}
-        <div
-          style={{
-            position: 'absolute',
-            left: shouldHideButtons ? '-80px' : '0px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            opacity: shouldHideButtons ? 0 : 1,
-            transition:
-              'left 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            display: 'flex',
-            gap: '6px', // Reduced from SPACING.xs (8px) for tighter spacing
-            alignItems: 'center',
-            pointerEvents: shouldHideButtons ? 'none' : 'auto',
-            zIndex: 200, // Above cards
-            paddingLeft: SPACING.xs,
-            paddingTop: SPACING.xs,
-            paddingBottom: SPACING.xs,
-            paddingRight: '4px', // Reduced right padding for less gap before cards
-            background: isCollapsed
-              ? 'rgba(20, 20, 25, 0.9)'
-              : 'rgba(20, 20, 25, 0.95)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '12px 0 0 12px',
-          }}
-        >
-          <button
-            onClick={
-              isAtHomepage || shouldHideButtons ? undefined : onHomeClick
-            }
-            onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
-            onTouchStart={handleButtonTouchStart}
-            onTouchEnd={(e) => {
-              if (!isAtHomepage && !shouldHideButtons && isTouchClick(e)) {
-                e.preventDefault();
-                e.stopPropagation();
-                onHomeClick();
-              }
-              touchStartRef.current = null;
-            }}
-            style={{
-              ...iconButtonStyle(hoveredButton === 'home', isAtHomepage),
-              pointerEvents: shouldHideButtons ? 'none' : 'auto',
-            }}
-            onMouseEnter={() =>
-              !isAtHomepage && !isCollapsed && setHoveredButton('home')
-            }
-            onMouseLeave={() => setHoveredButton(null)}
-            title={isAtHomepage ? 'Already at Homepage' : 'Go to Homepage'}
-          >
-            <svg
-              width='32'
-              height='32'
-              viewBox='0 0 24 24'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-              style={{ display: 'block' }}
-            >
-              <path
-                d='M3 9.5L12 3L21 9.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.5Z'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                fill='none'
-              />
-              <path
-                d='M9 21V12H15V21'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-              />
-            </svg>
-          </button>
-
-          {/* Spacer */}
-          <div
-            style={{
-              width: '1px',
-              height: '32px',
-              background: 'rgba(255, 255, 255, 0.15)',
-              flexShrink: 0,
-            }}
-          />
-        </div>
+        <LeftButtonContainer>
+          <HomeButton isAtHomepage={isAtHomepage} onClick={onHomeClick} />
+          <ButtonSpacer />
+        </LeftButtonContainer>
 
         {/* Room navigation cards container - centered, full width when collapsed */}
-        <div
-          style={{
-            position: 'relative',
-            height: isCollapsed ? '100%' : `${cardHeight}px`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden', // Always clip cards outside bounds
-            width: '100%',
-            flexShrink: 1,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-        >
-          {/* Cards container - absolute positioning for each card with RAF updates */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '100%',
-              height: '100%',
-              pointerEvents: isCollapsed ? 'none' : 'auto', // Disable card clicks when collapsed
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-            }}
-          >
-            {rooms.map((room, index) => {
-              const isActive = currentRoom.offsetX === room.offsetX;
-              const distance = Math.abs(index - smoothRoomProgress);
+        <CardsContainer />
 
-              return (
-                <div
-                  key={room.offsetX}
-                  ref={(el) => {
-                    cardRefsRef.current[index] = el;
-                  }}
-                  style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: '50%',
-                    transform: 'translate(0px, -50%)', // RAF will update this
-                    willChange: 'transform',
-                  }}
-                >
-                  <MinimapRoomCard
-                    room={room}
-                    index={index}
-                    isActive={isActive}
-                    distance={distance}
-                    cardWidth={isCollapsed ? miniCardSize : cardWidth}
-                    cardHeight={isCollapsed ? miniCardSize : cardHeight}
-                    isMobile={isMobile}
-                    onClick={onRoomClick}
-                    isCollapsed={isCollapsed}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* Grid button - only shows when in app switcher (expanded) */}
+        <RightButtonContainer visible={!shouldHideButtons}>
+          <ButtonSpacer />
+          <GridButton onClick={() => setIsGridModalOpen(true)} />
+        </RightButtonContainer>
 
         {/* Restore app button container - absolutely positioned, slides out without affecting layout */}
         {/* Always render to allow smooth fade out animation */}
-        <div
-          style={{
-            position: 'absolute',
-            right: shouldHideButtons || !minimizedAppIconUrl ? '-80px' : '0px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            opacity: shouldHideButtons || !minimizedAppIconUrl ? 0 : 1,
-            transition:
-              'right 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            display: 'flex',
-            gap: '6px', // Reduced from SPACING.xs (8px) for tighter spacing
-            alignItems: 'center',
-            pointerEvents:
-              shouldHideButtons || !minimizedAppIconUrl ? 'none' : 'auto',
-            zIndex: 200, // Above cards
-            paddingRight: SPACING.xs,
-            paddingTop: SPACING.xs,
-            paddingBottom: SPACING.xs,
-            paddingLeft: '4px', // Reduced left padding to match home button's right padding
-            background: isCollapsed
-              ? 'rgba(20, 20, 25, 0.9)'
-              : 'rgba(20, 20, 25, 0.95)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '0 12px 12px 0',
-          }}
+        <RightButtonContainer
+          visible={!shouldHideButtons && !!minimizedAppIconUrl}
         >
-          {/* Spacer */}
-          <div
-            style={{
-              width: '1px',
-              height: '32px',
-              background: 'rgba(255, 255, 255, 0.15)',
-              flexShrink: 0,
-            }}
+          <ButtonSpacer />
+          <RestoreAppButton
+            minimizedAppIconUrl={minimizedAppIconUrl}
+            onClick={onRestoreAppClick}
           />
-
-          {/* Always render button to prevent instant disappear - use visibility */}
-          <button
-            onClick={
-              shouldHideButtons || !minimizedAppIconUrl || !onRestoreAppClick
-                ? undefined
-                : onRestoreAppClick
-            }
-            onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
-            onTouchStart={handleButtonTouchStart}
-            onTouchEnd={(e) => {
-              if (
-                !shouldHideButtons &&
-                minimizedAppIconUrl &&
-                onRestoreAppClick &&
-                isTouchClick(e)
-              ) {
-                e.preventDefault();
-                e.stopPropagation();
-                onRestoreAppClick();
-              }
-              touchStartRef.current = null;
-            }}
-            style={{
-              width: '56px',
-              height: '56px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'rgba(76, 175, 80, 0.15)',
-              border: '2px solid rgba(76, 175, 80, 0.6)',
-              borderRadius: '12px',
-              cursor:
-                minimizedAppIconUrl && onRestoreAppClick
-                  ? 'pointer'
-                  : 'default',
-              transform:
-                hoveredButton === 'restore' ? 'scale(1.1)' : 'scale(1)',
-              boxShadow:
-                '0 0 20px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
-              animation:
-                shouldHideButtons || !minimizedAppIconUrl
-                  ? 'none'
-                  : 'minimizedAppPulse 2s ease-in-out infinite',
-              flexShrink: 0,
-              padding: '6px',
-              transition:
-                'transform 0.2s ease, opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              pointerEvents:
-                shouldHideButtons || !minimizedAppIconUrl ? 'none' : 'auto',
-              opacity: minimizedAppIconUrl ? 1 : 0,
-            }}
-            onMouseEnter={() =>
-              !isCollapsed && minimizedAppIconUrl && setHoveredButton('restore')
-            }
-            onMouseLeave={() => setHoveredButton(null)}
-            title={minimizedAppIconUrl ? 'Return to minimized app' : ''}
-          >
-            {minimizedAppIconUrl && (
-              <img
-                src={minimizedAppIconUrl}
-                alt='Minimized app'
-                draggable={false}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                  pointerEvents: 'none', // Click handler is on parent button
-                }}
-              />
-            )}
-          </button>
-        </div>
+        </RightButtonContainer>
 
         {/* CSS animations and utilities */}
         <style>{`
@@ -576,6 +346,16 @@ export function FloatingMenuBar({
         }
       `}</style>
       </div>
-    </>
+
+      {/* Grid Modal */}
+      {isGridModalOpen && (
+        <AppGridModal
+          rooms={rooms}
+          currentRoom={currentRoom}
+          onRoomClick={onRoomClick}
+          onClose={() => setIsGridModalOpen(false)}
+        />
+      )}
+    </FloatingMenuBarProvider>
   );
 }

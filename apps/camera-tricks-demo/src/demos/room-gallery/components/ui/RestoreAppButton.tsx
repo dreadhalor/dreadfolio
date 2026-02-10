@@ -1,81 +1,94 @@
-import { useState } from 'react';
-import { useIsMobile } from '../../hooks/useIsMobile';
-import {
-  SPACING,
-  BORDER_RADIUS,
-  COLORS,
-  UI_Z_INDEX,
-} from '../../config/styleConstants';
+import { useFloatingMenuBarContext } from './FloatingMenuBarContext';
 
 interface RestoreAppButtonProps {
-  appName: string;
-  onRestore: () => void;
+  minimizedAppIconUrl: string | null | undefined;
+  onClick?: () => void;
 }
 
-/**
- * Restore App Button - Shows when an app is minimized
- * 
- * Provides quick access to restore the minimized app without clicking the portal
- * Positioned in top-left corner (opposite of return button)
- */
-export function RestoreAppButton({ appName, onRestore }: RestoreAppButtonProps) {
-  const isMobile = useIsMobile();
-  const [isHovered, setIsHovered] = useState(false);
-
-  function getButtonStyles(isMobile: boolean): React.CSSProperties {
-    return {
-      position: 'fixed',
-      // Position in bottom-right corner
-      bottom: isMobile
-        ? `calc(${SPACING.sm} + env(safe-area-inset-bottom))`
-        : SPACING.lg,
-      right: isMobile
-        ? `calc(${SPACING.sm} + env(safe-area-inset-right))`
-        : SPACING.lg,
-      padding: isMobile
-        ? `${SPACING.xs} ${SPACING.md}`
-        : `${SPACING.sm} ${SPACING.lg}`,
-      background: COLORS.overlay.darker,
-      color: '#fff',
-      border: `2px solid ${COLORS.border.medium}`,
-      borderRadius: BORDER_RADIUS.pill,
-      fontSize: isMobile ? '0.875rem' : '1rem',
-      fontWeight: '600',
-      cursor: 'pointer',
-      zIndex: UI_Z_INDEX.RETURN_BUTTON, // Same layer as return button
-      backdropFilter: 'blur(10px)',
-      boxShadow: isHovered
-        ? '0 8px 24px rgba(76, 175, 80, 0.4)'
-        : '0 4px 12px rgba(0, 0, 0, 0.3)',
-      transform: 'scale(1)',
-      transition: 'all 0.2s ease',
-      userSelect: 'none',
-      WebkitUserSelect: 'none',
-      WebkitTouchCallout: 'none',
-      WebkitTapHighlightColor: 'transparent',
-      display: 'flex',
-      alignItems: 'center',
-      gap: SPACING.xs,
-    };
-  }
+export function RestoreAppButton({ minimizedAppIconUrl, onClick }: RestoreAppButtonProps) {
+  const {
+    isCollapsed,
+    shouldHideButtons,
+    hoveredButton,
+    setHoveredButton,
+    handleButtonTouchStart,
+    isTouchClick,
+    touchStartRef,
+  } = useFloatingMenuBarContext();
 
   return (
     <button
-      onClick={onRestore}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        ...getButtonStyles(isMobile),
-        ...(isHovered && {
-          transform: 'scale(1.05)',
-          borderColor: '#4CAF50',
-        }),
+      onClick={
+        shouldHideButtons || !minimizedAppIconUrl || !onClick
+          ? undefined
+          : onClick
+      }
+      onMouseDown={(e) => e.stopPropagation()} // Prevent drag start
+      onTouchStart={handleButtonTouchStart}
+      onTouchEnd={(e) => {
+        if (
+          !shouldHideButtons &&
+          minimizedAppIconUrl &&
+          onClick &&
+          isTouchClick(e)
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        }
+        touchStartRef.current = null;
       }}
+      style={{
+        width: '56px',
+        height: '56px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(76, 175, 80, 0.15)',
+        border: '2px solid rgba(76, 175, 80, 0.6)',
+        borderRadius: '12px',
+        cursor:
+          minimizedAppIconUrl && onClick
+            ? 'pointer'
+            : 'default',
+        transform:
+          hoveredButton === 'restore' ? 'scale(1.1)' : 'scale(1)',
+        boxShadow:
+          '0 0 20px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
+        animation:
+          shouldHideButtons || !minimizedAppIconUrl
+            ? 'none'
+            : 'minimizedAppPulse 2s ease-in-out infinite',
+        flexShrink: 0,
+        padding: '6px',
+        transition:
+          'transform 0.2s ease, opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        pointerEvents:
+          shouldHideButtons || !minimizedAppIconUrl ? 'none' : 'auto',
+        opacity: minimizedAppIconUrl ? 1 : 0,
+      }}
+      onMouseEnter={() =>
+        !isCollapsed && minimizedAppIconUrl && setHoveredButton('restore')
+      }
+      onMouseLeave={() => setHoveredButton(null)}
+      title={minimizedAppIconUrl ? 'Return to minimized app' : ''}
     >
-      <span style={{ fontSize: isMobile ? '1rem' : '1.25rem' }}>↩️</span>
-      <span>
-        {isMobile ? appName : `Return to ${appName}`}
-      </span>
+      {minimizedAppIconUrl && (
+        <img
+          src={minimizedAppIconUrl}
+          alt='Minimized app'
+          draggable={false}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            pointerEvents: 'none', // Click handler is on parent button
+          }}
+        />
+      )}
     </button>
   );
 }
