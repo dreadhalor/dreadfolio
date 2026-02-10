@@ -14,7 +14,7 @@ import { FloatingMenuBar } from './components/ui/FloatingMenuBar';
 import { AppLoader } from './components/ui/AppLoader';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { NavigationToast } from './components/ui/NavigationToast';
-import { CameraDebugDisplay } from './components/ui/CameraDebugDisplay';
+// import { CameraDebugDisplay } from './components/ui/CameraDebugDisplay';
 
 // Providers
 import { AppLoaderProvider, useAppLoader } from './providers/AppLoaderContext';
@@ -358,15 +358,15 @@ function RoomGalleryInner() {
         </>
       )}
 
-      {/* Camera Debug Display - Always visible for debugging positioning issues */}
-      <CameraDebugDisplay
+      {/* Camera Debug Display - Hidden by default, uncomment for troubleshooting */}
+      {/* <CameraDebugDisplay
         currentRoomProgressRef={currentRoomProgressRef}
         targetRoomProgressRef={targetRoomProgressRef}
         roomProgress={roomProgress}
         currentRoomIndex={currentRoom ? ROOMS.indexOf(currentRoom) : 0}
         appLoaderState={appLoaderState}
         activePortalRef={activePortalRef}
-      />
+      /> */}
 
       {/* Navigation Toast */}
       <NavigationToast
