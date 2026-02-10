@@ -44,7 +44,7 @@ export function AppGridModal({
     }
     // Close drawer
     onClose();
-    
+
     // If clicking the current room and it has an app, open it directly
     if (room.offsetX === currentRoom.offsetX && room.appUrl) {
       const roomIndex = rooms.findIndex((r) => r.offsetX === room.offsetX);
