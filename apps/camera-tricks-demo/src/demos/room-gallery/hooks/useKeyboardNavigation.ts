@@ -6,6 +6,7 @@ interface UseKeyboardNavigationProps {
   setRoomProgress: (progress: number) => void;
   appLoaderState: string;
   minimizeApp: () => void;
+  isBlocked?: boolean;
 }
 
 /**
@@ -16,9 +17,15 @@ export function useKeyboardNavigation({
   setRoomProgress,
   appLoaderState,
   minimizeApp,
+  isBlocked = false,
 }: UseKeyboardNavigationProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle if interaction is blocked (e.g., modal is open)
+      if (isBlocked) {
+        return;
+      }
+
       // Don't interfere with typing in inputs
       if (
         e.target instanceof HTMLInputElement ||
@@ -76,5 +83,5 @@ export function useKeyboardNavigation({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [appLoaderState, minimizeApp, targetRoomProgressRef, setRoomProgress]);
+  }, [appLoaderState, minimizeApp, targetRoomProgressRef, setRoomProgress, isBlocked]);
 }

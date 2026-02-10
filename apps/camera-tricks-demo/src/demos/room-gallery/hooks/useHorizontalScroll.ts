@@ -5,6 +5,7 @@ interface UseHorizontalScrollProps {
   targetRoomProgressRef: MutableRefObject<number>;
   setRoomProgress: (progress: number) => void;
   appLoaderState: string;
+  isBlocked?: boolean;
 }
 
 /**
@@ -20,11 +21,17 @@ export function useHorizontalScroll({
   targetRoomProgressRef,
   setRoomProgress,
   appLoaderState,
+  isBlocked = false,
 }: UseHorizontalScrollProps) {
   useEffect(() => {
     let wheelEndTimeoutRef: number | null = null;
 
     const handleWheel = (e: WheelEvent) => {
+      // Don't handle if interaction is blocked (e.g., modal is open)
+      if (isBlocked) {
+        return;
+      }
+
       // Don't interfere when app is active
       if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
         return;
@@ -91,5 +98,5 @@ export function useHorizontalScroll({
       }
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [appLoaderState, targetRoomProgressRef, setRoomProgress]);
+  }, [appLoaderState, targetRoomProgressRef, setRoomProgress, isBlocked]);
 }

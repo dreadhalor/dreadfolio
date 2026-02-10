@@ -5,6 +5,7 @@ interface UseDragNavigationProps {
   targetRoomProgressRef: MutableRefObject<number>;
   setRoomProgress: (progress: number) => void;
   appLoaderState: string;
+  isBlocked?: boolean;
 }
 
 interface UseDragNavigationReturn {
@@ -20,18 +21,25 @@ interface UseDragNavigationReturn {
  * - Mouse drag (mousedown/mousemove/mouseup)
  * - Touch drag (touchstart/touchmove/touchend)
  * - Automatic snapping to nearest room on drag end
- * - Blocking drags when app is active
+ * - Blocking drags when app is active or modal is open
  */
 export function useDragNavigation({
   targetRoomProgressRef,
   setRoomProgress,
   appLoaderState,
+  isBlocked = false,
 }: UseDragNavigationProps): UseDragNavigationReturn {
   const [isDragging, setIsDragging] = useState(false);
   const lastMouseXRef = useRef(0);
 
   // Unified pointer down handler
   const handlePointerDown = useCallback((clientX: number, isPassThrough = false) => {
+    // Block dragging if interaction is blocked (e.g., modal is open)
+    if (isBlocked) {
+      console.log(`[Drag] Blocked - interaction is blocked`);
+      return;
+    }
+
     // Block ALL dragging when app is visible (even pass-through from minibar)
     if (appLoaderState === 'app-active' || appLoaderState === 'fading-to-black') {
       console.log(`[Drag] Blocked - app is ${appLoaderState}, pass-through: ${isPassThrough}`);
@@ -41,7 +49,7 @@ export function useDragNavigation({
     console.log(`[Drag] Started - pass-through: ${isPassThrough}`);
     setIsDragging(true);
     lastMouseXRef.current = clientX;
-  }, [appLoaderState]);
+  }, [appLoaderState, isBlocked]);
 
   const handlePointerMove = useCallback(
     (clientX: number) => {
@@ -85,9 +93,10 @@ export function useDragNavigation({
   // Mouse event handlers
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      console.log(`[useDragNavigation] handleMouseDown called, isBlocked: ${isBlocked}`);
       handlePointerDown(e.clientX);
     },
-    [handlePointerDown],
+    [handlePointerDown, isBlocked],
   );
 
   const handleMouseMove = useCallback(
@@ -104,12 +113,13 @@ export function useDragNavigation({
   // Touch event handlers
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
+      console.log(`[useDragNavigation] handleTouchStart called, touches: ${e.touches.length}, isBlocked: ${isBlocked}`);
       if (e.touches.length === 1) {
         e.preventDefault(); // Prevent iOS scrolling/zooming
         handlePointerDown(e.touches[0].clientX);
       }
     },
-    [handlePointerDown],
+    [handlePointerDown, isBlocked],
   );
 
   const handleTouchMove = useCallback(
