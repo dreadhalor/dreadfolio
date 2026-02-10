@@ -35,6 +35,7 @@ interface FloatingMenuBarProps {
   onDragEnd?: () => void; // Called when drag ends (for snapping)
   onModalStateChange?: (isOpen: boolean) => void; // Called when modal opens/closes
   appLoaderState?: AppLoaderState; // Current app loader state (to auto-close drawer)
+  isFastTraveling?: boolean; // Fast traveling to room (to auto-close drawer)
 }
 
 /**
@@ -63,6 +64,7 @@ export function FloatingMenuBar({
   onDragEnd,
   onModalStateChange,
   appLoaderState,
+  isFastTraveling,
 }: FloatingMenuBarProps) {
   const isMobile = useIsMobile();
   const smoothRoomProgress = useSyncedRefState(
@@ -90,6 +92,14 @@ export function FloatingMenuBar({
       handleGridModalClose();
     }
   }, [appLoaderState, isGridModalOpen, handleGridModalClose]);
+
+  // Auto-close drawer when fast traveling (prevents drawer from reopening during travel)
+  useEffect(() => {
+    if (isFastTraveling && isGridModalOpen) {
+      console.log('[FloatingMenuBar] Auto-closing drawer - fast travel started');
+      handleGridModalClose();
+    }
+  }, [isFastTraveling, isGridModalOpen, handleGridModalClose]);
 
   // Use desktop values for both mobile and desktop
   const cardWidth = MINIMAP_CONFIG.ROOM_CARD_WIDTH; // 60px
@@ -382,6 +392,7 @@ export function FloatingMenuBar({
         onLoadApp={onLoadApp}
         onClose={handleGridModalClose}
         open={isGridModalOpen}
+        isFastTraveling={isFastTraveling}
       />
     </FloatingMenuBarProvider>
   );

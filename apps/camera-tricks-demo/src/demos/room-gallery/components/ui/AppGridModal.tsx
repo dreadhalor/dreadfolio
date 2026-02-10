@@ -12,6 +12,7 @@ interface AppGridModalProps {
   onLoadApp: (url: string, name: string, roomIndex: number) => void;
   onClose: () => void;
   open: boolean; // Controlled open state
+  isFastTraveling?: boolean; // Prevent reopening during fast travel
 }
 
 /**
@@ -32,6 +33,7 @@ export function AppGridModal({
   onLoadApp,
   onClose,
   open,
+  isFastTraveling,
 }: AppGridModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [hasAnimatedIn, setHasAnimatedIn] = useState(false);
@@ -105,6 +107,12 @@ export function AppGridModal({
     <Drawer.Root
       open={open}
       onOpenChange={(isOpen) => {
+        // Prevent reopening during fast travel
+        if (isOpen && isFastTraveling) {
+          console.log('[AppGridModal] Blocked drawer open - fast traveling');
+          return;
+        }
+        
         if (!isOpen) {
           // Blur search input before closing
           if (searchInputRef.current) {

@@ -318,19 +318,51 @@ function RoomGalleryInner() {
   });
 
 
-  // Fast travel to specific room (simple!)
+  // Fast travel to specific room (with blocking to prevent interruption)
   const moveTo = useCallback((room: RoomData) => {
-    // Block navigation if fast traveling to app
+    // Block navigation if already fast traveling
     if (isFastTravelingToApp) {
-      console.log('[moveTo] Blocked - fast traveling to app');
+      console.log('[moveTo] Blocked - already fast traveling');
       return;
     }
 
     const roomIndex = ROOMS.indexOf(room);
+    const currentPos = currentRoomProgressRef.current ?? 0;
+    const distance = Math.abs(currentPos - roomIndex);
 
-    // Just set room progress to the room index
+    // If very close, just snap instantly
+    if (distance < 0.5) {
+      targetRoomProgressRef.current = roomIndex;
+      setRoomProgress(roomIndex);
+      return;
+    }
+
+    // Far away: Block navigation during fast travel
+    console.log(`[moveTo] Fast traveling to room ${roomIndex} (distance: ${distance.toFixed(2)})`);
+    setIsFastTravelingToApp(true);
+    
     targetRoomProgressRef.current = roomIndex;
     setRoomProgress(roomIndex);
+
+    // Poll for arrival
+    const checkArrival = () => {
+      const currentDistance = Math.abs((currentRoomProgressRef.current ?? 0) - roomIndex);
+      
+      if (currentDistance < 0.05) {
+        console.log(`[moveTo] Fast travel complete`);
+        setIsFastTravelingToApp(false);
+        fastTravelRafRef.current = null;
+      } else {
+        fastTravelRafRef.current = requestAnimationFrame(checkArrival);
+      }
+    };
+
+    // Cancel any existing polling
+    if (fastTravelRafRef.current !== null) {
+      cancelAnimationFrame(fastTravelRafRef.current);
+    }
+
+    fastTravelRafRef.current = requestAnimationFrame(checkArrival);
   }, [isFastTravelingToApp]);
 
   // Derive current room from lerped camera position (smooth, jitter-free)
@@ -454,6 +486,7 @@ function RoomGalleryInner() {
         currentRoomProgressRef={currentRoomProgressRef}
         onRoomClick={moveTo}
         appLoaderState={appLoaderState}
+        isFastTraveling={isFastTravelingToApp}
         onLoadApp={(url: string, name: string, roomIndex: number) => {
           // CRITICAL: Snap camera to exact room position before loading
           // Otherwise, if camera is mid-lerp (e.g., 0.8 traveling to 0),
