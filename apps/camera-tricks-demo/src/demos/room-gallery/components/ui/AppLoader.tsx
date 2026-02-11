@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useAppLoader, AppLoaderState } from '../../providers/AppLoaderContext';
 import { usePortalIframeRef } from '../../hooks/usePortalRefs';
@@ -11,13 +11,16 @@ function IframeWithLogging({
   currentAppName,
   iframeRef,
   getIframeStyles,
+  onLoadError,
 }: {
   currentAppUrl: string;
   currentAppName: string | null;
   iframeRef: React.MutableRefObject<HTMLIFrameElement | null>;
   getIframeStyles: () => React.CSSProperties;
+  onLoadError: () => void;
 }) {
   const isMatrixCam = currentAppUrl?.includes('/ascii-video');
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (isMatrixCam) {
@@ -43,6 +46,80 @@ function IframeWithLogging({
     };
   }, [isMatrixCam]);
 
+  // Detect iframe load errors (404, network failures, etc.)
+  useEffect(() => {
+    if (!iframeRef.current) return;
+
+    const iframe = iframeRef.current;
+    let timeoutId: NodeJS.Timeout;
+
+    const checkIframeLoad = () => {
+      try {
+        // Try to access iframe content - will throw if CORS or load failed
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        
+        // Check if we can access the document and if it has loaded
+        if (iframeDoc) {
+          if (iframeDoc.readyState === 'complete') {
+            // Check for error pages or empty content
+            const title = iframeDoc.title?.toLowerCase() || '';
+            const bodyText = iframeDoc.body?.textContent?.toLowerCase() || '';
+            
+            // Detect common error indicators
+            if (
+              title.includes('404') ||
+              title.includes('not found') ||
+              bodyText.includes('404') ||
+              bodyText.includes('cannot be found') ||
+              bodyText.includes('page not found') ||
+              (bodyText.length < 100 && bodyText.includes('error'))
+            ) {
+              console.error('[IframeWithLogging] Load error detected:', currentAppUrl);
+              setHasError(true);
+              onLoadError();
+            }
+          }
+        }
+      } catch (e) {
+        // CORS error or other access issues - this is expected for cross-origin iframes
+        // Don't treat as error since the iframe might be loading fine
+        console.log('[IframeWithLogging] CORS or access restriction (normal for cross-origin)');
+      }
+    };
+
+    // Set timeout to detect if iframe takes too long to load
+    timeoutId = setTimeout(() => {
+      console.warn('[IframeWithLogging] Iframe load timeout:', currentAppUrl);
+      setHasError(true);
+      onLoadError();
+    }, 15000); // 15 second timeout
+
+    const handleLoad = () => {
+      clearTimeout(timeoutId);
+      checkIframeLoad();
+    };
+
+    const handleError = () => {
+      console.error('[IframeWithLogging] Iframe error event:', currentAppUrl);
+      clearTimeout(timeoutId);
+      setHasError(true);
+      onLoadError();
+    };
+
+    iframe.addEventListener('load', handleLoad);
+    iframe.addEventListener('error', handleError);
+
+    return () => {
+      clearTimeout(timeoutId);
+      iframe.removeEventListener('load', handleLoad);
+      iframe.removeEventListener('error', handleError);
+    };
+  }, [currentAppUrl, iframeRef, onLoadError]);
+
+  if (hasError) {
+    return null; // Don't render iframe if there's an error
+  }
+
   return (
     <iframe
       key={currentAppUrl} // Force remount when URL changes to prevent old content flash
@@ -53,6 +130,158 @@ function IframeWithLogging({
       allow='accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; usb; xr-spatial-tracking'
       sandbox='allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-presentation allow-same-origin allow-scripts'
     />
+  );
+}
+
+// Error overlay for failed app loads
+function AppLoadErrorOverlay({
+  appName,
+  appUrl,
+  onClose,
+}: {
+  appName: string | null;
+  appUrl: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100dvh',
+        background: 'rgba(0, 0, 0, 0.95)',
+        zIndex: Z_INDEX.IFRAME_ACTIVE + 2,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: '500px',
+          background: '#1a1a1a',
+          border: '2px solid #ff4444',
+          borderRadius: '12px',
+          padding: '2rem',
+          textAlign: 'center',
+          color: '#fff',
+        }}
+      >
+        {/* Error Icon */}
+        <div
+          style={{
+            fontSize: '3rem',
+            marginBottom: '1rem',
+          }}
+        >
+          ⚠️
+        </div>
+
+        {/* Title */}
+        <h2
+          style={{
+            margin: '0 0 1rem 0',
+            fontSize: '1.5rem',
+            color: '#ff4444',
+          }}
+        >
+          App Not Available
+        </h2>
+
+        {/* Message */}
+        <p
+          style={{
+            margin: '0 0 1.5rem 0',
+            fontSize: '1rem',
+            color: '#ccc',
+            lineHeight: '1.5',
+          }}
+        >
+          <strong>{appName || 'This app'}</strong> is currently unavailable. This usually happens when:
+        </p>
+
+        <ul
+          style={{
+            textAlign: 'left',
+            margin: '0 0 1.5rem 0',
+            padding: '0 0 0 1.5rem',
+            fontSize: '0.9rem',
+            color: '#aaa',
+            lineHeight: '1.6',
+          }}
+        >
+          <li>The app is still being deployed to production</li>
+          <li>CloudFront is still propagating (typically 15-30 minutes)</li>
+          <li>The app path is incorrect</li>
+        </ul>
+
+        <p
+          style={{
+            margin: '0 0 1.5rem 0',
+            fontSize: '0.85rem',
+            color: '#888',
+            fontFamily: 'monospace',
+          }}
+        >
+          URL: {appUrl}
+        </p>
+
+        {/* Actions */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'center',
+          }}
+        >
+          <button
+            onClick={onClose}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              background: '#444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#555';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#444';
+            }}
+          >
+            Go Back
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontSize: '1rem',
+              background: '#ff4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#ff6666';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#ff4444';
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -122,12 +351,30 @@ function MatrixCamBlackOverlay({
  * to avoid React re-render overhead. This is intentional for 60fps animation.
  */
 export function AppLoader() {
-  const { state, currentAppUrl, currentAppName } = useAppLoader();
+  const { state, currentAppUrl, currentAppName, closeApp } = useAppLoader();
   const [showIframe, setShowIframe] = useState(false);
+  const [hasLoadError, setHasLoadError] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // Register iframe ref with portal ref manager (replaces window object pollution)
   usePortalIframeRef(iframeRef);
+
+  // Reset error state when URL changes
+  useEffect(() => {
+    setHasLoadError(false);
+  }, [currentAppUrl]);
+
+  // Handle iframe load errors
+  const handleLoadError = useCallback(() => {
+    console.error('[AppLoader] App failed to load:', currentAppUrl);
+    setHasLoadError(true);
+  }, [currentAppUrl]);
+
+  // Handle error overlay close
+  const handleErrorClose = useCallback(() => {
+    setHasLoadError(false);
+    closeApp(); // Return to gallery view
+  }, [closeApp]);
 
   // Track showIframe changes for debugging
   useEffect(() => {
@@ -356,20 +603,30 @@ export function AppLoader() {
 
   return (
     <>
+      {/* Error overlay - shown when app fails to load */}
+      {hasLoadError && (
+        <AppLoadErrorOverlay
+          appName={currentAppName}
+          appUrl={currentAppUrl}
+          onClose={handleErrorClose}
+        />
+      )}
+
       {/* Iframe - repositions based on state */}
-      {showIframe && (
+      {showIframe && !hasLoadError && (
         <IframeWithLogging
           currentAppUrl={currentAppUrl}
           currentAppName={currentAppName}
           iframeRef={iframeRef}
           getIframeStyles={getIframeStyles}
+          onLoadError={handleLoadError}
         />
       )}
 
       {/* Black overlay for fade effect (only during transition phases) */}
       {(state === 'portal-zooming' ||
         state === 'transitioning' ||
-        state === 'zooming-out') && (
+        state === 'zooming-out') && !hasLoadError && (
         <animated.div
           style={{
             position: 'fixed',

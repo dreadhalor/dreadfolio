@@ -37,9 +37,153 @@ if (import.meta.env.DEV) {
 }
 
 /**
+ * Detect if we're in a recursive iframe situation (camera-tricks-demo loaded within itself)
+ * This prevents infinite loops when the /home app (or other apps) embed camera-tricks-demo
+ */
+function isRecursiveIframe(): boolean {
+  try {
+    // Check if we're in an iframe
+    if (window.self === window.top) {
+      return false; // Top-level window, no recursion
+    }
+
+    // Check parent frames for camera-tricks-demo signature
+    let currentWindow = window.parent;
+    let depth = 0;
+    const MAX_DEPTH = 5; // Prevent infinite loop in case of security errors
+
+    while (currentWindow && currentWindow !== window.top && depth < MAX_DEPTH) {
+      try {
+        // Check if parent has camera-tricks-demo loaded
+        const parentUrl = currentWindow.location.href;
+        if (parentUrl.includes('/camera-tricks')) {
+          return true; // Recursive iframe detected!
+        }
+        currentWindow = currentWindow.parent;
+      } catch (e) {
+        // Cross-origin security error - can't access parent, assume safe
+        break;
+      }
+      depth++;
+    }
+
+    return false;
+  } catch (e) {
+    // Any error, assume safe
+    return false;
+  }
+}
+
+/**
+ * Fallback component shown when recursive iframe is detected
+ */
+function RecursiveIframeWarning() {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+        color: '#fff',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        textAlign: 'center',
+        zIndex: 9999,
+      }}
+    >
+      <div
+        style={{
+          fontSize: '4rem',
+          marginBottom: '1rem',
+        }}
+      >
+        🔄
+      </div>
+      <h1
+        style={{
+          fontSize: '2rem',
+          marginBottom: '1rem',
+          fontWeight: 600,
+        }}
+      >
+        Recursive Loop Detected
+      </h1>
+      <p
+        style={{
+          fontSize: '1.125rem',
+          maxWidth: '600px',
+          lineHeight: 1.6,
+          opacity: 0.9,
+          marginBottom: '2rem',
+        }}
+      >
+        This app can't be loaded inside itself. The 3D gallery is already
+        running in the parent window.
+      </p>
+      <a
+        href='/'
+        onClick={(e) => {
+          e.preventDefault();
+          if (window.top) {
+            window.top.location.href = '/';
+          }
+        }}
+        style={{
+          padding: '0.75rem 2rem',
+          background: 'rgba(255, 255, 255, 0.2)',
+          border: '2px solid rgba(255, 255, 255, 0.5)',
+          borderRadius: '8px',
+          color: '#fff',
+          textDecoration: 'none',
+          fontSize: '1rem',
+          fontWeight: 500,
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+        }}
+      >
+        Return to Gallery
+      </a>
+      <p
+        style={{
+          marginTop: '2rem',
+          fontSize: '0.875rem',
+          opacity: 0.7,
+        }}
+      >
+        CloudFront is still deploying. This issue will resolve automatically
+        once all apps are available.
+      </p>
+    </div>
+  );
+}
+
+/**
  * Room Gallery - Inner component with access to AppLoader context
  */
 function RoomGalleryInner() {
+  // Check for recursive iframe situation
+  const isRecursive = isRecursiveIframe();
+
+  // If we're in a recursive iframe, show warning instead
+  if (isRecursive) {
+    console.warn('[RoomGallery] Recursive iframe detected - preventing infinite loop');
+    return <RecursiveIframeWarning />;
+  }
   const {
     state: appLoaderState,
     currentAppUrl,
