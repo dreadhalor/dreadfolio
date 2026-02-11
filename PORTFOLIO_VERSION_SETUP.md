@@ -8,8 +8,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 
 ```
 ~/Desktop/Coding/dreadfolios/
-  v1-archive/
-    portfolio/      ← Complete v1 ecosystem (2022)
+  dreadfolio-v1/    ← Complete v1 ecosystem (2022)
                       GitHub: https://github.com/Dreadhalor/dreadfolio-v1
                       Structure: apps/ containing portfolio + 5 archived apps
   dreadfolio-v2/    ← React physics (2024) - Physics-based app switcher
@@ -176,6 +175,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
     - Cleaned node_modules and build artifacts (can be reinstalled)
     - Complete v1 time capsule now in single repository
     - Renamed from portfolio-og to dreadfolio-v1 for consistency
+    - Moved from `v1-archive/portfolio/` to `dreadfolio-v1/` (consistent with v2/v3)
 
 ## Next Steps
 
