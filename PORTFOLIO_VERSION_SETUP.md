@@ -49,7 +49,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 - ✅ `scottjhetrick-portfolio-v1` - Angular v1 portfolio (3.6 MB, 50 files)
 - ✅ `scottjhetrick-minesweeper-v1` - Minesweeper 2022 build (278 KB, 17 files)
 - ✅ `scottjhetrick-enlight-v1` - Enlight 2022 build (1.3 MB, 14 files)
-- ✅ `scottjhetrick-visualizeit-v1` - VisualizeIt 2022 build (512 KB, 14 files)
+- ✅ `scottjhetrick-visualizeit-v1` - Pathfinder Visualizer 2022 build (512 KB, 14 files)
 - ✅ `scottjhetrick-shareme-v1` - ShareMe 2022 build (5.0 MB, 35 files)
 - ✅ `scottjhetrick-ascii-video-v1` - ASCII-Video/Matrix-Cam 2022 build (2.6 MB, 6 files)
 
@@ -139,11 +139,11 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 17. ✅ Cloned and checked out 2022 versions:
     - Minesweeper: 437d18c (2022-12-29)
     - Enlight: 0457d67 (2022-12-30)
-    - VisualizeIt: cf63d8a (2022-12-19)
+    - Pathfinder Visualizer: cf63d8a (2022-12-19)
     - ShareMe: 993c0df (2022-12-27)
     - ASCII-Video: e936e05 (2022-03-28)
 18. ✅ Built all 5 apps with 2022 dependencies:
-    - VisualizeIt: Used Node 16 + Python 3.9 for node-sass compatibility
+    - Pathfinder Visualizer: Used Node 16 + Python 3.9 for node-sass compatibility
     - ShareMe: Fixed missing assets and TypeScript declarations
 19. ✅ Created 5 new S3 buckets with clean naming:
     - `scottjhetrick-minesweeper-v1`
@@ -176,7 +176,8 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
     - Complete v1 time capsule now in single repository
     - Renamed from portfolio-og to dreadfolio-v1 for consistency
     - Moved from `v1-archive/portfolio/` to `dreadfolio-v1/` (consistent with v2/v3)
-    - Migrated VisualizeIt URL from `/AlgorithmVisualizer` to `/pathfinder-visualizer` for kebab-case consistency
+    - Migrated Pathfinder Visualizer URL from `/AlgorithmVisualizer` to `/pathfinder-visualizer` for kebab-case consistency
+    - Renamed directory from `visualizeit/` to `pathfinder-visualizer/` for complete consistency
 
 ## Next Steps
 
@@ -184,7 +185,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 - ✅ Full v1 ecosystem deployed with 2022 app versions
 - ✅ Portfolio + 5 archived apps served under `v1.scottjhetrick.com`
 - ✅ CloudFront path routing configured
-- ✅ All 5 apps load correctly (Minesweeper, Enlight, VisualizeIt, ShareMe, Matrix-Cam/ASCII-Video)
+- ✅ All 5 apps load correctly (Minesweeper, Enlight, Pathfinder Visualizer, ShareMe, Matrix-Cam/ASCII-Video)
 - ✅ External apps still work (BetterMUN, NetWorth)
 
 **Test URLs:**
