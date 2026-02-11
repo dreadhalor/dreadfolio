@@ -349,7 +349,7 @@ export function AppGridModal({
               </div>
             )}
 
-            {/* Portfolio v1 Time Machine Link */}
+            {/* Portfolio Time Machine Links */}
             {filteredRooms.length > 0 && (
               <div
                 style={{
@@ -362,90 +362,183 @@ export function AppGridModal({
                   borderTop: '1px solid rgba(139, 115, 85, 0.15)',
                 }}
               >
-                <a
-                  href='https://v1.scottjhetrick.com'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onClose();
-                  }}
-                  onTouchEnd={(e) => {
-                    e.stopPropagation();
-                  }}
+                <div
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 12px',
-                    background: 'rgba(139, 115, 85, 0.08)',
-                    border: '1px solid rgba(139, 115, 85, 0.25)',
-                    borderRadius: '8px',
-                    color: 'rgba(139, 115, 85, 0.85)',
-                    fontSize: '0.8125rem',
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer',
-                    pointerEvents: 'auto',
-                    touchAction: 'manipulation',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background =
-                      'rgba(139, 115, 85, 0.12)';
-                    e.currentTarget.style.borderColor =
-                      'rgba(139, 115, 85, 0.4)';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background =
-                      'rgba(139, 115, 85, 0.08)';
-                    e.currentTarget.style.borderColor =
-                      'rgba(139, 115, 85, 0.25)';
-                    e.currentTarget.style.transform = 'translateY(0)';
+                    gap: SPACING.sm,
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
                   }}
                 >
-                  <svg
-                    width='14'
-                    height='14'
-                    viewBox='0 0 16 16'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
-                    style={{ flexShrink: 0 }}
+                  <a
+                    href='https://v1.scottjhetrick.com'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 12px',
+                      background: 'rgba(139, 115, 85, 0.08)',
+                      border: '1px solid rgba(139, 115, 85, 0.25)',
+                      borderRadius: '8px',
+                      color: 'rgba(139, 115, 85, 0.85)',
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      touchAction: 'manipulation',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        'rgba(139, 115, 85, 0.12)';
+                      e.currentTarget.style.borderColor =
+                        'rgba(139, 115, 85, 0.4)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background =
+                        'rgba(139, 115, 85, 0.08)';
+                      e.currentTarget.style.borderColor =
+                        'rgba(139, 115, 85, 0.25)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
                   >
-                    <path
-                      d='M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z'
-                      stroke='currentColor'
-                      strokeWidth='1.5'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                    <path
-                      d='M8 5V8L10 10'
-                      stroke='currentColor'
-                      strokeWidth='1.5'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                  <span>Portfolio v1 (2024)</span>
-                  <svg
-                    width='10'
-                    height='10'
-                    viewBox='0 0 12 12'
-                    fill='none'
-                    xmlns='http://www.w3.org/2000/svg'
-                    style={{ flexShrink: 0, opacity: 0.5 }}
+                    <svg
+                      width='14'
+                      height='14'
+                      viewBox='0 0 16 16'
+                      fill='none'
+                      xmlns='http://www.w3.org/2000/svg'
+                      style={{ flexShrink: 0 }}
+                    >
+                      <path
+                        d='M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <path
+                        d='M8 5V8L10 10'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                    <span>Portfolio v1 (2022)</span>
+                    <svg
+                      width='10'
+                      height='10'
+                      viewBox='0 0 12 12'
+                      fill='none'
+                      xmlns='http://www.w3.org/2000/svg'
+                      style={{ flexShrink: 0, opacity: 0.5 }}
+                    >
+                      <path
+                        d='M10 2L2 10M10 2H3M10 2V9'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </a>
+                  <a
+                    href='https://v2.scottjhetrick.com'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClose();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '8px 12px',
+                      background: 'rgba(139, 115, 85, 0.08)',
+                      border: '1px solid rgba(139, 115, 85, 0.25)',
+                      borderRadius: '8px',
+                      color: 'rgba(139, 115, 85, 0.85)',
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      touchAction: 'manipulation',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        'rgba(139, 115, 85, 0.12)';
+                      e.currentTarget.style.borderColor =
+                        'rgba(139, 115, 85, 0.4)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background =
+                        'rgba(139, 115, 85, 0.08)';
+                      e.currentTarget.style.borderColor =
+                        'rgba(139, 115, 85, 0.25)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
                   >
-                    <path
-                      d='M10 2L2 10M10 2H3M10 2V9'
-                      stroke='currentColor'
-                      strokeWidth='1.5'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                </a>
+                    <svg
+                      width='14'
+                      height='14'
+                      viewBox='0 0 16 16'
+                      fill='none'
+                      xmlns='http://www.w3.org/2000/svg'
+                      style={{ flexShrink: 0 }}
+                    >
+                      <path
+                        d='M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                      <path
+                        d='M8 5V8L10 10'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                    <span>Portfolio v2 (2024)</span>
+                    <svg
+                      width='10'
+                      height='10'
+                      viewBox='0 0 12 12'
+                      fill='none'
+                      xmlns='http://www.w3.org/2000/svg'
+                      style={{ flexShrink: 0, opacity: 0.5 }}
+                    >
+                      <path
+                        d='M10 2L2 10M10 2H3M10 2V9'
+                        stroke='currentColor'
+                        strokeWidth='1.5'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </a>
+                </div>
                 <p
                   style={{
                     fontSize: '0.6875rem',
@@ -454,7 +547,7 @@ export function AppGridModal({
                     margin: 0,
                   }}
                 >
-                  Time capsule • Opens in new tab
+                  Time capsules • Open in new tab
                 </p>
               </div>
             )}
