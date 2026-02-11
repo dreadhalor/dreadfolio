@@ -8,8 +8,10 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 
 ```
 ~/Desktop/Coding/dreadfolios/
-  v1-archive/       ← Complete v1 ecosystem (2022) - Portfolio + 4 apps
-  dreadfolio-v1/    ← Angular (2022) - Original source (for reference)
+  v1-archive/
+    portfolio/      ← Complete v1 ecosystem (2022)
+                      GitHub: https://github.com/dreadhalor/portfolio-og
+                      Structure: apps/ containing portfolio + 5 archived apps
   dreadfolio-v2/    ← React physics (2024) - Physics-based app switcher
   dreadfolio/       ← 3D camera gallery (2026) - Current monorepo
 ```
@@ -38,8 +40,9 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
   - Serves v3 3D gallery portfolio (PRODUCTION)
 - ✅ `staging.scottjhetrick.com` → CloudFront `E1RAIZQJ35RLQQ`
   - Serves v3 3D gallery portfolio (STAGING)
-- ✅ `v1.scottjhetrick.com` → CloudFront `E1GW95D8P43MF1` (2026-02-10)
+- ✅ `v1.scottjhetrick.com` → CloudFront `E2OH90LTG8IZP1` (2026-02-11)
   - Serves Angular v1 portfolio + 5 archived apps via path routing
+  - Previous distribution `E1GW95D8P43MF1` (disabled, being deleted)
 - ✅ `v2.scottjhetrick.com` → Load Balancer (2026-02-10)
   - Serves React physics v2 portfolio
 
@@ -74,17 +77,19 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 - Origin Access Control: E1L8GTM8RZDBF2
 - Status: Updated with new bucket names ✅ (2026-02-11)
 
-**V1 Time Capsule** - `E1GW95D8P43MF1` (d2cfiorovnmu3v.cloudfront.net)
+**V1 Time Capsule** - `E2OH90LTG8IZP1` (d1vyptossjlgly.cloudfront.net)
 - Custom Domain: `v1.scottjhetrick.com`
 - **6 Origins** with path-based routing:
   - `/` → `scottjhetrick-portfolio-v1` (Angular portfolio)
-  - `/minesweeper/*` → `scottjhetrick-minesweeper-v1`
-  - `/enlight/*` → `scottjhetrick-enlight-v1`
-  - `/AlgorithmVisualizer/*` → `scottjhetrick-visualizeit-v1`
-  - `/shareme/*` → `scottjhetrick-shareme-v1`
-  - `/ascii-video/*` → `scottjhetrick-ascii-video-v1` (Matrix-Cam)
+  - `/minesweeper/*` → `scottjhetrick-minesweeper-v1/minesweeper/`
+  - `/enlight/*` → `scottjhetrick-enlight-v1/enlight/`
+  - `/AlgorithmVisualizer/*` → `scottjhetrick-visualizeit-v1/AlgorithmVisualizer/`
+  - `/shareme/*` → `scottjhetrick-shareme-v1/shareme/`
+  - `/ascii-video/*` → `scottjhetrick-ascii-video-v1/ascii-video/` (Matrix-Cam)
+- CloudFront Function: `v1-url-rewrite-simple` (appends index.html to directories)
 - SSL: Wildcard cert `*.scottjhetrick.com` (arn:...088eabe4-8561-46af-96e0-58bd1a286e3f)
 - Origin Access Control: E1L8GTM8RZDBF2
+- Status: Fully functional ✅ (2026-02-11)
 
 ## Completed Work
 
@@ -155,6 +160,21 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 25. ✅ Rebuilt and redeployed v1 portfolio with updated URLs (twice - added Matrix-Cam on 2026-02-11)
 26. ✅ Created comprehensive README for `v1-archive/`
 27. ✅ Updated deploy script for new bucket names
+28. ✅ (2026-02-11) Debugged and fixed v1 CloudFront routing issues:
+    - Identified broken cache behaviors in distribution `E1GW95D8P43MF1`
+    - Created new CloudFront distribution `E2OH90LTG8IZP1` from scratch
+    - Reorganized S3 structure: apps now in subfolders matching CloudFront paths
+    - Created simple CloudFront Function for index.html appending
+    - Updated all bucket policies for new distribution
+    - Disabled old distribution `E1GW95D8P43MF1`
+    - ✅ Verified all 6 apps working correctly at `v1.scottjhetrick.com`
+29. ✅ (2026-02-11) Consolidated v1 portfolio GitHub repository:
+    - Moved portfolio into `apps/portfolio/` alongside archived apps
+    - All v1 apps now peers in `apps/` directory for consistent structure
+    - Updated repository: https://github.com/dreadhalor/portfolio-og
+    - Removed .git folders from archived apps (commits documented in README)
+    - Cleaned node_modules and build artifacts (can be reinstalled)
+    - Complete v1 time capsule now in single repository
 
 ## Next Steps
 
