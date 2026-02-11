@@ -2,7 +2,7 @@ name: Deploy to CloudFront
 
 on:
   push:
-    branches: [main]  # Temporarily deploy main to staging until production is ready
+    branches: [main, staging]  # main → prod, staging → staging
     paths:
       - 'apps/**'
       - 'packages/**'
@@ -32,14 +32,11 @@ jobs:
       - name: Determine environment
         id: set-env
         run: |
-          # TEMPORARY: Always deploy to staging until production infrastructure is ready
-          echo "environment=staging" >> $GITHUB_OUTPUT
-          # TODO: Uncomment when production is ready
-          # if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-          #   echo "environment=prod" >> $GITHUB_OUTPUT
-          # else
-          #   echo "environment=staging" >> $GITHUB_OUTPUT
-          # fi
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
 
       - name: Detect changed apps
         id: detect
@@ -103,27 +100,27 @@ jobs:
           ENV="${{ needs.detect-changes.outputs.environment }}"
           
           # Map app names to their build paths
-          # NOTE: Bucket names must match Terraform: ${app}-${env}-2026
+          # NOTE: Bucket names use pattern: scottjhetrick-${app}-v3-${env}
           case $APP in
             "portfolio")
               DIST_PATH="apps/portfolio/frontend/dist"
-              BUCKET_NAME="portfolio-$ENV-2026"
+              BUCKET_NAME="scottjhetrick-portfolio-v3-$ENV"
               ;;
             "shareme")
               DIST_PATH="apps/shareme/frontend/dist"
-              BUCKET_NAME="shareme-$ENV-2026"
+              BUCKET_NAME="scottjhetrick-shareme-v3-$ENV"
               ;;
             "su-done-ku")
               DIST_PATH="apps/su-done-ku/frontend/dist"
-              BUCKET_NAME="su-done-ku-$ENV-2026"
+              BUCKET_NAME="scottjhetrick-su-done-ku-v3-$ENV"
               ;;
             "dread-ui")
               DIST_PATH="packages/dread-ui/dist"
-              BUCKET_NAME="dread-ui-$ENV-2026"
+              BUCKET_NAME="scottjhetrick-dread-ui-v3-$ENV"
               ;;
             *)
               DIST_PATH="apps/$APP/dist"
-              BUCKET_NAME="$APP-$ENV-2026"
+              BUCKET_NAME="scottjhetrick-$APP-v3-$ENV"
               ;;
           esac
           
