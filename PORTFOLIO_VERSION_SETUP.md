@@ -49,7 +49,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 - ✅ `scottjhetrick-portfolio-v1` - Angular v1 portfolio (3.6 MB, 50 files)
 - ✅ `scottjhetrick-minesweeper-v1` - Minesweeper 2022 build (278 KB, 17 files)
 - ✅ `scottjhetrick-enlight-v1` - Enlight 2022 build (1.3 MB, 14 files)
-- ✅ `scottjhetrick-visualizeit-v1` - Pathfinder Visualizer 2022 build (512 KB, 14 files)
+- ✅ `scottjhetrick-pathfinder-visualizer-v1` - Pathfinder Visualizer 2022 build (512 KB, 14 files)
 - ✅ `scottjhetrick-shareme-v1` - ShareMe 2022 build (5.0 MB, 35 files)
 - ✅ `scottjhetrick-ascii-video-v1` - ASCII-Video/Matrix-Cam 2022 build (2.6 MB, 6 files)
 
@@ -82,7 +82,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
   - `/` → `scottjhetrick-portfolio-v1` (Angular portfolio)
   - `/minesweeper/*` → `scottjhetrick-minesweeper-v1/minesweeper/`
   - `/enlight/*` → `scottjhetrick-enlight-v1/enlight/`
-  - `/pathfinder-visualizer/*` → `scottjhetrick-visualizeit-v1/pathfinder-visualizer/`
+  - `/pathfinder-visualizer/*` → `scottjhetrick-pathfinder-visualizer-v1/pathfinder-visualizer/`
   - `/shareme/*` → `scottjhetrick-shareme-v1/shareme/`
   - `/ascii-video/*` → `scottjhetrick-ascii-video-v1/ascii-video/` (Matrix-Cam)
 - CloudFront Function: `v1-url-rewrite-simple` (appends index.html to directories)
@@ -148,7 +148,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 19. ✅ Created 5 new S3 buckets with clean naming:
     - `scottjhetrick-minesweeper-v1`
     - `scottjhetrick-enlight-v1`
-    - `scottjhetrick-visualizeit-v1`
+    - `scottjhetrick-pathfinder-visualizer-v1` (originally visualizeit-v1, renamed 2026-02-11)
     - `scottjhetrick-shareme-v1`
     - `scottjhetrick-ascii-video-v1`
 20. ✅ Uploaded all app builds to S3
@@ -178,6 +178,8 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
     - Moved from `v1-archive/portfolio/` to `dreadfolio-v1/` (consistent with v2/v3)
     - Migrated Pathfinder Visualizer URL from `/AlgorithmVisualizer` to `/pathfinder-visualizer` for kebab-case consistency
     - Renamed directory from `visualizeit/` to `pathfinder-visualizer/` for complete consistency
+    - Renamed S3 bucket from `scottjhetrick-visualizeit-v1` to `scottjhetrick-pathfinder-visualizer-v1`
+    - Updated CloudFront origin ID from `visualizeit-v1` to `pathfinder-visualizer-v1`
 
 ## Next Steps
 
