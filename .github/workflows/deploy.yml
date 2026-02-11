@@ -189,21 +189,21 @@ jobs:
             DOMAIN="staging.scottjhetrick.com"
           fi
           
-        # Determine invalidation path
-        if [[ "${{ matrix.app }}" == "portfolio" || "${{ matrix.app }}" == "camera-tricks-demo" ]]; then
-          # Portfolio and camera-tricks-demo are at root
-          INVALIDATION_PATH="/*"
-        else
-          # Map app name to URL path
-          case "${{ matrix.app }}" in
-            "home-page")
-              INVALIDATION_PATH="/home/*"
-              ;;
-            *)
-              INVALIDATION_PATH="/${{ matrix.app }}/*"
-              ;;
-          esac
-        fi
+          # Determine invalidation path
+          if [[ "${{ matrix.app }}" == "portfolio" || "${{ matrix.app }}" == "camera-tricks-demo" ]]; then
+            # Portfolio and camera-tricks-demo are at root
+            INVALIDATION_PATH="/*"
+          else
+            # Map app name to URL path
+            case "${{ matrix.app }}" in
+              "home-page")
+                INVALIDATION_PATH="/home/*"
+                ;;
+              *)
+                INVALIDATION_PATH="/${{ matrix.app }}/*"
+                ;;
+            esac
+          fi
           
           aws cloudfront create-invalidation \
             --distribution-id $DISTRIBUTION_ID \
