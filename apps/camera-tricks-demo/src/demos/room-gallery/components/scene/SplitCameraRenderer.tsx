@@ -252,15 +252,15 @@ export function SplitCameraRenderer({
 
   // Calculate visible camera indices for visual effects optimization
   const currentRoom = Math.floor(currentRoomProgressRef.current ?? 0);
-  const leftCameraIndex = Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom));
-  const rightCameraIndex = Math.max(
-    0,
-    Math.min(NUM_ROOMS - 1, currentRoom + 1),
-  );
-  const visibleCameraIndices = [leftCameraIndex];
-  if (rightCameraIndex !== leftCameraIndex) {
-    visibleCameraIndices.push(rightCameraIndex);
-  }
+    const leftCameraIndex = Math.max(0, Math.min(NUM_ROOMS - 1, currentRoom));
+    const rightCameraIndex = Math.max(
+      0,
+      Math.min(NUM_ROOMS - 1, currentRoom + 1),
+    );
+    const visibleCameraIndices = [leftCameraIndex];
+    if (rightCameraIndex !== leftCameraIndex) {
+      visibleCameraIndices.push(rightCameraIndex);
+    }
 
   // Hook 3: Portal visual effects (breathing, rotation, particles)
   usePortalVisualEffects({

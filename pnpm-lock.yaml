@@ -140,6 +140,9 @@ importers:
 
   apps/camera-tricks-demo:
     dependencies:
+      '@react-spring/web':
+        specifier: ^10.0.3
+        version: 10.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@react-three/drei':
         specifier: ^10.7.7
         version: 10.7.7(@react-three/fiber@9.5.0(@types/react@18.3.27)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.182.0))(@types/react@18.3.27)(@types/three@0.182.0)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.182.0)
@@ -16354,12 +16357,25 @@ snapshots:
       '@react-spring/types': 10.0.3
       react: 18.3.1
 
+  '@react-spring/animated@10.0.3(react@19.2.4)':
+    dependencies:
+      '@react-spring/shared': 10.0.3(react@19.2.4)
+      '@react-spring/types': 10.0.3
+      react: 19.2.4
+
   '@react-spring/core@10.0.3(react@18.3.1)':
     dependencies:
       '@react-spring/animated': 10.0.3(react@18.3.1)
       '@react-spring/shared': 10.0.3(react@18.3.1)
       '@react-spring/types': 10.0.3
       react: 18.3.1
+
+  '@react-spring/core@10.0.3(react@19.2.4)':
+    dependencies:
+      '@react-spring/animated': 10.0.3(react@19.2.4)
+      '@react-spring/shared': 10.0.3(react@19.2.4)
+      '@react-spring/types': 10.0.3
+      react: 19.2.4
 
   '@react-spring/rafz@10.0.3': {}
 
@@ -16368,6 +16384,12 @@ snapshots:
       '@react-spring/rafz': 10.0.3
       '@react-spring/types': 10.0.3
       react: 18.3.1
+
+  '@react-spring/shared@10.0.3(react@19.2.4)':
+    dependencies:
+      '@react-spring/rafz': 10.0.3
+      '@react-spring/types': 10.0.3
+      react: 19.2.4
 
   '@react-spring/types@10.0.3': {}
 
@@ -16379,6 +16401,15 @@ snapshots:
       '@react-spring/types': 10.0.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  '@react-spring/web@10.0.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@react-spring/animated': 10.0.3(react@19.2.4)
+      '@react-spring/core': 10.0.3(react@19.2.4)
+      '@react-spring/shared': 10.0.3(react@19.2.4)
+      '@react-spring/types': 10.0.3
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   '@react-three/drei@10.7.7(@react-three/fiber@9.5.0(@types/react@18.3.27)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.182.0))(@types/react@18.3.27)(@types/three@0.182.0)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.182.0)':
     dependencies:

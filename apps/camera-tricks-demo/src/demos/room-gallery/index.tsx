@@ -769,9 +769,9 @@ function RoomGalleryInner() {
 export default function RoomGallery() {
   return (
     <ErrorBoundary>
-      <AppLoaderProvider>
-        <RoomGalleryInner />
-      </AppLoaderProvider>
+    <AppLoaderProvider>
+      <RoomGalleryInner />
+    </AppLoaderProvider>
     </ErrorBoundary>
   );
 }

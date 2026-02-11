@@ -72,6 +72,7 @@ export function AppCard({
         alignItems: 'center',
         gap: SPACING.xs,
         aspectRatio: '1',
+        width: '100%',
         position: 'relative',
         overflow: 'hidden',
         boxShadow,
@@ -118,7 +119,7 @@ export function AppCard({
       <div
         style={{
           width: '100%',
-          height: '100%',
+          aspectRatio: '1',
           borderRadius: '12px',
           overflow: 'hidden',
           display: 'flex',
