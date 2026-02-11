@@ -82,7 +82,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
   - `/` → `scottjhetrick-portfolio-v1` (Angular portfolio)
   - `/minesweeper/*` → `scottjhetrick-minesweeper-v1/minesweeper/`
   - `/enlight/*` → `scottjhetrick-enlight-v1/enlight/`
-  - `/AlgorithmVisualizer/*` → `scottjhetrick-visualizeit-v1/AlgorithmVisualizer/`
+  - `/pathfinder-visualizer/*` → `scottjhetrick-visualizeit-v1/pathfinder-visualizer/`
   - `/shareme/*` → `scottjhetrick-shareme-v1/shareme/`
   - `/ascii-video/*` → `scottjhetrick-ascii-video-v1/ascii-video/` (Matrix-Cam)
 - CloudFront Function: `v1-url-rewrite-simple` (appends index.html to directories)
@@ -176,6 +176,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
     - Complete v1 time capsule now in single repository
     - Renamed from portfolio-og to dreadfolio-v1 for consistency
     - Moved from `v1-archive/portfolio/` to `dreadfolio-v1/` (consistent with v2/v3)
+    - Migrated VisualizeIt URL from `/AlgorithmVisualizer` to `/pathfinder-visualizer` for kebab-case consistency
 
 ## Next Steps
 
@@ -190,7 +191,7 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
 - https://v1.scottjhetrick.com (portfolio)
 - https://v1.scottjhetrick.com/minesweeper
 - https://v1.scottjhetrick.com/enlight
-- https://v1.scottjhetrick.com/AlgorithmVisualizer/
+- https://v1.scottjhetrick.com/pathfinder-visualizer/
 - https://v1.scottjhetrick.com/shareme
 - https://v1.scottjhetrick.com/ascii-video (Matrix-Cam)
 
