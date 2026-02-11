@@ -377,7 +377,6 @@ export function AppGridModal({
                     rel='noopener noreferrer'
                     onClick={(e) => {
                       e.stopPropagation();
-                      onClose();
                     }}
                     onTouchEnd={(e) => {
                       e.stopPropagation();
@@ -461,7 +460,6 @@ export function AppGridModal({
                     rel='noopener noreferrer'
                     onClick={(e) => {
                       e.stopPropagation();
-                      onClose();
                     }}
                     onTouchEnd={(e) => {
                       e.stopPropagation();
