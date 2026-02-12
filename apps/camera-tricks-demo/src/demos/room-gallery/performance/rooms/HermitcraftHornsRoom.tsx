@@ -40,7 +40,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometry.applyMatrix4(tempObject.matrix);
       return geometry;
     };
-  }, [createBlock, offsetX]); // Only recreate if offsetX changes (which it doesn't after mount)
+  }, [offsetX]); // Only recreate if offsetX changes (which it doesn't after mount)
 
   // Ground layer with terrain variation (merged)
   const groundGeometry = useMemo(() => {
@@ -186,7 +186,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       trunks: mergeGeometries(trunkGeometries),
       leaves: mergeGeometries(leavesGeometries),
     };
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Farms (merged by type)
   const farmsGeometry = useMemo(() => {
@@ -195,7 +195,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(farm.x, farm.y, farm.z, farm.width, 0.1, farm.depth));
     });
     return mergeGeometries(geometries);
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Fences (merged)
   const fencesGeometry = useMemo(() => {
@@ -204,7 +204,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(fence.x, fence.y, fence.z, fence.width, fence.height, fence.depth));
     });
     return mergeGeometries(geometries);
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Village well (merged)
   const wellGeometry = useMemo(() => {
@@ -241,7 +241,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
     });
 
     return mergeGeometries(geometries);
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Hay bales (merged)
   const hayBalesGeometry = useMemo(() => {
@@ -250,7 +250,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(bale.x, bale.y, bale.z, 0.8, 0.8, 0.8));
     });
     return mergeGeometries(geometries);
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Ores (merged by type)
   const oreGeometries = useMemo(() => {
@@ -267,7 +267,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       emerald: createOreGeometry(HERMITCRAFT_CONFIG.ORES.emerald),
       gold: createOreGeometry(HERMITCRAFT_CONFIG.ORES.gold),
     };
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Wall decorations (merged)
   const wallDecorationsGeometry = useMemo(() => {
@@ -297,7 +297,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
     });
 
     return mergeGeometries(geometries);
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Flowers (merged by type)
   const flowerGeometries = useMemo(() => {
@@ -318,7 +318,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       poppies: createFlowerGeometry(HERMITCRAFT_CONFIG.FLOWERS.poppies),
       dandelions: createFlowerGeometry(HERMITCRAFT_CONFIG.FLOWERS.dandelions),
     };
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Static tall grass (merged)
   const tallGrassGeometry = useMemo(() => {
@@ -332,7 +332,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(grassGeo);
     });
     return mergeGeometries(geometries);
-  }, [createBlock, offsetX]);
+  }, [createBlock]);
 
   // Hanging lanterns (animated)
   const lanterns = useMemo(() => {
@@ -345,7 +345,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       basePosition: [offsetX + pos.x, pos.y, pos.z] as [number, number, number],
       floatOffset: idx * 1.5,
     }));
-  }, [createBlock, offsetX]);
+  }, [offsetX]);
 
   // Animated floating items
   const floatingItems = useMemo(() => {
@@ -359,7 +359,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       color: item.color,
       floatOffset: idx * 1.3,
     }));
-  }, [createBlock, offsetX]);
+  }, [offsetX]);
 
   // Animated grass blades
   const animatedGrass = useMemo(() => {
@@ -368,7 +368,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       basePosition: [offsetX + pos.x, pos.y, pos.z] as [number, number, number],
       swayOffset: idx * 2.1,
     }));
-  }, [createBlock, offsetX]);
+  }, [offsetX]);
 
   // Refs for animated elements
   const lanternRefs = useRef<(THREE.Mesh | null)[]>([]);
