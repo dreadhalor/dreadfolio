@@ -5,5 +5,6 @@ terraform {
     region         = "us-east-1"
     dynamodb_table = "dreadfolio-terraform-locks"
     encrypt        = true
+    workspace_key_prefix = "env"
   }
 }
