@@ -99,12 +99,12 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
     rightPanel.applyMatrix4(tempObject.matrix);
     geometries.push(rightPanel);
     
-    // Pedestal/display stands for ambiance (back corners, low)
+    // Pedestal/display stands for ambiance (closer to camera, sides)
     const pedestals = [
-      { x: -9, z: -8 },
-      { x: 9, z: -8 },
-      { x: -9, z: -3 },
-      { x: 9, z: -3 },
+      { x: -8, z: 3 },    // Front left
+      { x: 8, z: 3 },     // Front right
+      { x: -8, z: 0 },    // Mid left
+      { x: 8, z: 0 },     // Mid right
     ];
     
     pedestals.forEach(pos => {
