@@ -30,15 +30,17 @@ interface HermitcraftHornsRoomProps {
 export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHornsRoomProps) {
   const matcap = useMatcap();
   
-  // Helper function for block creation
-  const createBlock = (x: number, y: number, z: number, width = 1, height = 1, depth = 1) => {
-    const geometry = new THREE.BoxGeometry(width * BLOCK_SIZE, height * BLOCK_SIZE, depth * BLOCK_SIZE);
-    const tempObject = new THREE.Object3D();
-    tempObject.position.set(offsetX + x, y, z);
-    tempObject.updateMatrix();
-    geometry.applyMatrix4(tempObject.matrix);
-    return geometry;
-  };
+  // Memoize the block creation helper to prevent useMemo dependency churn
+  const createBlock = useMemo(() => {
+    return (x: number, y: number, z: number, width = 1, height = 1, depth = 1) => {
+      const geometry = new THREE.BoxGeometry(width * BLOCK_SIZE, height * BLOCK_SIZE, depth * BLOCK_SIZE);
+      const tempObject = new THREE.Object3D();
+      tempObject.position.set(offsetX + x, y, z);
+      tempObject.updateMatrix();
+      geometry.applyMatrix4(tempObject.matrix);
+      return geometry;
+    };
+  }, [createBlock, offsetX]); // Only recreate if offsetX changes (which it doesn't after mount)
 
   // Ground layer with terrain variation (merged)
   const groundGeometry = useMemo(() => {
@@ -47,7 +49,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(pos.x, pos.y, pos.z, pos.width, 0.2, pos.depth));
     });
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock]);
 
   // Dirt paths (merged, slightly raised)
   const pathGeometry = useMemo(() => {
@@ -56,69 +58,71 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(path.x, path.y, path.z, path.width, 0.08, path.depth));
     });
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock]);
 
-  // Helper to create a peaked roof
-  const createPeakedRoof = (roof: typeof HERMITCRAFT_CONFIG.HOUSE_SMALL.roof) => {
-    const geometries: THREE.BufferGeometry[] = [];
-    const tempObject = new THREE.Object3D();
-    
-    const halfWidth = roof.baseWidth / 2;
-    const halfDepth = roof.baseDepth / 2;
-    const roofHeight = roof.peakHeight - roof.baseY;
-    
-    // Front slope (facing +Z)
-    const frontSlope = new THREE.PlaneGeometry(roof.baseWidth, Math.sqrt(roofHeight * roofHeight + halfDepth * halfDepth));
-    tempObject.position.set(offsetX + roof.x, roof.baseY + roofHeight / 2, roof.z + halfDepth / 2);
-    tempObject.rotation.x = -Math.atan(roofHeight / halfDepth);
-    tempObject.updateMatrix();
-    frontSlope.applyMatrix4(tempObject.matrix);
-    geometries.push(frontSlope);
-    
-    tempObject.rotation.x = 0;
-    
-    // Back slope (facing -Z)
-    const backSlope = new THREE.PlaneGeometry(roof.baseWidth, Math.sqrt(roofHeight * roofHeight + halfDepth * halfDepth));
-    tempObject.position.set(offsetX + roof.x, roof.baseY + roofHeight / 2, roof.z - halfDepth / 2);
-    tempObject.rotation.x = Math.atan(roofHeight / halfDepth);
-    tempObject.rotation.y = Math.PI;
-    tempObject.updateMatrix();
-    backSlope.applyMatrix4(tempObject.matrix);
-    geometries.push(backSlope);
-    
-    tempObject.rotation.x = 0;
-    tempObject.rotation.y = 0;
-    
-    // Left gable (triangle)
-    const leftGableShape = new THREE.Shape();
-    leftGableShape.moveTo(-halfDepth, 0);
-    leftGableShape.lineTo(halfDepth, 0);
-    leftGableShape.lineTo(0, roofHeight);
-    leftGableShape.lineTo(-halfDepth, 0);
-    const leftGable = new THREE.ShapeGeometry(leftGableShape);
-    tempObject.position.set(offsetX + roof.x - halfWidth, roof.baseY, roof.z);
-    tempObject.rotation.y = Math.PI / 2;
-    tempObject.updateMatrix();
-    leftGable.applyMatrix4(tempObject.matrix);
-    geometries.push(leftGable);
-    
-    tempObject.rotation.y = 0;
-    
-    // Right gable (triangle)
-    const rightGableShape = new THREE.Shape();
-    rightGableShape.moveTo(-halfDepth, 0);
-    rightGableShape.lineTo(halfDepth, 0);
-    rightGableShape.lineTo(0, roofHeight);
-    rightGableShape.lineTo(-halfDepth, 0);
-    const rightGable = new THREE.ShapeGeometry(rightGableShape);
-    tempObject.position.set(offsetX + roof.x + halfWidth, roof.baseY, roof.z);
-    tempObject.rotation.y = -Math.PI / 2;
-    tempObject.updateMatrix();
-    rightGable.applyMatrix4(tempObject.matrix);
-    geometries.push(rightGable);
-    
-    return geometries;
-  };
+  // Memoize the peaked roof creation helper
+  const createPeakedRoof = useMemo(() => {
+    return (roof: typeof HERMITCRAFT_CONFIG.HOUSE_SMALL.roof) => {
+      const geometries: THREE.BufferGeometry[] = [];
+      const tempObject = new THREE.Object3D();
+      
+      const halfWidth = roof.baseWidth / 2;
+      const halfDepth = roof.baseDepth / 2;
+      const roofHeight = roof.peakHeight - roof.baseY;
+      
+      // Front slope (facing +Z)
+      const frontSlope = new THREE.PlaneGeometry(roof.baseWidth, Math.sqrt(roofHeight * roofHeight + halfDepth * halfDepth));
+      tempObject.position.set(offsetX + roof.x, roof.baseY + roofHeight / 2, roof.z + halfDepth / 2);
+      tempObject.rotation.x = -Math.atan(roofHeight / halfDepth);
+      tempObject.updateMatrix();
+      frontSlope.applyMatrix4(tempObject.matrix);
+      geometries.push(frontSlope);
+      
+      tempObject.rotation.x = 0;
+      
+      // Back slope (facing -Z)
+      const backSlope = new THREE.PlaneGeometry(roof.baseWidth, Math.sqrt(roofHeight * roofHeight + halfDepth * halfDepth));
+      tempObject.position.set(offsetX + roof.x, roof.baseY + roofHeight / 2, roof.z - halfDepth / 2);
+      tempObject.rotation.x = Math.atan(roofHeight / halfDepth);
+      tempObject.rotation.y = Math.PI;
+      tempObject.updateMatrix();
+      backSlope.applyMatrix4(tempObject.matrix);
+      geometries.push(backSlope);
+      
+      tempObject.rotation.x = 0;
+      tempObject.rotation.y = 0;
+      
+      // Left gable (triangle)
+      const leftGableShape = new THREE.Shape();
+      leftGableShape.moveTo(-halfDepth, 0);
+      leftGableShape.lineTo(halfDepth, 0);
+      leftGableShape.lineTo(0, roofHeight);
+      leftGableShape.lineTo(-halfDepth, 0);
+      const leftGable = new THREE.ShapeGeometry(leftGableShape);
+      tempObject.position.set(offsetX + roof.x - halfWidth, roof.baseY, roof.z);
+      tempObject.rotation.y = Math.PI / 2;
+      tempObject.updateMatrix();
+      leftGable.applyMatrix4(tempObject.matrix);
+      geometries.push(leftGable);
+      
+      tempObject.rotation.y = 0;
+      
+      // Right gable (triangle)
+      const rightGableShape = new THREE.Shape();
+      rightGableShape.moveTo(-halfDepth, 0);
+      rightGableShape.lineTo(halfDepth, 0);
+      rightGableShape.lineTo(0, roofHeight);
+      rightGableShape.lineTo(-halfDepth, 0);
+      const rightGable = new THREE.ShapeGeometry(rightGableShape);
+      tempObject.position.set(offsetX + roof.x + halfWidth, roof.baseY, roof.z);
+      tempObject.rotation.y = -Math.PI / 2;
+      tempObject.updateMatrix();
+      rightGable.applyMatrix4(tempObject.matrix);
+      geometries.push(rightGable);
+      
+      return geometries;
+    };
+  }, [offsetX]);
 
   // Houses (merged by material)
   const housesGeometry = useMemo(() => {
@@ -166,7 +170,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       doors: mergeGeometries(doorGeometries),
       windows: mergeGeometries(windowGeometries),
     };
-  }, [offsetX]);
+  }, [createBlock, createPeakedRoof]);
 
   // Trees (merged by type)
   const treesGeometry = useMemo(() => {
@@ -182,7 +186,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       trunks: mergeGeometries(trunkGeometries),
       leaves: mergeGeometries(leavesGeometries),
     };
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Farms (merged by type)
   const farmsGeometry = useMemo(() => {
@@ -191,7 +195,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(farm.x, farm.y, farm.z, farm.width, 0.1, farm.depth));
     });
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Fences (merged)
   const fencesGeometry = useMemo(() => {
@@ -200,7 +204,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(fence.x, fence.y, fence.z, fence.width, fence.height, fence.depth));
     });
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Village well (merged)
   const wellGeometry = useMemo(() => {
@@ -237,7 +241,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
     });
 
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Hay bales (merged)
   const hayBalesGeometry = useMemo(() => {
@@ -246,7 +250,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(createBlock(bale.x, bale.y, bale.z, 0.8, 0.8, 0.8));
     });
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Ores (merged by type)
   const oreGeometries = useMemo(() => {
@@ -263,7 +267,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       emerald: createOreGeometry(HERMITCRAFT_CONFIG.ORES.emerald),
       gold: createOreGeometry(HERMITCRAFT_CONFIG.ORES.gold),
     };
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Wall decorations (merged)
   const wallDecorationsGeometry = useMemo(() => {
@@ -293,7 +297,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
     });
 
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Flowers (merged by type)
   const flowerGeometries = useMemo(() => {
@@ -314,7 +318,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       poppies: createFlowerGeometry(HERMITCRAFT_CONFIG.FLOWERS.poppies),
       dandelions: createFlowerGeometry(HERMITCRAFT_CONFIG.FLOWERS.dandelions),
     };
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Static tall grass (merged)
   const tallGrassGeometry = useMemo(() => {
@@ -328,7 +332,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       geometries.push(grassGeo);
     });
     return mergeGeometries(geometries);
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Hanging lanterns (animated)
   const lanterns = useMemo(() => {
@@ -341,7 +345,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       basePosition: [offsetX + pos.x, pos.y, pos.z] as [number, number, number],
       floatOffset: idx * 1.5,
     }));
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Animated floating items
   const floatingItems = useMemo(() => {
@@ -355,7 +359,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       color: item.color,
       floatOffset: idx * 1.3,
     }));
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Animated grass blades
   const animatedGrass = useMemo(() => {
@@ -364,7 +368,7 @@ export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHo
       basePosition: [offsetX + pos.x, pos.y, pos.z] as [number, number, number],
       swayOffset: idx * 2.1,
     }));
-  }, [offsetX]);
+  }, [createBlock, offsetX]);
 
   // Refs for animated elements
   const lanternRefs = useRef<(THREE.Mesh | null)[]>([]);

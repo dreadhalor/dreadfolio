@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoomColors } from '../../types';
@@ -29,29 +29,42 @@ export function EnlightRoom({ colors: _colors, offsetX }: EnlightRoomProps) {
   const lightRef = useRef<THREE.PointLight>(null);
   const lightOrbRef = useRef<THREE.Mesh>(null);
   
-  // Helper to create geometry for different object types
-  const createGeometry = (obj: typeof ENLIGHT_CONFIG.OBJECTS[0]) => {
-    switch (obj.type) {
-      case 'box':
-        return <boxGeometry args={[obj.size, obj.size, obj.size]} />;
-      case 'sphere':
-        return <sphereGeometry args={[obj.size, 32, 32]} />;
-      case 'cone':
-        return <coneGeometry args={[obj.size, obj.height || obj.size * 2, 32]} />;
-      case 'cylinder':
-        return <cylinderGeometry args={[obj.size, obj.size, obj.height || obj.size * 2, 32]} />;
-      case 'torus':
-        return <torusGeometry args={[obj.size, obj.tube || 0.3, 16, 32]} />;
-      case 'torusKnot':
-        return <torusKnotGeometry args={[obj.size, obj.tube || 0.3, 100, 16]} />;
-      case 'octahedron':
-        return <octahedronGeometry args={[obj.size, 0]} />;
-      case 'dodecahedron':
-        return <dodecahedronGeometry args={[obj.size, 0]} />;
-      default:
-        return <boxGeometry args={[obj.size, obj.size, obj.size]} />;
-    }
-  };
+  // Memoize geometries - create once, not every frame (prevents GC stutters)
+  const geometries = useMemo(() => {
+    return ENLIGHT_CONFIG.OBJECTS.map((obj) => {
+      switch (obj.type) {
+        case 'box':
+          return new THREE.BoxGeometry(obj.size, obj.size, obj.size);
+        case 'sphere':
+          return new THREE.SphereGeometry(obj.size, 32, 32);
+        case 'cone':
+          return new THREE.ConeGeometry(obj.size, obj.height || obj.size * 2, 32);
+        case 'cylinder':
+          return new THREE.CylinderGeometry(obj.size, obj.size, obj.height || obj.size * 2, 32);
+        case 'torus':
+          return new THREE.TorusGeometry(obj.size, obj.tube || 0.3, 16, 32);
+        case 'torusKnot':
+          return new THREE.TorusKnotGeometry(obj.size, obj.tube || 0.3, 100, 16);
+        case 'octahedron':
+          return new THREE.OctahedronGeometry(obj.size, 0);
+        case 'dodecahedron':
+          return new THREE.DodecahedronGeometry(obj.size, 0);
+        default:
+          return new THREE.BoxGeometry(obj.size, obj.size, obj.size);
+      }
+    });
+  }, []); // Empty deps - create once and never recreate
+  
+  // Memoize material - create once, not every frame
+  const objectMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: ENLIGHT_COLORS.surfaces,
+        roughness: 0.9,
+        metalness: 0,
+      }),
+    [],
+  );
   
   // Animate orbiting light
   useFrame((state) => {
@@ -108,16 +121,11 @@ export function EnlightRoom({ colors: _colors, offsetX }: EnlightRoomProps) {
           layers={1}
           position={[offsetX + obj.x, obj.y, obj.z]}
           rotation={obj.rotation || [0, 0, 0]}
+          geometry={geometries[i]}
+          material={objectMaterial}
           castShadow
           receiveShadow
-        >
-          {createGeometry(obj)}
-          <meshStandardMaterial 
-            color={ENLIGHT_COLORS.surfaces}
-            roughness={0.9}
-            metalness={0}
-          />
-        </mesh>
+        />
       ))}
     </>
   );
