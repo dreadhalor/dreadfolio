@@ -34,23 +34,25 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
   // Animated number cubes
   const numberCubeRefs = useRef<(THREE.Mesh | null)[]>([]);
   
-  // Configuration for floating number cubes (1-9)
+  // Configuration for floating number cubes (1-9) - positioned closer to camera
   const numberCubes = useMemo(() => {
     return [
-      // Back area (safe from description zone)
-      { num: 1, x: -6, y: 3, z: -5, rotSpeed: 0.3, bobPhase: 0 },
-      { num: 2, x: 0, y: 7, z: -7, rotSpeed: 0.4, bobPhase: 1 },
-      { num: 3, x: 6, y: 4, z: -6, rotSpeed: 0.35, bobPhase: 2 },
+      // Front sides (closer to camera, avoiding description zone)
+      { num: 1, x: -5, y: 3, z: 3, rotSpeed: 0.3, bobPhase: 0 },
+      { num: 2, x: 5, y: 4, z: 2.5, rotSpeed: 0.35, bobPhase: 1 },
+      { num: 3, x: -6.5, y: 6, z: 1, rotSpeed: 0.32, bobPhase: 2 },
       
-      // Side areas (away from portal and description)
-      { num: 4, x: -8, y: 8, z: -1, rotSpeed: 0.32, bobPhase: 3 },
-      { num: 5, x: -7, y: 2.5, z: 2, rotSpeed: 0.38, bobPhase: 4 },
-      { num: 6, x: 8, y: 6, z: -2, rotSpeed: 0.36, bobPhase: 5 },
-      { num: 7, x: 7, y: 3.5, z: 1, rotSpeed: 0.34, bobPhase: 6 },
+      // Mid-depth (between back and front)
+      { num: 4, x: 6.5, y: 5, z: 0, rotSpeed: 0.38, bobPhase: 3 },
+      { num: 5, x: -4, y: 2.5, z: -2, rotSpeed: 0.36, bobPhase: 4 },
+      { num: 6, x: 4, y: 7, z: -3, rotSpeed: 0.34, bobPhase: 5 },
       
-      // Higher up (safe zones)
-      { num: 8, x: -3, y: 9, z: 0, rotSpeed: 0.42, bobPhase: 7 },
-      { num: 9, x: 3, y: 8.5, z: -3, rotSpeed: 0.39, bobPhase: 8 },
+      // Back area (for depth)
+      { num: 7, x: -7, y: 4, z: -5, rotSpeed: 0.4, bobPhase: 6 },
+      { num: 8, x: 7, y: 3, z: -6, rotSpeed: 0.42, bobPhase: 7 },
+      
+      // High and close (above portal area)
+      { num: 9, x: 0, y: 9, z: 6.5, rotSpeed: 0.39, bobPhase: 8 },
     ];
   }, []);
 
@@ -139,6 +141,24 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
     }
     
     tempObject.rotation.y = 0;
+    
+    // Small Sudoku cell frames floating closer to camera (on sides to avoid description)
+    const closeCells = [
+      { x: -6, y: 2, z: 4 },
+      { x: -5, y: 6, z: 5 },
+      { x: 6, y: 2, z: 4 },
+      { x: 5, y: 6, z: 5 },
+      { x: -7, y: 4, z: 3 },
+      { x: 7, y: 4, z: 3 },
+    ];
+    
+    closeCells.forEach(pos => {
+      const cellFrame = new THREE.BoxGeometry(0.6, 0.6, 0.05);
+      tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
+      tempObject.updateMatrix();
+      cellFrame.applyMatrix4(tempObject.matrix);
+      geometries.push(cellFrame);
+    });
     
     return mergeGeometries(geometries);
   }, [offsetX]);
@@ -234,6 +254,40 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
           <boxGeometry args={[0.8, 0.8, 0.8]} />
           <meshMatcapMaterial matcap={matcap} color={colors.accent} />
         </mesh>
+      ))}
+      
+      {/* Small Sudoku cell frames floating close to camera (on sides) */}
+      {[
+        { x: -6, y: 2, z: 4 },
+        { x: -5, y: 6, z: 5 },
+        { x: 6, y: 2, z: 4 },
+        { x: 5, y: 6, z: 5 },
+        { x: -7, y: 4, z: 3 },
+        { x: 7, y: 4, z: 3 },
+      ].map((pos, i) => (
+        <group key={`close-cell-${i}`} position={[offsetX + pos.x, pos.y, pos.z]}>
+          {/* Cell background */}
+          <mesh>
+            <planeGeometry args={[0.55, 0.55]} />
+            <meshMatcapMaterial matcap={matcap} color="#1e3a8a" />
+          </mesh>
+          {/* Mini grid on cell */}
+          {Array.from({ length: 4 }, (_, j) => {
+            const offset = -0.25 + j * 0.166;
+            return (
+              <group key={j}>
+                <mesh position={[offset, 0, 0.01]}>
+                  <planeGeometry args={[0.01, 0.5]} />
+                  <meshMatcapMaterial matcap={matcap} color="#3b82f6" />
+                </mesh>
+                <mesh position={[0, offset, 0.01]}>
+                  <planeGeometry args={[0.5, 0.01]} />
+                  <meshMatcapMaterial matcap={matcap} color="#3b82f6" />
+                </mesh>
+              </group>
+            );
+          })}
+        </group>
       ))}
       
       {/* Floor grid pattern overlay */}
