@@ -248,9 +248,16 @@ export function FloatingMenuBar({
             ? 'rgba(20, 20, 25, 0.9)'
             : 'rgba(30, 30, 35, 0.95)',
           backdropFilter: 'blur(24px)',
-          border: isCollapsed
-            ? '1px solid rgba(255, 255, 255, 0.1)'
-            : '1px solid rgba(255, 255, 255, 0.15)',
+          ...(isCollapsed
+            ? {
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                borderBottom: 'none',
+                borderLeft: 'none',
+                borderRight: 'none',
+              }
+            : {
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+              }),
           boxSizing: 'border-box' as const,
           borderRadius: borderRadiusValue,
           boxShadow: isCollapsed
