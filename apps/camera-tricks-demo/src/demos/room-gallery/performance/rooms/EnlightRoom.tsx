@@ -120,7 +120,7 @@ export function EnlightRoom({ colors: _colors, offsetX }: EnlightRoomProps) {
           key={i}
           layers={1}
           position={[offsetX + obj.x, obj.y, obj.z]}
-          rotation={obj.rotation || [0, 0, 0]}
+          rotation={(obj.rotation || [0, 0, 0]) as [number, number, number]}
           geometry={geometries[i]}
           material={objectMaterial}
           castShadow
