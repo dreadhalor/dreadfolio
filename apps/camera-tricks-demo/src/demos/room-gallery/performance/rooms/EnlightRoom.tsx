@@ -97,11 +97,11 @@ export function EnlightRoom({ colors: _colors, offsetX }: EnlightRoomProps) {
         intensity={ENLIGHT_CONFIG.LIGHT.intensity}
         distance={ENLIGHT_CONFIG.LIGHT.distance}
         decay={ENLIGHT_CONFIG.LIGHT.decay}
-        castShadow={false}
-        // shadow-mapSize-width={512}
-        // shadow-mapSize-height={512}
-        // shadow-bias={-0.002}
-        // shadow-normalBias={0.05}
+        castShadow
+        shadow-mapSize-width={512}
+        shadow-mapSize-height={512}
+        shadow-bias={-0.002}
+        shadow-normalBias={0.05}
       />
       
       {/* Visual light orb (glowing sphere) - on layer 1 */}
