@@ -1,8 +1,8 @@
 resource "aws_s3_bucket" "app" {
-  bucket = "${var.app_name}-${var.environment}-2026"
+  bucket = "scottjhetrick-${var.app_name}-v3-${var.environment}"
 
   tags = {
-    Name        = "${var.app_name}-${var.environment}-2026"
+    Name        = "scottjhetrick-${var.app_name}-v3-${var.environment}"
     Environment = var.environment
     Application = var.app_name
     ManagedBy   = "Terraform"
@@ -26,31 +26,8 @@ resource "aws_s3_bucket_public_access_block" "app" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_policy" "app" {
-  bucket = aws_s3_bucket.app.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowCloudFrontServicePrincipal"
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.app.arn}/*"
-        Condition = {
-          StringEquals = {
-            "aws:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/E1RAIZQJ35RLQQ"
-          }
-        }
-      }
-    ]
-  })
-}
-
-data "aws_caller_identity" "current" {}
+# Note: Bucket policy is managed in main.tf after CloudFront distribution is created
+# to avoid circular dependency
 
 resource "aws_s3_bucket_lifecycle_configuration" "app" {
   bucket = aws_s3_bucket.app.id

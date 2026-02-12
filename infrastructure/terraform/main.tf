@@ -49,6 +49,36 @@ module "cloudfront" {
   depends_on = [module.app_buckets]
 }
 
+# Create S3 bucket policies (after CloudFront is created)
+data "aws_caller_identity" "current" {}
+
+resource "aws_s3_bucket_policy" "app_buckets" {
+  for_each = module.app_buckets
+  bucket   = each.value.bucket_id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${each.value.bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "aws:SourceArn" = module.cloudfront.distribution_arn
+          }
+        }
+      }
+    ]
+  })
+
+  depends_on = [module.cloudfront]
+}
+
 # Create IAM role for GitHub Actions
 module "github_actions_iam" {
   source = "./modules/github-actions-iam"
