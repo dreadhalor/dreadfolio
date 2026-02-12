@@ -98,8 +98,8 @@ export function EnlightRoom({ colors: _colors, offsetX }: EnlightRoomProps) {
         distance={ENLIGHT_CONFIG.LIGHT.distance}
         decay={ENLIGHT_CONFIG.LIGHT.decay}
         castShadow
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
+        shadow-mapSize-width={512}
+        shadow-mapSize-height={512}
         shadow-bias={-0.002}
         shadow-normalBias={0.05}
       />
