@@ -18,7 +18,7 @@ const App = () => {
   const { unlockAchievementById } = useAchievements();
 
   const apiKey = import.meta.env.VITE_GIPHY_API_KEY as string;
-  
+
   const trendingSearchesUrl = useMemo(() => {
     return `https://api.giphy.com/v1/trending/searches?api_key=${apiKey}`;
   }, [apiKey]);
@@ -36,7 +36,9 @@ const App = () => {
     fetch(trendingSearchesUrl)
       .then((response) => response.json())
       .then((json) => setTrendingSearches(json.data))
-      .catch((error) => console.error('Failed to fetch trending searches:', error));
+      .catch((error) =>
+        console.error('Failed to fetch trending searches:', error),
+      );
   }, [trendingSearchesUrl]);
 
   const handleSearchTermClick = (term: string) => {

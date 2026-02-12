@@ -1,5 +1,5 @@
-import { Button } from "dread-ui";
-import { FaArrowTrendUp } from "react-icons/fa6";
+import { Button } from 'dread-ui';
+import { FaArrowTrendUp } from 'react-icons/fa6';
 
 type Props = {
   trendingSearches: string[];
@@ -13,13 +13,13 @@ const TrendingSearches = ({
   handleSearchTermClick,
 }: Props) => {
   return (
-    <div className="flex w-full flex-wrap content-start items-center gap-2 text-xl">
+    <div className='flex w-full flex-wrap content-start items-center gap-2 text-xl'>
       {trendingSearches.map((term) => (
         <Button
           key={term} // Add a key for each item
-          variant={term === searchTerm ? "default" : "secondary"}
-          size="sm"
-          className="gap-1 px-2"
+          variant={term === searchTerm ? 'default' : 'secondary'}
+          size='sm'
+          className='gap-1 px-2 shadow-none'
           onClick={() => handleSearchTermClick(term)}
         >
           <FaArrowTrendUp />
