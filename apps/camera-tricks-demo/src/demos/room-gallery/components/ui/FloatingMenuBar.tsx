@@ -246,19 +246,16 @@ export function FloatingMenuBar({
           height: `${height}px`,
           background: isCollapsed
             ? 'rgba(20, 20, 25, 0.9)'
-            : 'rgba(20, 20, 25, 0.95)',
-          backdropFilter: 'blur(20px)',
-          borderTop: isCollapsed
+            : 'rgba(30, 30, 35, 0.95)',
+          backdropFilter: 'blur(24px)',
+          border: isCollapsed
             ? '1px solid rgba(255, 255, 255, 0.1)'
-            : 'none',
-          borderBottom: 'none',
-          borderLeft: 'none',
-          borderRight: 'none',
+            : '1px solid rgba(255, 255, 255, 0.15)',
           boxSizing: 'border-box' as const,
           borderRadius: borderRadiusValue,
           boxShadow: isCollapsed
             ? '0 -4px 16px rgba(0, 0, 0, 0.3)'
-            : '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2)',
+            : '0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           padding: paddingValue,
           display: 'flex',
           alignItems: 'center',
@@ -302,7 +299,7 @@ export function FloatingMenuBar({
         onMouseEnter={
           isCollapsed
             ? (e) => {
-                e.currentTarget.style.background = 'rgba(30, 30, 35, 0.95)';
+                e.currentTarget.style.background = 'rgba(40, 40, 45, 0.95)';
               }
             : undefined
         }
