@@ -1,6 +1,7 @@
 import { RoomData, RoomTheme } from '../types';
 import { ROOM_SPACING } from './constants';
 import { PORTFOLIO_APPS } from './apps';
+import { ROOM_THEMES } from './themes';
 
 // Map app IDs to their specific room themes
 const APP_THEME_MAP: Record<string, RoomTheme> = {
@@ -38,6 +39,7 @@ export const ROOMS: RoomData[] = PORTFOLIO_APPS.map((app, index) => ({
 /**
  * Get dividing wall colors between two adjacent rooms
  * Returns the colors for the left and right sides of the wall
+ * Uses the sideWalls color from each room's theme
  * 
  * @param roomIndex - Index of the left room (0-13 for 15 rooms with 14 dividing walls)
  * @returns Object with leftRoomColor and rightRoomColor, or null if invalid index
@@ -45,8 +47,11 @@ export const ROOMS: RoomData[] = PORTFOLIO_APPS.map((app, index) => ({
 export const getDividingWallColors = (roomIndex: number): { leftRoomColor: string; rightRoomColor: string } | null => {
   if (roomIndex < 0 || roomIndex >= ROOMS.length - 1) return null;
   
+  const leftRoom = ROOMS[roomIndex];
+  const rightRoom = ROOMS[roomIndex + 1];
+  
   return {
-    leftRoomColor: ROOMS[roomIndex].color,
-    rightRoomColor: ROOMS[roomIndex + 1].color,
+    leftRoomColor: ROOM_THEMES[leftRoom.theme].sideWalls,
+    rightRoomColor: ROOM_THEMES[rightRoom.theme].sideWalls,
   };
 };

@@ -68,7 +68,14 @@ export const ROOM_THEMES: Record<RoomTheme, RoomColors> = {
     accent: '#404040',      // Medium dark accent
     furniture: '#353535',   // Visible dark furniture
   },
-  'hermitcraft-horns': generateAppRoomColors('#6b9fff'),
+  'hermitcraft-horns': {
+    ...generateAppRoomColors('#8b00ff'), // Portal stays purple
+    // Override room colors to match Minecraft sky/environment
+    ceiling: '#87CEEB',      // Sky blue (Minecraft daytime sky)
+    backWall: '#87CEEB',     // Sky blue
+    sideWalls: '#87CEEB',    // Sky blue
+    floor: '#5cb80a',        // Grass green (matches village ground)
+  },
   'enlight': generateAppRoomColors('#ff6b9d'),
   'dredged-up': generateAppRoomColors('#1a4d2e'),
   'minesweeper': generateAppRoomColors('#5EB3E4'), // Windows XP Bliss sky blue

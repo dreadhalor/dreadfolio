@@ -106,7 +106,7 @@ const PORTFOLIO_APPS_RAW: AppData[] = [
   {
     id: 'hermitcraft-horns',
     name: 'HermitCraft Horns',
-    color: '#6b9fff', // Bright sky blue
+    color: '#8b00ff', // Minecraft nether portal purple
     description:
       'An app for making & sharing audio clips of Hermitcraft videos.',
     url: 'https://hermitcraft-horns.com',

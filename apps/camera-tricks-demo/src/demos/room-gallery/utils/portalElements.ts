@@ -95,19 +95,20 @@ export function createPortalFrame(
   const portalSurface = new THREE.Mesh(SHARED_GEOMETRIES.portalSurface, portalSurfaceMaterial);
 
   // 3D Torus ring #1 (main portal frame - thick and dimensional)
+  // Use frameColor if available (e.g., obsidian for nether portal), otherwise use theme color
   const torusMaterial = new THREE.MeshBasicMaterial({
-    color: theme.color,
+    color: theme.frameColor || theme.color,
     opacity: theme.opacity.torus,
-    transparent: true,
+    transparent: theme.opacity.torus < 1.0,
   });
   materials.push(torusMaterial);
   const torus = new THREE.Mesh(SHARED_GEOMETRIES.torus, torusMaterial);
   
   // 3D Torus ring #2 (rotates on different axis for intersecting effect)
   const torus2Material = new THREE.MeshBasicMaterial({
-    color: theme.color,
+    color: theme.frameColor || theme.color,
     opacity: theme.opacity.torus,
-    transparent: true,
+    transparent: theme.opacity.torus < 1.0,
   });
   materials.push(torus2Material);
   const torus2 = new THREE.Mesh(SHARED_GEOMETRIES.torus, torus2Material);

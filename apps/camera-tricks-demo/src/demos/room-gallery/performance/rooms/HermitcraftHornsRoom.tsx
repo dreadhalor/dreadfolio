@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { InstancedMonitors } from '../shared/InstancedComponents';
 import { useMatcap } from '../shared/useMatcap';
-import { Sparkles } from '../shared/RoomParticles';
+import { HERMITCRAFT_CONFIG, MINECRAFT_COLORS, BLOCK_SIZE } from './config/HermitcraftHornsConfig';
 
 interface HermitcraftHornsRoomProps {
   colors: RoomColors;
@@ -12,251 +12,540 @@ interface HermitcraftHornsRoomProps {
 }
 
 /**
- * HermitCraft Horns Room - Recording Studio / Gaming Den
+ * HermitCraft Horns Room - Minecraft Village Scene
  * 
  * Features:
- * - Minecraft-inspired blocky furniture
- * - Recording equipment (mic, headphones)
- * - Audio waveform decorations
- * - Gaming setup with monitors
+ * - Full Minecraft village with 3 houses (small, medium, large)
+ * - 8 trees scattered throughout
+ * - Farm plots with wheat and pumpkins
+ * - Central village well
+ * - Fences, hay bales, paths
+ * - Wall decorations on sides
+ * - Hanging lanterns (animated)
+ * - Floating items and ore blocks
+ * - Dense flower and grass coverage
+ * 
+ * Performance: 15 animated objects (4 lanterns + 6 floating items + 5 grass blades)
  */
-export function HermitcraftHornsRoom({ colors, offsetX }: HermitcraftHornsRoomProps) {
+export function HermitcraftHornsRoom({ colors: _colors, offsetX }: HermitcraftHornsRoomProps) {
   const matcap = useMatcap();
   
-  // Merge all static decorations into single geometry
-  const mergedGeometry = useMemo(() => {
+  // Helper function for block creation
+  const createBlock = (x: number, y: number, z: number, width = 1, height = 1, depth = 1) => {
+    const geometry = new THREE.BoxGeometry(width * BLOCK_SIZE, height * BLOCK_SIZE, depth * BLOCK_SIZE);
+    const tempObject = new THREE.Object3D();
+    tempObject.position.set(offsetX + x, y, z);
+    tempObject.updateMatrix();
+    geometry.applyMatrix4(tempObject.matrix);
+    return geometry;
+  };
+
+  // Ground layer with terrain variation (merged)
+  const groundGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    HERMITCRAFT_CONFIG.GROUND.grass.forEach(pos => {
+      geometries.push(createBlock(pos.x, pos.y, pos.z, pos.width, 0.2, pos.depth));
+    });
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Dirt paths (merged, slightly raised)
+  const pathGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    HERMITCRAFT_CONFIG.GROUND.paths.forEach(path => {
+      geometries.push(createBlock(path.x, path.y, path.z, path.width, 0.08, path.depth));
+    });
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Helper to create a peaked roof
+  const createPeakedRoof = (roof: typeof HERMITCRAFT_CONFIG.HOUSE_SMALL.roof) => {
     const geometries: THREE.BufferGeometry[] = [];
     const tempObject = new THREE.Object3D();
     
-    // Recording desk (blocky, Minecraft-style)
-    const desk = new THREE.BoxGeometry(3, 0.3, 1.5);
-    tempObject.position.set(offsetX, 1, -6);
+    const halfWidth = roof.baseWidth / 2;
+    const halfDepth = roof.baseDepth / 2;
+    const roofHeight = roof.peakHeight - roof.baseY;
+    
+    // Front slope (facing +Z)
+    const frontSlope = new THREE.PlaneGeometry(roof.baseWidth, Math.sqrt(roofHeight * roofHeight + halfDepth * halfDepth));
+    tempObject.position.set(offsetX + roof.x, roof.baseY + roofHeight / 2, roof.z + halfDepth / 2);
+    tempObject.rotation.x = -Math.atan(roofHeight / halfDepth);
     tempObject.updateMatrix();
-    desk.applyMatrix4(tempObject.matrix);
-    geometries.push(desk);
-    
-    // Desk legs (4 blocky legs)
-    const legSize = 0.2;
-    const legHeight = 1;
-    for (let i = 0; i < 4; i++) {
-      const leg = new THREE.BoxGeometry(legSize, legHeight, legSize);
-      const xOff = i % 2 === 0 ? -1.3 : 1.3;
-      const zOff = i < 2 ? -0.6 : 0.6;
-      tempObject.position.set(offsetX + xOff, legHeight / 2, -6 + zOff);
-      tempObject.updateMatrix();
-      leg.applyMatrix4(tempObject.matrix);
-      geometries.push(leg);
-    }
-    
-    // Microphone stand
-    const micStand = new THREE.CylinderGeometry(0.08, 0.08, 2, 8);
-    tempObject.position.set(offsetX - 1, 2.2, -6);
-    tempObject.updateMatrix();
-    micStand.applyMatrix4(tempObject.matrix);
-    geometries.push(micStand);
-    
-    // Microphone head
-    const micHead = new THREE.CapsuleGeometry(0.15, 0.3, 8, 8);
-    tempObject.position.set(offsetX - 1, 3.3, -6);
-    tempObject.updateMatrix();
-    micHead.applyMatrix4(tempObject.matrix);
-    geometries.push(micHead);
-    
-    // Headphone stand
-    const headphoneStand = new THREE.CylinderGeometry(0.1, 0.15, 0.8, 8);
-    tempObject.position.set(offsetX + 1.5, 1.6, -6);
-    tempObject.updateMatrix();
-    headphoneStand.applyMatrix4(tempObject.matrix);
-    geometries.push(headphoneStand);
-    
-    // Headphone arc
-    const headphoneArc = new THREE.TorusGeometry(0.4, 0.08, 8, 16, Math.PI);
-    tempObject.position.set(offsetX + 1.5, 2.2, -6);
-    tempObject.rotation.x = Math.PI / 2;
-    tempObject.updateMatrix();
-    headphoneArc.applyMatrix4(tempObject.matrix);
-    geometries.push(headphoneArc);
-    
-    tempObject.rotation.x = 0; // Reset rotation
-    
-    // Sound foam panels on side walls (blocky, colorful) - moved closer
-    for (let i = 0; i < 8; i++) {
-      const foam = new THREE.BoxGeometry(1, 1, 0.2);
-      const isLeft = i < 4;
-      const xPos = isLeft ? -13 : 13; // Side walls
-      const zPos = -3 + (i % 4) * 2; // Spread along wall, closer to camera
-      const y = 2 + Math.floor(i / 4) * 2;
-      tempObject.position.set(offsetX + xPos, y, zPos);
-      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2; // Face inward
-      tempObject.updateMatrix();
-      foam.applyMatrix4(tempObject.matrix);
-      geometries.push(foam);
-    }
-    tempObject.rotation.y = 0; // Reset rotation
-    
-    // Storage shelves (blocky)
-    const shelf = new THREE.BoxGeometry(2, 0.2, 0.8);
-    for (let i = 0; i < 3; i++) {
-      tempObject.position.set(offsetX + 6, 1.5 + i * 1.5, -7);
-      tempObject.updateMatrix();
-      const shelfClone = shelf.clone();
-      shelfClone.applyMatrix4(tempObject.matrix);
-      geometries.push(shelfClone);
-    }
-    
-    // Audio mixer on desk (blocky, Minecraft style)
-    const mixer = new THREE.BoxGeometry(1.2, 0.15, 0.8);
-    tempObject.position.set(offsetX + 0.5, 1.2, -6);
-    tempObject.updateMatrix();
-    mixer.applyMatrix4(tempObject.matrix);
-    geometries.push(mixer);
-    
-    // Mixer knobs (small cubes)
-    for (let i = 0; i < 12; i++) {
-      const knob = new THREE.BoxGeometry(0.08, 0.08, 0.08);
-      const row = Math.floor(i / 4);
-      const col = i % 4;
-      tempObject.position.set(
-        offsetX + 0.1 + col * 0.25,
-        1.28,
-        -6.2 + row * 0.25
-      );
-      tempObject.updateMatrix();
-      knob.applyMatrix4(tempObject.matrix);
-      geometries.push(knob);
-    }
-    
-    // Gaming chair (blocky)
-    const chairSeat = new THREE.BoxGeometry(0.8, 0.15, 0.8);
-    tempObject.position.set(offsetX, 0.7, -4);
-    tempObject.updateMatrix();
-    chairSeat.applyMatrix4(tempObject.matrix);
-    geometries.push(chairSeat);
-    
-    const chairBack = new THREE.BoxGeometry(0.8, 1, 0.15);
-    tempObject.position.set(offsetX, 1.3, -4.3);
-    tempObject.updateMatrix();
-    chairBack.applyMatrix4(tempObject.matrix);
-    geometries.push(chairBack);
-    
-    // Chair pole
-    const chairPole = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8);
-    tempObject.position.set(offsetX, 0.4, -4);
-    tempObject.updateMatrix();
-    chairPole.applyMatrix4(tempObject.matrix);
-    geometries.push(chairPole);
-    
-    // Keyboard on desk
-    const keyboard = new THREE.BoxGeometry(0.8, 0.04, 0.3);
-    tempObject.position.set(offsetX - 1, 1.17, -5.5);
-    tempObject.updateMatrix();
-    keyboard.applyMatrix4(tempObject.matrix);
-    geometries.push(keyboard);
-    
-    // Mouse
-    const mouse = new THREE.BoxGeometry(0.1, 0.05, 0.15);
-    tempObject.position.set(offsetX - 0.3, 1.17, -5.5);
-    tempObject.updateMatrix();
-    mouse.applyMatrix4(tempObject.matrix);
-    geometries.push(mouse);
-    
-    // Minecraft-style posters on side walls - closer and more visible
-    for (let i = 0; i < 4; i++) {
-      const poster = new THREE.BoxGeometry(1.2, 1.5, 0.05);
-      const isLeft = i < 2;
-      const xPos = isLeft ? -13 : 13; // Side walls
-      const zPos = -1 + (i % 2) * 4; // Two per wall
-      tempObject.position.set(offsetX + xPos, 5, zPos);
-      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2; // Face inward
-      tempObject.updateMatrix();
-      poster.applyMatrix4(tempObject.matrix);
-      geometries.push(poster);
-    }
-    tempObject.rotation.y = 0; // Reset rotation
-    
-    // Pop filter (ring in front of mic)
-    const popFilter = new THREE.TorusGeometry(0.25, 0.02, 8, 16);
-    tempObject.position.set(offsetX - 1, 3, -6.3);
-    tempObject.rotation.x = Math.PI / 6;
-    tempObject.updateMatrix();
-    popFilter.applyMatrix4(tempObject.matrix);
-    geometries.push(popFilter);
+    frontSlope.applyMatrix4(tempObject.matrix);
+    geometries.push(frontSlope);
     
     tempObject.rotation.x = 0;
     
-    // Cable management (blocky cables along desk edge)
-    for (let i = 0; i < 8; i++) {
-      const cable = new THREE.BoxGeometry(0.05, 0.05, 0.3);
-      tempObject.position.set(offsetX - 1.5 + i * 0.4, 0.9, -6.5);
-      tempObject.updateMatrix();
-      cable.applyMatrix4(tempObject.matrix);
-      geometries.push(cable);
-    }
+    // Back slope (facing -Z)
+    const backSlope = new THREE.PlaneGeometry(roof.baseWidth, Math.sqrt(roofHeight * roofHeight + halfDepth * halfDepth));
+    tempObject.position.set(offsetX + roof.x, roof.baseY + roofHeight / 2, roof.z - halfDepth / 2);
+    tempObject.rotation.x = Math.atan(roofHeight / halfDepth);
+    tempObject.rotation.y = Math.PI;
+    tempObject.updateMatrix();
+    backSlope.applyMatrix4(tempObject.matrix);
+    geometries.push(backSlope);
     
-    // Studio lights (blocky)
-    for (let i = 0; i < 3; i++) {
-      const light = new THREE.BoxGeometry(0.4, 0.3, 0.4);
-      tempObject.position.set(offsetX - 4 + i * 4, 4.5, -5);
-      tempObject.updateMatrix();
-      light.applyMatrix4(tempObject.matrix);
-      geometries.push(light);
-    }
+    tempObject.rotation.x = 0;
+    tempObject.rotation.y = 0;
     
-    // Shelf items (game cases/collectibles)
-    for (let shelf = 0; shelf < 3; shelf++) {
-      for (let item = 0; item < 5; item++) {
-        const case_ = new THREE.BoxGeometry(0.15, 0.5, 0.1);
-        tempObject.position.set(
-          offsetX + 5.5 + item * 0.2,
-          1.6 + shelf * 1.5,
-          -7
-        );
+    // Left gable (triangle)
+    const leftGableShape = new THREE.Shape();
+    leftGableShape.moveTo(-halfDepth, 0);
+    leftGableShape.lineTo(halfDepth, 0);
+    leftGableShape.lineTo(0, roofHeight);
+    leftGableShape.lineTo(-halfDepth, 0);
+    const leftGable = new THREE.ShapeGeometry(leftGableShape);
+    tempObject.position.set(offsetX + roof.x - halfWidth, roof.baseY, roof.z);
+    tempObject.rotation.y = Math.PI / 2;
+    tempObject.updateMatrix();
+    leftGable.applyMatrix4(tempObject.matrix);
+    geometries.push(leftGable);
+    
+    tempObject.rotation.y = 0;
+    
+    // Right gable (triangle)
+    const rightGableShape = new THREE.Shape();
+    rightGableShape.moveTo(-halfDepth, 0);
+    rightGableShape.lineTo(halfDepth, 0);
+    rightGableShape.lineTo(0, roofHeight);
+    rightGableShape.lineTo(-halfDepth, 0);
+    const rightGable = new THREE.ShapeGeometry(rightGableShape);
+    tempObject.position.set(offsetX + roof.x + halfWidth, roof.baseY, roof.z);
+    tempObject.rotation.y = -Math.PI / 2;
+    tempObject.updateMatrix();
+    rightGable.applyMatrix4(tempObject.matrix);
+    geometries.push(rightGable);
+    
+    return geometries;
+  };
+
+  // Houses (merged by material)
+  const housesGeometry = useMemo(() => {
+    const wallGeometries: THREE.BufferGeometry[] = [];
+    const roofGeometries: THREE.BufferGeometry[] = [];
+    const doorGeometries: THREE.BufferGeometry[] = [];
+    const windowGeometries: THREE.BufferGeometry[] = [];
+
+    // Small house
+    HERMITCRAFT_CONFIG.HOUSE_SMALL.walls.forEach(wall => {
+      wallGeometries.push(createBlock(wall.x, wall.y, wall.z, wall.width, wall.height, wall.depth));
+    });
+    roofGeometries.push(...createPeakedRoof(HERMITCRAFT_CONFIG.HOUSE_SMALL.roof));
+    const smallDoor = HERMITCRAFT_CONFIG.HOUSE_SMALL.door;
+    doorGeometries.push(createBlock(smallDoor.x, smallDoor.y, smallDoor.z, smallDoor.width, smallDoor.height, smallDoor.depth));
+    HERMITCRAFT_CONFIG.HOUSE_SMALL.windows.forEach(window => {
+      windowGeometries.push(createBlock(window.x, window.y, window.z, window.width, window.height, window.depth));
+    });
+
+    // Medium house
+    HERMITCRAFT_CONFIG.HOUSE_MEDIUM.walls.forEach(wall => {
+      wallGeometries.push(createBlock(wall.x, wall.y, wall.z, wall.width, wall.height, wall.depth));
+    });
+    roofGeometries.push(...createPeakedRoof(HERMITCRAFT_CONFIG.HOUSE_MEDIUM.roof));
+    const mediumDoor = HERMITCRAFT_CONFIG.HOUSE_MEDIUM.door;
+    doorGeometries.push(createBlock(mediumDoor.x, mediumDoor.y, mediumDoor.z, mediumDoor.width, mediumDoor.height, mediumDoor.depth));
+    HERMITCRAFT_CONFIG.HOUSE_MEDIUM.windows.forEach(window => {
+      windowGeometries.push(createBlock(window.x, window.y, window.z, window.width, window.height, window.depth));
+    });
+
+    // Large house
+    HERMITCRAFT_CONFIG.HOUSE_LARGE.walls.forEach(wall => {
+      wallGeometries.push(createBlock(wall.x, wall.y, wall.z, wall.width, wall.height, wall.depth));
+    });
+    roofGeometries.push(...createPeakedRoof(HERMITCRAFT_CONFIG.HOUSE_LARGE.roof));
+    const largeDoor = HERMITCRAFT_CONFIG.HOUSE_LARGE.door;
+    doorGeometries.push(createBlock(largeDoor.x, largeDoor.y, largeDoor.z, largeDoor.width, largeDoor.height, largeDoor.depth));
+    HERMITCRAFT_CONFIG.HOUSE_LARGE.windows.forEach(window => {
+      windowGeometries.push(createBlock(window.x, window.y, window.z, window.width, window.height, window.depth));
+    });
+
+    return {
+      walls: mergeGeometries(wallGeometries),
+      roofs: mergeGeometries(roofGeometries),
+      doors: mergeGeometries(doorGeometries),
+      windows: mergeGeometries(windowGeometries),
+    };
+  }, [offsetX]);
+
+  // Trees (merged by type)
+  const treesGeometry = useMemo(() => {
+    const trunkGeometries: THREE.BufferGeometry[] = [];
+    const leavesGeometries: THREE.BufferGeometry[] = [];
+    
+    HERMITCRAFT_CONFIG.TREES.forEach(tree => {
+      trunkGeometries.push(createBlock(tree.trunkPos.x, tree.trunkPos.y, tree.trunkPos.z, 0.7, tree.trunkHeight, 0.7));
+      leavesGeometries.push(createBlock(tree.leavesPos.x, tree.leavesPos.y, tree.leavesPos.z, tree.leavesSize, tree.leavesSize, tree.leavesSize));
+    });
+
+    return {
+      trunks: mergeGeometries(trunkGeometries),
+      leaves: mergeGeometries(leavesGeometries),
+    };
+  }, [offsetX]);
+
+  // Farms (merged by type)
+  const farmsGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    HERMITCRAFT_CONFIG.FARMS.forEach(farm => {
+      geometries.push(createBlock(farm.x, farm.y, farm.z, farm.width, 0.1, farm.depth));
+    });
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Fences (merged)
+  const fencesGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    HERMITCRAFT_CONFIG.FENCES.forEach(fence => {
+      geometries.push(createBlock(fence.x, fence.y, fence.z, fence.width, fence.height, fence.depth));
+    });
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Village well (merged)
+  const wellGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    const tempObject = new THREE.Object3D();
+    
+    // Well base (cylinder)
+    const base = new THREE.CylinderGeometry(
+      HERMITCRAFT_CONFIG.WELL.base.radius,
+      HERMITCRAFT_CONFIG.WELL.base.radius,
+      HERMITCRAFT_CONFIG.WELL.base.height,
+      16
+    );
+    tempObject.position.set(
+      offsetX + HERMITCRAFT_CONFIG.WELL.base.x,
+      HERMITCRAFT_CONFIG.WELL.base.y,
+      HERMITCRAFT_CONFIG.WELL.base.z
+    );
+    tempObject.updateMatrix();
+    base.applyMatrix4(tempObject.matrix);
+    geometries.push(base);
+
+    // Roof
+    const roof = HERMITCRAFT_CONFIG.WELL.roof;
+    geometries.push(createBlock(roof.x, roof.y, roof.z, roof.width, roof.height, roof.depth));
+
+    // Posts
+    HERMITCRAFT_CONFIG.WELL.posts.forEach(post => {
+      const postGeo = new THREE.CylinderGeometry(post.radius, post.radius, post.height, 8);
+      tempObject.position.set(offsetX + post.x, post.y, post.z);
+      tempObject.updateMatrix();
+      postGeo.applyMatrix4(tempObject.matrix);
+      geometries.push(postGeo);
+    });
+
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Hay bales (merged)
+  const hayBalesGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    HERMITCRAFT_CONFIG.HAY_BALES.forEach(bale => {
+      geometries.push(createBlock(bale.x, bale.y, bale.z, 0.8, 0.8, 0.8));
+    });
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Ores (merged by type)
+  const oreGeometries = useMemo(() => {
+    const createOreGeometry = (positions: { x: number; y: number; z: number }[]) => {
+      const geometries: THREE.BufferGeometry[] = [];
+      positions.forEach(pos => {
+        geometries.push(createBlock(pos.x, pos.y, pos.z, 0.4, 0.4, 0.4));
+      });
+      return mergeGeometries(geometries);
+    };
+
+    return {
+      diamond: createOreGeometry(HERMITCRAFT_CONFIG.ORES.diamond),
+      emerald: createOreGeometry(HERMITCRAFT_CONFIG.ORES.emerald),
+      gold: createOreGeometry(HERMITCRAFT_CONFIG.ORES.gold),
+    };
+  }, [offsetX]);
+
+  // Wall decorations (merged)
+  const wallDecorationsGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    const tempObject = new THREE.Object3D();
+    
+    // Left wall decorations
+    HERMITCRAFT_CONFIG.WALL_DECORATIONS.leftWall.forEach(dec => {
+      const block = new THREE.BoxGeometry(dec.size, dec.size, 0.2);
+      tempObject.position.set(offsetX + dec.x, dec.y, dec.z);
+      tempObject.rotation.y = Math.PI / 2;
+      tempObject.updateMatrix();
+      block.applyMatrix4(tempObject.matrix);
+      geometries.push(block);
+    });
+
+    tempObject.rotation.y = 0;
+
+    // Right wall decorations
+    HERMITCRAFT_CONFIG.WALL_DECORATIONS.rightWall.forEach(dec => {
+      const block = new THREE.BoxGeometry(dec.size, dec.size, 0.2);
+      tempObject.position.set(offsetX + dec.x, dec.y, dec.z);
+      tempObject.rotation.y = -Math.PI / 2;
+      tempObject.updateMatrix();
+      block.applyMatrix4(tempObject.matrix);
+      geometries.push(block);
+    });
+
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Flowers (merged by type)
+  const flowerGeometries = useMemo(() => {
+    const createFlowerGeometry = (positions: { x: number; y: number; z: number }[]) => {
+      const geometries: THREE.BufferGeometry[] = [];
+      const tempObject = new THREE.Object3D();
+      positions.forEach(pos => {
+        const flowerGeo = new THREE.PlaneGeometry(0.25, 0.35);
+        tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
         tempObject.updateMatrix();
-        case_.applyMatrix4(tempObject.matrix);
-        geometries.push(case_);
+        flowerGeo.applyMatrix4(tempObject.matrix);
+        geometries.push(flowerGeo);
+      });
+      return mergeGeometries(geometries);
+    };
+
+    return {
+      poppies: createFlowerGeometry(HERMITCRAFT_CONFIG.FLOWERS.poppies),
+      dandelions: createFlowerGeometry(HERMITCRAFT_CONFIG.FLOWERS.dandelions),
+    };
+  }, [offsetX]);
+
+  // Static tall grass (merged)
+  const tallGrassGeometry = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+    const tempObject = new THREE.Object3D();
+    HERMITCRAFT_CONFIG.TALL_GRASS.forEach(pos => {
+      const grassGeo = new THREE.PlaneGeometry(0.18, 0.45);
+      tempObject.position.set(offsetX + pos.x, pos.y, pos.z);
+      tempObject.updateMatrix();
+      grassGeo.applyMatrix4(tempObject.matrix);
+      geometries.push(grassGeo);
+    });
+    return mergeGeometries(geometries);
+  }, [offsetX]);
+
+  // Hanging lanterns (animated)
+  const lanterns = useMemo(() => {
+    return HERMITCRAFT_CONFIG.LANTERNS.positions.map((pos, idx) => ({
+      geometry: new THREE.BoxGeometry(
+        HERMITCRAFT_CONFIG.LANTERNS.size,
+        HERMITCRAFT_CONFIG.LANTERNS.size,
+        HERMITCRAFT_CONFIG.LANTERNS.size
+      ),
+      basePosition: [offsetX + pos.x, pos.y, pos.z] as [number, number, number],
+      floatOffset: idx * 1.5,
+    }));
+  }, [offsetX]);
+
+  // Animated floating items
+  const floatingItems = useMemo(() => {
+    return HERMITCRAFT_CONFIG.FLOATING_ITEMS.items.map((item, idx) => ({
+      geometry: new THREE.BoxGeometry(
+        HERMITCRAFT_CONFIG.FLOATING_ITEMS.size,
+        HERMITCRAFT_CONFIG.FLOATING_ITEMS.size,
+        HERMITCRAFT_CONFIG.FLOATING_ITEMS.size
+      ),
+      basePosition: [offsetX + item.x, item.y, item.z] as [number, number, number],
+      color: item.color,
+      floatOffset: idx * 1.3,
+    }));
+  }, [offsetX]);
+
+  // Animated grass blades
+  const animatedGrass = useMemo(() => {
+    return HERMITCRAFT_CONFIG.ANIMATED_GRASS.positions.map((pos, idx) => ({
+      geometry: new THREE.PlaneGeometry(0.22, 0.55),
+      basePosition: [offsetX + pos.x, pos.y, pos.z] as [number, number, number],
+      swayOffset: idx * 2.1,
+    }));
+  }, [offsetX]);
+
+  // Refs for animated elements
+  const lanternRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const itemRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const grassRefs = useRef<(THREE.Mesh | null)[]>([]);
+
+  // Optimized animation loop
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    
+    // Cache animation parameters
+    const lanternSpeed = HERMITCRAFT_CONFIG.LANTERNS.floatSpeed;
+    const lanternAmp = HERMITCRAFT_CONFIG.LANTERNS.floatAmplitude;
+    const floatSpeed = HERMITCRAFT_CONFIG.FLOATING_ITEMS.floatSpeed;
+    const floatAmp = HERMITCRAFT_CONFIG.FLOATING_ITEMS.floatAmplitude;
+    const rotSpeed = HERMITCRAFT_CONFIG.FLOATING_ITEMS.rotationSpeed;
+    const swaySpeed = HERMITCRAFT_CONFIG.ANIMATED_GRASS.swaySpeed;
+    const swayAmp = HERMITCRAFT_CONFIG.ANIMATED_GRASS.swayAmplitude;
+    
+    // Animate lanterns
+    for (let i = 0; i < lanternRefs.current.length; i++) {
+      const lantern = lanternRefs.current[i];
+      if (lantern) {
+        const data = lanterns[i];
+        lantern.position.y = data.basePosition[1] + Math.sin(time * lanternSpeed + data.floatOffset) * lanternAmp;
       }
     }
     
-    return mergeGeometries(geometries);
-  }, [offsetX]);
+    // Animate floating items
+    for (let i = 0; i < itemRefs.current.length; i++) {
+      const item = itemRefs.current[i];
+      if (item) {
+        const data = floatingItems[i];
+        item.position.y = data.basePosition[1] + Math.sin(time * floatSpeed + data.floatOffset) * floatAmp;
+        item.rotation.y = time * rotSpeed + data.floatOffset;
+      }
+    }
+    
+    // Animate grass blades
+    for (let i = 0; i < grassRefs.current.length; i++) {
+      const grass = grassRefs.current[i];
+      if (grass) {
+        const data = animatedGrass[i];
+        grass.rotation.z = Math.sin(time * swaySpeed + data.swayOffset) * swayAmp;
+      }
+    }
+  });
   
   return (
     <>
-      {/* Static furniture */}
-      <mesh geometry={mergedGeometry}>
-        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
+      {/* Ground layer */}
+      <mesh geometry={groundGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.grass} fog />
       </mesh>
       
-      {/* Gaming monitors */}
-      <InstancedMonitors offsetX={offsetX} count={2} color="#1a1a1a" />
-      
-      {/* Audio waveform visualization (simple bars) - moved to side wall */}
-      <group position={[offsetX - 8, 5, 0]} rotation={[0, Math.PI / 2, 0]}>
-        {Array.from({ length: 10 }, (_, i) => {
-          const height = 0.5 + Math.sin(i * 0.5) * 0.3;
-          return (
-            <mesh key={i} position={[i * 0.4 - 2, height / 2, 0]}>
-              <boxGeometry args={[0.3, height, 0.2]} />
-              <meshMatcapMaterial matcap={matcap} color={colors.accent} />
-            </mesh>
-          );
-        })}
-      </group>
-      
-      {/* Rug */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
-        <planeGeometry args={[10, 8]} />
-        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
+      {/* Dirt paths */}
+      <mesh geometry={pathGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.dirtPath} fog />
       </mesh>
       
-      {/* Musical note particles */}
-      <Sparkles offsetX={offsetX} color="#6b9fff" count={45} />
+      {/* Houses */}
+      <mesh geometry={housesGeometry.walls} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.oakPlanks} fog />
+      </mesh>
       
-      {/* Hanging banners/flags */}
-      {[-6, -2, 2, 6].map((x, i) => (
-        <mesh key={i} position={[offsetX + x, 7 + Math.sin(i) * 0.5, 0]} rotation={[0, 0, 0.1 * (i % 2 ? 1 : -1)]}>
-          <planeGeometry args={[1.5, 2.5]} />
-          <meshMatcapMaterial matcap={matcap} color={colors.picture} transparent opacity={0.9} />
+      <mesh geometry={housesGeometry.roofs} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.spruceLog} side={THREE.DoubleSide} fog />
+      </mesh>
+      
+      <mesh geometry={housesGeometry.doors} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.oakLog} fog />
+      </mesh>
+      
+      <mesh geometry={housesGeometry.windows} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.glass} transparent opacity={0.6} fog />
+      </mesh>
+      
+      {/* Trees */}
+      <mesh geometry={treesGeometry.trunks} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.oakLog} fog />
+      </mesh>
+      
+      <mesh geometry={treesGeometry.leaves} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.oakLeaves} fog />
+      </mesh>
+      
+      {/* Farms */}
+      <mesh geometry={farmsGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.wheat} fog />
+      </mesh>
+      
+      {/* Fences */}
+      <mesh geometry={fencesGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.oakLog} fog />
+      </mesh>
+      
+      {/* Village well */}
+      <mesh geometry={wellGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.cobblestone} fog />
+      </mesh>
+      
+      {/* Hay bales */}
+      <mesh geometry={hayBalesGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.hay} fog />
+      </mesh>
+      
+      {/* Wall decorations */}
+      <mesh geometry={wallDecorationsGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.cobblestone} fog />
+      </mesh>
+      
+      {/* Ores */}
+      <mesh geometry={oreGeometries.diamond} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.diamond} fog />
+      </mesh>
+      
+      <mesh geometry={oreGeometries.emerald} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.emerald} fog />
+      </mesh>
+      
+      <mesh geometry={oreGeometries.gold} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.gold} fog />
+      </mesh>
+      
+      {/* Flowers */}
+      <mesh geometry={flowerGeometries.poppies} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.poppy} side={THREE.DoubleSide} fog />
+      </mesh>
+      
+      <mesh geometry={flowerGeometries.dandelions} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.dandelion} side={THREE.DoubleSide} fog />
+      </mesh>
+      
+      {/* Static tall grass */}
+      <mesh geometry={tallGrassGeometry} frustumCulled={false}>
+        <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.tallGrass} side={THREE.DoubleSide} transparent opacity={0.8} fog />
+      </mesh>
+      
+      {/* Hanging lanterns (animated) */}
+      {lanterns.map((lantern, idx) => (
+        <mesh
+          key={`lantern-${idx}`}
+          ref={(el) => (lanternRefs.current[idx] = el)}
+          position={lantern.basePosition}
+          geometry={lantern.geometry}
+          frustumCulled={false}
+        >
+          <meshMatcapMaterial matcap={matcap} color={MINECRAFT_COLORS.torch} fog />
+        </mesh>
+      ))}
+      
+      {/* Animated floating items (pickups) */}
+      {floatingItems.map((item, idx) => (
+        <mesh
+          key={`item-${idx}`}
+          ref={(el) => (itemRefs.current[idx] = el)}
+          position={item.basePosition}
+          geometry={item.geometry}
+          frustumCulled={false}
+        >
+          <meshMatcapMaterial matcap={matcap} color={item.color} fog />
+        </mesh>
+      ))}
+      
+      {/* Animated grass blades */}
+      {animatedGrass.map((grass, idx) => (
+        <mesh
+          key={`grass-${idx}`}
+          ref={(el) => (grassRefs.current[idx] = el)}
+          position={grass.basePosition}
+          geometry={grass.geometry}
+          frustumCulled={false}
+        >
+          <meshMatcapMaterial 
+            matcap={matcap} 
+            color={MINECRAFT_COLORS.tallGrass} 
+            side={THREE.DoubleSide}
+            transparent
+            opacity={0.85}
+            fog
+          />
         </mesh>
       ))}
     </>
