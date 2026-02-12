@@ -144,11 +144,6 @@ export function SplitCameraRenderer({
         camera.layers.enable(0);
         camera.layers.enable(1);
         
-        // Debug logging (only log first camera to avoid spam)
-        if (i === 0) {
-          console.log('[SplitCameraRenderer] Cameras configured to see layers 0 and 1');
-        }
-
         // Initialize at starting positions (consistent with runtime formula)
         const initialX = calculateCameraPosition(i, 0, CAMERA_SPACING);
         camera.position.set(initialX, CAMERA_HEIGHT, CAMERA_Z_POSITION);
@@ -225,9 +220,6 @@ export function SplitCameraRenderer({
   // Instant portal zoom for URL loads (skip animation, set position directly)
   useEffect(() => {
     if (instantZoomPortalIndex !== null && instantZoomPortalIndex !== undefined) {
-      console.log(`[SplitCameraRenderer] Instant zoom requested for portal ${instantZoomPortalIndex}`);
-      console.log(`[SplitCameraRenderer] Cameras array length: ${cameras.length}`);
-      
       const camera = cameras[instantZoomPortalIndex];
       if (!camera) {
         console.warn(`[SplitCameraRenderer] Camera ${instantZoomPortalIndex} not found!`);
@@ -239,12 +231,8 @@ export function SplitCameraRenderer({
         return;
       }
       
-      console.log(`[SplitCameraRenderer] BEFORE instant zoom - Camera Z: ${camera.position.z.toFixed(2)}, Portal Z: ${camera.portalGroup.position.z.toFixed(2)}`);
-      
       // Use centralized dolly utility to ensure correct positioning
       PortalDollyUtils.setZoomedInstant(camera);
-      
-      console.log(`[SplitCameraRenderer] AFTER instant zoom - Camera Z: ${camera.position.z.toFixed(2)}, Portal Z: ${camera.portalGroup.position.z.toFixed(2)}`);
       
       // Immediately report debug info (since useFrame won't run when app is active)
       if (onPortalDebugUpdate && camera.portalGroup) {

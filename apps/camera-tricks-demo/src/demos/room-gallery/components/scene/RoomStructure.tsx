@@ -1,5 +1,4 @@
-import { useMemo, useEffect, useRef } from 'react';
-import * as THREE from 'three';
+import { useMemo } from 'react';
 import { RoomStructureProps } from '../../types/props';
 import { createTileTexture } from '../../utils/TextureGenerator';
 import {
@@ -41,57 +40,11 @@ export function RoomStructure({
   // Enlight room needs standard material to respond to point light
   const useStandardMaterial = theme === 'enlight';
 
-  // Refs to verify layers are actually set on all meshes
-  const floorRef = useRef<THREE.Mesh>(null);
-  const ceilingRef = useRef<THREE.Mesh>(null);
-  const backWallRef = useRef<THREE.Mesh>(null);
-  const frontWallRef = useRef<THREE.Mesh>(null);
-  const leftWallRef = useRef<THREE.Mesh>(null);
-  const rightWallRef = useRef<THREE.Mesh>(null);
-
-  // Debug logging
-  useEffect(() => {
-    const layer = useStandardMaterial ? 1 : 0;
-    console.log(`[RoomStructure] ${theme} room surfaces set to layer ${layer}`);
-    
-    if (useStandardMaterial) {
-      console.log(`[RoomStructure] ${theme} room colors:`, {
-        floor: colors.floor,
-        ceiling: colors.ceiling,
-        backWall: colors.backWall,
-        sideWalls: colors.sideWalls,
-      });
-    }
-
-    // Verify layers are actually set on ALL surfaces for Enlight room
-    if (useStandardMaterial) {
-      setTimeout(() => {
-        const surfaces = [
-          { name: 'floor', ref: floorRef },
-          { name: 'ceiling', ref: ceilingRef },
-          { name: 'back wall', ref: backWallRef },
-          { name: 'front wall', ref: frontWallRef },
-          { name: 'left wall', ref: leftWallRef },
-          { name: 'right wall', ref: rightWallRef },
-        ];
-
-        surfaces.forEach(({ name, ref }) => {
-          if (ref.current) {
-            console.log(
-              `[RoomStructure] ${theme} ${name} layer mask:`,
-              ref.current.layers.mask,
-            );
-          }
-        });
-      }, 100);
-    }
-  }, [theme, useStandardMaterial, colors]);
 
   return (
     <>
       {/* Floor with tiled texture and perspective grid */}
       <mesh
-        ref={floorRef}
         layers={useStandardMaterial ? 1 : 0}
         rotation={[-Math.PI / 2, 0, 0]}
         position={[offsetX, 0, 0]}
@@ -111,7 +64,6 @@ export function RoomStructure({
 
       {/* Ceiling with fog */}
       <mesh
-        ref={ceilingRef}
         layers={useStandardMaterial ? 1 : 0}
         rotation={[Math.PI / 2, 0, 0]}
         position={[offsetX, ROOM_VISUAL_HEIGHT, 0]}
@@ -131,7 +83,6 @@ export function RoomStructure({
 
       {/* Back Wall with fog */}
       <mesh
-        ref={backWallRef}
         layers={useStandardMaterial ? 1 : 0}
         position={[offsetX, halfHeight, -halfDepth]}
         receiveShadow={useStandardMaterial}
@@ -150,7 +101,6 @@ export function RoomStructure({
 
       {/* Front Wall with fog */}
       <mesh
-        ref={frontWallRef}
         layers={useStandardMaterial ? 1 : 0}
         position={[offsetX, halfHeight, halfDepth]}
         rotation={[0, Math.PI, 0]}
@@ -171,7 +121,6 @@ export function RoomStructure({
       {/* Left Wall (only for first room) with fog */}
       {isFirst && (
         <mesh
-          ref={leftWallRef}
           layers={useStandardMaterial ? 1 : 0}
           position={[offsetX - halfWidth, halfHeight, 0]}
           rotation={[0, Math.PI / 2, 0]}
@@ -193,7 +142,6 @@ export function RoomStructure({
       {/* Right Wall (only for last room) with fog */}
       {isLast && (
         <mesh
-          ref={rightWallRef}
           layers={useStandardMaterial ? 1 : 0}
           position={[offsetX + halfWidth, halfHeight, 0]}
           rotation={[0, -Math.PI / 2, 0]}
