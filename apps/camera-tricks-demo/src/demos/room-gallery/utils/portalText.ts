@@ -88,7 +88,7 @@ export function createPortalTextSprite(
   const borderRadius = 12;
   const lineHeight = fontSize * 1.4;
   const textHeight = allLines.length * lineHeight;
-  
+
   const bgWidth = maxLineWidth + 2 * padding;
   const bgHeight = textHeight + 2 * padding;
   const bgX = (canvasWidth - bgWidth) / 2;
@@ -111,20 +111,20 @@ export function createPortalTextSprite(
   context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
   context.lineWidth = 1.5;
   context.stroke();
-  
+
   // Reset shadow for text
   context.shadowColor = 'transparent';
   context.shadowBlur = 0;
 
   // Draw text with simple shadow (no glow)
-  const startY = canvasHeight / 2 - (textHeight / 2) + (lineHeight / 2);
-  
+  const startY = canvasHeight / 2 - textHeight / 2 + lineHeight / 2;
+
   context.fillStyle = color;
   context.shadowColor = 'rgba(0, 0, 0, 0.8)';
   context.shadowBlur = 4;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 2;
-  
+
   allLines.forEach((line, i) => {
     context.fillText(line, canvasWidth / 2, startY + i * lineHeight);
   });

@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
 import { useMatcap } from '../shared/useMatcap';
-import { InstancedGridCubes } from '../shared/InstancedComponents';
 
 interface SuDoneKuRoomProps {
   colors: RoomColors;
@@ -11,222 +11,131 @@ interface SuDoneKuRoomProps {
 }
 
 /**
- * Su-Done-Ku Room - Puzzle Workshop / Logic Lab
+ * Su-Done-Ku Room - Digital Sudoku Puzzle Matrix
+ * 
+ * Theme: Clean, modern puzzle lab with floating animated Sudoku grids
  * 
  * Features:
- * - 3x3 grid structure (Sudoku grid)
- * - Number blocks (1-9) as decorations
- * - Grid patterns everywhere
- * - Whiteboard with strategies
- * - Clean, logical organization
+ * - Three large floating Sudoku grid panels (back, left, right walls)
+ * - Animated rotating number cubes (1-9) scattered throughout
+ * - Clean, minimalist aesthetic
+ * - All elements respect clearance zones
+ * 
+ * Clearance Zones (MUST AVOID):
+ * - Portal: X = offsetX ± 1.5, Y = 2-4, Z = 4.2-5.8
+ * - Title: X = offsetX ± 2.5, Y = 5.5-7, Z = 5-6
+ * - Description: X = offsetX ± 4, Y = 0.5-2, Z = 7-9.5
+ * 
+ * Performance: 9 animated number cubes
  */
 export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
   const matcap = useMatcap();
 
-  // Merge all static decorations into single geometry
+  // Animated number cubes
+  const numberCubeRefs = useRef<(THREE.Mesh | null)[]>([]);
+  
+  // Configuration for floating number cubes (1-9)
+  const numberCubes = useMemo(() => {
+    return [
+      // Back area (safe from description zone)
+      { num: 1, x: -6, y: 3, z: -5, rotSpeed: 0.3, bobPhase: 0 },
+      { num: 2, x: 0, y: 7, z: -7, rotSpeed: 0.4, bobPhase: 1 },
+      { num: 3, x: 6, y: 4, z: -6, rotSpeed: 0.35, bobPhase: 2 },
+      
+      // Side areas (away from portal and description)
+      { num: 4, x: -8, y: 8, z: -1, rotSpeed: 0.32, bobPhase: 3 },
+      { num: 5, x: -7, y: 2.5, z: 2, rotSpeed: 0.38, bobPhase: 4 },
+      { num: 6, x: 8, y: 6, z: -2, rotSpeed: 0.36, bobPhase: 5 },
+      { num: 7, x: 7, y: 3.5, z: 1, rotSpeed: 0.34, bobPhase: 6 },
+      
+      // Higher up (safe zones)
+      { num: 8, x: -3, y: 9, z: 0, rotSpeed: 0.42, bobPhase: 7 },
+      { num: 9, x: 3, y: 8.5, z: -3, rotSpeed: 0.39, bobPhase: 8 },
+    ];
+  }, []);
+
+  // Animate number cubes
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    
+    for (let i = 0; i < numberCubeRefs.current.length; i++) {
+      const cube = numberCubeRefs.current[i];
+      if (cube) {
+        const data = numberCubes[i];
+        // Gentle bobbing
+        cube.position.y = data.y + Math.sin(time * 0.5 + data.bobPhase) * 0.3;
+        // Slow rotation
+        cube.rotation.x = time * data.rotSpeed;
+        cube.rotation.y = time * data.rotSpeed * 1.3;
+      }
+    }
+  });
+
+  // Static geometry
   const mergedGeometry = useMemo(() => {
     const geometries: THREE.BufferGeometry[] = [];
     const tempObject = new THREE.Object3D();
     
-    // Central Sudoku grid frame (large 3x3)
-    const gridFrame = new THREE.BoxGeometry(6, 0.2, 6);
-    tempObject.position.set(offsetX, 0.1, 0);
+    // Large Sudoku grid panel - back wall
+    const backPanel = new THREE.BoxGeometry(8, 6, 0.15);
+    tempObject.position.set(offsetX, 5, -9.85);
     tempObject.updateMatrix();
-    gridFrame.applyMatrix4(tempObject.matrix);
-    geometries.push(gridFrame);
+    backPanel.applyMatrix4(tempObject.matrix);
+    geometries.push(backPanel);
     
-    // Grid lines (thick dividers)
-    for (let i = 1; i < 3; i++) {
-      // Vertical lines
-      const vLine = new THREE.BoxGeometry(0.1, 0.3, 6);
-      tempObject.position.set(offsetX - 3 + i * 2, 0.15, 0);
-      tempObject.updateMatrix();
-      vLine.applyMatrix4(tempObject.matrix);
-      geometries.push(vLine);
-      
-      // Horizontal lines
-      const hLine = new THREE.BoxGeometry(6, 0.3, 0.1);
-      tempObject.position.set(offsetX, 0.15, -3 + i * 2);
-      tempObject.updateMatrix();
-      hLine.applyMatrix4(tempObject.matrix);
-      geometries.push(hLine);
-    }
-    
-    // Whiteboard on wall
-    const whiteboard = new THREE.BoxGeometry(4, 2.5, 0.1);
-    tempObject.position.set(offsetX, 3, -9.8);
+    // Sudoku grid panel - left wall
+    const leftPanel = new THREE.BoxGeometry(0.15, 5, 5);
+    tempObject.position.set(offsetX - 11.85, 5, -2);
     tempObject.updateMatrix();
-    whiteboard.applyMatrix4(tempObject.matrix);
-    geometries.push(whiteboard);
+    leftPanel.applyMatrix4(tempObject.matrix);
+    geometries.push(leftPanel);
     
-    // Whiteboard frame
-    const frameThickness = 0.15;
-    const frameDepth = 0.12;
-    
-    // Top frame
-    const topFrame = new THREE.BoxGeometry(4.3, frameThickness, frameDepth);
-    tempObject.position.set(offsetX, 4.25, -9.75);
+    // Sudoku grid panel - right wall
+    const rightPanel = new THREE.BoxGeometry(0.15, 5, 5);
+    tempObject.position.set(offsetX + 11.85, 5, -2);
     tempObject.updateMatrix();
-    topFrame.applyMatrix4(tempObject.matrix);
-    geometries.push(topFrame);
+    rightPanel.applyMatrix4(tempObject.matrix);
+    geometries.push(rightPanel);
     
-    // Bottom frame
-    const bottomFrame = new THREE.BoxGeometry(4.3, frameThickness, frameDepth);
-    tempObject.position.set(offsetX, 1.75, -9.75);
-    tempObject.updateMatrix();
-    bottomFrame.applyMatrix4(tempObject.matrix);
-    geometries.push(bottomFrame);
+    // Pedestal/display stands for ambiance (back corners, low)
+    const pedestals = [
+      { x: -9, z: -8 },
+      { x: 9, z: -8 },
+      { x: -9, z: -3 },
+      { x: 9, z: -3 },
+    ];
     
-    // Left frame
-    const leftFrame = new THREE.BoxGeometry(frameThickness, 2.5, frameDepth);
-    tempObject.position.set(offsetX - 2.15, 3, -9.75);
-    tempObject.updateMatrix();
-    leftFrame.applyMatrix4(tempObject.matrix);
-    geometries.push(leftFrame);
-    
-    // Right frame
-    const rightFrame = new THREE.BoxGeometry(frameThickness, 2.5, frameDepth);
-    tempObject.position.set(offsetX + 2.15, 3, -9.75);
-    tempObject.updateMatrix();
-    rightFrame.applyMatrix4(tempObject.matrix);
-    geometries.push(rightFrame);
-    
-    // Work table
-    const table = new THREE.BoxGeometry(2.5, 0.15, 1.5);
-    tempObject.position.set(offsetX + 5, 1, 5);
-    tempObject.updateMatrix();
-    table.applyMatrix4(tempObject.matrix);
-    geometries.push(table);
-    
-    // Table legs
-    for (let i = 0; i < 4; i++) {
-      const leg = new THREE.CylinderGeometry(0.08, 0.08, 1, 8);
-      const xOff = i % 2 === 0 ? -1.1 : 1.1;
-      const zOff = i < 2 ? -0.6 : 0.6;
-      tempObject.position.set(offsetX + 5 + xOff, 0.5, 5 + zOff);
-      tempObject.updateMatrix();
-      leg.applyMatrix4(tempObject.matrix);
-      geometries.push(leg);
-    }
-    
-    // Number pedestals around the room (1-9)
-    for (let i = 0; i < 9; i++) {
-      const angle = (i / 9) * Math.PI * 2;
-      const radius = 7;
-      const pedestal = new THREE.CylinderGeometry(0.35, 0.4, 0.8, 8);
-      
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * radius,
-        0.4,
-        Math.sin(angle) * radius
-      );
+    pedestals.forEach(pos => {
+      const pedestal = new THREE.CylinderGeometry(0.4, 0.5, 1.2, 8);
+      tempObject.position.set(offsetX + pos.x, 0.6, pos.z);
       tempObject.updateMatrix();
       pedestal.applyMatrix4(tempObject.matrix);
       geometries.push(pedestal);
-    }
+      
+      // Small decorative cube on top
+      const topCube = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+      tempObject.position.set(offsetX + pos.x, 1.4, pos.z);
+      tempObject.updateMatrix();
+      topCube.applyMatrix4(tempObject.matrix);
+      geometries.push(topCube);
+    });
     
-    // Puzzle books on table
-    for (let i = 0; i < 5; i++) {
-      const book = new THREE.BoxGeometry(0.3, 0.05, 0.4);
+    // Floating ring frame around portal area (decorative, not obstructing)
+    const ringSegments = 12;
+    for (let i = 0; i < ringSegments; i++) {
+      const angle = (i / ringSegments) * Math.PI * 2;
+      const radius = 6;
+      const segment = new THREE.BoxGeometry(0.8, 0.2, 0.2);
+      
       tempObject.position.set(
-        offsetX + 4.5 + i * 0.35,
-        1.08 + i * 0.06,
-        5
+        offsetX + Math.cos(angle) * radius,
+        11,
+        5 + Math.sin(angle) * radius
       );
-      tempObject.rotation.y = (Math.random() - 0.5) * 0.3;
+      tempObject.rotation.y = angle;
       tempObject.updateMatrix();
-      book.applyMatrix4(tempObject.matrix);
-      geometries.push(book);
-    }
-    
-    tempObject.rotation.y = 0;
-    
-    // Pencil holder on table
-    const pencilHolder = new THREE.CylinderGeometry(0.08, 0.08, 0.2, 8);
-    tempObject.position.set(offsetX + 6, 1.2, 5);
-    tempObject.updateMatrix();
-    pencilHolder.applyMatrix4(tempObject.matrix);
-    geometries.push(pencilHolder);
-    
-    // Pencils in holder
-    for (let i = 0; i < 6; i++) {
-      const pencil = new THREE.CylinderGeometry(0.01, 0.01, 0.35, 6);
-      const angle = (i / 6) * Math.PI * 2;
-      tempObject.position.set(
-        offsetX + 6 + Math.cos(angle) * 0.03,
-        1.38,
-        5 + Math.sin(angle) * 0.03
-      );
-      tempObject.updateMatrix();
-      pencil.applyMatrix4(tempObject.matrix);
-      geometries.push(pencil);
-    }
-    
-    // Eraser on table
-    const eraser = new THREE.BoxGeometry(0.12, 0.05, 0.08);
-    tempObject.position.set(offsetX + 5.5, 1.08, 5.5);
-    tempObject.updateMatrix();
-    eraser.applyMatrix4(tempObject.matrix);
-    geometries.push(eraser);
-    
-    // Ruler on table
-    const ruler = new THREE.BoxGeometry(0.8, 0.01, 0.08);
-    tempObject.position.set(offsetX + 5, 1.08, 5.7);
-    tempObject.updateMatrix();
-    ruler.applyMatrix4(tempObject.matrix);
-    geometries.push(ruler);
-    
-    // Marker tray below whiteboard
-    const tray = new THREE.BoxGeometry(1, 0.1, 0.15);
-    tempObject.position.set(offsetX, 1.5, -9.7);
-    tempObject.updateMatrix();
-    tray.applyMatrix4(tempObject.matrix);
-    geometries.push(tray);
-    
-    // Markers in tray
-    for (let i = 0; i < 6; i++) {
-      const marker = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
-      tempObject.position.set(offsetX - 0.4 + i * 0.16, 1.55, -9.7);
-      tempObject.rotation.z = Math.PI / 2;
-      tempObject.updateMatrix();
-      marker.applyMatrix4(tempObject.matrix);
-      geometries.push(marker);
-    }
-    
-    tempObject.rotation.z = 0;
-    
-    // Chair for table
-    const chairSeat = new THREE.BoxGeometry(0.8, 0.1, 0.8);
-    tempObject.position.set(offsetX + 5, 0.6, 4);
-    tempObject.updateMatrix();
-    chairSeat.applyMatrix4(tempObject.matrix);
-    geometries.push(chairSeat);
-    
-    const chairBack = new THREE.BoxGeometry(0.8, 0.8, 0.1);
-    tempObject.position.set(offsetX + 5, 1.2, 4.35);
-    tempObject.updateMatrix();
-    chairBack.applyMatrix4(tempObject.matrix);
-    geometries.push(chairBack);
-    
-    // Chair legs
-    for (let i = 0; i < 4; i++) {
-      const leg = new THREE.CylinderGeometry(0.04, 0.04, 0.6, 8);
-      const xOff = i % 2 === 0 ? -0.35 : 0.35;
-      const zOff = i < 2 ? -0.35 : 0.35;
-      tempObject.position.set(offsetX + 5 + xOff, 0.3, 4 + zOff);
-      tempObject.updateMatrix();
-      leg.applyMatrix4(tempObject.matrix);
-      geometries.push(leg);
-    }
-    
-    // Sudoku strategy posters on side wall
-    for (let i = 0; i < 3; i++) {
-      const poster = new THREE.BoxGeometry(1, 1.2, 0.05);
-      tempObject.position.set(offsetX + 9.8, 2.5 + i * 0.5, -6 + i * 3);
-      tempObject.rotation.y = Math.PI / 2;
-      tempObject.updateMatrix();
-      poster.applyMatrix4(tempObject.matrix);
-      geometries.push(poster);
+      segment.applyMatrix4(tempObject.matrix);
+      geometries.push(segment);
     }
     
     tempObject.rotation.y = 0;
@@ -234,92 +143,104 @@ export function SuDoneKuRoom({ colors, offsetX }: SuDoneKuRoomProps) {
     return mergeGeometries(geometries);
   }, [offsetX]);
   
+  // Helper to create Sudoku grid lines on a plane
+  const createSudokuGrid = (size: number, position: [number, number, number], rotation?: [number, number, number]) => {
+    const gridLines = [];
+    const cellSize = size / 9;
+    
+    for (let i = 0; i <= 9; i++) {
+      const offset = -size / 2 + i * cellSize;
+      const isThick = i % 3 === 0;
+      const thickness = isThick ? 0.06 : 0.02;
+      const color = isThick ? '#3b82f6' : '#60a5fa';
+      
+      // Vertical line
+      gridLines.push(
+        <mesh
+          key={`v${i}`}
+          position={[position[0] + offset, position[1], position[2]]}
+          rotation={rotation}
+        >
+          <planeGeometry args={[thickness, size]} />
+          <meshMatcapMaterial matcap={matcap} color={color} />
+        </mesh>
+      );
+      
+      // Horizontal line
+      gridLines.push(
+        <mesh
+          key={`h${i}`}
+          position={[position[0], position[1] + size / 2 - i * cellSize, position[2]]}
+          rotation={rotation}
+        >
+          <planeGeometry args={[size, thickness]} />
+          <meshMatcapMaterial matcap={matcap} color={color} />
+        </mesh>
+      );
+    }
+    
+    return gridLines;
+  };
+
   return (
     <>
-      {/* Static furniture */}
+      {/* Static furniture/structure */}
       <mesh geometry={mergedGeometry}>
         <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
       </mesh>
       
-      {/* Sudoku grid cubes (main centerpiece) */}
-      <InstancedGridCubes offsetX={offsetX} count={9} gridSize={3} />
-      
-      {/* Number blocks on pedestals around the room */}
-      <group>
-        {Array.from({ length: 9 }, (_, i) => {
-          const angle = (i / 9) * Math.PI * 2;
-          const radius = 7;
-          
-          return (
-            <mesh
-              key={i}
-              position={[
-                offsetX + Math.cos(angle) * radius,
-                1.2,
-                Math.sin(angle) * radius,
-              ]}
-            >
-              <boxGeometry args={[0.5, 0.5, 0.5]} />
-              <meshMatcapMaterial matcap={matcap} color={colors.accent} />
-            </mesh>
-          );
-        })}
-      </group>
-      
-      {/* Whiteboard content (Sudoku strategy notes) */}
-      <mesh position={[offsetX, 3, -9.75]}>
-        <planeGeometry args={[3.8, 2.3]} />
-        <meshMatcapMaterial matcap={matcap} color="#f0f0f0" />
+      {/* Back wall Sudoku panel background */}
+      <mesh position={[offsetX, 5, -9.8]}>
+        <planeGeometry args={[7.8, 5.8]} />
+        <meshMatcapMaterial matcap={matcap} color="#1e3a8a" />
       </mesh>
       
-      {/* Grid pattern on whiteboard */}
-      <group position={[offsetX, 3, -9.7]}>
-        {/* Draw a simple Sudoku grid */}
-        {Array.from({ length: 10 }, (_, i) => {
-          const pos = -1.5 + i * 0.333;
-          const isThick = i % 3 === 0;
-          
-          return (
-            <group key={i}>
-              {/* Vertical line */}
-              <mesh position={[pos, 0, 0]}>
-                <planeGeometry args={[isThick ? 0.03 : 0.01, 2]} />
-                <meshMatcapMaterial matcap={matcap} color="#3b82f6" />
-              </mesh>
-              {/* Horizontal line */}
-              <mesh position={[0, 0.5 - i * 0.333, 0]}>
-                <planeGeometry args={[2, isThick ? 0.03 : 0.01]} />
-                <meshMatcapMaterial matcap={matcap} color="#3b82f6" />
-              </mesh>
-            </group>
-          );
-        })}
+      {/* Back wall Sudoku grid */}
+      <group position={[offsetX, 5, -9.75]}>
+        {createSudokuGrid(5.5, [0, 0, 0])}
       </group>
       
-      {/* Floor with grid pattern */}
+      {/* Left wall Sudoku panel background */}
+      <mesh position={[offsetX - 11.8, 5, -2]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[4.8, 4.8]} />
+        <meshMatcapMaterial matcap={matcap} color="#1e40af" />
+      </mesh>
+      
+      {/* Left wall Sudoku grid */}
+      <group position={[offsetX - 11.75, 5, -2]} rotation={[0, Math.PI / 2, 0]}>
+        {createSudokuGrid(4.2, [0, 0, 0])}
+      </group>
+      
+      {/* Right wall Sudoku panel background */}
+      <mesh position={[offsetX + 11.8, 5, -2]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[4.8, 4.8]} />
+        <meshMatcapMaterial matcap={matcap} color="#1e40af" />
+      </mesh>
+      
+      {/* Right wall Sudoku grid */}
+      <group position={[offsetX + 11.75, 5, -2]} rotation={[0, -Math.PI / 2, 0]}>
+        {createSudokuGrid(4.2, [0, 0, 0])}
+      </group>
+      
+      {/* Animated floating number cubes */}
+      {numberCubes.map((cube, i) => (
+        <mesh
+          key={i}
+          ref={(el) => {
+            numberCubeRefs.current[i] = el;
+          }}
+          position={[offsetX + cube.x, cube.y, cube.z]}
+        >
+          <boxGeometry args={[0.8, 0.8, 0.8]} />
+          <meshMatcapMaterial matcap={matcap} color={colors.accent} />
+        </mesh>
+      ))}
+      
+      {/* Floor grid pattern overlay */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
-        <planeGeometry args={[10, 8]} />
-        <meshMatcapMaterial matcap={matcap} color={colors.rug} />
+        <planeGeometry args={[24, 20]} />
+        <meshMatcapMaterial matcap={matcap} color={colors.rug} transparent opacity={0.3} />
       </mesh>
-      
-      {/* Grid lines on floor */}
-      <group position={[offsetX, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        {Array.from({ length: 11 }, (_, i) => {
-          const pos = -5 + i;
-          return (
-            <group key={i}>
-              <mesh position={[pos, 0, 0]}>
-                <planeGeometry args={[0.02, 8]} />
-                <meshMatcapMaterial matcap={matcap} color="#2563eb" transparent opacity={0.3} />
-              </mesh>
-              <mesh position={[0, -4 + i, 0]}>
-                <planeGeometry args={[10, 0.02]} />
-                <meshMatcapMaterial matcap={matcap} color="#2563eb" transparent opacity={0.3} />
-              </mesh>
-            </group>
-          );
-        })}
-      </group>
     </>
   );
 }
