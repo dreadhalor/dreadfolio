@@ -23,6 +23,7 @@ export interface RoomStructureProps {
   colors: RoomColors;
   isFirst: boolean;
   isLast: boolean;
+  theme: import('./index').RoomTheme;
 }
 
 // Dividing wall props

@@ -62,6 +62,7 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
           <RoomStructure
             offsetX={room.offsetX}
             colors={colors}
+            theme={room.theme}
             isFirst={index === 0}
             isLast={index === ROOMS.length - 1}
           />
@@ -84,6 +85,8 @@ export function Scene({ onFpsUpdate, onDrawCallsUpdate }: SceneProps) {
               position={[wallPosition, 0, 0]}
               leftRoomColor={wallColors.leftRoomColor}
               rightRoomColor={wallColors.rightRoomColor}
+              leftRoomIsEnlight={room.theme === 'enlight'}
+              rightRoomIsEnlight={nextRoom.theme === 'enlight'}
             />
           )
         );

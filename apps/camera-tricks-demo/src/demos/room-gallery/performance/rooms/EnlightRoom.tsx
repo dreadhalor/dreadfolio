@@ -1,10 +1,8 @@
-import { useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoomColors } from '../../types';
-import { useMatcap } from '../shared/useMatcap';
-import { Fireflies } from '../shared/RoomParticles';
+import { ENLIGHT_CONFIG, ENLIGHT_COLORS } from './config/EnlightConfig';
 
 interface EnlightRoomProps {
   colors: RoomColors;
@@ -12,263 +10,114 @@ interface EnlightRoomProps {
 }
 
 /**
- * Enlight Room - Light Lab / Photography Studio
+ * Enlight Room - Shadow Playground
+ * 
+ * A completely dark room with a fast-orbiting light source that casts dramatic shadows.
+ * The light reveals the room's surfaces and geometric objects as it travels, creating
+ * a mesmerizing shadow dance inspired by the Enlight app.
  * 
  * Features:
- * - Large spotlight creating dramatic shadows
- * - Geometric shapes casting shadows
- * - Prisms/crystals with emissive pink light
- * - Dark walls with bright light rays
+ * - Single fast-orbiting pink point light (layer 1 only)
+ * - Pitch black room isolated from global lights via layers
+ * - 9 geometric objects at varying heights casting dynamic shadows
+ * - Light dynamically illuminates walls, floor, and ceiling as it passes
+ * - Real-time shadow mapping for dramatic shadow play
+ * 
+ * Performance: 1 shadow-casting light + 9 objects, isolated to this room
  */
-export function EnlightRoom({ colors, offsetX }: EnlightRoomProps) {
-  const matcap = useMatcap();
-
-  const spotlightRef = useRef<THREE.Mesh>(null);
-  const crystalRefs = useRef<THREE.Mesh[]>([]);
+export function EnlightRoom({ colors: _colors, offsetX }: EnlightRoomProps) {
+  const lightRef = useRef<THREE.PointLight>(null);
+  const lightOrbRef = useRef<THREE.Mesh>(null);
   
-  // Animate spotlight rotation
+  // Helper to create geometry for different object types
+  const createGeometry = (obj: typeof ENLIGHT_CONFIG.OBJECTS[0]) => {
+    switch (obj.type) {
+      case 'box':
+        return <boxGeometry args={[obj.size, obj.size, obj.size]} />;
+      case 'sphere':
+        return <sphereGeometry args={[obj.size, 32, 32]} />;
+      case 'cone':
+        return <coneGeometry args={[obj.size, obj.height || obj.size * 2, 32]} />;
+      case 'cylinder':
+        return <cylinderGeometry args={[obj.size, obj.size, obj.height || obj.size * 2, 32]} />;
+      case 'torus':
+        return <torusGeometry args={[obj.size, obj.tube || 0.3, 16, 32]} />;
+      case 'torusKnot':
+        return <torusKnotGeometry args={[obj.size, obj.tube || 0.3, 100, 16]} />;
+      case 'octahedron':
+        return <octahedronGeometry args={[obj.size, 0]} />;
+      case 'dodecahedron':
+        return <dodecahedronGeometry args={[obj.size, 0]} />;
+      default:
+        return <boxGeometry args={[obj.size, obj.size, obj.size]} />;
+    }
+  };
+  
+  // Animate orbiting light
   useFrame((state) => {
-    if (spotlightRef.current) {
-      spotlightRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+    const time = state.clock.elapsedTime;
+    const angle = time * ENLIGHT_CONFIG.LIGHT.orbitSpeed;
+    const radius = ENLIGHT_CONFIG.LIGHT.orbitRadius;
+    const height = ENLIGHT_CONFIG.LIGHT.height;
+    
+    const x = offsetX + Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    
+    if (lightRef.current) {
+      lightRef.current.position.set(x, height, z);
     }
     
-    // Rotate crystals
-    crystalRefs.current.forEach((crystal, i) => {
-      if (crystal) {
-        crystal.rotation.y = state.clock.elapsedTime * (0.5 + i * 0.2);
-        crystal.rotation.x = state.clock.elapsedTime * 0.3;
-      }
-    });
+    if (lightOrbRef.current) {
+      lightOrbRef.current.position.set(x, height, z);
+    }
   });
-  
-  // Merge all static decorations into single geometry
-  const mergedGeometry = useMemo(() => {
-    const geometries: THREE.BufferGeometry[] = [];
-    const tempObject = new THREE.Object3D();
-    
-    // Photography tripod legs
-    for (let i = 0; i < 3; i++) {
-      const angle = (i / 3) * Math.PI * 2;
-      const leg = new THREE.CylinderGeometry(0.05, 0.08, 1.5, 8);
-      tempObject.position.set(
-        offsetX + 5 + Math.cos(angle) * 0.5,
-        0.75,
-        4 + Math.sin(angle) * 0.5
-      );
-      tempObject.rotation.z = Math.PI / 6;
-      tempObject.rotation.y = angle;
-      tempObject.updateMatrix();
-      leg.applyMatrix4(tempObject.matrix);
-      geometries.push(leg);
-    }
-    
-    tempObject.rotation.z = 0;
-    tempObject.rotation.y = 0;
-    
-    // Tripod center pole
-    const pole = new THREE.CylinderGeometry(0.06, 0.06, 1.5, 8);
-    tempObject.position.set(offsetX + 5, 2.25, 4);
-    tempObject.updateMatrix();
-    pole.applyMatrix4(tempObject.matrix);
-    geometries.push(pole);
-    
-    // Reflector panels (photography equipment) - moved much closer
-    for (let i = 0; i < 3; i++) {
-      const reflector = new THREE.BoxGeometry(1.5, 2, 0.1);
-      tempObject.position.set(offsetX - 6 + i * 3, 2, 0); // Moved to z=0 (10 units from camera, much more visible)
-      tempObject.updateMatrix();
-      reflector.applyMatrix4(tempObject.matrix);
-      geometries.push(reflector);
-    }
-    
-    // Shadow-casting geometric sculptures
-    const sculpturePositions = [
-      { x: -4, z: 0, shape: 'box' },
-      { x: -1, z: 1, shape: 'cylinder' },
-      { x: 2, z: -1, shape: 'cone' },
-    ];
-    
-    sculpturePositions.forEach((pos) => {
-      let geometry: THREE.BufferGeometry;
-      if (pos.shape === 'box') {
-        geometry = new THREE.BoxGeometry(0.8, 1.5, 0.8);
-        tempObject.position.set(offsetX + pos.x, 0.75, pos.z);
-      } else if (pos.shape === 'cylinder') {
-        geometry = new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8);
-        tempObject.position.set(offsetX + pos.x, 0.75, pos.z);
-      } else {
-        geometry = new THREE.ConeGeometry(0.6, 1.5, 8);
-        tempObject.position.set(offsetX + pos.x, 0.75, pos.z);
-      }
-      tempObject.updateMatrix();
-      geometry.applyMatrix4(tempObject.matrix);
-      geometries.push(geometry);
-    });
-    
-    // Camera equipment table
-    const equipTable = new THREE.BoxGeometry(2, 0.1, 1.5);
-    tempObject.position.set(offsetX - 6, 0.8, 5);
-    tempObject.updateMatrix();
-    equipTable.applyMatrix4(tempObject.matrix);
-    geometries.push(equipTable);
-    
-    // Table legs
-    for (let i = 0; i < 4; i++) {
-      const leg = new THREE.CylinderGeometry(0.06, 0.06, 0.8, 8);
-      const xOff = i % 2 === 0 ? -0.9 : 0.9;
-      const zOff = i < 2 ? -0.6 : 0.6;
-      tempObject.position.set(offsetX - 6 + xOff, 0.4, 5 + zOff);
-      tempObject.updateMatrix();
-      leg.applyMatrix4(tempObject.matrix);
-      geometries.push(leg);
-    }
-    
-    // Camera body on table
-    const cameraBody = new THREE.BoxGeometry(0.4, 0.3, 0.3);
-    tempObject.position.set(offsetX - 6, 0.95, 5);
-    tempObject.updateMatrix();
-    cameraBody.applyMatrix4(tempObject.matrix);
-    geometries.push(cameraBody);
-    
-    // Camera lens
-    const lens = new THREE.CylinderGeometry(0.15, 0.18, 0.3, 16);
-    tempObject.position.set(offsetX - 6, 0.95, 4.7);
-    tempObject.rotation.x = Math.PI / 2;
-    tempObject.updateMatrix();
-    lens.applyMatrix4(tempObject.matrix);
-    geometries.push(lens);
-    
-    tempObject.rotation.x = 0;
-    
-    // Multiple light stands around sculptures
-    for (let i = 0; i < 4; i++) {
-      const angle = (i / 4) * Math.PI * 2;
-      const stand = new THREE.CylinderGeometry(0.08, 0.12, 1.8, 8);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * 6,
-        0.9,
-        Math.sin(angle) * 6
-      );
-      tempObject.updateMatrix();
-      stand.applyMatrix4(tempObject.matrix);
-      geometries.push(stand);
-      
-      // Light heads
-      const lightHead = new THREE.ConeGeometry(0.25, 0.4, 8);
-      tempObject.position.set(
-        offsetX + Math.cos(angle) * 6,
-        1.8,
-        Math.sin(angle) * 6
-      );
-      tempObject.updateMatrix();
-      lightHead.applyMatrix4(tempObject.matrix);
-      geometries.push(lightHead);
-    }
-    
-    // Diffuser screens (translucent panels)
-    for (let i = 0; i < 2; i++) {
-      const diffuser = new THREE.BoxGeometry(1.5, 2.5, 0.05);
-      tempObject.position.set(offsetX + 7, 1.5, -3 + i * 6);
-      tempObject.rotation.y = Math.PI / 6;
-      tempObject.updateMatrix();
-      diffuser.applyMatrix4(tempObject.matrix);
-      geometries.push(diffuser);
-    }
-    
-    tempObject.rotation.y = 0;
-    
-    // Light meter on table
-    const lightMeter = new THREE.BoxGeometry(0.15, 0.25, 0.1);
-    tempObject.position.set(offsetX - 6.5, 0.95, 5.5);
-    tempObject.updateMatrix();
-    lightMeter.applyMatrix4(tempObject.matrix);
-    geometries.push(lightMeter);
-    
-    // Color calibration targets - moved to side walls closer to camera
-    for (let i = 0; i < 3; i++) {
-      const target = new THREE.BoxGeometry(0.4, 0.4, 0.02);
-      const isLeft = i === 0;
-      const xPos = isLeft ? -13 : 13; // Side walls
-      const zPos = -2 + (i > 0 ? (i - 1) * 3 : 0); // Spread along wall
-      tempObject.position.set(offsetX + xPos, 4, zPos);
-      tempObject.rotation.y = isLeft ? Math.PI / 2 : -Math.PI / 2;
-      tempObject.updateMatrix();
-      target.applyMatrix4(tempObject.matrix);
-      geometries.push(target);
-    }
-    tempObject.rotation.y = 0;
-    
-    return mergeGeometries(geometries);
-  }, [offsetX]);
   
   return (
     <>
-      {/* Static furniture */}
-      <mesh geometry={mergedGeometry}>
-        <meshMatcapMaterial matcap={matcap} color={colors.furniture} />
+      {/* NO ambient light - pitch black except for the orbiting light */}
+      
+      {/* Orbiting point light - affects layer 1 only (Enlight room) */}
+      <pointLight
+        ref={lightRef}
+        layers={1}
+        color={ENLIGHT_CONFIG.LIGHT.color}
+        intensity={ENLIGHT_CONFIG.LIGHT.intensity}
+        distance={ENLIGHT_CONFIG.LIGHT.distance}
+        decay={ENLIGHT_CONFIG.LIGHT.decay}
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+        shadow-bias={-0.002}
+        shadow-normalBias={0.05}
+      />
+      
+      {/* Visual light orb (glowing sphere) - on layer 1 */}
+      <mesh ref={lightOrbRef} layers={1}>
+        <sphereGeometry args={[ENLIGHT_CONFIG.LIGHT_ORB.size, 16, 16]} />
+        <meshStandardMaterial
+          color={ENLIGHT_CONFIG.LIGHT_ORB.color}
+          emissive={ENLIGHT_CONFIG.LIGHT_ORB.color}
+          emissiveIntensity={ENLIGHT_CONFIG.LIGHT_ORB.emissiveIntensity}
+        />
       </mesh>
       
-      {/* Main spotlight on tripod */}
-      <mesh ref={spotlightRef} position={[offsetX + 5, 3, 4]}>
-        <coneGeometry args={[0.4, 0.8, 8]} />
-        <meshMatcapMaterial matcap={matcap} color="#ffffff" />
-      </mesh>
-      
-      {/* Spotlight beam (emissive) */}
-      <mesh position={[offsetX + 5, 2, 4]} rotation={[-Math.PI / 4, 0, 0]}>
-        <coneGeometry args={[2, 4, 8, 1, true]} />
-        <meshMatcapMaterial matcap={matcap} color="#ff6b9d" transparent opacity={0.3} side={THREE.DoubleSide} />
-      </mesh>
-      
-      {/* Crystal prisms with pink glow */}
-      {[
-        { x: -6, z: -3 },
-        { x: -3, z: 5 },
-        { x: 4, z: -5 },
-      ].map((pos, i) => (
+      {/* Shadow-casting geometric objects - on layer 1 */}
+      {ENLIGHT_CONFIG.OBJECTS.map((obj, i) => (
         <mesh
           key={i}
-          ref={(el) => {
-            if (el) crystalRefs.current[i] = el;
-          }}
-          position={[offsetX + pos.x, 1.5, pos.z]}
+          layers={1}
+          position={[offsetX + obj.x, obj.y, obj.z]}
+          rotation={obj.rotation || [0, 0, 0]}
+          castShadow
+          receiveShadow
         >
-          <octahedronGeometry args={[0.6, 0]} />
-          <meshMatcapMaterial matcap={matcap} color="#ff6b9d" />
+          {createGeometry(obj)}
+          <meshStandardMaterial 
+            color={ENLIGHT_COLORS.surfaces}
+            roughness={0.9}
+            metalness={0}
+          />
         </mesh>
-      ))}
-      
-      {/* Light ray effects (flat emissive planes) */}
-      <group position={[offsetX, 2, 0]}>
-        {[0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4].map((angle, i) => (
-          <mesh key={i} rotation={[0, angle, 0]}>
-            <planeGeometry args={[0.1, 4]} />
-            <meshMatcapMaterial matcap={matcap} color="#ffffff" transparent opacity={0.2} side={THREE.DoubleSide} />
-          </mesh>
-        ))}
-      </group>
-      
-      {/* Dark floor (represents black background) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[offsetX, 0.01, 0]}>
-        <planeGeometry args={[10, 8]} />
-        <meshMatcapMaterial matcap={matcap} color="#0a0a0a" />
-      </mesh>
-      
-      {/* Light particles - fireflies of enlightenment */}
-      <Fireflies offsetX={offsetX} color="#ff6b9d" count={40} />
-      
-      {/* Hanging light fixtures */}
-      {[-5, 0, 5].map((x, i) => (
-        <group key={i} position={[offsetX + x, 8, -2 + i * 2]}>
-          <mesh position={[0, 0, 0]}>
-            <coneGeometry args={[0.4, 0.6, 8]} />
-            <meshMatcapMaterial matcap={matcap} color={colors.light} transparent opacity={0.8} />
-          </mesh>
-          <mesh position={[0, -0.5, 0]}>
-            <sphereGeometry args={[0.15, 8, 8]} />
-            <meshMatcapMaterial matcap={matcap} color={colors.accent} />
-          </mesh>
-        </group>
       ))}
     </>
   );

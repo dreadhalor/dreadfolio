@@ -606,7 +606,7 @@ function RoomGalleryInner() {
     >
       <Canvas
         camera={{ manual: true }} // We manually control cameras in SplitCameraRenderer
-        shadows={false} // Shadows completely disabled for performance
+        shadows // Shadows enabled to test Enlight room lighting
         resize={{ scroll: false, debounce: 0 }} // Disable scroll-based ResizeObserver to prevent firing during drawer animations
         frameloop={
           appLoaderState === 'app-active' ||

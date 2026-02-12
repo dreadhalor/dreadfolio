@@ -140,6 +140,15 @@ export function SplitCameraRenderer({
           CAMERA_FAR_PLANE,
         ) as ExtendedCamera;
 
+        // Enable cameras to see both layer 0 (normal rooms) and layer 1 (Enlight room)
+        camera.layers.enable(0);
+        camera.layers.enable(1);
+        
+        // Debug logging (only log first camera to avoid spam)
+        if (i === 0) {
+          console.log('[SplitCameraRenderer] Cameras configured to see layers 0 and 1');
+        }
+
         // Initialize at starting positions (consistent with runtime formula)
         const initialX = calculateCameraPosition(i, 0, CAMERA_SPACING);
         camera.position.set(initialX, CAMERA_HEIGHT, CAMERA_Z_POSITION);
