@@ -31,8 +31,8 @@ export function LeftButtonContainer({ children, visible }: LeftButtonContainerPr
         paddingRight: '4px', // Reduced right padding for less gap before cards
         background: isCollapsed
           ? 'rgba(20, 20, 25, 0.9)'
-          : 'rgba(20, 20, 25, 0.95)',
-        backdropFilter: 'blur(20px)',
+          : 'rgba(30, 30, 35, 0.95)',
+        backdropFilter: 'blur(24px)',
         borderRadius: '12px 0 0 12px',
       }}
     >

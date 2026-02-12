@@ -31,8 +31,8 @@ export function RightButtonContainer({ children, visible }: RightButtonContainer
         paddingLeft: '4px',
         background: isCollapsed
           ? 'rgba(20, 20, 25, 0.9)'
-          : 'rgba(20, 20, 25, 0.95)',
-        backdropFilter: 'blur(20px)',
+          : 'rgba(30, 30, 35, 0.95)',
+        backdropFilter: 'blur(24px)',
         borderRadius: '0 12px 12px 0',
       }}
     >
