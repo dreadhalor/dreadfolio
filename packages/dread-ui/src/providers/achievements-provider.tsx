@@ -42,6 +42,7 @@ export interface AchievementsContextValue {
   unlockAchievementById: (id: string, gameId?: string) => Promise<void>;
   saveAchievement: (achievement: Achievement) => Promise<void>;
   isUnlockable: (achievementId: string, gameId: string) => boolean;
+  loading: boolean;
   showAchievementDialog: boolean;
   setShowAchievementDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -65,6 +66,8 @@ interface Props {
 export const AchievementsProvider = ({ children }: Props) => {
   const [allAchievements, setAllAchievements] = useState<BaseAchievement[]>([]);
   const [showAchievementDialog, setShowAchievementDialog] = useState(false);
+  const [unlockingAchievements, setUnlockingAchievements] = useState<Set<string>>(new Set());
+  const [queuedUnlocks, setQueuedUnlocks] = useState<Array<{ id: string; gameId: string }>>([]);
 
   const { uid, signedIn } = useAuth();
   const { db, saveAchievement: _saveAchievement, deleteAchievement } = useDB();
@@ -95,10 +98,24 @@ export const AchievementsProvider = ({ children }: Props) => {
     achievement: Achievement,
     state: 'locked' | 'unlocked',
   ) => {
+    const achievementKey = `${achievement.gameId}:${achievement.id}`;
+
     if (!uid) return;
+    
+    // Prevent unlocking if already in progress
+    if (state === 'unlocked' && unlockingAchievements.has(achievementKey)) {
+      return;
+    }
+    
     if (achievement.state === state) return;
+    
+    // Prevent unlocking an achievement that's already been unlocked
+    if (state === 'unlocked' && achievement.state === 'newly_unlocked') return;
 
     if (state === 'unlocked' && achievement.state === 'locked') {
+      // Mark as in-flight
+      setUnlockingAchievements(prev => new Set(prev).add(achievementKey));
+      
       achievement.state = 'newly_unlocked';
       achievement.unlockedAt = Timestamp.now();
       if (userPreferences.showNotifications) {
@@ -117,16 +134,34 @@ export const AchievementsProvider = ({ children }: Props) => {
       }
     }
 
-    state === 'unlocked'
-      ? await saveAchievement(achievement)
-      : await deleteAchievement(
-          achievement.id,
-          achievement.gameId,
-          achievement.uid,
-        );
+    try {
+      state === 'unlocked'
+        ? await saveAchievement(achievement)
+        : await deleteAchievement(
+            achievement.id,
+            achievement.gameId,
+            achievement.uid,
+          );
+    } finally {
+      // Remove from in-flight tracking
+      if (state === 'unlocked') {
+        const achievementKey = `${achievement.gameId}:${achievement.id}`;
+        setUnlockingAchievements(prev => {
+          const next = new Set(prev);
+          next.delete(achievementKey);
+          return next;
+        });
+      }
+    }
   };
 
   const unlockAchievementById = async (id: string, gameId = '') => {
+    // If still loading, queue the unlock for later
+    if (loading) {
+      setQueuedUnlocks(prev => [...prev, { id, gameId }]);
+      return;
+    }
+    
     const achievement = achievements.find(
       (achievement) => achievement.id === id && achievement.gameId === gameId,
     );
@@ -155,17 +190,19 @@ export const AchievementsProvider = ({ children }: Props) => {
 
   const isUnlockable = useCallback(
     (achievementId: string, gameId: string) => {
-      return (
-        achievements.find(
-          (achievement) =>
-            achievement.uid === uid &&
-            achievement.gameId === gameId &&
-            achievement.id === achievementId &&
-            achievement.state === 'locked',
-        ) !== undefined
+      // Don't allow unlocking while data is still loading
+      if (loading) return false;
+
+      const achievement = achievements.find(
+        (achievement) =>
+          achievement.uid === uid &&
+          achievement.gameId === gameId &&
+          achievement.id === achievementId,
       );
+      
+      return achievement?.state === 'locked';
     },
-    [achievements, uid],
+    [achievements, uid, loading],
   );
 
   useEffect(() => {
@@ -188,6 +225,16 @@ export const AchievementsProvider = ({ children }: Props) => {
     });
   }, [setAllAchievements, db]);
 
+  // Process queued unlocks when loading completes
+  useEffect(() => {
+    if (!loading && queuedUnlocks.length > 0) {
+      queuedUnlocks.forEach(({ id, gameId }) => {
+        unlockAchievementById(id, gameId);
+      });
+      setQueuedUnlocks([]);
+    }
+  }, [loading, queuedUnlocks, unlockAchievementById]);
+
   useEffect(() => {
     if (signedIn && !loading) {
       if (isUnlockable('login', 'home')) unlockAchievementById('login', 'home');
@@ -204,6 +251,7 @@ export const AchievementsProvider = ({ children }: Props) => {
         unlockAchievementById,
         saveAchievement,
         isUnlockable,
+        loading,
         showAchievementDialog,
         setShowAchievementDialog,
       }}

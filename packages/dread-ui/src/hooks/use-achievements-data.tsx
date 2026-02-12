@@ -13,21 +13,21 @@ export function useAchievementsData() {
     [],
   );
   const [loading, setLoading] = useState(true);
+  const [userDataLoaded, setUserDataLoaded] = useState(false);
 
   useEffect(() => {
     setGameAchievements([]);
     setUserAchievements([]);
     setLoading(true);
+    setUserDataLoaded(false);
   }, [uid]);
 
   useEffect(() => {
     const gameUnsubscribe = subscribeToGameAchievements(setGameAchievements);
-    const userUnsubscribe = subscribeToUserAchievements(uid, (achievements) =>
-      setUserAchievements(() => {
-        setLoading(false);
-        return achievements;
-      }),
-    );
+    const userUnsubscribe = subscribeToUserAchievements(uid, (achievements) => {
+      setUserAchievements(achievements);
+      setUserDataLoaded(true);
+    });
 
     return () => {
       gameUnsubscribe();
@@ -35,6 +35,13 @@ export function useAchievementsData() {
     };
     // when I add the subscribe functions to the dependency array, the app crashes
   }, [uid, subscribeToGameAchievements, subscribeToUserAchievements]);
+
+  // Set loading to false only after user data is loaded AND achievements have been combined
+  useEffect(() => {
+    if (userDataLoaded && gameAchievements.length > 0) {
+      setLoading(false);
+    }
+  }, [userDataLoaded, gameAchievements]);
 
   return { gameAchievements, userAchievements, loading };
 }

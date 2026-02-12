@@ -23,6 +23,7 @@ const useFullAchievements = () => {
           state: 'locked',
         };
       }
+      
       return {
         ...gameAchievement,
         ...userAchievement,
@@ -43,8 +44,9 @@ const useFullAchievements = () => {
       });
     };
 
-    setAchievements(combineAchievements(gameAchievements, userAchievements));
-  }, [gameAchievements, userAchievements, uid]);
+    const combined = combineAchievements(gameAchievements, userAchievements);
+    setAchievements(combined);
+  }, [gameAchievements, userAchievements, uid, loading]);
 
   return { achievements, loading };
 };
