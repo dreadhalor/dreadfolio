@@ -180,6 +180,22 @@ Discovered 3 portfolio versions spanning 2022-2026 and reorganized into `dreadfo
     - Renamed directory from `visualizeit/` to `pathfinder-visualizer/` for complete consistency
     - Renamed S3 bucket from `scottjhetrick-visualizeit-v1` to `scottjhetrick-pathfinder-visualizer-v1`
     - Updated CloudFront origin ID from `visualizeit-v1` to `pathfinder-visualizer-v1`
+30. ✅ (2026-02-11) S3 Infrastructure Cleanup:
+    - Deleted 16 obsolete staging buckets (suffix `-staging-2026`)
+    - Deleted `dreadfolio-terraform-state` bucket (Terraform no longer in use)
+    - Kept legacy project buckets: `dash-of-sass-aws-bucket`, `aws-sam-cli-managed-...-nicbywhxtev9` (su-done-ku Lambda)
+    - **Final S3 inventory: 38 buckets** (2 legacy + 6 v1 + 30 v3)
+
+## Infrastructure Management
+
+**Current Approach (2026-02-11):** Manual AWS CLI + GitHub Actions CI/CD
+
+The infrastructure is managed through:
+- **AWS CLI commands** for resource provisioning (S3, CloudFront, OAC, IAM)
+- **GitHub Actions** for automated deployments (`.github/workflows/deploy.yml`)
+- **Branch-based environments**: `main` → production, `staging` → staging
+
+**Historical Note:** Terraform was briefly used for initial staging setup (2026-02-09) but was abandoned in favor of the current approach. The Terraform state has been deleted.
 
 ## Next Steps
 
