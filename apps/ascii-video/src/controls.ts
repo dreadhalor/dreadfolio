@@ -65,7 +65,8 @@ export class Controls {
       `right:max(12px,env(safe-area-inset-right));z-index:6;` +
       `width:${TAP}px;height:${TAP}px;border:1px solid ${EDGE};border-radius:10px;` +
       `cursor:pointer;background:rgba(0,0,0,.6);color:${ACCENT};` +
-      `display:grid;place-items:center;touch-action:manipulation;`;
+      `display:grid;place-items:center;padding:0;box-sizing:border-box;` +
+      `line-height:0;touch-action:manipulation;`;
     this.toggle.addEventListener('click', () => this.setOpen(true));
 
     this.panel.setAttribute('role', 'dialog');
@@ -160,7 +161,8 @@ export class Controls {
     close.setAttribute('aria-label', 'Close controls');
     close.style.cssText =
       `width:${TAP}px;height:${TAP}px;background:none;border:0;color:${ACCENT};` +
-      `display:grid;place-items:center;cursor:pointer;touch-action:manipulation;`;
+      `display:grid;place-items:center;padding:0;box-sizing:border-box;` +
+      `line-height:0;cursor:pointer;touch-action:manipulation;`;
     close.addEventListener('click', () => this.setOpen(false));
     bar.append(title, close);
     return bar;

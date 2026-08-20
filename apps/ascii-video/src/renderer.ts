@@ -472,10 +472,14 @@ export class AsciiVideoApp {
   }
 
   private buildDiagnostics() {
+    // Stops short of the gear rather than running underneath it. 44px button
+    // plus its inset plus a gap.
     this.diagnostics.style.cssText =
-      'position:absolute;top:12px;left:12px;z-index:5;font:12px ui-monospace,monospace;' +
-      'color:#0ff;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:4px;' +
-      'pointer-events:none;display:none;';
+      'position:absolute;z-index:5;font:12px/1.45 ui-monospace,monospace;' +
+      'top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));' +
+      'right:calc(max(12px,env(safe-area-inset-right)) + 56px);' +
+      'color:#0ff;background:rgba(0,0,0,.55);padding:5px 8px;border-radius:6px;' +
+      'text-align:left;pointer-events:none;display:none;';
     this.host.appendChild(this.diagnostics);
   }
 

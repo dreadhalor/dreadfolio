@@ -97,6 +97,15 @@ export class PersonSegmenter {
     throw new Error(`ImageSegmenter could not load the ${kind} model`);
   }
 
+  /** Tear down and rebuild with the same model, releasing whatever it held. */
+  async reload() {
+    const kind = this.kind;
+    this.segmenter?.close();
+    this.segmenter = null;
+    this.mask = null;
+    await this.create(kind);
+  }
+
   get ready() {
     return this.segmenter !== null;
   }

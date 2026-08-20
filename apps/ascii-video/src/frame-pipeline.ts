@@ -83,6 +83,18 @@ export class FramePipeline {
   /** Rolling stage timings, so a slowdown can be attributed rather than guessed. */
   private segmentSamples: number[] = [];
   private processSamples: number[] = [];
+  /**
+   * Inference gets slower over time on some devices -- observed on iOS, where a
+   * multiclass frame goes from tens of milliseconds to ~68ms -- and both
+   * reloading the model and letting the OS purge GPU resources on an app switch
+   * restore it. Nothing accumulates on the JS side, so this watches the number
+   * itself and rebuilds the segmenter when it degrades, which is exactly what
+   * the manual workaround was doing.
+   */
+  private segmentBaseline = 0;
+  private baselineSamples: number[] = [];
+  private lastRecovery = 0;
+  private recoveries = 0;
 
   cols = 0;
   rows = 0;
@@ -93,6 +105,10 @@ export class FramePipeline {
 
   async load(kind: SegmenterKind = 'binary') {
     await this.segmenter.load(kind);
+    this.segmentBaseline = 0;
+    this.baselineSamples = [];
+    this.segmentSamples = [];
+    this.recoveries = 0;
   }
 
   get segmentationReady() {
@@ -253,10 +269,50 @@ export class FramePipeline {
 
     const segmentStarted = performance.now();
     const mask = this.segmenter.segment(this.segInput);
-    record(this.segmentSamples, performance.now() - segmentStarted);
+    const elapsed = performance.now() - segmentStarted;
+    record(this.segmentSamples, elapsed);
+    this.watchInference(elapsed);
     if (!mask) return;
     this.lastMask = mask;
 
+  }
+
+  /**
+   * Establish what this device's inference actually costs, then rebuild the
+   * segmenter if it drifts far above that. Rate-limited and capped, because a
+   * rebuild is itself a stall and a rebuild loop would be worse than the
+   * slowdown it is chasing.
+   */
+  private watchInference(elapsed: number) {
+    if (!this.segmentBaseline) {
+      // Skip the first few frames; the first inference includes warm-up.
+      this.baselineSamples.push(elapsed);
+      if (this.baselineSamples.length < 40) return;
+      const sorted = [...this.baselineSamples].sort((a, b) => a - b);
+      this.segmentBaseline = sorted[Math.floor(sorted.length * 0.25)]!;
+      return;
+    }
+    if (this.recoveries >= 3) return;
+    if (this.segmentSamples.length < 45) return;
+    const now = performance.now();
+    if (now - this.lastRecovery < 15000) return;
+    if (median(this.segmentSamples) < Math.max(8, this.segmentBaseline * 2.2)) return;
+
+    this.lastRecovery = now;
+    this.recoveries++;
+    const kind = this.segmenter.kind;
+    console.warn(
+      `[ascii-video] inference degraded to ${median(this.segmentSamples)}ms ` +
+        `from a ${this.segmentBaseline.toFixed(1)}ms baseline; rebuilding the ${kind} segmenter`,
+    );
+    // Deliberately not awaited: the loop keeps running on the previous mask
+    // until the replacement is ready.
+    void this.segmenter
+      .reload()
+      .then(() => {
+        this.segmentSamples = [];
+      })
+      .catch((err) => console.error('[ascii-video] segmenter rebuild failed:', err));
   }
 
   stats() {
@@ -277,6 +333,8 @@ export class FramePipeline {
     return {
       segmentMs: median(this.segmentSamples),
       pipelineMs: median(this.processSamples),
+      segmentBaselineMs: Number(this.segmentBaseline.toFixed(2)),
+      segmentRebuilds: this.recoveries,
       maskWidth: width,
       maskHeight: height,
       personFraction: Number((person / data.length).toFixed(4)),
