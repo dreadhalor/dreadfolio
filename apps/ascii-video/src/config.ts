@@ -52,44 +52,12 @@ export const settings = {
   edgeThreshold: 120,
 };
 
-export type Settings = typeof settings;
-
 export const draw_margin: [number, number] = [0, 0];
 export const base_black: [number, number, number] = [0, 0, 0];
 export const base_white: [number, number, number] = [255, 255, 255];
 
 /** Long edge of the canvas handed to the segmentation model. */
 export const segmentation_long_side = 256;
-
-/**
- * Multiclass categories, verified against the model rather than taken on faith:
- * rendering each index as a distinct colour puts 1 exactly on hair, 2 on the
- * neck and shoulders, 3 on the face. Matches the documentation here, unlike the
- * binary model whose mask is inverted from what its docs imply.
- */
-export const REGION = {
-  background: 0,
-  hair: 1,
-  bodySkin: 2,
-  faceSkin: 3,
-  clothes: 4,
-  accessories: 5,
-} as const;
-
-/** Per-region tint, applied to the cell's own brightness. */
-/**
- * Glyph set per region, indexed by category. Mixing these within one frame is
- * only safe because each run carries its own letter-spacing -- see the note on
- * advance widths in ascii-dom.
- */
-export const regionGlyphs: GlyphMode[] = [
-  'ramp', // background
-  'braille', // hair -- fine dot texture suits strands
-  'ramp', // body skin
-  'edge', // face skin -- contours pick out features
-  'ramp', // clothes
-  'edge', // accessories
-];
 
 export const regionPalette: [number, number, number][] = [
   [0, 0, 0], // background, never drawn

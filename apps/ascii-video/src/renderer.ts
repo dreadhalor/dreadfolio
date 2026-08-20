@@ -305,7 +305,6 @@ export class AsciiVideoApp {
           glyphMode: settings.glyphMode,
           black: settings.black,
           backgroundColor: settings.black ? base_black : base_white,
-          foregroundColor: settings.black ? base_white : base_black,
           charScale: settings.pixelScale,
           drawSquares: settings.drawSquares,
           drawChars: settings.drawChars,

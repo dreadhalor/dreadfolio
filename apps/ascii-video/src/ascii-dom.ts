@@ -92,7 +92,6 @@ export type AsciiDomOptions = {
   glyphMode: GlyphMode;
   black: boolean;
   backgroundColor: [number, number, number];
-  foregroundColor: [number, number, number];
   charScale: number;
   drawSquares: boolean;
   drawChars: boolean;
