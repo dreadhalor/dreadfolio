@@ -34,6 +34,14 @@ export type Frame = {
   categories: Uint8Array | null;
 };
 
+/**
+ * Subpixels per cell. Braille needs 2x4, and so does per-region mixing, since
+ * any cell might turn out to be braille.
+ */
+function subSampling(): [number, number] {
+  return settings.glyphMode === 'braille' || settings.regionEffects ? [2, 4] : [1, 1];
+}
+
 /** The source rect that fills `destAspect` from `src` without distortion. */
 function coverRect(srcW: number, srcH: number, destAspect: number) {
   const srcAspect = srcW / srcH;
@@ -110,7 +118,7 @@ export class FramePipeline {
         ? [cells, Math.max(1, Math.round(cells / aspect))]
         : [Math.max(1, Math.round(cells * aspect)), cells];
 
-    const [subX, subY] = settings.glyphMode === 'braille' ? [2, 4] : [1, 1];
+    const [subX, subY] = subSampling();
     if (cols === this.cols && rows === this.rows && subX === this.subX && subY === this.subY)
       return;
 
@@ -132,7 +140,7 @@ export class FramePipeline {
     if (!vw || !vh || !this.cols || !this.rows) return null;
 
     // Re-derive the sub-sampling if the glyph mode changed under us.
-    const [wantX, wantY] = settings.glyphMode === 'braille' ? [2, 4] : [1, 1];
+    const [wantX, wantY] = subSampling();
     if (wantX !== this.subX || wantY !== this.subY) {
       this.subX = wantX;
       this.subY = wantY;
@@ -181,7 +189,9 @@ export class FramePipeline {
       this.maskValues.fill(255);
     }
 
-    const wantRegions = settings.colorMode === 'region' && this.kind === 'multiclass';
+    const wantRegions =
+      (settings.colorMode === 'region' || settings.regionEffects) &&
+      this.kind === 'multiclass';
     if (wantRegions && this.lastMask) this.sampleCategories(vw, vh, sx, sy, sw, sh);
 
     return {

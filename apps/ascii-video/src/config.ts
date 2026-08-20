@@ -16,6 +16,8 @@ export const settings = {
   glyphMode: 'ramp' as GlyphMode,
   backgroundMode: 'video' as BackgroundMode,
   colorMode: 'image' as ColorMode,
+  /** Give each segmentation region its own glyph set. Needs the multiclass model. */
+  regionEffects: false,
   crt: false,
   mask: true,
   timeMode: 'off' as import('./temporal').TimeMode,
@@ -74,6 +76,20 @@ export const REGION = {
 } as const;
 
 /** Per-region tint, applied to the cell's own brightness. */
+/**
+ * Glyph set per region, indexed by category. Mixing these within one frame is
+ * only safe because each run carries its own letter-spacing -- see the note on
+ * advance widths in ascii-dom.
+ */
+export const regionGlyphs: GlyphMode[] = [
+  'ramp', // background
+  'braille', // hair -- fine dot texture suits strands
+  'ramp', // body skin
+  'edge', // face skin -- contours pick out features
+  'ramp', // clothes
+  'edge', // accessories
+];
+
 export const regionPalette: [number, number, number][] = [
   [0, 0, 0], // background, never drawn
   [255, 120, 40], // hair

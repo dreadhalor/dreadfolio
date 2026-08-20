@@ -57,6 +57,24 @@ const EDGE_GLYPHS = ['_', '/', '|', '\\'];
  * resolve to different widths even within one monospace stack (0.684 vs 0.602
  * here), so this has to be measured against the glyphs actually in use.
  */
+const MARKUP = /[&<>]/g;
+const ESCAPES: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
+
+/**
+ * Runs go through innerHTML, and glyph sets legitimately contain markup
+ * characters -- the ASCII rain alphabet has `<`, `>` and `&`. Unescaped, `<`
+ * opens a tag and swallows the characters after it, so the row comes out short
+ * and every glyph downstream of it slides left.
+ */
+function escapeMarkup(text: string): string {
+  MARKUP.lastIndex = 0;
+  return MARKUP.test(text) ? text.replace(MARKUP, (c) => ESCAPES[c]!) : text;
+}
+
+function categoriesOf(opts: AsciiDomOptions, index: number): number {
+  return opts.categories ? opts.categories[index]! : 0;
+}
+
 function measureAdvanceRatio(sample: string): number {
   const probe = document.createElement('span');
   probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font-family:${FONT_STACK};font-size:100px;font-weight:bold;`;
@@ -87,6 +105,8 @@ export type AsciiDomOptions = {
   brailleGain: number;
   /** Sobel magnitude above which a cell becomes a contour glyph. */
   edgeThreshold: number;
+  /** Per-category glyph set; null uses `glyphMode` for the whole frame. */
+  regionGlyphs: GlyphMode[] | null;
   /** Fill the backdrop everywhere, not just behind the subject. */
   opaqueBackground: boolean;
   getFill: (pixel: [number, number, number, number]) => number[];
@@ -124,6 +144,10 @@ export class AsciiDomRenderer {
   private dots = new Uint8Array(0);
   private advanceRatio = 0;
   private advanceMode: GlyphMode | null = null;
+  /** Advance ratios per glyph family, measured once; see layout(). */
+  private ratios: { ascii: number; braille: number } | null = null;
+  /** letter-spacing that makes a braille run advance exactly one cell. */
+  private brailleSpacing = 0;
   private rawDensity: string[] = [];
   private densitySource = '';
 
@@ -160,17 +184,26 @@ export class AsciiDomRenderer {
       `width:${cols * cellSize}px;height:${rows * cellSize}px;` +
       `--cell:${cellSize}px;pointer-events:none;isolation:isolate;`;
 
+    if (!this.ratios) {
+      this.ratios = {
+        ascii: measureAdvanceRatio('M'),
+        braille: measureAdvanceRatio(String.fromCodePoint(BRAILLE_BASE + 0xff)),
+      };
+    }
     if (glyphMode !== this.advanceMode) {
       this.advanceMode = glyphMode;
-      this.advanceRatio = measureAdvanceRatio(
-        glyphMode === 'braille' ? String.fromCodePoint(BRAILLE_BASE + 0xff) : 'M',
-      );
+      this.advanceRatio =
+        glyphMode === 'braille' ? this.ratios.braille : this.ratios.ascii;
     }
 
     // Lock the advance to exactly one cell, then nudge right by half the added
     // spacing so the glyph sits centred.
     const fontSize = cellSize * charScale;
     const letterSpacing = cellSize - fontSize * this.advanceRatio;
+    // Mixed glyph families in one row would otherwise drift, because a single
+    // letter-spacing value cannot normalise two different advances. Spacing is
+    // inheritable, so a run of braille inside an ASCII row can carry its own.
+    this.brailleSpacing = cellSize - fontSize * this.ratios.braille;
     const [fr, fg, fb] = black ? [255, 255, 255] : [0, 0, 0];
 
     this.textLayer.style.cssText =
@@ -236,8 +269,14 @@ export class AsciiDomRenderer {
     const [bgR, bgG, bgB] = opts.backgroundColor;
     const color = this.colorImage.data;
     const bars = this.barImage.data;
-    const braille = glyphMode === 'braille';
-    const edges = glyphMode === 'edge';
+    const regions = opts.regionGlyphs;
+    // Whether the *frame* needs each input, not whether the global mode does.
+    // Gating these on glyphMode alone meant per-region cells got neither: a
+    // braille region rendered as U+2800 everywhere (the empty pattern, which
+    // is not blank) and an edge region fell back to tone because the smoothed
+    // luminance it differentiates was never filled in.
+    const braille = glyphMode === 'braille' || (regions?.includes('braille') ?? false);
+    const edges = glyphMode === 'edge' || (regions?.includes('edge') ?? false);
     const { data: px, mask, cols, rows, subX, subY, sampleW } = frame;
     const cells = subX * subY;
     const { lum, chan, alpha, dots } = this;
@@ -287,26 +326,35 @@ export class AsciiDomRenderer {
     // reads the unsmoothed field, so only edge detection pays for it.
     if (edges) this.smoothLuminance(cols, rows);
 
-    // A plain ASCII space is NOT a drop-in for a braille cell: it is narrower
-    // (0.602 vs 0.684 of font-size), and because one letter-spacing value
-    // normalises the whole layer that difference accumulates along the row.
-    //
-    // U+2800 has the right advance but is not blank -- it paints the empty dot
-    // positions -- so blank RUNS get wrapped in a visibility:hidden span, which
-    // keeps the advance and renders nothing.
-    const blank = braille ? BRAILLE_BLANK : ' ';
 
     // Pass 2: choose glyphs and write the colour and backdrop canvases.
+    //
+    // A row is emitted as runs rather than one string, because a run may need
+    // its own letter-spacing (braille advances 0.684 of the font size against
+    // ASCII's 0.602, and one global value cannot normalise both) or its own
+    // visibility (U+2800 is not actually blank). Runs break on region
+    // boundaries, so this is a few spans a row, not one per cell.
     for (let y = 0; y < rows; y++) {
       let line = '';
       let html = '';
+      let spans = 0;
+      let runText = '';
+      let runBraille = false;
       let runBlank = false;
-      let runLength = 0;
+
       const flushRun = () => {
-        if (!runLength) return;
-        const text = line.slice(line.length - runLength);
-        html += runBlank ? `<span style="visibility:hidden">${text}</span>` : text;
-        runLength = 0;
+        if (!runText) return;
+        const needsSpacing = runBraille && this.brailleSpacing !== 0;
+        if (!runBlank && !needsSpacing) {
+          html += escapeMarkup(runText);
+        } else {
+          const style =
+            (runBlank ? 'visibility:hidden;' : '') +
+            (needsSpacing ? `letter-spacing:${this.brailleSpacing.toFixed(3)}px;` : '');
+          html += `<span style="${style}">${escapeMarkup(runText)}</span>`;
+          spans++;
+        }
+        runText = '';
       };
 
       for (let x = 0; x < cols; x++) {
@@ -319,32 +367,38 @@ export class AsciiDomRenderer {
         const rain = !visible && opts.rain ? opts.rain : null;
         const rainGlyph = rain ? rain.glyph[i]! : -1;
 
+        // Per-cell glyph family. Rain always uses the frame's base set, since
+        // its alphabet is chosen to match.
+        const cellMode: GlyphMode =
+          regions && visible ? regions[categoriesOf(opts, i)] ?? glyphMode : glyphMode;
+        const cellBraille = cellMode === 'braille';
+
         bars[i * 4] = bgR;
         bars[i * 4 + 1] = bgG;
         bars[i * 4 + 2] = bgB;
         bars[i * 4 + 3] = opts.opaqueBackground || visible ? 255 : 0;
 
-        const cellBlank = !(visible && drawChars) && rainGlyph < 0;
-        if (braille && cellBlank !== runBlank) {
+        const drawing = visible && drawChars;
+        const isBlank = !drawing && rainGlyph < 0;
+        // A run must not mix advances, so it breaks on family as well as on
+        // visibility; the blank glyph then matches whichever family it lands in.
+        if (cellBraille !== runBraille || isBlank !== runBlank) {
           flushRun();
-          runBlank = cellBlank;
+          runBraille = cellBraille;
+          runBlank = isBlank;
         }
-        runLength++;
 
-        if (visible && drawChars) {
-          if (braille) {
-            line += String.fromCodePoint(BRAILLE_BASE + dots[i]!);
-          } else {
-            line += edges
+        let glyph: string;
+        if (drawing) {
+          glyph = cellBraille
+            ? String.fromCodePoint(BRAILLE_BASE + dots[i]!)
+            : cellMode === 'edge'
               ? this.edgeGlyph(x, y, cols, rows, chars, len, black, opts.edgeThreshold)
               : this.rampGlyph(lum[i]!, chars, len, black);
-          }
           let fill = this.cellColor(r, g, b, a, opts, i);
-          if (braille) {
-            // Dot density already encodes tone, so letting colour encode it too
-            // multiplies the two and crushes the image; full normalisation goes
-            // the other way and washes structure out. A fixed gain keeps
-            // relative tone and stops the picture being dark.
+          if (cellBraille) {
+            // Dot density already encodes tone; letting colour encode it too
+            // multiplies the two and crushes the image.
             const k = opts.brailleGain;
             fill = [
               Math.min(255, fill[0]! * k),
@@ -357,34 +411,35 @@ export class AsciiDomRenderer {
           color[i * 4 + 2] = fill[2]!;
           color[i * 4 + 3] = 255;
         } else if (rainGlyph >= 0) {
-          line += rain!.chars[rainGlyph] ?? blank;
+          glyph = rain!.chars[rainGlyph] ?? ' ';
           const t = rain!.intensity[i]! / 255;
-          // The leading cell of a column burns near-white, the tail is green.
           color[i * 4] = t > 0.94 ? 200 : 30 * t;
           color[i * 4 + 1] = 70 + 185 * t;
           color[i * 4 + 2] = t > 0.94 ? 210 : 60 * t;
           color[i * 4 + 3] = 255;
         } else {
-          line += blank;
+          glyph = cellBraille ? BRAILLE_BLANK : ' ';
           // Transparent leaves the backdrop untouched, so the video shows.
           color[i * 4 + 3] = 0;
         }
+        line += glyph;
+        runText += glyph;
       }
+      flushRun();
 
       const row = this.textRows[y];
       if (!row) continue;
-      if (braille) {
-        flushRun();
-        if (html !== this.htmlCache[y]) {
-          row.innerHTML = html;
-          this.htmlCache[y] = html;
+      if (spans === 0) {
+        // Fast path: a plain row needs no markup at all.
+        if (line !== this.textCache[y] || this.htmlCache[y]) {
+          row.textContent = line;
+          this.htmlCache[y] = '';
         }
-        this.textCache[y] = line;
-      } else if (line !== this.textCache[y]) {
-        row.textContent = line;
-        this.textCache[y] = line;
-        this.htmlCache[y] = '';
+      } else if (html !== this.htmlCache[y]) {
+        row.innerHTML = html;
+        this.htmlCache[y] = html;
       }
+      this.textCache[y] = line;
     }
     this.colorCtx!.putImageData(this.colorImage, 0, 0);
     this.barCtx!.putImageData(this.barImage, 0, 0);
