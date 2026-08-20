@@ -50,6 +50,7 @@ export class PersonSegmenter {
   private mask: MaskFrame | null = null;
   private timestamp = 0;
   private loading: Promise<void> | null = null;
+  private reloading = false;
 
   kind: SegmenterKind = 'binary';
   delegate: 'GPU' | 'CPU' | null = null;
@@ -97,17 +98,33 @@ export class PersonSegmenter {
     throw new Error(`ImageSegmenter could not load the ${kind} model`);
   }
 
-  /** Tear down and rebuild with the same model, releasing whatever it held. */
+  /**
+   * Tear down and rebuild with the same model, releasing whatever it held.
+   *
+   * The last mask is deliberately kept and `ready` stays true throughout.
+   * Callers read "not ready" as "there is no segmentation at all", which makes
+   * the entire frame count as subject and paints an opaque backdrop over the
+   * video -- a black flash every time this fires. Serving the stale mask
+   * instead merely freezes the silhouette for the second the rebuild takes.
+   *
+   * The old segmenter is closed before the new one is built rather than after,
+   * so a device already short of memory never holds two models at once.
+   */
   async reload() {
     const kind = this.kind;
-    this.segmenter?.close();
-    this.segmenter = null;
-    this.mask = null;
-    await this.create(kind);
+    this.reloading = true;
+    try {
+      this.segmenter?.close();
+      this.segmenter = null;
+      await this.create(kind);
+    } finally {
+      this.reloading = false;
+    }
   }
 
   get ready() {
-    return this.segmenter !== null;
+    // A rebuild in flight still counts: the last mask remains usable.
+    return this.segmenter !== null || this.reloading;
   }
 
   /** True when a raw mask value belongs to the subject rather than the background. */
