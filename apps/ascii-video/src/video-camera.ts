@@ -1,72 +1,66 @@
+/**
+ * Webcam access. The video element is no longer a hidden scratch source: it is
+ * the actual on-screen underlay, so the browser composites the live feed on the
+ * GPU instead of us round-tripping every frame through a full-window canvas.
+ */
+
 export class VideoCamera {
-  private constraints = { audio: false, video: { facingMode: 'user' } };
+  private stream: MediaStream | null = null;
+  readonly video: HTMLVideoElement;
 
-  private video: HTMLVideoElement;
-  private stream: MediaStream;
-  private video_container: HTMLDivElement;
-
-  private container_style = {
-    position: 'absolute',
-    visibility: 'hidden',
-    height: '0px',
-    width: '0px',
-    overflow: 'hidden',
-  };
+  /** Resolves once the element has real dimensions and is playing. */
+  readonly ready: Promise<HTMLVideoElement>;
+  private markReady!: (video: HTMLVideoElement) => void;
+  private failReady!: (reason: unknown) => void;
 
   constructor() {
-    this.start(true);
-  }
-
-  constructDivs() {
     this.video = document.createElement('video');
     this.video.playsInline = true;
-    this.video_container = document.createElement('div');
-    Object.assign(this.video_container.style, this.container_style);
-    this.video_container.append(this.video);
-    document.body.append(this.video_container);
-  }
-  formatVideoFeed() {
-    // let constraints = this.getMaxDimensionsConstraints();
-    // let scaled = this.getScaledDimensions(0.5);
-    // let scaled = { width: 640, height: 480 };
-    // this.getVideoTrack().applyConstraints(constraints);
-    return this.video.play();
-  }
-  isStopped() {
-    return this.stream?.getTracks()?.every((track) => track.readyState === 'ended') ?? true;
-  }
-  start(initialize: boolean = false) {
-    navigator.mediaDevices
-      .getUserMedia(this.constraints)
-      .then((stream: MediaStream) => {
-        if (initialize) this.constructDivs();
-        this.stream = stream;
-        this.video.srcObject = stream;
-        this.video.onloadedmetadata = () => this.formatVideoFeed()
-      })
-      .catch((err) => alert(err));
-  }
-  stop() {
-    this.stream.getTracks().forEach((track) => track.stop());
-  }
-  play() {
+    this.video.muted = true;
+    this.video.autoplay = true;
+
+    this.ready = new Promise((resolve, reject) => {
+      this.markReady = resolve;
+      this.failReady = reject;
+    });
+
     this.start();
   }
 
-
-  getVideoTrack = () => this.stream?.getVideoTracks()?.[0];
-  getCapabilities = () => this.getVideoTrack()?.getCapabilities();
-  getSettings = () => this.getVideoTrack()?.getSettings();
-  getScaledDimensions(ratio: number) {
-    const { width, height } = this.getSettings();
-    return { width: Math.floor(width * ratio), height: Math.floor(height * ratio) };
+  async start() {
+    try {
+      // A 16:9 hint keeps the sensor crop close to the display aspect, so the
+      // cover-crop throws away as little of the frame as possible.
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: 'user',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      });
+      this.video.srcObject = this.stream;
+      await this.video.play();
+      if (this.video.videoWidth) this.markReady(this.video);
+      else
+        this.video.onloadedmetadata = () => this.markReady(this.video);
+    } catch (err) {
+      console.error('[camera] getUserMedia failed:', err);
+      this.failReady(err);
+    }
   }
-  getMaxDimensionsConstraints = () => {
-    const capabilities = this.getCapabilities();
-    return { width: capabilities?.width.max, height: capabilities?.height.max };
-  };
 
-  getVideoElement() {
-    return this.video;
+  isStopped() {
+    const tracks = this.stream?.getTracks();
+    return !tracks?.length || tracks.every((t) => t.readyState === 'ended');
+  }
+
+  stop() {
+    this.stream?.getTracks().forEach((track) => track.stop());
+    this.stream = null;
+  }
+
+  getSettings() {
+    return this.stream?.getVideoTracks()?.[0]?.getSettings();
   }
 }

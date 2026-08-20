@@ -26,3 +26,6 @@ dist-ssr
 # SSL certificates
 .cert/
 *.pem
+
+# MediaPipe wasm runtime, mirrored from node_modules at dev/build time
+public/mediapipe/

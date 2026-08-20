@@ -12,12 +12,53 @@
   user-select: none; /* Standard syntax */
 }
 
+/*
+ * The whole point of rendering ASCII as DOM text is that you can select and
+ * copy it. The universal rule above applies to every element directly, so it
+ * beats inheritance from the text layer -- the characters have to be exempted
+ * explicitly or they come out unselectable.
+ */
+.ascii-text,
+.ascii-text * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Glow in currentColor so the colour blend tints it along with the glyphs. */
+.crt .ascii-text {
+  text-shadow: 0 0 0.4em currentColor;
+}
+
+/* Available to assistive tech, invisible on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html,
 body {
   margin: 0px;
   height: 100vh;
+  /* 100vh on mobile Safari includes the browser chrome, so the app overflows
+     and the bottom of the grid sits under the toolbar. dvh tracks the visible
+     viewport; the vh above stays as the fallback. */
+  height: 100dvh;
   width: 100vw;
-  /* height: 100%; */
-  /* width: 100%; */
   overflow: hidden;
+  overscroll-behavior: none;
+  /* No double-tap zoom delay, and no rubber-banding on a fixed-size canvas. */
+  touch-action: manipulation;
+}
+
+/* Selecting the art is now the only way to lift the characters out, so keep it
+   available on touch too -- but not on the chrome around it. */
+.ascii-text {
+  -webkit-touch-callout: default;
 }

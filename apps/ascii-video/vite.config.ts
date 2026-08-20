@@ -12,12 +12,19 @@ const hasCerts = fs.existsSync(certPath);
 export default defineConfig({
   plugins: [tailwindcss(), tsconfigPaths(), svgr()],
   base: '/ascii-video/',
-  server: hasCerts ? {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, '.cert/key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, '.cert/cert.pem')),
-    },
-  } : {},
+  server: {
+    // Reachable from the Air over the tailnet via Caddy (ascii.dreadville.net),
+    // so the dev server has to accept that Host header, not just localhost.
+    allowedHosts: ['.dreadville.net', 'mini.local'],
+    ...(hasCerts
+      ? {
+          https: {
+            key: fs.readFileSync(path.resolve(__dirname, '.cert/key.pem')),
+            cert: fs.readFileSync(path.resolve(__dirname, '.cert/cert.pem')),
+          },
+        }
+      : {}),
+  },
   worker: {
     format: 'es',
   },
