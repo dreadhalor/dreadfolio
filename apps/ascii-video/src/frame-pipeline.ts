@@ -80,7 +80,12 @@ export class FramePipeline {
    * a consistent physical size, then capped.
    */
   resize(width: number, height: number) {
-    const dpi = 96 * window.devicePixelRatio;
+    // A CSS pixel is already nominally 1/96 inch regardless of devicePixelRatio,
+    // so multiplying by the ratio double-counts it. On a 3x phone that made
+    // cells three times too big -- 27 columns across a 393px viewport. On
+    // desktop the cell cap below almost always binds, so this only really
+    // changes the small-viewport, high-density case that was wrong.
+    const dpi = 96;
     const longest = Math.max(width, height);
     const cells = Math.min(
       Math.floor((longest * settings.cpi) / dpi),

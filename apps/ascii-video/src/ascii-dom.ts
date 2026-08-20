@@ -96,7 +96,7 @@ export class AsciiDomRenderer {
   private barImage: ImageData | null = null;
 
   private textRows: HTMLDivElement[] = [];
-  /** Plain text per row, which is also what the clipboard export reads. */
+  /** Plain text per row; the DOM holds the same characters. */
   private textCache: string[] = [];
   /** Markup per row, used only by the braille path's hidden blank runs. */
   private htmlCache: string[] = [];
@@ -122,38 +122,6 @@ export class AsciiDomRenderer {
     this.barCtx = this.barLayer.getContext('2d');
   }
 
-  /** The ASCII as plain text, one line per row. */
-  toText() {
-    return this.textCache.join('\n');
-  }
-
-  /**
-   * The ASCII with 24-bit ANSI colour, ready to paste into a terminal. Cells
-   * are grouped into runs of identical colour so the escape codes stay sane.
-   */
-  toAnsi() {
-    if (!this.colorImage) return this.toText();
-    const data = this.colorImage.data;
-    const out: string[] = [];
-    for (let y = 0; y < this.rows; y++) {
-      const line = this.textCache[y] ?? '';
-      let row = '';
-      let current = '';
-      for (let x = 0; x < this.cols; x++) {
-        const o = (y * this.cols + x) * 4;
-        const code = data[o + 3]
-          ? `\u001b[38;2;${data[o]};${data[o + 1]};${data[o + 2]}m`
-          : '\u001b[0m';
-        if (code !== current) {
-          row += code;
-          current = code;
-        }
-        row += line[x] ?? ' ';
-      }
-      out.push(row + '\u001b[0m');
-    }
-    return out.join('\n');
-  }
 
   layout(
     cols: number,

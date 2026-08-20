@@ -66,8 +66,6 @@ export class AsciiVideoApp {
     this.buildDiagnostics();
     this.controls = new Controls(this.host, {
       onColorMode: (mode) => this.setColorMode(mode),
-      onCopyText: () => this.copy(this.ascii.toText(), 'ASCII copied'),
-      onCopyAnsi: () => this.copy(this.ascii.toAnsi(), 'ANSI copied'),
     });
 
     this.observeSize();
@@ -132,14 +130,6 @@ export class AsciiVideoApp {
     settings.colorMode = mode;
   }
 
-  private async copy(text: string, message: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      this.controls?.say(`${message} (${text.length.toLocaleString()} chars)`);
-    } catch {
-      this.controls?.say('clipboard blocked');
-    }
-  }
 
   private applySize(width: number, height: number) {
     if (!width || !height) return;

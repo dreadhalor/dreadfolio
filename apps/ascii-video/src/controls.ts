@@ -1,21 +1,18 @@
 /**
- * Small on-screen control panel. Everything it touches lives in `settings`,
- * which the render loop reads fresh each frame, so changes apply immediately
- * with no restart. Collapsed by default and toggled with the button or `c`.
+ * On-screen control panel. Everything it touches lives in `settings`, which the
+ * render loop reads fresh each frame, so changes apply immediately.
+ *
+ * Sizing targets touch: controls are at least 44px on their short axis, the
+ * panel is anchored with viewport-relative limits so it cannot overflow a phone
+ * screen, and it can be dismissed three ways (the X, tapping outside, Escape)
+ * because a gear that hides itself when open leaves no way back.
  */
 import { settings, type BackgroundMode, type ColorMode, type GlyphMode } from './config';
 
-export type ControlHandlers = {
-  onColorMode: (mode: ColorMode) => void | Promise<void>;
-  onCopyText: () => void;
-  onCopyAnsi: () => void;
-};
+const TAP = 44;
 
-const PANEL_STYLE =
-  'position:absolute;top:12px;right:12px;z-index:5;min-width:190px;' +
-  'font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9fe6b0;' +
-  'background:rgba(0,0,0,.72);border:1px solid rgba(120,255,170,.35);' +
-  'border-radius:6px;padding:10px 12px;backdrop-filter:blur(2px);';
+const ACCENT = '#9fe6b0';
+const EDGE = 'rgba(120,255,170,.35)';
 
 export class Controls {
   private panel = document.createElement('div');
@@ -23,17 +20,35 @@ export class Controls {
   private status = document.createElement('div');
   private open = false;
 
-  constructor(parent: HTMLElement, private handlers: ControlHandlers) {
+  constructor(
+    parent: HTMLElement,
+    private handlers: { onColorMode: (mode: ColorMode) => void | Promise<void> },
+  ) {
     this.toggle.textContent = '⚙';
-    this.toggle.title = 'Controls (c)';
+    this.toggle.setAttribute('aria-label', 'Open controls');
     this.toggle.style.cssText =
-      'position:absolute;top:12px;right:12px;z-index:6;width:30px;height:30px;' +
-      'border:1px solid rgba(120,255,170,.35);border-radius:6px;cursor:pointer;' +
-      'background:rgba(0,0,0,.6);color:#9fe6b0;font-size:15px;line-height:1;';
-    this.toggle.addEventListener('click', () => this.setOpen(!this.open));
+      `position:absolute;top:max(12px,env(safe-area-inset-top));` +
+      `right:max(12px,env(safe-area-inset-right));z-index:6;` +
+      `width:${TAP}px;height:${TAP}px;border:1px solid ${EDGE};border-radius:10px;` +
+      `cursor:pointer;background:rgba(0,0,0,.6);color:${ACCENT};font-size:20px;` +
+      `line-height:1;touch-action:manipulation;`;
+    this.toggle.addEventListener('click', () => this.setOpen(true));
 
-    this.panel.style.cssText = PANEL_STYLE;
+    this.panel.setAttribute('role', 'dialog');
+    this.panel.setAttribute('aria-label', 'ASCII Video controls');
+    this.panel.style.cssText =
+      `position:absolute;top:max(12px,env(safe-area-inset-top));` +
+      `right:max(12px,env(safe-area-inset-right));z-index:6;` +
+      `width:min(260px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;` +
+      `font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:${ACCENT};` +
+      `background:rgba(0,0,0,.8);border:1px solid ${EDGE};border-radius:10px;` +
+      `padding:8px 12px 12px;backdrop-filter:blur(3px);` +
+      `-webkit-overflow-scrolling:touch;touch-action:manipulation;`;
+
+    this.status.style.cssText = 'margin-top:8px;opacity:.75;min-height:1.5em;font-size:12px;';
+
     this.panel.append(
+      this.header(),
       this.select<GlyphMode>('glyphs', ['ramp', 'braille'], settings.glyphMode, (v) => {
         settings.glyphMode = v;
       }),
@@ -57,21 +72,25 @@ export class Controls {
       this.check('stats', settings.showDiagnostics, (v) => {
         settings.showDiagnostics = v;
       }),
-      this.button('copy text', () => this.handlers.onCopyText()),
-      this.button('copy ANSI', () => this.handlers.onCopyAnsi()),
       this.status,
     );
-    this.status.style.cssText = 'margin-top:6px;opacity:.75;min-height:1.6em;';
 
     parent.append(this.toggle, this.panel);
     this.setOpen(false);
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'c' && !e.metaKey && !e.ctrlKey && !e.altKey) {
-        const target = e.target as HTMLElement | null;
-        if (target && /^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) return;
-        this.setOpen(!this.open);
-      }
+      const target = e.target as HTMLElement | null;
+      if (target && /^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName)) return;
+      if (e.key === 'Escape') this.setOpen(false);
+      else if (e.key === 'c' && !e.metaKey && !e.ctrlKey && !e.altKey) this.setOpen(!this.open);
+    });
+
+    // Tapping the artwork dismisses the panel, which is the gesture people
+    // reach for on a phone before they look for an X.
+    parent.addEventListener('pointerdown', (e) => {
+      if (!this.open) return;
+      const target = e.target as Node;
+      if (!this.panel.contains(target) && target !== this.toggle) this.setOpen(false);
     });
   }
 
@@ -81,18 +100,37 @@ export class Controls {
     this.toggle.style.display = open ? 'none' : 'block';
   }
 
-  /** Transient feedback line, e.g. after a copy. */
   say(message: string) {
     this.status.textContent = message;
     window.setTimeout(() => {
       if (this.status.textContent === message) this.status.textContent = '';
-    }, 2200);
+    }, 2600);
+  }
+
+  private header() {
+    const bar = document.createElement('div');
+    bar.style.cssText =
+      'display:flex;align-items:center;justify-content:space-between;' +
+      `margin:-4px -4px 4px 0;border-bottom:1px solid ${EDGE};padding-bottom:4px;`;
+    const title = document.createElement('span');
+    title.textContent = 'controls';
+    title.style.opacity = '.7';
+    const close = document.createElement('button');
+    close.textContent = '✕';
+    close.setAttribute('aria-label', 'Close controls');
+    close.style.cssText =
+      `width:${TAP}px;height:${TAP}px;background:none;border:0;color:${ACCENT};` +
+      `font-size:17px;cursor:pointer;touch-action:manipulation;`;
+    close.addEventListener('click', () => this.setOpen(false));
+    bar.append(title, close);
+    return bar;
   }
 
   private row(label: string, control: HTMLElement) {
     const wrap = document.createElement('label');
     wrap.style.cssText =
-      'display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;';
+      `display:flex;align-items:center;justify-content:space-between;gap:10px;` +
+      `min-height:${TAP}px;cursor:pointer;`;
     const text = document.createElement('span');
     text.textContent = label;
     wrap.append(text, control);
@@ -107,8 +145,8 @@ export class Controls {
   ) {
     const el = document.createElement('select');
     el.style.cssText =
-      'background:#0b1a12;color:#9fe6b0;border:1px solid rgba(120,255,170,.3);' +
-      'border-radius:4px;font:inherit;padding:1px 4px;';
+      `background:#0b1a12;color:${ACCENT};border:1px solid ${EDGE};border-radius:6px;` +
+      `font:inherit;padding:6px 8px;min-height:${TAP - 10}px;touch-action:manipulation;`;
     for (const option of options) {
       const item = document.createElement('option');
       item.value = option;
@@ -124,18 +162,8 @@ export class Controls {
     const el = document.createElement('input');
     el.type = 'checkbox';
     el.checked = initial;
-    el.style.accentColor = '#5fdc8f';
+    el.style.cssText = 'width:24px;height:24px;accent-color:#5fdc8f;touch-action:manipulation;';
     el.addEventListener('change', () => onChange(el.checked));
     return this.row(label, el);
-  }
-
-  private button(label: string, onClick: () => void) {
-    const el = document.createElement('button');
-    el.textContent = label;
-    el.style.cssText =
-      'width:100%;margin-top:6px;background:#0b1a12;color:#9fe6b0;cursor:pointer;' +
-      'border:1px solid rgba(120,255,170,.3);border-radius:4px;font:inherit;padding:3px 0;';
-    el.addEventListener('click', onClick);
-    return el;
   }
 }

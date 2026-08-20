@@ -46,6 +46,19 @@ html,
 body {
   margin: 0px;
   height: 100vh;
+  /* 100vh on mobile Safari includes the browser chrome, so the app overflows
+     and the bottom of the grid sits under the toolbar. dvh tracks the visible
+     viewport; the vh above stays as the fallback. */
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
+  overscroll-behavior: none;
+  /* No double-tap zoom delay, and no rubber-banding on a fixed-size canvas. */
+  touch-action: manipulation;
+}
+
+/* Selecting the art is now the only way to lift the characters out, so keep it
+   available on touch too -- but not on the chrome around it. */
+.ascii-text {
+  -webkit-touch-callout: default;
 }

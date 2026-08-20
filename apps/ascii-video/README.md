@@ -16,7 +16,6 @@ inspect them in devtools.
 - **Real-time ASCII conversion** — webcam to characters at display framerate
 - **AI person segmentation** — MediaPipe ImageSegmenter, GPU delegate
 - **Selectable text** — the ASCII is DOM, not pixels painted onto a canvas
-- **Copy to clipboard** — as plain text, or with 24-bit ANSI colour for a terminal
 - **Braille mode** — halftone dot rendering at 2x4 subcell resolution
 - **Region colouring** — hair, skin, face and clothes tinted separately
 - **Matrix rain** — falling katakana in the area the mask carves out
@@ -25,6 +24,8 @@ inspect them in devtools.
 - **Responsive** — the grid is derived from viewport size and display DPI
 
 Press `c` or click the gear to open the controls; everything is switchable live.
+Close with the X, Escape, or by tapping the artwork. The ASCII is real selectable
+text, so you can drag-select and copy a frame straight out of the page.
 
 ---
 
@@ -251,12 +252,39 @@ export const pixelation_max = 100;  // cap on grid cells along the long axis
 export const segment_interval = 1;  // run segmentation every N frames
 ```
 
+### Asset caching
+
+`public/` is copied verbatim by Vite — no content hashing — and the deploy serves
+everything non-HTML with `max-age=31536000, immutable`. An unversioned path
+would therefore pin the first copy a visitor downloaded for a year, and a
+CloudFront invalidation would not help because the browser never revalidates.
+So both large binaries carry a version in their path:
+
+- models are named `*.v1.tflite`; **bump the suffix whenever a model file is
+  replaced**, or returning visitors keep the old weights
+- the wasm runtime goes to `public/mediapipe/wasm-<package version>/`, written by
+  `scripts/copy-mediapipe-wasm.mjs`, which also emits `src/mediapipe-runtime.ts`
+  so the app knows the directory. That file is generated but committed, so a
+  bare `vite` still works; the script rewrites it when the version changes.
+  (Vite's `define` was the obvious mechanism and does not survive into
+  dev-served modules here, hence the generated file.)
+
 In development the app instance is exposed for poking at:
 
 ```js
-asciiVideo.stats()            // fps, frame time, grid, delegate, mask coverage
-asciiVideo.maskEnabled = false // render the whole frame, ignoring segmentation
+asciiVideo.stats()             // fps, frame time, grid, model, delegate, coverage
+asciiSettings.glyphMode = 'braille'  // same object the render loop reads
 ```
+
+## Mobile
+
+The grid is sized from CSS pixels only. A CSS pixel is already nominally 1/96
+inch regardless of `devicePixelRatio`, so multiplying by the ratio double-counts
+it — that made cells three times too large on a 3x phone, 27 columns across a
+393px viewport instead of 46. Controls are 44px on their short axis, the panel is
+bounded by `min(260px, 100vw - 24px)` and `100dvh`, and the page uses `100dvh`
+because `100vh` on mobile Safari includes the browser chrome and pushes the
+bottom of the grid under the toolbar.
 
 ---
 

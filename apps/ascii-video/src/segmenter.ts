@@ -18,14 +18,20 @@
  * colouring is actually switched on.
  */
 import { FilesetResolver, ImageSegmenter } from '@mediapipe/tasks-vision';
+import { MEDIAPIPE_WASM_DIR } from './mediapipe-runtime';
 
 const BASE = import.meta.env.BASE_URL;
 
 export type SegmenterKind = 'binary' | 'multiclass';
 
+/**
+ * Filenames carry a revision because public/ assets are served immutable for a
+ * year with no content hash. Bump the suffix whenever a model file is replaced,
+ * or returning visitors keep the old weights.
+ */
 const MODEL_FILE: Record<SegmenterKind, string> = {
-  binary: 'selfie_segmenter_landscape.tflite',
-  multiclass: 'selfie_multiclass_256x256.tflite',
+  binary: 'selfie_segmenter_landscape.v1.tflite',
+  multiclass: 'selfie_multiclass_256x256.v1.tflite',
 };
 
 export type MaskFrame = {
@@ -61,7 +67,7 @@ export class PersonSegmenter {
 
   private async create(kind: SegmenterKind) {
     if (!this.fileset) {
-      this.fileset = await FilesetResolver.forVisionTasks(`${BASE}mediapipe/wasm`);
+      this.fileset = await FilesetResolver.forVisionTasks(`${BASE}${MEDIAPIPE_WASM_DIR}`);
     }
     const options = {
       baseOptions: { modelAssetPath: `${BASE}models/${MODEL_FILE[kind]}` },
