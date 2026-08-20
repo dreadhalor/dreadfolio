@@ -212,12 +212,20 @@ public/
 **Glyphs.** `ramp` maps cell brightness onto a density ramp. `braille` samples
 each cell at 2x4 and ordered-dithers those eight subpixels into a Unicode
 braille pattern — a halftone, so it captures finer gradients but reads as
-dithering rather than as four times the detail. Two things to know if you touch
-it: the dither matrix must be indexed in *absolute* subpixel space (a 2x4 matrix
-is exactly one cell wide, so every cell gets the same pattern and the image
-prints a regular stripe), and braille glyphs resolve to a different advance
-width than ASCII in the same monospace stack (0.684 vs 0.602 here), so the cell
-advance has to be measured against the glyphs actually in use.
+dithering rather than as four times the detail.
+
+Three things to know before touching braille, each of which produced a visible
+bug: the dither matrix must be indexed in *absolute* subpixel space (a 2x4
+matrix is exactly one cell wide, so every cell gets an identical pattern and the
+image prints a regular stripe); **every glyph drawn in a frame must share one
+advance width**, because a single letter-spacing value normalises the layer and
+any narrower glyph shifts everything after it, accumulating along the row (this
+stack measures 50 for halfwidth katakana, 60.21 for ASCII, 68.36 for braille per
+100px, so an ASCII space among braille drags the row left by ~0.12 of a cell
+each); and **U+2800 is not blank** — it paints the empty dot positions in every
+macOS monospace fallback — so runs of blank cells are wrapped in a
+`visibility:hidden` span, which keeps the advance and renders nothing. Blank runs
+follow the silhouette, so that is ~70 spans per frame rather than one per cell.
 
 **Colour.** `image` uses the pixel's own colour. `region` tints by segmentation
 class — hair, body skin, face skin, clothes — modulated by the cell's brightness

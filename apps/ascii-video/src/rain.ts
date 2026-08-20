@@ -6,10 +6,6 @@
  * flickering every frame, which is what makes it read as falling code rather
  * than as noise.
  */
-import { rainGlyphs } from './config';
-
-const GLYPHS = [...rainGlyphs];
-
 export class RainField {
   private cols = 0;
   private rows = 0;
@@ -21,7 +17,12 @@ export class RainField {
   /** 0-255 brightness per cell. */
   intensity: Uint8Array = new Uint8Array(0);
 
-  readonly chars = GLYPHS;
+  /** Glyph set in use; swapped when the glyph mode changes. */
+  chars: string[] = [];
+
+  setChars(chars: string[]) {
+    if (chars.length && chars !== this.chars) this.chars = chars;
+  }
 
   resize(cols: number, rows: number) {
     if (cols === this.cols && rows === this.rows) return;
@@ -54,7 +55,7 @@ export class RainField {
 
       // Re-roll only the cells the head crossed this frame.
       for (let y = Math.max(0, Math.ceil(prev)); y <= Math.min(rows - 1, Math.floor(next)); y++) {
-        this.glyphSeed[y * cols + x] = (Math.random() * GLYPHS.length) | 0;
+        this.glyphSeed[y * cols + x] = (Math.random() * this.chars.length) | 0;
       }
 
       const tail = this.tail[x]!;
@@ -80,7 +81,7 @@ export class RainField {
     if (this.glyphSeed.length !== cols * rows) {
       this.glyphSeed = new Int16Array(cols * rows);
       for (let i = 0; i < this.glyphSeed.length; i++) {
-        this.glyphSeed[i] = (Math.random() * GLYPHS.length) | 0;
+        this.glyphSeed[i] = (Math.random() * Math.max(1, this.chars.length)) | 0;
       }
     }
   }

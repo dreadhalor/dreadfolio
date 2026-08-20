@@ -15,6 +15,8 @@ import {
   base_white,
   density,
   draw_margin,
+  rainGlyphsAscii,
+  rainGlyphsBraille,
   regionPalette,
   settings,
   type ColorMode,
@@ -204,6 +206,11 @@ export class AsciiVideoApp {
         const { cols, rows, cellSize, offsetX, offsetY } = geometry;
         const raining = settings.backgroundMode === 'rain' && useMask;
         if (raining) {
+          // Match the rain alphabet to the glyph mode so every character in the
+          // frame shares one advance width.
+          this.rain.setChars([
+            ...(settings.glyphMode === 'braille' ? rainGlyphsBraille : rainGlyphsAscii),
+          ]);
           this.rain.prepare(cols, rows);
           this.rain.step(1);
         }

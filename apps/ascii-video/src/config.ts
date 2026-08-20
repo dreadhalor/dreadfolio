@@ -74,6 +74,19 @@ export const regionPalette: [number, number, number][] = [
   [255, 240, 120], // accessories
 ];
 
-/** Katakana column glyphs for the rain, the usual Matrix set. */
-export const rainGlyphs =
-  'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789';
+/**
+ * Rain glyphs, per mode. Every character drawn in a frame MUST share one
+ * advance width: the layer normalises advance with a single letter-spacing
+ * value, so a narrower glyph shifts everything after it and the error
+ * accumulates along the row. In this stack the three sets measure
+ * 50 (halfwidth katakana), 60.21 (ASCII) and 68.36 (braille) per 100px of
+ * font-size, so katakana cannot be mixed with the ASCII ramp -- it drags each
+ * row left by 17% of a cell per glyph.
+ */
+export const rainGlyphsAscii = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ<>|/\\=+*#$%&';
+
+/** Braille rain: patterns with a few dots set, so the columns read as falling. */
+export const rainGlyphsBraille = Array.from(
+  { length: 48 },
+  (_, i) => String.fromCodePoint(0x2800 + ((i * 37 + 13) % 255) + 1),
+).join('');

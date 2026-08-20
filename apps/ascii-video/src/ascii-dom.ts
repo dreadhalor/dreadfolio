@@ -22,6 +22,7 @@ const FONT_STACK =
   "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
 
 const BRAILLE_BASE = 0x2800;
+const BRAILLE_BLANK = String.fromCodePoint(0x2800);
 /** Bit per dot in a 2-wide, 4-tall cell: [column][row]. */
 const DOT_BITS = [
   [0x01, 0x02, 0x04, 0x40],
@@ -95,7 +96,10 @@ export class AsciiDomRenderer {
   private barImage: ImageData | null = null;
 
   private textRows: HTMLDivElement[] = [];
+  /** Plain text per row, which is also what the clipboard export reads. */
   private textCache: string[] = [];
+  /** Markup per row, used only by the braille path's hidden blank runs. */
+  private htmlCache: string[] = [];
 
   private cols = 0;
   private rows = 0;
@@ -217,6 +221,7 @@ export class AsciiDomRenderer {
     this.textLayer.replaceChildren();
     this.textRows = [];
     this.textCache = new Array(this.rows).fill('');
+    this.htmlCache = new Array(this.rows).fill('');
     for (let y = 0; y < this.rows; y++) {
       const row = document.createElement('div');
       row.style.cssText = 'height:var(--cell);';
@@ -240,11 +245,33 @@ export class AsciiDomRenderer {
     const color = this.colorImage.data;
     const bars = this.barImage.data;
     const braille = glyphMode === 'braille';
+    // A plain ASCII space is NOT a drop-in for a braille cell: it is narrower
+    // (0.602 vs 0.684 of font-size), and because one letter-spacing value
+    // normalises the whole layer that difference accumulates along the row,
+    // dragging everything after it left.
+    //
+    // U+2800 has the right advance but is not actually blank -- it paints the
+    // empty dot positions (1153 ink pixels at 100px, in every macOS monospace
+    // fallback). So blank RUNS get wrapped in a visibility:hidden span, which
+    // keeps the advance and renders nothing. Runs follow the silhouette, so
+    // this is a few spans per row rather than one per cell.
+    const blank = braille ? BRAILLE_BLANK : ' ';
     const { data: px, cols, rows, subX, subY, sampleW } = frame;
     const cells = subX * subY;
 
     for (let y = 0; y < rows; y++) {
       let line = '';
+      // Only used in braille mode; see the note on `blank` above.
+      let html = '';
+      let runBlank = false;
+      let runLength = 0;
+      const flushRun = () => {
+        if (!runLength) return;
+        const text = line.slice(line.length - runLength);
+        html += runBlank ? `<span style="visibility:hidden">${text}</span>` : text;
+        runLength = 0;
+      };
+
       for (let x = 0; x < cols; x++) {
         // Average the cell's subpixels for colour and brightness; in ramp mode
         // this is a single sample and the loop collapses.
@@ -289,13 +316,20 @@ export class AsciiDomRenderer {
         bars[i * 4 + 2] = bgB;
         bars[i * 4 + 3] = opts.opaqueBackground || visible ? 255 : 0;
 
+        const cellBlank = !(visible && drawChars) && rainGlyph < 0;
+        if (braille && cellBlank !== runBlank) {
+          flushRun();
+          runBlank = cellBlank;
+        }
+        runLength++;
+
         if (visible && drawChars) {
           if (braille) {
             line += String.fromCodePoint(BRAILLE_BASE + dots);
           } else {
             const ramp = Math.floor(((r + g + b) / 3 / 255) * len);
             const index = black ? len - 1 - ramp : ramp;
-            line += chars[Math.min(len - 1, Math.max(0, index))] ?? ' ';
+            line += chars[Math.min(len - 1, Math.max(0, index))] ?? blank;
           }
           let fill = this.cellColor(r, g, b, a, opts, i);
           if (braille) {
@@ -315,7 +349,7 @@ export class AsciiDomRenderer {
           color[i * 4 + 2] = fill[2]!;
           color[i * 4 + 3] = 255;
         } else if (rainGlyph >= 0) {
-          line += rain!.chars[rainGlyph] ?? ' ';
+          line += rain!.chars[rainGlyph] ?? blank;
           const t = rain!.intensity[i]! / 255;
           // The leading cell of a column burns near-white, the tail is green.
           color[i * 4] = t > 0.94 ? 200 : 30 * t;
@@ -323,16 +357,25 @@ export class AsciiDomRenderer {
           color[i * 4 + 2] = t > 0.94 ? 210 : 60 * t;
           color[i * 4 + 3] = 255;
         } else {
-          line += ' ';
+          line += blank;
           // Transparent leaves the backdrop untouched, so the video shows.
           color[i * 4 + 3] = 0;
         }
       }
 
       const row = this.textRows[y];
-      if (row && line !== this.textCache[y]) {
+      if (!row) continue;
+      if (braille) {
+        flushRun();
+        if (html !== this.htmlCache[y]) {
+          row.innerHTML = html;
+          this.htmlCache[y] = html;
+        }
+        this.textCache[y] = line;
+      } else if (line !== this.textCache[y]) {
         row.textContent = line;
         this.textCache[y] = line;
+        this.htmlCache[y] = '';
       }
     }
     this.colorCtx!.putImageData(this.colorImage, 0, 0);
