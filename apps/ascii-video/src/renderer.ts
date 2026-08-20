@@ -59,6 +59,7 @@ export class AsciiVideoApp {
   private resizeObserver: ResizeObserver | null = null;
   private pixelRatio = window.devicePixelRatio;
   private errors = 0;
+  private appliedResolution = 0;
 
   /** Set false to render the whole frame as ASCII, ignoring segmentation. */
   maskEnabled = true;
@@ -173,6 +174,7 @@ export class AsciiVideoApp {
   private applySize(width: number, height: number) {
     if (!width || !height) return;
     this.pixelRatio = window.devicePixelRatio;
+    this.appliedResolution = settings.resolution;
     this.viewport = [width, height];
     this.pipeline.resize(
       Math.max(1, width - draw_margin[0] * 2),
@@ -223,7 +225,10 @@ export class AsciiVideoApp {
 
     // devicePixelRatio is a plain property read that forces no layout, and it
     // is the one grid input that can change without the element resizing.
-    if (window.devicePixelRatio !== this.pixelRatio) {
+    if (
+      window.devicePixelRatio !== this.pixelRatio ||
+      settings.resolution !== this.appliedResolution
+    ) {
       this.applySize(this.viewport[0], this.viewport[1]);
     }
 
@@ -398,6 +403,7 @@ export class AsciiVideoApp {
       frameMs: Number(avg.toFixed(2)),
       cols: this.pipeline.cols,
       rows: this.pipeline.rows,
+      resolution: settings.resolution,
       glyphMode: settings.glyphMode,
       backgroundMode: settings.backgroundMode,
       colorMode: settings.colorMode,

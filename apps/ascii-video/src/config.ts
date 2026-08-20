@@ -35,9 +35,12 @@ export const settings = {
   drawChars: true,
   showDiagnostics: false,
 
-  /** Characters per inch, with the grid's long axis capped below. */
-  cpi: 20,
-  pixelationMax: 100,
+  /**
+   * Cells along the grid's long axis. This is the app's resolution dial: the
+   * short axis follows the viewport's aspect. Segmentation cost is fixed
+   * regardless, so the ceiling here is really about the DOM.
+   */
+  resolution: 160,
   /** Mask alpha at or above which a cell counts as subject. */
   maskAlphaThreshold: 128,
   /** Run segmentation every N frames. */

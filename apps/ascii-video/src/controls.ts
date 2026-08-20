@@ -58,6 +58,9 @@ export class Controls {
 
     this.panel.append(
       this.header(),
+      this.range('resolution', 40, 300, 10, settings.resolution, (v) => {
+        settings.resolution = v;
+      }),
       this.select<GlyphMode>('glyphs', ['ramp', 'edge', 'braille'], settings.glyphMode, (v) => {
         settings.glyphMode = v;
       }),
@@ -171,6 +174,36 @@ export class Controls {
     el.value = initial;
     el.addEventListener('change', () => onChange(el.value as T));
     return this.row(label, el);
+  }
+
+  private range(
+    label: string,
+    min: number,
+    max: number,
+    step: number,
+    initial: number,
+    onChange: (value: number) => void,
+  ) {
+    const el = document.createElement('input');
+    el.type = 'range';
+    el.min = String(min);
+    el.max = String(max);
+    el.step = String(step);
+    el.value = String(initial);
+    el.style.cssText = `width:110px;accent-color:#5fdc8f;touch-action:manipulation;`;
+    const readout = document.createElement('span');
+    readout.textContent = String(initial);
+    readout.style.cssText = 'min-width:2.4em;text-align:right;opacity:.8;';
+    const apply = () => {
+      const value = Number(el.value);
+      readout.textContent = String(value);
+      onChange(value);
+    };
+    el.addEventListener('input', apply);
+    const group = document.createElement('span');
+    group.style.cssText = 'display:flex;align-items:center;gap:6px;';
+    group.append(readout, el);
+    return this.row(label, group);
   }
 
   private check(label: string, initial: boolean, onChange: (value: boolean) => void) {

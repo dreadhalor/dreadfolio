@@ -24,7 +24,7 @@ inspect them in devtools.
 - **Matrix rain** — falling katakana in the area the mask carves out
 - **CRT treatment** — scanlines, bloom and vignette
 - **Live diagnostics** — fps, frame time, grid size, model and delegate
-- **Responsive** — the grid is derived from viewport size and display DPI
+- **Resolution slider** — 40 to 300 cells across, adjustable live
 
 Press `c` or click the gear to open the controls; everything is switchable live.
 Close with the X, Escape, or by tapping the artwork. The ASCII is real selectable
@@ -78,6 +78,24 @@ guesses. Per-frame cost before and after:
 Per glyph mode, measured at 100x62 with pre-built buffers: ramp 0.5 ms, edge
 0.7 ms, braille 2.1 ms (eight times the sample data). Time effects add well
 under a millisecond.
+
+Resolution is close to free, which is the whole point of getting colour out of
+the DOM. Segmentation is a fixed cost that does not care how many cells there
+are, and the per-cell work is a tight typed-array loop. Measured across the
+slider's range at a 1400px viewport:
+
+| resolution | grid | cells | frame |
+|---|---|---|---|
+| 60 | 60x32 | 1,920 | 8.5 ms |
+| 100 | 100x54 | 5,400 | 8.4 ms |
+| 220 | 220x119 | 26,180 | 8.9 ms |
+| 400 | 400x216 | 86,400 | 10.7 ms |
+
+Sixteen times the cells for about 2 ms. The real ceiling is aesthetic rather
+than computational: past roughly 300 the cells are under 4px and it stops
+reading as characters at all, becoming a faintly textured photograph. The
+silhouette also becomes mask-limited, since the segmentation mask is 256 across
+however fine the grid gets.
 | **JS bundle** | **2.22 MB (~600 KB gz)** | **143 KB (~44 KB gz)** |
 
 Measured end to end: **~7 fps worth of work per frame, now 90-120 fps.**
@@ -355,10 +373,10 @@ asciiSettings.glyphMode = 'braille'  // same object the render loop reads
 
 ## Mobile
 
-The grid is sized from CSS pixels only. A CSS pixel is already nominally 1/96
-inch regardless of `devicePixelRatio`, so multiplying by the ratio double-counts
-it — that made cells three times too large on a 3x phone, 27 columns across a
-393px viewport instead of 46. Controls are 44px on their short axis, the panel is
+Resolution is set directly rather than derived from display density. The old
+heuristic multiplied by `devicePixelRatio` on top of CSS pixels, which are
+already device-independent, so it double-counted and made cells three times too
+large on a 3x phone. Controls are 44px on their short axis, the panel is
 bounded by `min(260px, 100vw - 24px)` and `100dvh`, and the page uses `100dvh`
 because `100vh` on mobile Safari includes the browser chrome and pushes the
 bottom of the grid under the toolbar.

@@ -101,17 +101,11 @@ export class FramePipeline {
    * a consistent physical size, then capped.
    */
   resize(width: number, height: number) {
-    // A CSS pixel is already nominally 1/96 inch regardless of devicePixelRatio,
-    // so multiplying by the ratio double-counts it. On a 3x phone that made
-    // cells three times too big -- 27 columns across a 393px viewport. On
-    // desktop the cell cap below almost always binds, so this only really
-    // changes the small-viewport, high-density case that was wrong.
-    const dpi = 96;
-    const longest = Math.max(width, height);
-    const cells = Math.min(
-      Math.floor((longest * settings.cpi) / dpi),
-      settings.pixelationMax,
-    );
+    // Resolution is set directly rather than derived from display DPI. The old
+    // heuristic multiplied by devicePixelRatio on top of CSS pixels, which are
+    // already device-independent, and in practice the cap bound almost always
+    // anyway -- so it was doing nothing except being wrong on phones.
+    const cells = Math.max(16, Math.min(400, Math.round(settings.resolution)));
     const aspect = width / height;
     const [cols, rows] =
       aspect >= 1
