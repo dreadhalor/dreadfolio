@@ -17,6 +17,34 @@ import {
 
 const TAP = 44;
 
+/**
+ * Lucide paths, inlined rather than pulled in as a dependency for two glyphs.
+ * They stroke in currentColor, so they pick up the panel's accent and can be
+ * sized like anything else -- which an emoji cannot.
+ */
+const ICONS: Record<string, string> = {
+  settings:
+    '<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/>' +
+    '<circle cx="12" cy="12" r="3"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+};
+
+function icon(name: keyof typeof ICONS, size = 20) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  svg.innerHTML = ICONS[name]!;
+  return svg;
+}
+
 const ACCENT = '#9fe6b0';
 const EDGE = 'rgba(120,255,170,.35)';
 
@@ -30,14 +58,14 @@ export class Controls {
     parent: HTMLElement,
     private handlers: { onColorMode: (mode: ColorMode) => void | Promise<void> },
   ) {
-    this.toggle.textContent = '⚙';
+    this.toggle.replaceChildren(icon('settings'));
     this.toggle.setAttribute('aria-label', 'Open controls');
     this.toggle.style.cssText =
       `position:absolute;top:max(12px,env(safe-area-inset-top));` +
       `right:max(12px,env(safe-area-inset-right));z-index:6;` +
       `width:${TAP}px;height:${TAP}px;border:1px solid ${EDGE};border-radius:10px;` +
-      `cursor:pointer;background:rgba(0,0,0,.6);color:${ACCENT};font-size:20px;` +
-      `line-height:1;touch-action:manipulation;`;
+      `cursor:pointer;background:rgba(0,0,0,.6);color:${ACCENT};` +
+      `display:grid;place-items:center;touch-action:manipulation;`;
     this.toggle.addEventListener('click', () => this.setOpen(true));
 
     this.panel.setAttribute('role', 'dialog');
@@ -128,11 +156,11 @@ export class Controls {
     title.textContent = 'controls';
     title.style.opacity = '.7';
     const close = document.createElement('button');
-    close.textContent = '✕';
+    close.replaceChildren(icon('x', 18));
     close.setAttribute('aria-label', 'Close controls');
     close.style.cssText =
       `width:${TAP}px;height:${TAP}px;background:none;border:0;color:${ACCENT};` +
-      `font-size:17px;cursor:pointer;touch-action:manipulation;`;
+      `display:grid;place-items:center;cursor:pointer;touch-action:manipulation;`;
     close.addEventListener('click', () => this.setOpen(false));
     bar.append(title, close);
     return bar;
