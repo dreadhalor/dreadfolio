@@ -4,9 +4,10 @@
  * hot path caches these values across frames.
  */
 
-export type GlyphMode = 'ramp' | 'braille';
+export type GlyphMode = 'ramp' | 'edge' | 'braille';
 export type BackgroundMode = 'video' | 'rain' | 'plain';
 export type ColorMode = 'image' | 'region';
+export type { TimeMode } from './temporal';
 
 /** Dark -> light. Index 0 is the densest glyph. */
 export const density = '@WÑ$9806532ba4c7?1=~"-;:,. ';
@@ -17,6 +18,9 @@ export const settings = {
   colorMode: 'image' as ColorMode,
   crt: false,
   mask: true,
+  timeMode: 'off' as import('./temporal').TimeMode,
+  /** Per-frame retention for the trails effect; higher lingers longer. */
+  trailDecay: 0.88,
 
   black: true,
   gradient: false,
@@ -38,6 +42,11 @@ export const settings = {
   segmentInterval: 1,
   /** Brightness lift for braille cells, whose dots already carry tone. */
   brailleGain: 1.9,
+  /**
+   * Sobel gradient magnitude above which a cell is drawn as a contour glyph
+   * rather than a tone glyph. Lower means more of the frame turns into lines.
+   */
+  edgeThreshold: 120,
 };
 
 export type Settings = typeof settings;

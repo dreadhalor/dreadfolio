@@ -16,7 +16,9 @@ inspect them in devtools.
 - **Real-time ASCII conversion** — webcam to characters at display framerate
 - **AI person segmentation** — MediaPipe ImageSegmenter, GPU delegate
 - **Selectable text** — the ASCII is DOM, not pixels painted onto a canvas
+- **Edge mode** — Sobel contour glyphs that follow features instead of tone
 - **Braille mode** — halftone dot rendering at 2x4 subcell resolution
+- **Time effects** — slit-scan and motion trails over the sampled grid
 - **Region colouring** — hair, skin, face and clothes tinted separately
 - **Matrix rain** — falling katakana in the area the mask carves out
 - **CRT treatment** — scanlines, bloom and vignette
@@ -71,6 +73,10 @@ guesses. Per-frame cost before and after:
 | Segmentation | 122.6 ms (BodyPix @ 2560x1440) | ~4-7 ms (MediaPipe, GPU delegate) |
 | Canvas pipeline | 11.9 ms | 0.3 ms |
 | DOM ASCII render | 8.4 ms at full coverage (2.3 ms at 25%) | **0.5 ms, flat** |
+
+Per glyph mode, measured at 100x62 with pre-built buffers: ramp 0.5 ms, edge
+0.7 ms, braille 2.1 ms (eight times the sample data). Time effects add well
+under a millisecond.
 | **JS bundle** | **2.22 MB (~600 KB gz)** | **143 KB (~44 KB gz)** |
 
 Measured end to end: **~7 fps worth of work per frame, now 90-120 fps.**
@@ -210,7 +216,20 @@ public/
 
 ## Modes
 
-**Glyphs.** `ramp` maps cell brightness onto a density ramp. `braille` samples
+**Glyphs.** `ramp` maps cell brightness onto a density ramp.
+
+`edge` runs a Sobel over the luminance field: the gradient magnitude decides
+whether a cell sits on an edge, and the gradient direction picks a glyph that
+follows the contour, so features are drawn as lines rather than dissolving into
+tone. Below the threshold it falls back to the ramp, so flat areas still shade.
+Two notes: the contour glyphs are ASCII `_ / | \` on purpose, because box
+drawing characters resolve to a different advance in the fallback font and this
+layer normalises advance globally; and luminance is box-blurred before the
+Sobel, since differentiating raw sensor noise turns half the frame into
+spurious contours. `edgeThreshold` tunes how much of the frame becomes line
+work — 120 gives roughly 13%, 38 gives 55% and reads as circuitry.
+
+`braille` samples
 each cell at 2x4 and ordered-dithers those eight subpixels into a Unicode
 braille pattern — a halftone, so it captures finer gradients but reads as
 dithering rather than as four times the detail.
@@ -236,6 +255,15 @@ is noticeably less clean around the jaw and shoulders than the 250KB binary one.
 
 **Background.** `video` shows the live feed behind the subject, `rain` replaces
 it with falling katakana, `plain` with flat colour.
+
+**Time.** `slitscan` takes each output row from a different point in the past,
+so moving through frame smears you across time. `trails` keeps a decaying
+maximum, including alpha, so the silhouette itself leaves an afterimage.
+
+These are only affordable because sampling happens at grid resolution: a
+slit-scan at camera resolution means buffering megabytes per frame, whereas a
+100x62 frame is 25KB and a whole second of history costs under a megabyte.
+History is capped at 24MB, which matters because braille samples 8x per cell.
 
 ## Customization
 

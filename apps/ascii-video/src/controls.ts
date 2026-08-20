@@ -7,7 +7,13 @@
  * screen, and it can be dismissed three ways (the X, tapping outside, Escape)
  * because a gear that hides itself when open leaves no way back.
  */
-import { settings, type BackgroundMode, type ColorMode, type GlyphMode } from './config';
+import {
+  settings,
+  type BackgroundMode,
+  type ColorMode,
+  type GlyphMode,
+  type TimeMode,
+} from './config';
 
 const TAP = 44;
 
@@ -49,7 +55,7 @@ export class Controls {
 
     this.panel.append(
       this.header(),
-      this.select<GlyphMode>('glyphs', ['ramp', 'braille'], settings.glyphMode, (v) => {
+      this.select<GlyphMode>('glyphs', ['ramp', 'edge', 'braille'], settings.glyphMode, (v) => {
         settings.glyphMode = v;
       }),
       this.select<BackgroundMode>(
@@ -62,6 +68,9 @@ export class Controls {
       ),
       this.select<ColorMode>('colour', ['image', 'region'], settings.colorMode, (v) => {
         void this.handlers.onColorMode(v);
+      }),
+      this.select<TimeMode>('time', ['off', 'slitscan', 'trails'], settings.timeMode, (v) => {
+        settings.timeMode = v;
       }),
       this.check('mask', settings.mask, (v) => {
         settings.mask = v;

@@ -9,6 +9,7 @@ import { AsciiDomRenderer } from './ascii-dom';
 import { Controls } from './controls';
 import { FramePipeline } from './frame-pipeline';
 import { RainField } from './rain';
+import { TemporalField } from './temporal';
 import { VideoCamera } from './video-camera';
 import {
   base_black,
@@ -31,6 +32,7 @@ export class AsciiVideoApp {
   private camera = new VideoCamera();
   private pipeline = new FramePipeline();
   private rain = new RainField();
+  private temporal = new TemporalField();
   private ascii: AsciiDomRenderer;
   private controls: Controls | null = null;
   private host: HTMLElement;
@@ -217,7 +219,13 @@ export class AsciiVideoApp {
           settings.black,
           settings.drawSquares,
         );
-        this.ascii.render(frame, {
+        // Time effects run on the sampled grid, before glyph selection. Always
+        // call through, even when off: that is what releases the retained
+        // history instead of leaving a megabyte of frames pinned.
+        const data = this.temporal.apply(frame, settings.timeMode, settings.trailDecay);
+        const timed = data === frame.data ? frame : { ...frame, data };
+
+        this.ascii.render(timed, {
           density,
           glyphMode: settings.glyphMode,
           black: settings.black,
@@ -228,6 +236,7 @@ export class AsciiVideoApp {
           drawChars: settings.drawChars,
           alphaThreshold: settings.maskAlphaThreshold,
           brailleGain: settings.brailleGain,
+          edgeThreshold: settings.edgeThreshold,
           opaqueBackground: settings.backgroundMode !== 'video' || !useMask,
           getFill: (px) => this.getFill(px),
           categories: frame.categories,
@@ -318,6 +327,8 @@ export class AsciiVideoApp {
       glyphMode: settings.glyphMode,
       backgroundMode: settings.backgroundMode,
       colorMode: settings.colorMode,
+      timeMode: settings.timeMode,
+      historyDepth: this.temporal.depth,
       model: this.pipeline.kind,
       delegate: this.pipeline.delegate,
       maskEnabled: this.maskEnabled && settings.mask,
