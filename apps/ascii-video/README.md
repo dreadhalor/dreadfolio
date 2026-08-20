@@ -282,10 +282,23 @@ it with falling katakana, `plain` with flat colour.
 so moving through frame smears you across time. `trails` keeps a decaying
 maximum, including coverage, so the silhouette itself leaves an afterimage.
 
-While a time effect runs, the live `<video>` element is swapped for a canvas
-carrying the same warp. The element is composited by the browser in real time,
-so leaving it on meant the background ran in the present while the subject
-smeared into the past, and the two visibly disagreed.
+The background is always drawn from the frame the ASCII was built from, never
+from the live `<video>`. The browser composites that element in real time, so
+showing it means the picture always runs slightly ahead of the mask on top of
+it — subtle on a fast machine, obvious on a phone where the loop is slower. The
+element stays in the DOM and is simply covered, because a hidden video is a
+decoder the browser may suspend.
+
+Every layer sits inside one `stage` element at `inset:0`, so the video, the
+background and the ASCII cannot describe different rectangles. They each used to
+carry their own copy of the geometry, and on iOS a `<video>` that ignored its
+update produced a half-sized picture under a full-sized grid.
+
+The render loop re-arms from inside its own `requestVideoFrameCallback`, so if
+that callback ever stops being delivered — backgrounding a tab on iOS is the
+reliable way — it never restarts. A watchdog notices a loop that has not ticked
+in 700ms and restarts it, and restarts are generation-tagged so a late callback
+cannot leave two chains running.
 
 The characters are warped on the CPU at grid resolution, which is cheap: a
 100x62 frame is 25KB, so a second of history costs under a megabyte.

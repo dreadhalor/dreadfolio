@@ -41,6 +41,12 @@ export class AsciiVideoApp {
   private diagnostics = document.createElement('div');
   private crt = document.createElement('div');
   /**
+   * One element carrying the grid's rect. The video, the warped feed and the
+   * ASCII all sit inside it at inset:0, so they cannot end up describing
+   * different rectangles -- which is what produced a half-sized video feed.
+   */
+  private stage = document.createElement('div');
+  /**
    * Stand-in for the live <video> while a time effect is running. The element
    * is composited by the browser in real time, so leaving it on meant the
    * background ran in the present while the subject smeared into the past --
@@ -59,6 +65,9 @@ export class AsciiVideoApp {
   private pixelRatio = window.devicePixelRatio;
   private errors = 0;
   private appliedResolution = 0;
+  private lastTick = 0;
+  private loopId = 0;
+  private watchdog = 0;
 
   /** Set false to render the whole frame as ASCII, ignoring segmentation. */
   maskEnabled = true;
@@ -69,19 +78,23 @@ export class AsciiVideoApp {
       'position:relative;width:100%;height:100%;overflow:hidden;';
     root.appendChild(this.host);
 
-    // The live feed, composited by the browser. Mirrored in CSS to match the
-    // mirrored sampling done in the pipeline.
+    this.stage.style.cssText = 'position:absolute;overflow:hidden;';
+    this.host.appendChild(this.stage);
+
+    // Mirrored in CSS to match the mirrored sampling done in the pipeline.
     const video = this.camera.video;
     video.style.cssText =
-      'position:absolute;object-fit:cover;transform:scaleX(-1);pointer-events:none;';
-    this.host.appendChild(video);
+      'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;' +
+      'transform:scaleX(-1);pointer-events:none;';
+    video.setAttribute('aria-hidden', 'true');
+    this.stage.appendChild(video);
 
     this.feed.style.cssText =
-      'position:absolute;pointer-events:none;display:none;';
-    this.host.appendChild(this.feed);
+      'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;';
+    this.stage.appendChild(this.feed);
     this.feedCtx = this.feed.getContext('2d');
 
-    this.ascii = new AsciiDomRenderer(this.host);
+    this.ascii = new AsciiDomRenderer(this.stage);
     this.buildCrt();
     this.buildDiagnostics();
     this.controls = new Controls(this.host, {
@@ -121,7 +134,9 @@ export class AsciiVideoApp {
     const rect = this.host.getBoundingClientRect();
     this.applySize(rect.width, rect.height);
     this.running = true;
+    this.lastTick = performance.now();
     this.schedule();
+    this.startWatchdog();
     await segmentation;
   }
 
@@ -181,14 +196,51 @@ export class AsciiVideoApp {
   private schedule() {
     if (!this.running) return;
     const video = this.camera.video;
+    // Generation-tagged so a restart cannot leave two chains running: if the
+    // suspended callback ever does fire, it sees a stale id and stops.
+    const id = this.loopId;
+    const run = () => {
+      if (id === this.loopId) this.tick();
+    };
     if ('requestVideoFrameCallback' in video) {
-      video.requestVideoFrameCallback(() => this.tick());
+      video.requestVideoFrameCallback(run);
     } else {
-      requestAnimationFrame(() => this.tick());
+      requestAnimationFrame(run);
     }
   }
 
+  /** Abandon the current callback chain and start a fresh one. */
+  private restart() {
+    this.loopId++;
+    this.lastTick = performance.now();
+    this.schedule();
+  }
+
+  /**
+   * requestVideoFrameCallback can simply stop being called -- backgrounding the
+   * tab on iOS is the reliable way to see it -- and because the loop re-arms
+   * from inside its own callback, once it stops it never restarts. This notices
+   * a stalled loop and kicks it, which is cheaper than trying to enumerate
+   * every way a platform might suspend the callback.
+   */
+  private startWatchdog() {
+    window.clearInterval(this.watchdog);
+    this.watchdog = window.setInterval(() => {
+      if (!this.running || document.hidden) return;
+      if (performance.now() - this.lastTick > 700) this.restart();
+    }, 700);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden || !this.running) return;
+      // Coming back from another app: re-measure, drop any stale warp history,
+      // and re-arm in case the callback chain was dropped while suspended.
+      const rect = this.host.getBoundingClientRect();
+      this.applySize(rect.width, rect.height);
+      this.restart();
+    });
+  }
+
   private tick() {
+    this.lastTick = performance.now();
     // A throw here used to escape the rVFC callback and stop the loop for good,
     // freezing the output while the stats kept reporting the last good rate.
     try {
@@ -234,8 +286,6 @@ export class AsciiVideoApp {
           cols,
           rows,
           cellSize,
-          offsetX,
-          offsetY,
           settings.pixelScale,
           settings.glyphMode,
           settings.black,
@@ -286,23 +336,26 @@ export class AsciiVideoApp {
     offsetY: number,
     raining: boolean,
   ) {
-    const style = this.camera.video.style;
-    style.left = `${offsetX}px`;
-    style.top = `${offsetY}px`;
-    style.width = `${cols * cellSize}px`;
-    style.height = `${rows * cellSize}px`;
-    // Rain and plain backgrounds cover the feed entirely, so stop painting it.
-    // A time effect swaps the live element for the warped canvas below.
-    const wantsFeed = settings.backgroundMode === 'video' && !raining;
-    const warped = wantsFeed && settings.timeMode !== 'off';
-    style.display = wantsFeed && !warped ? 'block' : 'none';
+    // The single place the grid's rect is expressed.
+    const stage = this.stage.style;
+    stage.left = `${offsetX}px`;
+    stage.top = `${offsetY}px`;
+    stage.width = `${cols * cellSize}px`;
+    stage.height = `${rows * cellSize}px`;
 
-    const feed = this.feed.style;
-    feed.display = warped ? 'block' : 'none';
-    feed.left = `${offsetX}px`;
-    feed.top = `${offsetY}px`;
-    feed.width = `${cols * cellSize}px`;
-    feed.height = `${rows * cellSize}px`;
+    // Rain and plain backgrounds cover the feed entirely, so stop painting it.
+    // Otherwise the background is drawn from the frame the ASCII was built
+    // from, never the live element: the browser composites <video> in real
+    // time, so leaving it visible means the picture always runs a little ahead
+    // of the mask sitting on top of it.
+    // The element is left rendered rather than display:none, and simply covered
+    // -- by the feed canvas in video mode, by the opaque bars otherwise. A
+    // hidden video is a decoder a browser may feel free to suspend, and on iOS
+    // that is a good way to end up with a frozen picture. It is never actually
+    // visible, but if the feed ever failed to paint, the live frame showing
+    // through beats a black rectangle.
+    const wantsFeed = settings.backgroundMode === 'video' && !raining;
+    this.feed.style.display = wantsFeed ? 'block' : 'none';
 
     this.crt.style.display = settings.crt ? 'block' : 'none';
     this.crt.style.setProperty('--scan', `${Math.max(2, cellSize / 3)}px`);
@@ -417,6 +470,7 @@ export class AsciiVideoApp {
 
   destroy() {
     this.running = false;
+    window.clearInterval(this.watchdog);
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.camera.stop();

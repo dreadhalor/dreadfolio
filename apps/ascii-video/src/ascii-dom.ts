@@ -161,8 +161,6 @@ export class AsciiDomRenderer {
     cols: number,
     rows: number,
     cellSize: number,
-    offsetX: number,
-    offsetY: number,
     charScale: number,
     glyphMode: GlyphMode,
     black: boolean,
@@ -170,10 +168,12 @@ export class AsciiDomRenderer {
   ) {
     // --cell lets the rows size themselves off one property, so a resize that
     // keeps the grid's shape costs a few style writes instead of new markup.
+    // Geometry lives on the stage, not here. Every layer used to carry its own
+    // copy of the rect, so any one of them failing to update -- which iOS
+    // Safari will do to a <video> -- left them disagreeing on screen.
     this.root.style.cssText =
-      `position:absolute;left:${offsetX}px;top:${offsetY}px;` +
-      `width:${cols * cellSize}px;height:${rows * cellSize}px;` +
-      `--cell:${cellSize}px;pointer-events:none;isolation:isolate;`;
+      `position:absolute;inset:0;--cell:${cellSize}px;` +
+      `pointer-events:none;isolation:isolate;`;
 
     if (glyphMode !== this.advanceMode) {
       this.advanceMode = glyphMode;

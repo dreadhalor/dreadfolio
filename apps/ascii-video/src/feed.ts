@@ -13,7 +13,9 @@
 import type { TimeMode } from './temporal';
 
 /** Cap on the ring's long edge. 32 frames at 640x360 is about 29MB of texture. */
-const MAX_EDGE = 640;
+const RING_EDGE = 640;
+/** Modes needing only one canvas can afford a sharper one. */
+const SINGLE_EDGE = 1280;
 
 function makeCanvas(width: number, height: number) {
   const canvas = document.createElement('canvas');
@@ -35,9 +37,9 @@ export class FeedField {
    * trails: that mode only needs the accumulator, so allocating a ring for it
    * would waste tens of megabytes of texture.
    */
-  private ensure(aspect: number, depth: number) {
-    const width = Math.max(1, Math.round(aspect >= 1 ? MAX_EDGE : MAX_EDGE * aspect));
-    const height = Math.max(1, Math.round(aspect >= 1 ? MAX_EDGE / aspect : MAX_EDGE));
+  private ensure(aspect: number, depth: number, edge: number) {
+    const width = Math.max(1, Math.round(aspect >= 1 ? edge : edge * aspect));
+    const height = Math.max(1, Math.round(aspect >= 1 ? edge / aspect : edge));
     if (width === this.width && height === this.height && depth === this.depth) return;
     this.width = width;
     this.height = height;
@@ -73,17 +75,26 @@ export class FeedField {
     depth: number,
     decay: number,
   ): HTMLCanvasElement | null {
-    if (mode === 'off' || !crop.sw || !crop.sh) {
+    if (!crop.sw || !crop.sh) {
       this.reset();
       return null;
     }
-    // Only slitscan needs the ring. Sizing it from a live history length meant
-    // trails -- which keeps no history -- reported zero and skipped painting
-    // entirely, leaving the background frozen on its last frame or black.
-    this.ensure(crop.sw / crop.sh, mode === 'slitscan' ? Math.max(2, depth) : 0);
-    return mode === 'slitscan'
-      ? this.slitScan(video, crop)
-      : this.trails(video, crop, decay);
+    // Only slitscan needs the ring, and only it has to stay small: sizing the
+    // ring from a live history length meant trails -- which keeps no history --
+    // reported zero and skipped painting entirely.
+    const ring = mode === 'slitscan';
+    const edge = Math.min(
+      ring ? RING_EDGE : SINGLE_EDGE,
+      Math.round(Math.max(crop.sw, crop.sh)),
+    );
+    this.ensure(crop.sw / crop.sh, ring ? Math.max(2, depth) : 0, edge);
+    if (mode === 'slitscan') return this.slitScan(video, crop);
+    if (mode === 'trails') return this.trails(video, crop, decay);
+    // No time effect: just the current frame, but drawn from the same sample
+    // the ASCII was built from so the two cannot drift apart.
+    const out = this.accumulator!;
+    this.drawSource(out.getContext('2d')!, video, crop);
+    return out;
   }
 
   private drawSource(
