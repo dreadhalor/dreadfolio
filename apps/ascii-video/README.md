@@ -275,7 +275,11 @@ per time step -- the technique mrdoob's slit-scan demo uses, and the reason it
 stays sharp. Both use the identical age mapping, `floor(t * depth)` at
 normalised height t, so the background and the characters shear together.
 
-Two things that are easy to get wrong here. The mask and the region labels are
+Three things that are easy to get wrong here. The renderer must be handed the
+**warped** labels, not the pipeline's live buffer -- passing the latter leaves
+the region tints pinned to the present while the pixels and the mask smear into
+the past, which shows up as colour that moves independently of the picture and
+as large near-black patches wherever a covered cell is labelled background. The mask and the region labels are
 reused buffers owned by the pipeline, so history has to **copy** them; retaining
 them by reference leaves every entry pointing at the current frame, and the
 pixels smear while coverage and tints stay in the present. And the history is

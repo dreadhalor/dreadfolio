@@ -257,7 +257,10 @@ export class AsciiVideoApp {
           edgeThreshold: settings.edgeThreshold,
           opaqueBackground: settings.backgroundMode !== 'video' || !useMask,
           getFill: (px) => this.getFill(px),
-          categories: frame.categories,
+          // `timed`, not `frame`: the warped labels. Passing the live buffer
+          // left the region tints pinned to the present while the pixels and
+          // the mask smeared into the past.
+          categories: timed.categories,
           regionPalette,
           rain: raining
             ? { chars: this.rain.chars, glyph: this.rain.glyph, intensity: this.rain.intensity }

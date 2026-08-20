@@ -478,7 +478,12 @@ export class AsciiDomRenderer {
   ): number[] {
     const categories = opts.categories;
     if (categories) {
-      const tint = opts.regionPalette[categories[index]!];
+      const category = categories[index]!;
+      // Category 0 is background. A cell can be covered by the mask and still
+      // be labelled background -- the two are resampled separately, and any
+      // drift between them used to paint pure black, which reads as a hole
+      // rather than as a mistake. Fall back to the image colour instead.
+      const tint = category === 0 ? undefined : opts.regionPalette[category];
       if (tint) {
         // Keep some of the image's own shading so it still reads as a picture.
         const level = 0.3 + 0.7 * (((r + g + b) / 3) / 255);
