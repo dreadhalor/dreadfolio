@@ -112,7 +112,10 @@ export class PersonSegmenter {
    */
   segment(source: HTMLCanvasElement | HTMLVideoElement): MaskFrame | null {
     if (!this.segmenter) return this.mask;
-    this.timestamp += 1;
+    // Real elapsed milliseconds, forced strictly increasing. Feeding a counter
+    // told the graph frames were arriving ~30x faster than they were, which is
+    // the sort of thing its internal buffering sizes itself against.
+    this.timestamp = Math.max(this.timestamp + 1, Math.round(performance.now()));
     this.segmenter.segmentForVideo(source, this.timestamp, (result) => {
       const categoryMask = result.categoryMask;
       if (!categoryMask) {

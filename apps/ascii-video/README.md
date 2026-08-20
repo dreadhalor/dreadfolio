@@ -322,6 +322,15 @@ padded to full depth on the first frame rather than filling up over time, since
 a growing depth changes the age mapping every frame, which rebuilds the GPU ring
 continuously and leaves its oldest bands blank.
 
+Per-frame allocation is kept low deliberately, because it is the difference
+between "heavy" and "heavy and getting worse" on a phone. Coverage and region
+labels are read straight from the model's output buffer rather than drawn into
+a canvas and read back, history copies go into a ring allocated once instead of
+a slice per frame, and the only unavoidable allocation left is the sample's own
+`getImageData`. MediaPipe also gets real elapsed timestamps rather than a
+counter, since a clock running thirty times slow is not a fair thing to hand a
+graph that sizes its buffering against it.
+
 Depth is capped at 32 steps: the background holds one canvas per step, so depth
 costs texture memory and draw calls there, not just bytes on the CPU. Only
 slitscan needs that ring -- trails keeps no history at all, just an accumulator

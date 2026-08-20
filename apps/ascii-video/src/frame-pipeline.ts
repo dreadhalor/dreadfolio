@@ -62,10 +62,8 @@ function makeCanvas(width: number, height: number, willRead = false) {
 export class FramePipeline {
   private sample = makeCanvas(1, 1, true);
   private segInput = makeCanvas(1, 1);
-  private maskCanvas = makeCanvas(1, 1);
-  private maskImage: ImageData | null = null;
-  /** Mask resampled to the grid, so it can travel with the pixels. */
-  private cellMask = makeCanvas(1, 1, true);
+
+  /** Coverage and labels resampled to the grid, travelling with the pixels. */
   private maskValues = new Uint8Array(0);
   private segmenter = new PersonSegmenter();
   private frameCounter = 0;
@@ -121,8 +119,6 @@ export class FramePipeline {
     this.sample.height = rows * subY;
     this.categories = new Uint8Array(cols * rows);
     this.maskValues = new Uint8Array(cols * rows);
-    this.cellMask.width = cols;
-    this.cellMask.height = rows;
   }
 
   /** Sample one video frame. Null until the camera reports real dimensions. */
@@ -156,32 +152,12 @@ export class FramePipeline {
     ctx.restore();
     ctx.globalCompositeOperation = 'source-over';
 
-    // Resample the mask onto the grid rather than compositing it into the
-    // pixels. The mask spans the whole camera frame while the grid shows only
-    // the cover-crop, so take the matching sub-rect.
-    const maskCtx = this.cellMask.getContext('2d')!;
-    if (applyMask && this.maskImage) {
-      const kx = this.maskCanvas.width / vw;
-      const ky = this.maskCanvas.height / vh;
-      maskCtx.save();
-      maskCtx.setTransform(-1, 0, 0, 1, this.cols, 0);
-      maskCtx.globalCompositeOperation = 'copy';
-      maskCtx.drawImage(
-        this.maskCanvas,
-        sx * kx, sy * ky, sw * kx, sh * ky,
-        0, 0, this.cols, this.rows,
-      );
-      maskCtx.restore();
-      const alpha = maskCtx.getImageData(0, 0, this.cols, this.rows).data;
-      for (let i = 0, a = 3; i < this.maskValues.length; i++, a += 4) {
-        this.maskValues[i] = alpha[a]!;
-      }
+    const wantRegions = settings.colorMode === 'region' && this.kind === 'multiclass';
+    if (applyMask && this.lastMask) {
+      this.sampleMask(vw, vh, sx, sy, sw, sh, wantRegions);
     } else {
       this.maskValues.fill(255);
     }
-
-    const wantRegions = settings.colorMode === 'region' && this.kind === 'multiclass';
-    if (wantRegions && this.lastMask) this.sampleCategories(vw, vh, sx, sy, sw, sh);
 
     return {
       data: ctx.getImageData(0, 0, sampleW, sampleH).data,
@@ -197,29 +173,40 @@ export class FramePipeline {
   }
 
   /**
-   * Nearest-neighbour the category mask onto the grid, applying the same crop
-   * and mirror the image sampling used so regions land on the right glyphs.
+   * Nearest-neighbour the segmentation onto the grid, applying the same crop and
+   * mirror the image sampling used.
+   *
+   * Coverage used to come from drawing the mask into a canvas and reading it
+   * back, which cost a GPU round-trip and an ImageData allocation every frame
+   * for data already sitting in memory. Reading it here also means coverage and
+   * labels are sampled identically, so they cannot disagree at the silhouette.
    */
-  private sampleCategories(
+  private sampleMask(
     vw: number,
     vh: number,
     sx: number,
     sy: number,
     sw: number,
     sh: number,
+    wantRegions: boolean,
   ) {
     const mask = this.lastMask!;
-    const out = this.categories!;
+    const coverage = this.maskValues;
+    const labels = this.categories!;
     const kx = mask.width / vw;
     const ky = mask.height / vh;
     for (let y = 0; y < this.rows; y++) {
       const v = (y + 0.5) / this.rows;
       const my = Math.min(mask.height - 1, ((sy + v * sh) * ky) | 0);
+      const rowBase = my * mask.width;
       for (let x = 0; x < this.cols; x++) {
         // 1 - u because the sampled image is mirrored.
         const u = 1 - (x + 0.5) / this.cols;
         const mx = Math.min(mask.width - 1, ((sx + u * sw) * kx) | 0);
-        out[y * this.cols + x] = mask.data[my * mask.width + mx]!;
+        const value = mask.data[rowBase + mx]!;
+        const i = y * this.cols + x;
+        coverage[i] = this.segmenter.isSubject(value) ? 255 : 0;
+        if (wantRegions) labels[i] = value;
       }
     }
   }
@@ -252,24 +239,6 @@ export class FramePipeline {
     if (!mask) return;
     this.lastMask = mask;
 
-    if (
-      !this.maskImage ||
-      this.maskImage.width !== mask.width ||
-      this.maskImage.height !== mask.height
-    ) {
-      this.maskImage = new ImageData(mask.width, mask.height);
-      this.maskCanvas.width = mask.width;
-      this.maskCanvas.height = mask.height;
-    }
-
-    // Only alpha matters for destination-in, so RGB is left at zero. The two
-    // models disagree on encoding, so ask the segmenter rather than assuming.
-    const pixels = this.maskImage.data;
-    const values = mask.data;
-    for (let i = 0, a = 3; i < values.length; i++, a += 4) {
-      pixels[a] = this.segmenter.isSubject(values[i]!) ? 255 : 0;
-    }
-    this.maskCanvas.getContext('2d')!.putImageData(this.maskImage, 0, 0);
   }
 
   stats() {

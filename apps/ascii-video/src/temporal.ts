@@ -42,6 +42,9 @@ export class TemporalField {
   private accumulator: Float32Array | null = null;
   private maskAccumulator: Float32Array | null = null;
   private categoryAccumulator: Uint8Array | null = null;
+  /** Reusable backing store for history copies, one slot per retained frame. */
+  private slots: { mask: Uint8Array; categories: Uint8Array }[] = [];
+  private cursor = 0;
   private width = 0;
   private height = 0;
   private cols = 0;
@@ -92,6 +95,11 @@ export class TemporalField {
     this.accumulator = new Float32Array(frameBytes);
     this.maskAccumulator = new Float32Array(cols * rows);
     this.categoryAccumulator = new Uint8Array(cols * rows);
+    this.slots = Array.from({ length: this.capacity }, () => ({
+      mask: new Uint8Array(cols * rows),
+      categories: new Uint8Array(cols * rows),
+    }));
+    this.cursor = 0;
   }
 
   private reset(width: number, height: number) {
@@ -109,14 +117,18 @@ export class TemporalField {
   private slitScan(frame: Frame, current: TimedFrame): TimedFrame {
     const { sampleW: w, sampleH: h, cols, rows } = frame;
     // `data` is a fresh allocation each frame (getImageData), so it can be kept
-    // by reference. `mask` and `categories` are reused buffers owned by the
-    // pipeline, so retaining them would leave every history entry pointing at
-    // the current frame -- the pixels would smear while coverage and region
-    // tints stayed in the present. Copies are ~12KB a frame.
+    // by reference. `mask` and `categories` are buffers the pipeline reuses, so
+    // they have to be copied or every history entry would point at the present.
+    // The copies go into a ring allocated once rather than a slice per frame,
+    // which is ~11KB of garbage a frame that a phone would rather not collect.
+    const slot = this.slots[this.cursor]!;
+    this.cursor = (this.cursor + 1) % this.slots.length;
+    slot.mask.set(current.mask);
+    if (current.categories && slot.categories) slot.categories.set(current.categories);
     const entry = {
       data: current.data,
-      mask: current.mask.slice(),
-      categories: current.categories ? current.categories.slice() : null,
+      mask: slot.mask,
+      categories: current.categories ? slot.categories : null,
     };
     this.history.unshift(entry);
     // Pad to full depth with the current frame rather than letting the buffer

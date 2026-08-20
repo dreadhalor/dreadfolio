@@ -38,7 +38,7 @@ export const settings = {
    * short axis follows the viewport's aspect. Segmentation cost is fixed
    * regardless, so the ceiling here is really about the DOM.
    */
-  resolution: 160,
+  resolution: 100,
   /** Mask alpha at or above which a cell counts as subject. */
   maskAlphaThreshold: 128,
   /** Run segmentation every N frames. */
