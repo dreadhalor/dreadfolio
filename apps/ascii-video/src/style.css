@@ -12,12 +12,22 @@
   user-select: none; /* Standard syntax */
 }
 
+/*
+ * The whole point of rendering ASCII as DOM text is that you can select and
+ * copy it. The universal rule above applies to every element directly, so it
+ * beats inheritance from the text layer -- the characters have to be exempted
+ * explicitly or they come out unselectable.
+ */
+.ascii-text,
+.ascii-text * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 html,
 body {
   margin: 0px;
   height: 100vh;
   width: 100vw;
-  /* height: 100%; */
-  /* width: 100%; */
   overflow: hidden;
 }
