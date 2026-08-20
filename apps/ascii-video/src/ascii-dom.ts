@@ -238,7 +238,7 @@ export class AsciiDomRenderer {
     const bars = this.barImage.data;
     const braille = glyphMode === 'braille';
     const edges = glyphMode === 'edge';
-    const { data: px, cols, rows, subX, subY, sampleW } = frame;
+    const { data: px, mask, cols, rows, subX, subY, sampleW } = frame;
     const cells = subX * subY;
     const { lum, chan, alpha, dots } = this;
 
@@ -249,7 +249,6 @@ export class AsciiDomRenderer {
         let r = 0;
         let g = 0;
         let b = 0;
-        let a = 0;
         let cellDots = 0;
         for (let sy = 0; sy < subY; sy++) {
           const rowBase = ((y * subY + sy) * sampleW + x * subX) * 4;
@@ -261,7 +260,6 @@ export class AsciiDomRenderer {
             r += sr;
             g += sg;
             b += sb;
-            a += px[o + 3]!;
             if (braille) {
               const level = black ? (sr + sg + sb) / 3 : 255 - (sr + sg + sb) / 3;
               const bx = (x * subX + sx) % BAYER_N;
@@ -276,7 +274,9 @@ export class AsciiDomRenderer {
         chan[i * 3] = r / cells;
         chan[i * 3 + 1] = g / cells;
         chan[i * 3 + 2] = b / cells;
-        alpha[i] = a / cells;
+        // Coverage comes from the mask, not the pixel alpha, so a time effect
+        // warps pixels and coverage in step.
+        alpha[i] = mask[i]!;
         lum[i] = (r + g + b) / (3 * cells);
         dots[i] = cellDots;
       }

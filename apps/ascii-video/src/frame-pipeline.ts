@@ -13,8 +13,16 @@ import { segmentation_long_side, settings } from './config';
 import { PersonSegmenter, type SegmenterKind } from './segmenter';
 
 export type Frame = {
-  /** RGBA, row-major, sampleW * sampleH * 4. */
+  /**
+   * RGBA of the camera, row-major, sampleW * sampleH * 4, and deliberately
+   * NOT masked. Coverage travels separately in `mask` so that everything which
+   * describes a frame -- pixels, coverage, regions -- can be warped together by
+   * a time effect. Baking coverage into the alpha channel meant the mask and
+   * the region colours ran on different clocks from the pixels.
+   */
   data: Uint8ClampedArray;
+  /** Subject coverage per cell, 0-255. */
+  mask: Uint8Array;
   cols: number;
   rows: number;
   /** Subpixels per cell: 1x1 for the ramp, 2x4 for braille. */
@@ -51,6 +59,9 @@ export class FramePipeline {
   private segInput = makeCanvas(1, 1);
   private maskCanvas = makeCanvas(1, 1);
   private maskImage: ImageData | null = null;
+  /** Mask resampled to the grid, so it can travel with the pixels. */
+  private cellMask = makeCanvas(1, 1, true);
+  private maskValues = new Uint8Array(0);
   private segmenter = new PersonSegmenter();
   private frameCounter = 0;
   private lastMask: { data: Uint8Array; width: number; height: number } | null = null;
@@ -58,6 +69,8 @@ export class FramePipeline {
 
   cols = 0;
   rows = 0;
+  /** Source rect of the last sampled frame, so the feed can match it. */
+  crop = { sx: 0, sy: 0, sw: 0, sh: 0 };
   subX = 1;
   subY = 1;
 
@@ -108,6 +121,9 @@ export class FramePipeline {
     this.sample.width = cols * subX;
     this.sample.height = rows * subY;
     this.categories = new Uint8Array(cols * rows);
+    this.maskValues = new Uint8Array(cols * rows);
+    this.cellMask.width = cols;
+    this.cellMask.height = rows;
   }
 
   /** Sample one video frame. Null until the camera reports real dimensions. */
@@ -130,6 +146,7 @@ export class FramePipeline {
     const sampleH = this.sample.height;
     const ctx = this.sample.getContext('2d')!;
     const { sx, sy, sw, sh } = coverRect(vw, vh, this.cols / this.rows);
+    this.crop = { sx, sy, sw, sh };
 
     ctx.save();
     // Mirror once here: the video and the mask are both in unmirrored source
@@ -137,24 +154,39 @@ export class FramePipeline {
     ctx.setTransform(-1, 0, 0, 1, sampleW, 0);
     ctx.globalCompositeOperation = 'copy';
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sampleW, sampleH);
-
-    if (applyMask && this.maskImage) {
-      // The mask spans the whole camera frame while the grid shows only the
-      // cover-crop of it, so take the matching sub-rect rather than stretching
-      // the entire mask across the grid.
-      const kx = this.maskCanvas.width / vw;
-      const ky = this.maskCanvas.height / vh;
-      ctx.globalCompositeOperation = 'destination-in';
-      ctx.drawImage(this.maskCanvas, sx * kx, sy * ky, sw * kx, sh * ky, 0, 0, sampleW, sampleH);
-    }
     ctx.restore();
     ctx.globalCompositeOperation = 'source-over';
+
+    // Resample the mask onto the grid rather than compositing it into the
+    // pixels. The mask spans the whole camera frame while the grid shows only
+    // the cover-crop, so take the matching sub-rect.
+    const maskCtx = this.cellMask.getContext('2d')!;
+    if (applyMask && this.maskImage) {
+      const kx = this.maskCanvas.width / vw;
+      const ky = this.maskCanvas.height / vh;
+      maskCtx.save();
+      maskCtx.setTransform(-1, 0, 0, 1, this.cols, 0);
+      maskCtx.globalCompositeOperation = 'copy';
+      maskCtx.drawImage(
+        this.maskCanvas,
+        sx * kx, sy * ky, sw * kx, sh * ky,
+        0, 0, this.cols, this.rows,
+      );
+      maskCtx.restore();
+      const alpha = maskCtx.getImageData(0, 0, this.cols, this.rows).data;
+      for (let i = 0, a = 3; i < this.maskValues.length; i++, a += 4) {
+        this.maskValues[i] = alpha[a]!;
+      }
+    } else {
+      this.maskValues.fill(255);
+    }
 
     const wantRegions = settings.colorMode === 'region' && this.kind === 'multiclass';
     if (wantRegions && this.lastMask) this.sampleCategories(vw, vh, sx, sy, sw, sh);
 
     return {
       data: ctx.getImageData(0, 0, sampleW, sampleH).data,
+      mask: this.maskValues,
       cols: this.cols,
       rows: this.rows,
       subX: this.subX,

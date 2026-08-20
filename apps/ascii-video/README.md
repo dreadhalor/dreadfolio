@@ -258,12 +258,33 @@ it with falling katakana, `plain` with flat colour.
 
 **Time.** `slitscan` takes each output row from a different point in the past,
 so moving through frame smears you across time. `trails` keeps a decaying
-maximum, including alpha, so the silhouette itself leaves an afterimage.
+maximum, including coverage, so the silhouette itself leaves an afterimage.
 
-These are only affordable because sampling happens at grid resolution: a
-slit-scan at camera resolution means buffering megabytes per frame, whereas a
-100x62 frame is 25KB and a whole second of history costs under a megabyte.
-History is capped at 24MB, which matters because braille samples 8x per cell.
+While a time effect runs, the live `<video>` element is swapped for a canvas
+carrying the same warp. The element is composited by the browser in real time,
+so leaving it on meant the background ran in the present while the subject
+smeared into the past, and the two visibly disagreed.
+
+The characters are warped on the CPU at grid resolution, which is cheap: a
+100x62 frame is 25KB, so a second of history costs under a megabyte.
+
+The background is warped separately, because driving it off that same grid
+buffer made it a blurry mosaic. It keeps its own ring of **canvases** instead of
+pixel arrays, so history lives in GPU textures and compositing is one band blit
+per time step -- the technique mrdoob's slit-scan demo uses, and the reason it
+stays sharp. Both use the identical age mapping, `floor(t * depth)` at
+normalised height t, so the background and the characters shear together.
+
+Two things that are easy to get wrong here. The mask and the region labels are
+reused buffers owned by the pipeline, so history has to **copy** them; retaining
+them by reference leaves every entry pointing at the current frame, and the
+pixels smear while coverage and tints stay in the present. And the history is
+padded to full depth on the first frame rather than filling up over time, since
+a growing depth changes the age mapping every frame, which rebuilds the GPU ring
+continuously and leaves its oldest bands blank.
+
+Depth is capped at 32 steps: the background holds one canvas per step, so depth
+costs texture memory and draw calls there, not just bytes on the CPU.
 
 ## Customization
 

@@ -7,9 +7,10 @@
  */
 import { AsciiDomRenderer } from './ascii-dom';
 import { Controls } from './controls';
-import { FramePipeline } from './frame-pipeline';
+import { FramePipeline, type Frame } from './frame-pipeline';
 import { RainField } from './rain';
 import { TemporalField } from './temporal';
+import { FeedField } from './feed';
 import { VideoCamera } from './video-camera';
 import {
   base_black,
@@ -33,11 +34,22 @@ export class AsciiVideoApp {
   private pipeline = new FramePipeline();
   private rain = new RainField();
   private temporal = new TemporalField();
+  private feedField = new FeedField();
   private ascii: AsciiDomRenderer;
   private controls: Controls | null = null;
   private host: HTMLElement;
   private diagnostics = document.createElement('div');
   private crt = document.createElement('div');
+  /**
+   * Stand-in for the live <video> while a time effect is running. The element
+   * is composited by the browser in real time, so leaving it on meant the
+   * background ran in the present while the subject smeared into the past --
+   * the two visibly disagreed. FeedField warps the same way the grid does, at
+   * its own resolution, so the composition shares one clock without the
+   * background inheriting the grid's chunkiness.
+   */
+  private feed = document.createElement('canvas');
+  private feedCtx: CanvasRenderingContext2D | null = null;
 
   private frameTimes: number[] = [];
   private tickTimes: number[] = [];
@@ -62,6 +74,11 @@ export class AsciiVideoApp {
     video.style.cssText =
       'position:absolute;object-fit:cover;transform:scaleX(-1);pointer-events:none;';
     this.host.appendChild(video);
+
+    this.feed.style.cssText =
+      'position:absolute;pointer-events:none;display:none;';
+    this.host.appendChild(this.feed);
+    this.feedCtx = this.feed.getContext('2d');
 
     this.ascii = new AsciiDomRenderer(this.host);
     this.buildCrt();
@@ -222,9 +239,10 @@ export class AsciiVideoApp {
         // Time effects run on the sampled grid, before glyph selection. Always
         // call through, even when off: that is what releases the retained
         // history instead of leaving a megabyte of frames pinned.
-        const data = this.temporal.apply(frame, settings.timeMode, settings.trailDecay);
-        const timed = data === frame.data ? frame : { ...frame, data };
+        const warped = this.temporal.apply(frame, settings.timeMode, settings.trailDecay);
+        const timed: Frame = { ...frame, ...warped };
 
+        this.paintFeed();
         this.ascii.render(timed, {
           density,
           glyphMode: settings.glyphMode,
@@ -266,13 +284,44 @@ export class AsciiVideoApp {
     style.width = `${cols * cellSize}px`;
     style.height = `${rows * cellSize}px`;
     // Rain and plain backgrounds cover the feed entirely, so stop painting it.
-    style.display = settings.backgroundMode === 'video' && !raining ? 'block' : 'none';
+    // A time effect swaps the live element for the warped canvas below.
+    const wantsFeed = settings.backgroundMode === 'video' && !raining;
+    const warped = wantsFeed && settings.timeMode !== 'off';
+    style.display = wantsFeed && !warped ? 'block' : 'none';
+
+    const feed = this.feed.style;
+    feed.display = warped ? 'block' : 'none';
+    feed.left = `${offsetX}px`;
+    feed.top = `${offsetY}px`;
+    feed.width = `${cols * cellSize}px`;
+    feed.height = `${rows * cellSize}px`;
 
     this.crt.style.display = settings.crt ? 'block' : 'none';
     this.crt.style.setProperty('--scan', `${Math.max(2, cellSize / 3)}px`);
     // The bloom is a text-shadow in currentColor, so the blend tints it too.
     this.host.classList.toggle('crt', settings.crt);
     this.diagnostics.style.display = settings.showDiagnostics ? 'block' : 'none';
+  }
+
+  /** Draw the time-warped background at the feed's own resolution. */
+  private paintFeed() {
+    if (this.feed.style.display === 'none' || !this.feedCtx) {
+      if (settings.timeMode === 'off') this.feedField.reset();
+      return;
+    }
+    const source = this.feedField.render(
+      this.camera.video,
+      this.pipeline.crop,
+      settings.timeMode,
+      this.temporal.depth,
+      settings.trailDecay,
+    );
+    if (!source) return;
+    if (this.feed.width !== source.width || this.feed.height !== source.height) {
+      this.feed.width = source.width;
+      this.feed.height = source.height;
+    }
+    this.feedCtx.drawImage(source, 0, 0);
   }
 
   private getFill([r, g, b, a]: Pixel) {
