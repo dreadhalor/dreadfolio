@@ -20,7 +20,6 @@ inspect them in devtools.
 - **Braille mode** — halftone dot rendering at 2x4 subcell resolution
 - **Time effects** — slit-scan and motion trails over the sampled grid
 - **Region colouring** — hair, skin, face and clothes tinted separately
-- **Region effects** — a different glyph set per region, all in one frame
 - **Matrix rain** — falling katakana in the area the mask carves out
 - **CRT treatment** — scanlines, bloom and vignette
 - **Live diagnostics** — fps, frame time, grid size, model and delegate
@@ -266,31 +265,15 @@ macOS monospace fallback — so runs of blank cells are wrapped in a
 `visibility:hidden` span, which keeps the advance and renders nothing. Blank runs
 follow the silhouette, so that is ~70 spans per frame rather than one per cell.
 
+Run text goes through `innerHTML`, so it is escaped: the ASCII rain alphabet
+contains `<`, `>` and `&`, and an unescaped `<` opens a tag, swallows the
+characters behind it and slides the rest of the row left by whole cells.
+
 **Colour.** `image` uses the pixel's own colour. `region` tints by segmentation
 class — hair, body skin, face skin, clothes — modulated by the cell's brightness
 so it still reads as a picture. Region mode needs the multiclass model, which is
 16MB, so it is fetched only when selected and dropped again afterwards: its mask
 is noticeably less clean around the jaw and shoulders than the 250KB binary one.
-
-**Region effects.** `region fx` gives each segmentation class its own glyph set
-— braille on hair, contours on face skin, tone elsewhere — mixed within a single
-frame. It needs the multiclass labels, so it loads that model on demand.
-
-Mixing glyph families in one row looks impossible at first, because the layer
-normalises advance with a single letter-spacing value and braille advances
-0.684 of the font size against ASCII's 0.602. The way through is that
-letter-spacing is inheritable: a run of braille inside an ASCII row carries its
-own, and runs break on region boundaries, so it costs a few hundred spans a
-frame rather than one per cell. Measured drift across every colour x time x
-background combination: 0.3px on a 1095px grid.
-
-Two traps here, both of which produced silent, confusing output. Whether the
-frame needs braille dots or a smoothed luminance field depends on what any
-*region* asks for, not on the global glyph mode — gating on the latter rendered
-hair as U+2800 everywhere and dropped every contour. And run text goes through
-innerHTML, so it has to be escaped: the ASCII rain alphabet contains `<`, `>`
-and `&`, and an unescaped `<` opens a tag, swallows the characters after it and
-slides the rest of the row left by whole cells.
 
 **Background.** `video` shows the live feed behind the subject, `rain` replaces
 it with falling katakana, `plain` with flat colour.

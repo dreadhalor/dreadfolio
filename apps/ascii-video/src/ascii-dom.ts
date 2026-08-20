@@ -71,10 +71,6 @@ function escapeMarkup(text: string): string {
   return MARKUP.test(text) ? text.replace(MARKUP, (c) => ESCAPES[c]!) : text;
 }
 
-function categoriesOf(opts: AsciiDomOptions, index: number): number {
-  return opts.categories ? opts.categories[index]! : 0;
-}
-
 function measureAdvanceRatio(sample: string): number {
   const probe = document.createElement('span');
   probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font-family:${FONT_STACK};font-size:100px;font-weight:bold;`;
@@ -105,8 +101,6 @@ export type AsciiDomOptions = {
   brailleGain: number;
   /** Sobel magnitude above which a cell becomes a contour glyph. */
   edgeThreshold: number;
-  /** Per-category glyph set; null uses `glyphMode` for the whole frame. */
-  regionGlyphs: GlyphMode[] | null;
   /** Fill the backdrop everywhere, not just behind the subject. */
   opaqueBackground: boolean;
   getFill: (pixel: [number, number, number, number]) => number[];
@@ -144,10 +138,7 @@ export class AsciiDomRenderer {
   private dots = new Uint8Array(0);
   private advanceRatio = 0;
   private advanceMode: GlyphMode | null = null;
-  /** Advance ratios per glyph family, measured once; see layout(). */
-  private ratios: { ascii: number; braille: number } | null = null;
-  /** letter-spacing that makes a braille run advance exactly one cell. */
-  private brailleSpacing = 0;
+
   private rawDensity: string[] = [];
   private densitySource = '';
 
@@ -184,26 +175,19 @@ export class AsciiDomRenderer {
       `width:${cols * cellSize}px;height:${rows * cellSize}px;` +
       `--cell:${cellSize}px;pointer-events:none;isolation:isolate;`;
 
-    if (!this.ratios) {
-      this.ratios = {
-        ascii: measureAdvanceRatio('M'),
-        braille: measureAdvanceRatio(String.fromCodePoint(BRAILLE_BASE + 0xff)),
-      };
-    }
     if (glyphMode !== this.advanceMode) {
       this.advanceMode = glyphMode;
-      this.advanceRatio =
-        glyphMode === 'braille' ? this.ratios.braille : this.ratios.ascii;
+      // Braille and ASCII resolve to different advances in the same monospace
+      // stack, so this has to follow the glyphs actually in use.
+      this.advanceRatio = measureAdvanceRatio(
+        glyphMode === 'braille' ? String.fromCodePoint(BRAILLE_BASE + 0xff) : 'M',
+      );
     }
 
     // Lock the advance to exactly one cell, then nudge right by half the added
     // spacing so the glyph sits centred.
     const fontSize = cellSize * charScale;
     const letterSpacing = cellSize - fontSize * this.advanceRatio;
-    // Mixed glyph families in one row would otherwise drift, because a single
-    // letter-spacing value cannot normalise two different advances. Spacing is
-    // inheritable, so a run of braille inside an ASCII row can carry its own.
-    this.brailleSpacing = cellSize - fontSize * this.ratios.braille;
     const [fr, fg, fb] = black ? [255, 255, 255] : [0, 0, 0];
 
     this.textLayer.style.cssText =
@@ -269,14 +253,8 @@ export class AsciiDomRenderer {
     const [bgR, bgG, bgB] = opts.backgroundColor;
     const color = this.colorImage.data;
     const bars = this.barImage.data;
-    const regions = opts.regionGlyphs;
-    // Whether the *frame* needs each input, not whether the global mode does.
-    // Gating these on glyphMode alone meant per-region cells got neither: a
-    // braille region rendered as U+2800 everywhere (the empty pattern, which
-    // is not blank) and an edge region fell back to tone because the smoothed
-    // luminance it differentiates was never filled in.
-    const braille = glyphMode === 'braille' || (regions?.includes('braille') ?? false);
-    const edges = glyphMode === 'edge' || (regions?.includes('edge') ?? false);
+    const braille = glyphMode === 'braille';
+    const edges = glyphMode === 'edge';
     const { data: px, mask, cols, rows, subX, subY, sampleW } = frame;
     const cells = subX * subY;
     const { lum, chan, alpha, dots } = this;
@@ -329,30 +307,24 @@ export class AsciiDomRenderer {
 
     // Pass 2: choose glyphs and write the colour and backdrop canvases.
     //
-    // A row is emitted as runs rather than one string, because a run may need
-    // its own letter-spacing (braille advances 0.684 of the font size against
-    // ASCII's 0.602, and one global value cannot normalise both) or its own
-    // visibility (U+2800 is not actually blank). Runs break on region
-    // boundaries, so this is a few spans a row, not one per cell.
+    // A row is emitted as runs rather than one string, because blank runs need
+    // hiding: U+2800 has the right advance for a braille row but is not
+    // actually blank, it paints the empty dot positions. Runs follow the
+    // silhouette, so this is a few spans a row, not one per cell.
     for (let y = 0; y < rows; y++) {
       let line = '';
       let html = '';
       let spans = 0;
       let runText = '';
-      let runBraille = false;
       let runBlank = false;
 
       const flushRun = () => {
         if (!runText) return;
-        const needsSpacing = runBraille && this.brailleSpacing !== 0;
-        if (!runBlank && !needsSpacing) {
-          html += escapeMarkup(runText);
-        } else {
-          const style =
-            (runBlank ? 'visibility:hidden;' : '') +
-            (needsSpacing ? `letter-spacing:${this.brailleSpacing.toFixed(3)}px;` : '');
-          html += `<span style="${style}">${escapeMarkup(runText)}</span>`;
+        if (runBlank) {
+          html += `<span style="visibility:hidden">${escapeMarkup(runText)}</span>`;
           spans++;
+        } else {
+          html += escapeMarkup(runText);
         }
         runText = '';
       };
@@ -367,12 +339,6 @@ export class AsciiDomRenderer {
         const rain = !visible && opts.rain ? opts.rain : null;
         const rainGlyph = rain ? rain.glyph[i]! : -1;
 
-        // Per-cell glyph family. Rain always uses the frame's base set, since
-        // its alphabet is chosen to match.
-        const cellMode: GlyphMode =
-          regions && visible ? regions[categoriesOf(opts, i)] ?? glyphMode : glyphMode;
-        const cellBraille = cellMode === 'braille';
-
         bars[i * 4] = bgR;
         bars[i * 4 + 1] = bgG;
         bars[i * 4 + 2] = bgB;
@@ -380,23 +346,20 @@ export class AsciiDomRenderer {
 
         const drawing = visible && drawChars;
         const isBlank = !drawing && rainGlyph < 0;
-        // A run must not mix advances, so it breaks on family as well as on
-        // visibility; the blank glyph then matches whichever family it lands in.
-        if (cellBraille !== runBraille || isBlank !== runBlank) {
+        if (isBlank !== runBlank) {
           flushRun();
-          runBraille = cellBraille;
           runBlank = isBlank;
         }
 
         let glyph: string;
         if (drawing) {
-          glyph = cellBraille
+          glyph = braille
             ? String.fromCodePoint(BRAILLE_BASE + dots[i]!)
-            : cellMode === 'edge'
+            : edges
               ? this.edgeGlyph(x, y, cols, rows, chars, len, black, opts.edgeThreshold)
               : this.rampGlyph(lum[i]!, chars, len, black);
           let fill = this.cellColor(r, g, b, a, opts, i);
-          if (cellBraille) {
+          if (braille) {
             // Dot density already encodes tone; letting colour encode it too
             // multiplies the two and crushes the image.
             const k = opts.brailleGain;
@@ -418,7 +381,7 @@ export class AsciiDomRenderer {
           color[i * 4 + 2] = t > 0.94 ? 210 : 60 * t;
           color[i * 4 + 3] = 255;
         } else {
-          glyph = cellBraille ? BRAILLE_BLANK : ' ';
+          glyph = braille ? BRAILLE_BLANK : ' ';
           // Transparent leaves the backdrop untouched, so the video shows.
           color[i * 4 + 3] = 0;
         }

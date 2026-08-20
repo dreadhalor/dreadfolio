@@ -34,12 +34,9 @@ export type Frame = {
   categories: Uint8Array | null;
 };
 
-/**
- * Subpixels per cell. Braille needs 2x4, and so does per-region mixing, since
- * any cell might turn out to be braille.
- */
+/** Subpixels per cell: braille encodes eight dots, everything else needs one. */
 function subSampling(): [number, number] {
-  return settings.glyphMode === 'braille' || settings.regionEffects ? [2, 4] : [1, 1];
+  return settings.glyphMode === 'braille' ? [2, 4] : [1, 1];
 }
 
 /** The source rect that fills `destAspect` from `src` without distortion. */
@@ -183,9 +180,7 @@ export class FramePipeline {
       this.maskValues.fill(255);
     }
 
-    const wantRegions =
-      (settings.colorMode === 'region' || settings.regionEffects) &&
-      this.kind === 'multiclass';
+    const wantRegions = settings.colorMode === 'region' && this.kind === 'multiclass';
     if (wantRegions && this.lastMask) this.sampleCategories(vw, vh, sx, sy, sw, sh);
 
     return {

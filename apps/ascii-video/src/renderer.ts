@@ -19,7 +19,6 @@ import {
   draw_margin,
   rainGlyphsAscii,
   rainGlyphsBraille,
-  regionGlyphs,
   regionPalette,
   settings,
   type ColorMode,
@@ -87,7 +86,6 @@ export class AsciiVideoApp {
     this.buildDiagnostics();
     this.controls = new Controls(this.host, {
       onColorMode: (mode) => this.setColorMode(mode),
-      onRegionEffects: (on) => this.setRegionEffects(on),
     });
 
     this.observeSize();
@@ -132,26 +130,8 @@ export class AsciiVideoApp {
    * and drop back to the binary model afterwards, whose mask is noticeably
    * cleaner around the jaw and shoulders.
    */
-  /** Region glyph sets need the multiclass labels, so load them on demand. */
-  async setRegionEffects(on: boolean) {
-    if (on && this.pipeline.kind !== 'multiclass') {
-      this.controls?.say('loading region model…');
-      try {
-        await this.pipeline.load('multiclass');
-      } catch (err) {
-        console.error('[ascii-video] multiclass model failed:', err);
-        this.controls?.say('region model failed');
-        return;
-      }
-    }
-    settings.regionEffects = on;
-    if (!on && settings.colorMode !== 'region' && this.pipeline.kind !== 'binary') {
-      await this.pipeline.load('binary').catch(() => {});
-    }
-  }
-
   async setColorMode(mode: ColorMode) {
-    if (mode === 'image' && this.pipeline.kind !== 'binary' && !settings.regionEffects) {
+    if (mode === 'image' && this.pipeline.kind !== 'binary') {
       settings.colorMode = mode;
       await this.pipeline.load('binary').catch(() => {});
       return;
@@ -287,8 +267,6 @@ export class AsciiVideoApp {
           // the mask smeared into the past.
           categories: timed.categories,
           regionPalette,
-          regionGlyphs:
-            settings.regionEffects && timed.categories ? regionGlyphs : null,
           rain: raining
             ? { chars: this.rain.chars, glyph: this.rain.glyph, intensity: this.rain.intensity }
             : null,

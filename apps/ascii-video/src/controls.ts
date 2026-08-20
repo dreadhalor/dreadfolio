@@ -28,10 +28,7 @@ export class Controls {
 
   constructor(
     parent: HTMLElement,
-    private handlers: {
-      onColorMode: (mode: ColorMode) => void | Promise<void>;
-      onRegionEffects: (on: boolean) => void | Promise<void>;
-    },
+    private handlers: { onColorMode: (mode: ColorMode) => void | Promise<void> },
   ) {
     this.toggle.textContent = '⚙';
     this.toggle.setAttribute('aria-label', 'Open controls');
@@ -77,9 +74,6 @@ export class Controls {
       }),
       this.select<TimeMode>('time', ['off', 'slitscan', 'trails'], settings.timeMode, (v) => {
         settings.timeMode = v;
-      }),
-      this.check('region fx', settings.regionEffects, (v) => {
-        void this.handlers.onRegionEffects(v);
       }),
       this.check('mask', settings.mask, (v) => {
         settings.mask = v;

@@ -16,8 +16,6 @@ export const settings = {
   glyphMode: 'ramp' as GlyphMode,
   backgroundMode: 'video' as BackgroundMode,
   colorMode: 'image' as ColorMode,
-  /** Give each segmentation region its own glyph set. Needs the multiclass model. */
-  regionEffects: false,
   crt: false,
   mask: true,
   timeMode: 'off' as import('./temporal').TimeMode,
