@@ -58,6 +58,7 @@ export class AsciiVideoApp {
   private feedCtx: CanvasRenderingContext2D | null = null;
 
   private frameTimes: number[] = [];
+  private drawTimes: number[] = [];
   private tickTimes: number[] = [];
   private running = false;
   private viewport: [number, number] = [0, 0];
@@ -298,6 +299,7 @@ export class AsciiVideoApp {
         const timed: Frame = { ...frame, ...warped };
 
         this.paintFeed();
+        const drawStarted = performance.now();
         this.ascii.render(timed, {
           density,
           glyphMode: settings.glyphMode,
@@ -321,6 +323,8 @@ export class AsciiVideoApp {
             ? { chars: this.rain.chars, glyph: this.rain.glyph, intensity: this.rain.intensity }
             : null,
         });
+        this.drawTimes.push(performance.now() - drawStarted);
+        if (this.drawTimes.length > 90) this.drawTimes.shift();
       }
     }
 
@@ -412,9 +416,14 @@ export class AsciiVideoApp {
 
     const avg = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
     const { cols, rows } = this.pipeline;
+    const stage = this.pipeline.stats();
+    const draw = [...this.drawTimes].sort((a, b) => a - b);
+    const drawMs = draw.length ? draw[draw.length >> 1]! : 0;
+    // Broken out by stage: a slowdown should say which part got slower.
     this.diagnostics.textContent =
-      `${this.observedFps()} fps · ${avg.toFixed(1)}ms work · ${cols}x${rows} · ` +
-      `${this.pipeline.kind}/${this.pipeline.delegate ?? 'off'}`;
+      `${this.observedFps()} fps · ${avg.toFixed(1)}ms work · ` +
+      `seg ${stage.segmentMs}ms · pipe ${stage.pipelineMs}ms · draw ${drawMs.toFixed(1)}ms · ` +
+      `${cols}x${rows} · ${this.pipeline.kind}/${this.pipeline.delegate ?? 'off'}`;
   }
 
   /** Frames actually delivered per second, measured between ticks. */
@@ -428,8 +437,10 @@ export class AsciiVideoApp {
     const avg = this.frameTimes.length
       ? this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length
       : 0;
+    const draw = [...this.drawTimes].sort((a, b) => a - b);
     return {
       fps: this.observedFps(),
+      drawMs: draw.length ? Number(draw[draw.length >> 1]!.toFixed(2)) : 0,
       headroomFps: avg ? Math.round(1000 / avg) : 0,
       frameMs: Number(avg.toFixed(2)),
       cols: this.pipeline.cols,

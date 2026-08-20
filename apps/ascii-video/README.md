@@ -369,6 +369,18 @@ So both large binaries carry a version in their path:
   (Vite's `define` was the obvious mechanism and does not survive into
   dev-served modules here, hence the generated file.)
 
+Turning on `stats` breaks the frame down by stage rather than reporting one
+number, so a slowdown can be attributed instead of guessed at:
+
+```
+12 fps · 16.5ms work · seg 11.1ms · pipe 15.3ms · draw 0.7ms · 100x59 · binary/GPU
+```
+
+`seg` is model inference, `pipe` is the whole sampling pass including it, `draw`
+is the ASCII layer. For reference, on an M4 the binary model runs about 11ms and
+the multiclass one about 15ms, and `draw` stays under a millisecond at any
+resolution the slider offers.
+
 In development the app instance is exposed for poking at:
 
 ```js

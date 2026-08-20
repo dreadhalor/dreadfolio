@@ -34,6 +34,17 @@ export type Frame = {
   categories: Uint8Array | null;
 };
 
+/** Keep a bounded sample window and report its median. */
+function record(samples: number[], value: number) {
+  samples.push(value);
+  if (samples.length > 90) samples.shift();
+}
+function median(samples: number[]) {
+  if (!samples.length) return 0;
+  const sorted = [...samples].sort((a, b) => a - b);
+  return Number(sorted[sorted.length >> 1]!.toFixed(2));
+}
+
 /** Subpixels per cell: braille encodes eight dots, everything else needs one. */
 function subSampling(): [number, number] {
   return settings.glyphMode === 'braille' ? [2, 4] : [1, 1];
@@ -69,6 +80,9 @@ export class FramePipeline {
   private frameCounter = 0;
   private lastMask: { data: Uint8Array; width: number; height: number } | null = null;
   private categories: Uint8Array | null = null;
+  /** Rolling stage timings, so a slowdown can be attributed rather than guessed. */
+  private segmentSamples: number[] = [];
+  private processSamples: number[] = [];
 
   cols = 0;
   rows = 0;
@@ -125,6 +139,7 @@ export class FramePipeline {
   process(video: HTMLVideoElement, applyMask: boolean): Frame | null {
     const { videoWidth: vw, videoHeight: vh } = video;
     if (!vw || !vh || !this.cols || !this.rows) return null;
+    const started = performance.now();
 
     // Re-derive the sub-sampling if the glyph mode changed under us.
     const [wantX, wantY] = subSampling();
@@ -159,6 +174,7 @@ export class FramePipeline {
       this.maskValues.fill(255);
     }
 
+    record(this.processSamples, performance.now() - started);
     return {
       data: ctx.getImageData(0, 0, sampleW, sampleH).data,
       mask: this.maskValues,
@@ -235,20 +251,32 @@ export class FramePipeline {
     segCtx.globalCompositeOperation = 'copy';
     segCtx.drawImage(video, 0, 0, vw, vh, 0, 0, segW, segH);
 
+    const segmentStarted = performance.now();
     const mask = this.segmenter.segment(this.segInput);
+    record(this.segmentSamples, performance.now() - segmentStarted);
     if (!mask) return;
     this.lastMask = mask;
 
   }
 
   stats() {
-    if (!this.lastMask) return { maskWidth: 0, maskHeight: 0, personFraction: 0 };
+    if (!this.lastMask) {
+      return {
+        segmentMs: median(this.segmentSamples),
+        pipelineMs: median(this.processSamples),
+        maskWidth: 0,
+        maskHeight: 0,
+        personFraction: 0,
+      };
+    }
     const { data, width, height } = this.lastMask;
     let person = 0;
     for (let i = 0; i < data.length; i++) {
       if (this.segmenter.isSubject(data[i]!)) person++;
     }
     return {
+      segmentMs: median(this.segmentSamples),
+      pipelineMs: median(this.processSamples),
       maskWidth: width,
       maskHeight: height,
       personFraction: Number((person / data.length).toFixed(4)),
