@@ -1,55 +1,79 @@
 /**
- * Every visual knob the old p5 sketch exposed, kept verbatim so the rendered
- * result is unchanged. Only the machinery underneath was rewritten.
+ * Runtime-tunable settings. Everything here is a mutable default rather than a
+ * frozen constant so the on-screen controls can change it live; nothing in the
+ * hot path caches these values across frames.
  */
 
+export type GlyphMode = 'ramp' | 'braille';
+export type BackgroundMode = 'video' | 'rain' | 'plain';
+export type ColorMode = 'image' | 'region';
+
+/** Dark -> light. Index 0 is the densest glyph. */
 export const density = '@WÑ$9806532ba4c7?1=~"-;:,. ';
-// const density =
-// 'ヹヰガホヺセヱオザヂズモネルキヴミグビサヲテワプクヅバゾフベナンョォヵニャェヶトィー゠・';
 
-export const black = true;
-export const gradient = false;
-export const color = true;
-export const brighten_amount = 0;
-export const greenify = true;
-export const pixel_scale = 1.5;
-export const draw_raw_feed = true;
-export const draw_squares = true;
-export const draw_chars = true;
-export const show_diagnostics = false;
-export const pausable = false;
+export const settings = {
+  glyphMode: 'ramp' as GlyphMode,
+  backgroundMode: 'video' as BackgroundMode,
+  colorMode: 'image' as ColorMode,
+  crt: false,
+  mask: true,
 
-/** Outer padding around the ASCII grid, in px. */
+  black: true,
+  gradient: false,
+  color: true,
+  greenify: true,
+  brightenAmount: 0,
+  pixelScale: 1.5,
+  /** Background bars behind the subject. Turning these off forces monochrome. */
+  drawSquares: true,
+  drawChars: true,
+  showDiagnostics: false,
+
+  /** Characters per inch, with the grid's long axis capped below. */
+  cpi: 20,
+  pixelationMax: 100,
+  /** Mask alpha at or above which a cell counts as subject. */
+  maskAlphaThreshold: 128,
+  /** Run segmentation every N frames. */
+  segmentInterval: 1,
+  /** Brightness lift for braille cells, whose dots already carry tone. */
+  brailleGain: 1.9,
+};
+
+export type Settings = typeof settings;
+
 export const draw_margin: [number, number] = [0, 0];
+export const base_black: [number, number, number] = [0, 0, 0];
+export const base_white: [number, number, number] = [255, 255, 255];
 
-/**
- * Characters-per-inch target. The grid is sized from this and the display DPI
- * so the glyphs stay a consistent physical size across screens.
- */
-export const CPI = 20;
-/** Hard ceiling on grid cells along the long axis. */
-export const pixelation_max = 100;
-
-/**
- * Long-edge size of the canvas handed to the segmentation model. The short edge
- * follows the camera's aspect ratio so the frame is never distorted, and the
- * whole frame is always segmented -- see the note in frame-pipeline on why the
- * mask must cover the full frame rather than the visible crop.
- */
+/** Long edge of the canvas handed to the segmentation model. */
 export const segmentation_long_side = 256;
 
 /**
- * Run segmentation every N frames. 1 is affordable (~5ms) at 60fps; raise it
- * if you want more headroom, at the cost of a slightly laggier silhouette.
+ * Multiclass categories, verified against the model rather than taken on faith:
+ * rendering each index as a distinct colour puts 1 exactly on hair, 2 on the
+ * neck and shoulders, 3 on the face. Matches the documentation here, unlike the
+ * binary model whose mask is inverted from what its docs imply.
  */
-export const segment_interval = 1;
+export const REGION = {
+  background: 0,
+  hair: 1,
+  bodySkin: 2,
+  faceSkin: 3,
+  clothes: 4,
+  accessories: 5,
+} as const;
 
-/**
- * Mask alpha at or above which a cell counts as "person". The mask is scaled
- * from 256x144 down to the grid with smoothing, so edge cells land in between;
- * thresholding keeps the silhouette tight instead of haloing by a cell.
- */
-export const mask_alpha_threshold = 128;
+/** Per-region tint, applied to the cell's own brightness. */
+export const regionPalette: [number, number, number][] = [
+  [0, 0, 0], // background, never drawn
+  [255, 120, 40], // hair
+  [120, 255, 180], // body skin
+  [90, 200, 255], // face skin
+  [200, 130, 255], // clothes
+  [255, 240, 120], // accessories
+];
 
-export const base_black: [number, number, number] = [0, 0, 0];
-export const base_white: [number, number, number] = [255, 255, 255];
+/** Katakana column glyphs for the rain, the usual Matrix set. */
+export const rainGlyphs =
+  'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789';

@@ -1,81 +1,111 @@
 /**
  * Person segmentation via MediaPipe's ImageSegmenter (TFLite + GPU delegate).
  *
- * This replaces BodyPix-on-TensorFlow.js. Measured on an M4 (Chrome 151):
+ * Two models are supported and they do NOT agree on encoding, which is worth
+ * stating plainly because getting it backwards silently inverts the effect:
  *
- *   BodyPix segmentPerson + toMask, 2560x1440 input   122.6 ms
- *   TF.js SelfieSegmentation + mask materialization    63.8 ms
- *   MediaPipe ImageSegmenter, GPU delegate + readback   6.6 ms
+ *   binary (selfie_segmenter_landscape, 250KB)
+ *     emits 0 for subject and 255 for background. This is NOT the category
+ *     index the docs describe; verified by feeding it known inputs (a solid
+ *     grey frame comes back 100% 255, a close-up portrait 76% 0).
  *
- * The TF.js numbers are not readback overhead: reading a 16-pixel tensor costs
- * the same ~39ms as reading a 36,864-pixel one, because `.data()` is simply
- * where you wait for the queued inference. TF.js's generic WebGL kernels are
- * just far slower than TFLite's GPU delegate for this model.
+ *   multiclass (selfie_multiclass_256x256, 16MB)
+ *     emits true category indices, 0 background through 5 accessories, and
+ *     these DO match the docs -- verified by rendering each index as a colour
+ *     and checking the regions land on hair, face and neck.
+ *
+ * The multiclass model is 14MB gzipped, so it is never loaded unless region
+ * colouring is actually switched on.
  */
 import { FilesetResolver, ImageSegmenter } from '@mediapipe/tasks-vision';
 
-/** Vite serves the app under a base path; assets must be resolved against it. */
 const BASE = import.meta.env.BASE_URL;
 
+export type SegmenterKind = 'binary' | 'multiclass';
+
+const MODEL_FILE: Record<SegmenterKind, string> = {
+  binary: 'selfie_segmenter_landscape.tflite',
+  multiclass: 'selfie_multiclass_256x256.tflite',
+};
+
 export type MaskFrame = {
-  /** One byte per pixel: 0 = background, non-zero = person. */
+  /** Raw model output, one byte per pixel. Interpretation depends on `kind`. */
   data: Uint8Array;
   width: number;
   height: number;
+  kind: SegmenterKind;
 };
 
 export class PersonSegmenter {
   private segmenter: ImageSegmenter | null = null;
+  private fileset: Awaited<ReturnType<typeof FilesetResolver.forVisionTasks>> | null =
+    null;
   private buffer: Uint8Array | null = null;
   private mask: MaskFrame | null = null;
-  /** segmentForVideo requires strictly increasing timestamps. */
   private timestamp = 0;
-  private failed = false;
+  private loading: Promise<void> | null = null;
 
-  /** Which delegate actually took, for the diagnostics overlay. */
+  kind: SegmenterKind = 'binary';
   delegate: 'GPU' | 'CPU' | null = null;
 
-  async load() {
-    const fileset = await FilesetResolver.forVisionTasks(`${BASE}mediapipe/wasm`);
+  async load(kind: SegmenterKind = 'binary') {
+    if (this.kind === kind && this.segmenter) return;
+    if (this.loading) await this.loading.catch(() => {});
+    this.loading = this.create(kind);
+    try {
+      await this.loading;
+    } finally {
+      this.loading = null;
+    }
+  }
+
+  private async create(kind: SegmenterKind) {
+    if (!this.fileset) {
+      this.fileset = await FilesetResolver.forVisionTasks(`${BASE}mediapipe/wasm`);
+    }
     const options = {
-      baseOptions: {
-        modelAssetPath: `${BASE}models/selfie_segmenter_landscape.tflite`,
-      },
+      baseOptions: { modelAssetPath: `${BASE}models/${MODEL_FILE[kind]}` },
       runningMode: 'VIDEO' as const,
       outputCategoryMask: true,
       outputConfidenceMasks: false,
     };
 
-    // The GPU delegate is ~1.7x faster but is known to misbehave on some
-    // drivers, so fall back rather than leaving the app with no segmentation.
+    // The GPU delegate is faster but misbehaves on some drivers; falling back
+    // beats leaving the app with no segmentation at all.
     for (const delegate of ['GPU', 'CPU'] as const) {
       try {
-        this.segmenter = await ImageSegmenter.createFromOptions(fileset, {
+        const next = await ImageSegmenter.createFromOptions(this.fileset, {
           ...options,
           baseOptions: { ...options.baseOptions, delegate },
         });
+        this.segmenter?.close();
+        this.segmenter = next;
         this.delegate = delegate;
+        this.kind = kind;
+        this.mask = null;
         return;
       } catch (err) {
         console.warn(`[segmenter] ${delegate} delegate unavailable:`, err);
       }
     }
-    this.failed = true;
-    throw new Error('ImageSegmenter could not be created on either delegate');
+    throw new Error(`ImageSegmenter could not load the ${kind} model`);
   }
 
   get ready() {
-    return this.segmenter !== null && !this.failed;
+    return this.segmenter !== null;
+  }
+
+  /** True when a raw mask value belongs to the subject rather than the background. */
+  isSubject(value: number) {
+    return this.kind === 'binary' ? value === 0 : value !== 0;
   }
 
   /**
-   * Run one inference. The MPMask is only valid inside the callback, so the
-   * bytes are copied into a buffer we own and reuse across frames.
+   * Run one inference. The MPMask is only valid inside the callback, so its
+   * bytes are copied into a buffer we own and reuse.
    */
   segment(source: HTMLCanvasElement | HTMLVideoElement): MaskFrame | null {
     if (!this.segmenter) return this.mask;
-
-    // Wall-clock would go backwards if the tab is throttled; a counter cannot.
     this.timestamp += 1;
     this.segmenter.segmentForVideo(source, this.timestamp, (result) => {
       const categoryMask = result.categoryMask;
@@ -89,10 +119,9 @@ export class PersonSegmenter {
         this.buffer = new Uint8Array(values.length);
       }
       this.buffer.set(values);
-      this.mask = { data: this.buffer, width, height };
+      this.mask = { data: this.buffer, width, height, kind: this.kind };
       result.close();
     });
-
     return this.mask;
   }
 

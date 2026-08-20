@@ -16,9 +16,15 @@ inspect them in devtools.
 - **Real-time ASCII conversion** — webcam to characters at display framerate
 - **AI person segmentation** — MediaPipe ImageSegmenter, GPU delegate
 - **Selectable text** — the ASCII is DOM, not pixels painted onto a canvas
-- **Multiple visual modes** — color, gradient, greenify (Matrix), black/white
-- **Live diagnostics** — fps, frame time, grid size, active delegate
+- **Copy to clipboard** — as plain text, or with 24-bit ANSI colour for a terminal
+- **Braille mode** — halftone dot rendering at 2x4 subcell resolution
+- **Region colouring** — hair, skin, face and clothes tinted separately
+- **Matrix rain** — falling katakana in the area the mask carves out
+- **CRT treatment** — scanlines, bloom and vignette
+- **Live diagnostics** — fps, frame time, grid size, model and delegate
 - **Responsive** — the grid is derived from viewport size and display DPI
+
+Press `c` or click the gear to open the controls; everything is switchable live.
 
 ---
 
@@ -201,6 +207,27 @@ public/
 
 ---
 
+## Modes
+
+**Glyphs.** `ramp` maps cell brightness onto a density ramp. `braille` samples
+each cell at 2x4 and ordered-dithers those eight subpixels into a Unicode
+braille pattern — a halftone, so it captures finer gradients but reads as
+dithering rather than as four times the detail. Two things to know if you touch
+it: the dither matrix must be indexed in *absolute* subpixel space (a 2x4 matrix
+is exactly one cell wide, so every cell gets the same pattern and the image
+prints a regular stripe), and braille glyphs resolve to a different advance
+width than ASCII in the same monospace stack (0.684 vs 0.602 here), so the cell
+advance has to be measured against the glyphs actually in use.
+
+**Colour.** `image` uses the pixel's own colour. `region` tints by segmentation
+class — hair, body skin, face skin, clothes — modulated by the cell's brightness
+so it still reads as a picture. Region mode needs the multiclass model, which is
+16MB, so it is fetched only when selected and dropped again afterwards: its mask
+is noticeably less clean around the jaw and shoulders than the 250KB binary one.
+
+**Background.** `video` shows the live feed behind the subject, `rain` replaces
+it with falling katakana, `plain` with flat colour.
+
 ## Customization
 
 All knobs live in `src/config.ts`:
@@ -227,10 +254,16 @@ asciiVideo.maskEnabled = false // render the whole frame, ignoring segmentation
 
 ## Notes and gotchas
 
-- **The category mask emits 0 for person and 255 for background.** This is *not*
-  the category index the MediaPipe docs describe (0 background, 1 person).
-  Verified empirically: a solid gray frame returns 100% 255, a forest photo 97%
-  255, and a close-up portrait 76% 0. Get this backwards and the effect inverts.
+- **The two segmentation models do not agree on encoding.** The binary model
+  emits 0 for subject and 255 for background — *not* the category index its docs
+  describe. Verified empirically: a solid grey frame returns 100% 255, a forest
+  photo 97% 255, a close-up portrait 76% 0. The multiclass model does emit true
+  indices (0 background, 1 hair, 2 body-skin, 3 face-skin), verified by rendering
+  each index as a colour and checking the regions land where they should. Ask
+  `segmenter.isSubject()` rather than assuming either convention.
+- **Feed each model its native input shape.** The multiclass net is 256x256;
+  handing it a 256x144 letterbox makes it upscale vertically and the mask comes
+  back ragged with holes.
 - **`user-select: none` on `*` will silently break text selection.** The
   universal selector applies to every element directly, so it beats inheritance
   from the text layer; `.ascii-text *` has to be exempted explicitly.

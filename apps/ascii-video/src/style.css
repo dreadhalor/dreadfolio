@@ -24,6 +24,24 @@
   user-select: text;
 }
 
+/* Glow in currentColor so the colour blend tints it along with the glyphs. */
+.crt .ascii-text {
+  text-shadow: 0 0 0.4em currentColor;
+}
+
+/* Available to assistive tech, invisible on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html,
 body {
   margin: 0px;

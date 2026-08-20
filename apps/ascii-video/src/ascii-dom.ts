@@ -1,125 +1,156 @@
 /**
- * Renders the ASCII frame as real DOM text instead of glyphs painted into a
- * canvas. Every character you see is an actual text node you can inspect,
- * select and copy.
+ * Renders the ASCII frame as real DOM text. Every character is an actual text
+ * node you can select and copy.
  *
- * Two absolutely-positioned layers sit over the live <video> underlay:
+ * Colour does NOT live in the DOM. Photographic content shatters colour runs
+ * down to roughly one span per cell, and the cost of that is style recalc and
+ * inline layout -- 8.4ms at full coverage, scaling with how much of the frame
+ * is subject. Instead a cols x rows canvas is scaled over the text and blended:
  *
- *   .ascii-mask  opaque bars that hide the video where the frame is opaque
- *   .ascii-text  the characters themselves, colored per cell
+ *   black background -> multiply, since black x C = black and white x C = C
+ *   light background -> lighten,  since max(white, C) = white and max(0, C) = C
  *
- * Keeping the bars in their own layer is what makes the geometry exact: an
- * inline background box is sized by font metrics, not by line-height, so
- * per-character backgrounds would bleed into the neighbouring rows. Bars are
- * plain inline-blocks measured in pixels, so they land on the grid exactly.
- *
- * Colour is supplied by a cols x rows canvas scaled over the text with
- * mix-blend-mode: multiply, NOT by per-character spans. That matters a lot:
- * spans cost ~1.6us each in style recalc and inline layout, and photographic
- * content shatters colour runs down to roughly one span per cell, so the old
- * span path cost scaled with how much of the frame was person -- 8.4ms when a
- * subject filled the view, and far worse with devtools attached. Multiplying a
- * flat-per-cell colour canvas over white glyphs on a black backdrop is exactly
- * equivalent (black x C = black, white x C = C) and costs 0.3ms flat.
- *
- * That equivalence needs an opaque dark backdrop inside the blend group, so it
- * only holds for a black background with the mask bars drawn. Any other
- * combination falls back to the original span path, which still works.
- *
- * The hot path writes one string per row and only when it actually changed.
+ * Either way the text layer needs no spans at all and the cost is 0.5ms flat.
+ * The opaque backdrop the blend relies on is a second canvas rather than a row
+ * of <span> bars, which halves DOM mutation traffic -- worth a lot when
+ * devtools is attached and echoing every change.
  */
+import type { Frame } from './frame-pipeline';
+import type { GlyphMode } from './config';
 
 const FONT_STACK =
   "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
 
-/** Chars are HTML-escaped once up front rather than per cell, per frame. */
-function escapeChars(density: string): string[] {
-  return [...density].map((c) =>
-    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c,
-  );
-}
+const BRAILLE_BASE = 0x2800;
+/** Bit per dot in a 2-wide, 4-tall cell: [column][row]. */
+const DOT_BITS = [
+  [0x01, 0x02, 0x04, 0x40],
+  [0x08, 0x10, 0x20, 0x80],
+];
+/**
+ * Ordered dither thresholds so dot density tracks brightness. This is indexed
+ * in absolute subpixel space, not per cell: a 2x4 matrix would be exactly one
+ * cell wide, giving every cell the same pattern and printing a regular stripe
+ * across the whole image. 4x4 spans two cells horizontally and one vertically,
+ * so neighbours differ and the texture breaks up.
+ */
+const BAYER = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+const BAYER_N = 4;
+const BAYER_LEVELS = BAYER_N * BAYER_N;
 
 /**
- * Advance width of one monospace character as a fraction of font-size. Depends
- * on whichever font in the stack the browser actually picked, so measure it.
+ * Advance width of one glyph as a fraction of font-size. Braille and ASCII
+ * resolve to different widths even within one monospace stack (0.684 vs 0.602
+ * here), so this has to be measured against the glyphs actually in use.
  */
-function measureAdvanceRatio(): number {
+function measureAdvanceRatio(sample: string): number {
   const probe = document.createElement('span');
   probe.style.cssText = `position:absolute;visibility:hidden;white-space:pre;font-family:${FONT_STACK};font-size:100px;font-weight:bold;`;
-  probe.textContent = 'M'.repeat(100);
+  probe.textContent = sample.repeat(100);
   document.body.appendChild(probe);
   const ratio = probe.getBoundingClientRect().width / 100 / 100;
   probe.remove();
   return ratio;
 }
 
+export type RainSource = {
+  chars: string[];
+  glyph: Int16Array;
+  intensity: Uint8Array;
+};
+
 export type AsciiDomOptions = {
   density: string;
-  /** true = dark background, so bright pixels map to sparse characters. */
+  glyphMode: GlyphMode;
   black: boolean;
   backgroundColor: [number, number, number];
-  /** Glyph size relative to the cell, matching the old canvas pixel_scale. */
+  foregroundColor: [number, number, number];
   charScale: number;
   drawSquares: boolean;
   drawChars: boolean;
-  /**
-   * Alpha at or above which a cell counts as part of the person. The mask is
-   * scaled down to the grid with smoothing, so edge cells arrive partially
-   * transparent; thresholding keeps the silhouette from haloing by a cell.
-   */
   alphaThreshold: number;
-  getFill: (
-    pixel: [number, number, number, number],
-  ) => number[] | [number, number, number];
+  /** Brightness lift applied to braille cells; see the note in render(). */
+  brailleGain: number;
+  /** Fill the backdrop everywhere, not just behind the subject. */
+  opaqueBackground: boolean;
+  getFill: (pixel: [number, number, number, number]) => number[];
+  categories: Uint8Array | null;
+  regionPalette: [number, number, number][];
+  rain: RainSource | null;
 };
 
 export class AsciiDomRenderer {
   private root = document.createElement('div');
-  private maskLayer = document.createElement('div');
   private textLayer = document.createElement('div');
   private colorLayer = document.createElement('canvas');
-  private colorCtx: CanvasRenderingContext2D | null = null;
-  private colorImage: ImageData | null = null;
   private barLayer = document.createElement('canvas');
-  private barCtx: CanvasRenderingContext2D | null = null;
+  private colorCtx: CanvasRenderingContext2D | null;
+  private barCtx: CanvasRenderingContext2D | null;
+  private colorImage: ImageData | null = null;
   private barImage: ImageData | null = null;
 
-  private maskRows: HTMLDivElement[] = [];
   private textRows: HTMLDivElement[] = [];
-  private maskCache: string[] = [];
   private textCache: string[] = [];
 
   private cols = 0;
   private rows = 0;
   private advanceRatio = 0;
-  private escapedDensity: string[] = [];
+  private advanceMode: GlyphMode | null = null;
   private rawDensity: string[] = [];
   private densitySource = '';
 
   constructor(parent: HTMLElement) {
     this.root.className = 'ascii-dom';
-    this.maskLayer.className = 'ascii-mask';
     this.textLayer.className = 'ascii-text';
-    // The colour canvas blends only against its siblings here, never against
-    // the live video underlay, which sits outside this isolated group.
     this.colorLayer.className = 'ascii-color';
     this.barLayer.className = 'ascii-bars';
-    // Bottom to top: opaque bars, the glyphs, then the colour multiply.
-    this.root.append(
-      this.barLayer,
-      this.maskLayer,
-      this.textLayer,
-      this.colorLayer,
-    );
+    // A screen reader would otherwise read out thousands of junk characters.
+    this.root.setAttribute('aria-hidden', 'true');
+    // Bottom to top: opaque bars, the glyphs, then the colour blend.
+    this.root.append(this.barLayer, this.textLayer, this.colorLayer);
     parent.appendChild(this.root);
     this.colorCtx = this.colorLayer.getContext('2d');
     this.barCtx = this.barLayer.getContext('2d');
   }
 
+  /** The ASCII as plain text, one line per row. */
+  toText() {
+    return this.textCache.join('\n');
+  }
+
   /**
-   * Position the grid over the video. Rebuilds row elements only when the grid
-   * shape actually changes — resizing the window, not every frame.
+   * The ASCII with 24-bit ANSI colour, ready to paste into a terminal. Cells
+   * are grouped into runs of identical colour so the escape codes stay sane.
    */
+  toAnsi() {
+    if (!this.colorImage) return this.toText();
+    const data = this.colorImage.data;
+    const out: string[] = [];
+    for (let y = 0; y < this.rows; y++) {
+      const line = this.textCache[y] ?? '';
+      let row = '';
+      let current = '';
+      for (let x = 0; x < this.cols; x++) {
+        const o = (y * this.cols + x) * 4;
+        const code = data[o + 3]
+          ? `\u001b[38;2;${data[o]};${data[o + 1]};${data[o + 2]}m`
+          : '\u001b[0m';
+        if (code !== current) {
+          row += code;
+          current = code;
+        }
+        row += line[x] ?? ' ';
+      }
+      out.push(row + '\u001b[0m');
+    }
+    return out.join('\n');
+  }
+
   layout(
     cols: number,
     rows: number,
@@ -127,275 +158,205 @@ export class AsciiDomRenderer {
     offsetX: number,
     offsetY: number,
     charScale: number,
+    glyphMode: GlyphMode,
+    black: boolean,
+    drawSquares: boolean,
   ) {
-    // --cell lets the rows and mask bars size themselves off one property.
-    // Resizing then costs a handful of style writes instead of regenerating
-    // every row's markup, because none of that markup mentions pixels.
+    // --cell lets the rows size themselves off one property, so a resize that
+    // keeps the grid's shape costs a few style writes instead of new markup.
     this.root.style.cssText =
       `position:absolute;left:${offsetX}px;top:${offsetY}px;` +
       `width:${cols * cellSize}px;height:${rows * cellSize}px;` +
       `--cell:${cellSize}px;pointer-events:none;isolation:isolate;`;
 
-    if (!this.advanceRatio) this.advanceRatio = measureAdvanceRatio();
+    if (glyphMode !== this.advanceMode) {
+      this.advanceMode = glyphMode;
+      this.advanceRatio = measureAdvanceRatio(
+        glyphMode === 'braille' ? String.fromCodePoint(BRAILLE_BASE + 0xff) : 'M',
+      );
+    }
 
-    // Lock the character advance to exactly one cell, then nudge right by half
-    // the added spacing so the glyph sits centered in its cell.
+    // Lock the advance to exactly one cell, then nudge right by half the added
+    // spacing so the glyph sits centred.
     const fontSize = cellSize * charScale;
     const letterSpacing = cellSize - fontSize * this.advanceRatio;
+    const [fr, fg, fb] = black ? [255, 255, 255] : [0, 0, 0];
 
-    this.maskLayer.style.cssText =
-      'position:absolute;inset:0;white-space:pre;font-size:0;text-align:left;pointer-events:none;';
-    this.textLayer.style.cssText = `position:absolute;inset:0;white-space:pre;font-family:${FONT_STACK};font-weight:bold;font-size:${fontSize}px;line-height:${cellSize}px;letter-spacing:${letterSpacing}px;padding-left:${letterSpacing / 2}px;font-kerning:none;font-variant-ligatures:none;box-sizing:border-box;text-align:left;pointer-events:auto;cursor:text;user-select:text;-webkit-user-select:text;color:#fff;`;
+    this.textLayer.style.cssText =
+      `position:absolute;inset:0;white-space:pre;font-family:${FONT_STACK};` +
+      `font-weight:bold;font-size:${fontSize}px;line-height:${cellSize}px;` +
+      `letter-spacing:${letterSpacing}px;padding-left:${letterSpacing / 2}px;` +
+      `font-kerning:none;font-variant-ligatures:none;box-sizing:border-box;` +
+      `text-align:left;pointer-events:auto;cursor:text;user-select:text;` +
+      `-webkit-user-select:text;color:rgb(${fr},${fg},${fb});`;
 
-    // Cell size is a float that changes on every pixel of a resize drag, so
-    // rebuilding on it would thrash the DOM continuously. Only a change in the
-    // grid's shape actually requires different elements.
+    // Without an opaque backdrop the blend has nothing to multiply against, so
+    // colour is dropped and the text renders flat. Documented degradation.
+    const blended = drawSquares;
+    this.colorLayer.style.display = blended ? 'block' : 'none';
+    this.barLayer.style.display = blended ? 'block' : 'none';
+
     if (cols === this.cols && rows === this.rows) return;
-
     this.cols = cols;
     this.rows = rows;
-    // One canvas pixel per cell, upscaled by CSS with no smoothing so each
-    // glyph is multiplied by exactly one flat colour.
-    this.colorLayer.width = cols;
-    this.colorLayer.height = rows;
-    this.colorLayer.style.cssText =
-      'position:absolute;inset:0;width:100%;height:100%;' +
-      'image-rendering:pixelated;mix-blend-mode:multiply;pointer-events:none;';
-    this.colorImage = this.colorCtx
-      ? this.colorCtx.createImageData(cols, rows)
-      : null;
-    this.barLayer.width = cols;
-    this.barLayer.height = rows;
-    this.barLayer.style.cssText =
-      'position:absolute;inset:0;width:100%;height:100%;' +
-      'image-rendering:pixelated;pointer-events:none;';
-    this.barImage = this.barCtx ? this.barCtx.createImageData(cols, rows) : null;
+
+    for (const canvas of [this.colorLayer, this.barLayer]) {
+      canvas.width = cols;
+      canvas.height = rows;
+      canvas.style.cssText =
+        'position:absolute;inset:0;width:100%;height:100%;' +
+        'image-rendering:pixelated;pointer-events:none;';
+    }
+    this.colorLayer.style.mixBlendMode = black ? 'multiply' : 'lighten';
+    this.colorImage = this.colorCtx?.createImageData(cols, rows) ?? null;
+    this.barImage = this.barCtx?.createImageData(cols, rows) ?? null;
     this.rebuildRows();
   }
 
   private rebuildRows() {
-    this.maskLayer.replaceChildren();
     this.textLayer.replaceChildren();
-    this.maskRows = [];
     this.textRows = [];
-    this.maskCache = new Array(this.rows).fill('');
     this.textCache = new Array(this.rows).fill('');
-
     for (let y = 0; y < this.rows; y++) {
-      const maskRow = document.createElement('div');
-      maskRow.style.cssText = 'height:var(--cell);';
-      this.maskLayer.appendChild(maskRow);
-      this.maskRows.push(maskRow);
-
-      const textRow = document.createElement('div');
-      textRow.style.cssText = 'height:var(--cell);';
-      this.textLayer.appendChild(textRow);
-      this.textRows.push(textRow);
+      const row = document.createElement('div');
+      row.style.cssText = 'height:var(--cell);';
+      this.textLayer.appendChild(row);
+      this.textRows.push(row);
     }
   }
 
-  /**
-   * `pixels` is the raw RGBA buffer straight off getImageData — row-major,
-   * cols*rows*4 bytes. The previous signature took a [x][y] array of tuples,
-   * which meant allocating one 4-element array per cell every single frame.
-   */
-  render(pixels: Uint8ClampedArray, opts: AsciiDomOptions) {
-    // The blend path needs an opaque dark backdrop inside the isolated group
-    // for `white x colour = colour` to hold, which is what the mask bars on a
-    // black background provide.
-    const canBlend =
-      opts.black &&
-      opts.drawSquares &&
-      !!this.colorCtx &&
-      !!this.colorImage &&
-      !!this.barCtx &&
-      !!this.barImage;
-    this.colorLayer.style.display = canBlend ? 'block' : 'none';
-    this.barLayer.style.display = canBlend ? 'block' : 'none';
-    // The span-based mask layer is only used by the fallback path.
-    this.maskLayer.style.display = canBlend ? 'none' : 'block';
-    if (canBlend) {
-      this.renderBlended(pixels, opts);
-      return;
-    }
-    this.renderRuns(pixels, opts);
-  }
-
-  /**
-   * Colour comes from the canvas, so the text layer carries no spans at all --
-   * one string per row, plain white. This is the path whose cost does not care
-   * how much of the frame is person.
-   */
-  private renderBlended(pixels: Uint8ClampedArray, opts: AsciiDomOptions) {
-    const { density, black, drawChars, getFill } = opts;
-    const threshold = opts.alphaThreshold;
+  render(frame: Frame, opts: AsciiDomOptions) {
+    const { density, black, drawChars, glyphMode } = opts;
     if (density !== this.densitySource) {
       this.densitySource = density;
-      this.escapedDensity = escapeChars(density);
       this.rawDensity = [...density];
     }
+    if (!this.colorImage || !this.barImage) return;
+
     const chars = this.rawDensity;
     const len = chars.length;
+    const threshold = opts.alphaThreshold;
     const [bgR, bgG, bgB] = opts.backgroundColor;
-    const color = this.colorImage!.data;
-    const bars = this.barImage!.data;
+    const color = this.colorImage.data;
+    const bars = this.barImage.data;
+    const braille = glyphMode === 'braille';
+    const { data: px, cols, rows, subX, subY, sampleW } = frame;
+    const cells = subX * subY;
 
-    for (let y = 0; y < this.rows; y++) {
+    for (let y = 0; y < rows; y++) {
       let line = '';
-      let offset = y * this.cols * 4;
+      for (let x = 0; x < cols; x++) {
+        // Average the cell's subpixels for colour and brightness; in ramp mode
+        // this is a single sample and the loop collapses.
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let a = 0;
+        let dots = 0;
+        for (let sy = 0; sy < subY; sy++) {
+          const rowBase = ((y * subY + sy) * sampleW + x * subX) * 4;
+          for (let sx = 0; sx < subX; sx++) {
+            const o = rowBase + sx * 4;
+            const sr = px[o]!;
+            const sg = px[o + 1]!;
+            const sb = px[o + 2]!;
+            r += sr;
+            g += sg;
+            b += sb;
+            a += px[o + 3]!;
+            if (braille) {
+              const lum = (sr + sg + sb) / 3;
+              const level = black ? lum : 255 - lum;
+              const bx = (x * subX + sx) % BAYER_N;
+              const by = (y * subY + sy) % BAYER_N;
+              const threshold = ((BAYER[by]![bx]! + 0.5) / BAYER_LEVELS) * 255;
+              if (level > threshold) dots |= DOT_BITS[sx]![sy]!;
+            }
+          }
+        }
+        r /= cells;
+        g /= cells;
+        b /= cells;
+        a /= cells;
 
-      for (let x = 0; x < this.cols; x++, offset += 4) {
-        const r = pixels[offset]!;
-        const g = pixels[offset + 1]!;
-        const b = pixels[offset + 2]!;
-        const a = pixels[offset + 3]!;
+        const i = y * cols + x;
         const visible = a >= threshold;
+        const rain = !visible && opts.rain ? opts.rain : null;
+        const rainGlyph = rain ? rain.glyph[i]! : -1;
 
-        // The opaque backdrop the multiply depends on, painted as pixels rather
-        // than as spans. This is the last innerHTML write gone: the only DOM
-        // mutation left per frame is one text node per row, which matters a lot
-        // when devtools is attached and echoing every change.
-        bars[offset] = bgR;
-        bars[offset + 1] = bgG;
-        bars[offset + 2] = bgB;
-        bars[offset + 3] = visible ? 255 : 0;
+        bars[i * 4] = bgR;
+        bars[i * 4 + 1] = bgG;
+        bars[i * 4 + 2] = bgB;
+        bars[i * 4 + 3] = opts.opaqueBackground || visible ? 255 : 0;
 
         if (visible && drawChars) {
-          const avg = (r + g + b) / 3;
-          const ramp = Math.floor((avg / 255) * len);
-          const index = black ? len - 1 - ramp : ramp;
-          line += chars[Math.min(len - 1, Math.max(0, index))] ?? ' ';
-          const fill = getFill([r, g, b, a]);
-          color[offset] = fill[0]!;
-          color[offset + 1] = fill[1]!;
-          color[offset + 2] = fill[2]!;
-          color[offset + 3] = 255;
+          if (braille) {
+            line += String.fromCodePoint(BRAILLE_BASE + dots);
+          } else {
+            const ramp = Math.floor(((r + g + b) / 3 / 255) * len);
+            const index = black ? len - 1 - ramp : ramp;
+            line += chars[Math.min(len - 1, Math.max(0, index))] ?? ' ';
+          }
+          let fill = this.cellColor(r, g, b, a, opts, i);
+          if (braille) {
+            // Dot density already encodes tone, so letting colour encode it too
+            // multiplies the two and crushes the image. Full normalisation goes
+            // the other way and washes the structure out, so lift by a fixed
+            // gain: relative tone survives, the picture just stops being dark.
+            const k = opts.brailleGain;
+            fill = [
+              Math.min(255, fill[0]! * k),
+              Math.min(255, fill[1]! * k),
+              Math.min(255, fill[2]! * k),
+            ];
+          }
+          color[i * 4] = fill[0]!;
+          color[i * 4 + 1] = fill[1]!;
+          color[i * 4 + 2] = fill[2]!;
+          color[i * 4 + 3] = 255;
+        } else if (rainGlyph >= 0) {
+          line += rain!.chars[rainGlyph] ?? ' ';
+          const t = rain!.intensity[i]! / 255;
+          // The leading cell of a column burns near-white, the tail is green.
+          color[i * 4] = t > 0.94 ? 200 : 30 * t;
+          color[i * 4 + 1] = 70 + 185 * t;
+          color[i * 4 + 2] = t > 0.94 ? 210 : 60 * t;
+          color[i * 4 + 3] = 255;
         } else {
           line += ' ';
-          // Transparent here leaves the backdrop untouched, so masked-out cells
-          // stay clear and the live video shows through.
-          color[offset + 3] = 0;
+          // Transparent leaves the backdrop untouched, so the video shows.
+          color[i * 4 + 3] = 0;
         }
       }
-      const textRow = this.textRows[y];
-      if (textRow && line !== this.textCache[y]) {
-        textRow.textContent = line;
+
+      const row = this.textRows[y];
+      if (row && line !== this.textCache[y]) {
+        row.textContent = line;
         this.textCache[y] = line;
       }
     }
-    this.colorCtx!.putImageData(this.colorImage!, 0, 0);
-    this.barCtx!.putImageData(this.barImage!, 0, 0);
+    this.colorCtx!.putImageData(this.colorImage, 0, 0);
+    this.barCtx!.putImageData(this.barImage, 0, 0);
   }
 
-  /** Original per-run span renderer, kept for configurations blending cannot express. */
-  private renderRuns(pixels: Uint8ClampedArray, opts: AsciiDomOptions) {
-    const { density, black, drawSquares, drawChars, getFill } = opts;
-    const threshold = opts.alphaThreshold;
-    if (density !== this.densitySource) {
-      this.densitySource = density;
-      this.escapedDensity = escapeChars(density);
-      this.rawDensity = [...density];
-    }
-    const chars = this.escapedDensity;
-    const len = chars.length;
-    const [bgR, bgG, bgB] = opts.backgroundColor;
-    const bgCss = `rgb(${bgR},${bgG},${bgB})`;
-
-    for (let y = 0; y < this.rows; y++) {
-      let maskHtml = '';
-      let textHtml = '';
-
-      // Run state: a run is a stretch of cells sharing one color (or one
-      // opacity, for the mask), flushed as a single span.
-      let maskOpaque = false;
-      let maskRun = 0;
-      let textColor = '';
-      let textRun = '';
-
-      const flushMask = () => {
-        if (!maskRun) return;
-        // Sized in cells, not pixels, so a row's markup is identical before and
-        // after a resize and the row cache below keeps holding.
-        const box =
-          `display:inline-block;vertical-align:top;` +
-          `width:calc(var(--cell) * ${maskRun});height:var(--cell)`;
-        maskHtml += maskOpaque
-          ? `<span style="${box};background:${bgCss}"></span>`
-          : `<span style="${box}"></span>`;
-        maskRun = 0;
-      };
-      const flushText = () => {
-        if (!textRun) return;
-        textHtml += textColor
-          ? `<span style="color:${textColor}">${textRun}</span>`
-          : textRun;
-        textRun = '';
-      };
-
-      let offset = y * this.cols * 4;
-      for (let x = 0; x < this.cols; x++, offset += 4) {
-        // The buffer is exactly cols*rows*4 bytes, so these are always in range.
-        const r = pixels[offset]!;
-        const g = pixels[offset + 1]!;
-        const b = pixels[offset + 2]!;
-        const a = pixels[offset + 3]!;
-        // Below the threshold the segmentation mask cut this cell out: leave it
-        // transparent so the live video shows through.
-        const visible = a >= threshold;
-        const opaque = visible && drawSquares;
-
-        if (opaque !== maskOpaque) {
-          flushMask();
-          maskOpaque = opaque;
-        }
-        maskRun++;
-
-        let char = ' ';
-        let color = '';
-        if (visible && drawChars) {
-          const avg = (r + g + b) / 3;
-          const ramp = Math.floor((avg / 255) * len);
-          // The ramp runs dense -> sparse, so a dark pixel on a dark
-          // background wants the sparse end and vice versa.
-          const index = black ? len - 1 - ramp : ramp;
-          char = chars[Math.min(len - 1, Math.max(0, index))] ?? ' ';
-          color = toCss(getFill([r, g, b, a]));
-        }
-
-        if (color !== textColor) {
-          flushText();
-          textColor = color;
-        }
-        textRun += char;
-      }
-      flushMask();
-      flushText();
-
-      // Writing innerHTML is by far the most expensive thing here, so skip the
-      // rows that did not change between frames.
-      const maskRow = this.maskRows[y];
-      const textRow = this.textRows[y];
-      if (maskRow && maskHtml !== this.maskCache[y]) {
-        maskRow.innerHTML = maskHtml;
-        this.maskCache[y] = maskHtml;
-      }
-      if (textRow && textHtml !== this.textCache[y]) {
-        textRow.innerHTML = textHtml;
-        this.textCache[y] = textHtml;
+  /** Region tint modulated by the cell's own brightness, or the image colour. */
+  private cellColor(
+    r: number,
+    g: number,
+    b: number,
+    a: number,
+    opts: AsciiDomOptions,
+    index: number,
+  ): number[] {
+    const categories = opts.categories;
+    if (categories) {
+      const tint = opts.regionPalette[categories[index]!];
+      if (tint) {
+        // Keep some of the image's own shading so it still reads as a picture.
+        const level = 0.3 + 0.7 * (((r + g + b) / 3) / 255);
+        return [tint[0] * level, tint[1] * level, tint[2] * level];
       }
     }
+    return opts.getFill([r, g, b, a]);
   }
-
-}
-
-/**
- * Quantize to 8 levels per channel before stringifying. Video noise makes
- * neighbouring cells differ by a digit or two, which would split every run;
- * rounding collapses those into shared runs with no visible banding.
- */
-function toCss(fill: number[] | [number, number, number]): string {
-  const [r, g, b, a = 255] = fill;
-  const q = (v: number) => Math.min(255, Math.max(0, Math.round(v)) & 0b11111000);
-  if (a >= 255) return `rgb(${q(r)},${q(g)},${q(b)})`;
-  return `rgba(${q(r)},${q(g)},${q(b)},${(Math.round(a / 32) * 32) / 255})`;
 }
