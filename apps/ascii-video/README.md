@@ -288,7 +288,10 @@ a growing depth changes the age mapping every frame, which rebuilds the GPU ring
 continuously and leaves its oldest bands blank.
 
 Depth is capped at 32 steps: the background holds one canvas per step, so depth
-costs texture memory and draw calls there, not just bytes on the CPU.
+costs texture memory and draw calls there, not just bytes on the CPU. Only
+slitscan needs that ring -- trails keeps no history at all, just an accumulator
+-- so anything sizing itself off the *live* history length sees zero under
+trails and must not treat that as "nothing to draw".
 
 ## Customization
 

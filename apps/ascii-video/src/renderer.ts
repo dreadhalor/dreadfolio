@@ -316,7 +316,7 @@ export class AsciiVideoApp {
       this.camera.video,
       this.pipeline.crop,
       settings.timeMode,
-      this.temporal.depth,
+      this.temporal.steps,
       settings.trailDecay,
     );
     if (!source) return;

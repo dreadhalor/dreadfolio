@@ -52,6 +52,15 @@ export class TemporalField {
     return this.history.length;
   }
 
+  /**
+   * Time steps this field is configured for. Unlike `depth` this does not
+   * depend on the history actually being populated -- trails keeps no history
+   * at all, so anything sizing itself off `depth` would see zero and skip.
+   */
+  get steps() {
+    return Math.max(2, this.capacity);
+  }
+
   apply(frame: Frame, mode: TimeMode, decay: number): TimedFrame {
     const current: TimedFrame = {
       data: frame.data,

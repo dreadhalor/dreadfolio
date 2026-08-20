@@ -30,7 +30,11 @@ export class FeedField {
   private depth = 0;
   private primed = false;
 
-  /** Resize to the crop's aspect, keeping the ring at `depth` frames. */
+  /**
+   * Resize to the crop's aspect. `depth` is the ring length, which is zero for
+   * trails: that mode only needs the accumulator, so allocating a ring for it
+   * would waste tens of megabytes of texture.
+   */
   private ensure(aspect: number, depth: number) {
     const width = Math.max(1, Math.round(aspect >= 1 ? MAX_EDGE : MAX_EDGE * aspect));
     const height = Math.max(1, Math.round(aspect >= 1 ? MAX_EDGE / aspect : MAX_EDGE));
@@ -69,11 +73,14 @@ export class FeedField {
     depth: number,
     decay: number,
   ): HTMLCanvasElement | null {
-    if (mode === 'off' || depth < 2) {
+    if (mode === 'off' || !crop.sw || !crop.sh) {
       this.reset();
       return null;
     }
-    this.ensure(crop.sw / crop.sh, depth);
+    // Only slitscan needs the ring. Sizing it from a live history length meant
+    // trails -- which keeps no history -- reported zero and skipped painting
+    // entirely, leaving the background frozen on its last frame or black.
+    this.ensure(crop.sw / crop.sh, mode === 'slitscan' ? Math.max(2, depth) : 0);
     return mode === 'slitscan'
       ? this.slitScan(video, crop)
       : this.trails(video, crop, decay);
@@ -94,6 +101,7 @@ export class FeedField {
     video: HTMLVideoElement,
     crop: { sx: number; sy: number; sw: number; sh: number },
   ) {
+    if (!this.ring.length) return this.accumulator;
     if (!this.primed) {
       // Seed every frame in the ring with the current image so the effect eases
       // in from a still picture instead of scrolling in out of black.
