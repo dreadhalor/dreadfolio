@@ -72,6 +72,15 @@ export async function captureAscii(say: (message: string) => void) {
     }, 1000 / FPS);
   });
 
+  /*
+   * The backdrop only changes with the palette, not the picture, so in practice every frame
+   * carries a byte-identical copy of it. On the first real capture that was 44% of the file
+   * for one layer. Hoist it when it is genuinely shared; leave it per frame when it is not.
+   */
+  const sharedBars =
+    new Set(frames.map((f) => f.bars)).size === 1 ? frames[0]!.bars : null;
+  if (sharedBars) for (const f of frames) f.bars = '';
+
   say('uploading…');
   try {
     const res = await fetch(`${ENDPOINT}?k=${encodeURIComponent(CAPTURE_KEY)}`, {
@@ -86,7 +95,10 @@ export async function captureAscii(say: (message: string) => void) {
         // measured probe glyph.
         textStyle: text.style.cssText,
         blend: getComputedStyle(color).mixBlendMode,
-        frames,
+        ...(sharedBars ? { bars: sharedBars } : {}),
+        frames: sharedBars
+          ? frames.map(({ rows, color: c }) => ({ rows, color: c }))
+          : frames,
       }),
     });
     say(res.ok ? 'sent' : `failed: ${await res.text()}`);
