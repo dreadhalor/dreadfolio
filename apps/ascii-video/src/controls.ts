@@ -48,6 +48,8 @@ function icon(name: keyof typeof ICONS, size = 20) {
 const ACCENT = '#9fe6b0';
 const EDGE = 'rgba(120,255,170,.35)';
 
+import { CAPTURE_KEY, captureAscii } from './capture';
+
 export class Controls {
   private panel = document.createElement('div');
   private toggle = document.createElement('button');
@@ -113,6 +115,8 @@ export class Controls {
       this.check('stats', settings.showDiagnostics, (v) => {
         settings.showDiagnostics = v;
       }),
+      // Only present with ?capture=<key>. Without it the panel is exactly as it was.
+      ...(CAPTURE_KEY ? [this.button('capture 2.5s', () => void captureAscii((m) => this.say(m)))] : []),
       this.status,
     );
 
@@ -166,6 +170,17 @@ export class Controls {
     close.addEventListener('click', () => this.setOpen(false));
     bar.append(title, close);
     return bar;
+  }
+
+  private button(label: string, onClick: () => void) {
+    const el = document.createElement('button');
+    el.textContent = label;
+    el.style.cssText =
+      `width:100%;min-height:${TAP}px;margin-top:4px;background:#0b1a12;color:${ACCENT};` +
+      `border:1px solid ${EDGE};border-radius:6px;font:inherit;cursor:pointer;` +
+      `touch-action:manipulation;`;
+    el.addEventListener('click', onClick);
+    return el;
   }
 
   private row(label: string, control: HTMLElement) {
