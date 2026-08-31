@@ -1,6 +1,6 @@
 import { IGif } from '@giphy/js-types';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MediaType, fetchGifs } from '../lib/giphy';
+import { MediaType, fetchGifs, isRateLimited } from '../lib/giphy';
 
 const PAGE_SIZE = 30;
 
@@ -32,6 +32,11 @@ export const useGifFeed = (query: string, type: MediaType) => {
   const generation = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const fetchingMore = useRef(false);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  // exponential backoff for 429s — hammering a rate-limited key digs the hole deeper
+  const retryDelay = useRef(30_000);
 
   const runFetch = useCallback(
     async (offset: number, currentGeneration: number) => {
@@ -47,6 +52,7 @@ export const useGifFeed = (query: string, type: MediaType) => {
           controller.signal,
         );
         if (generation.current !== currentGeneration) return;
+        retryDelay.current = 30_000;
         setState((prev) => {
           const existing = offset === 0 ? [] : prev.gifs;
           const seen = new Set(existing.map((gif) => gif.id));
@@ -67,13 +73,26 @@ export const useGifFeed = (query: string, type: MediaType) => {
           generation.current !== currentGeneration
         )
           return;
-        const message = err instanceof Error ? err.message : 'Network error';
+        const rateLimited = isRateLimited(err);
+        const message = rateLimited
+          ? "Giphy's free-tier rate limit is catching its breath — retrying automatically."
+          : err instanceof Error
+            ? err.message
+            : 'Network error';
         setState((prev) => ({
           ...prev,
           loading: false,
           loadingMore: false,
           error: message,
         }));
+        if (rateLimited) {
+          clearTimeout(retryTimer.current);
+          retryTimer.current = setTimeout(() => {
+            if (generation.current === currentGeneration)
+              runFetch(offset, currentGeneration);
+          }, retryDelay.current);
+          retryDelay.current = Math.min(retryDelay.current * 2, 300_000);
+        }
       } finally {
         fetchingMore.current = false;
       }
@@ -84,9 +103,13 @@ export const useGifFeed = (query: string, type: MediaType) => {
   useEffect(() => {
     generation.current += 1;
     fetchingMore.current = false;
+    clearTimeout(retryTimer.current);
     setState({ ...initialState });
     runFetch(0, generation.current);
-    return () => abortRef.current?.abort();
+    return () => {
+      abortRef.current?.abort();
+      clearTimeout(retryTimer.current);
+    };
   }, [runFetch]);
 
   const loadMore = useCallback(() => {

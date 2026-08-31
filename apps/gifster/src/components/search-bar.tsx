@@ -33,7 +33,9 @@ const SearchBar = ({ value, onChange, onCommit }: Props) => {
 
   useEffect(() => {
     setHighlighted(-1);
-    if (!debouncedValue.trim()) {
+    // 2+ chars before hitting the autocomplete API — single letters are
+    // wasted calls against Giphy's tight free-tier rate limit
+    if (debouncedValue.trim().length < 2) {
       setSuggestions([]);
       return;
     }
