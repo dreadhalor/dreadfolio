@@ -29,9 +29,15 @@ const GifCardInner = ({ gif, staggerIndex, onSelect }: Props) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   // Wide margin mounts the <video> just before it scrolls in; the tight one
-  // drives play/pause so offscreen cards cost nothing.
+  // drives play/pause so offscreen cards cost nothing. The mount is LATCHED:
+  // unmounting on scroll-out forces a refetch+decode on every re-entry,
+  // which reads as aggressive flicker on mobile. A paused offscreen video
+  // is far cheaper than that.
   const nearView = useInView(cardRef, '600px');
   const inView = useInView(cardRef, '100px');
+  const everNear = useRef(false);
+  if (nearView) everNear.current = true;
+  const showVideo = nearView || everNear.current;
   const favorites = useFavorites();
   const favorited = favorites.some((entry) => entry.id === gif.id);
 
@@ -74,7 +80,7 @@ const GifCardInner = ({ gif, staggerIndex, onSelect }: Props) => {
       }}
       aria-label={gif.title || 'GIF'}
     >
-      {nearView ? (
+      {showVideo ? (
         <video
           ref={videoRef}
           src={gridVideoUrl(gif)}
