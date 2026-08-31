@@ -3,6 +3,7 @@ import {
   memo,
   useEffect,
   useRef,
+  useState,
   type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { toast } from 'sonner';
@@ -38,6 +39,11 @@ const GifCardInner = ({ gif, staggerIndex, onSelect }: Props) => {
   const everNear = useRef(false);
   if (nearView) everNear.current = true;
   const showVideo = nearView || everNear.current;
+  // The video sits on top of an always-mounted poster and cross-fades in
+  // once it can actually render frames — swapping elements (or showing a
+  // frameless video) flashes on mobile. With preload=auto it usually
+  // becomes ready while still below the viewport, so the fade is invisible.
+  const [videoReady, setVideoReady] = useState(false);
   const favorites = useFavorites();
   const favorited = favorites.some((entry) => entry.id === gif.id);
 
@@ -80,23 +86,25 @@ const GifCardInner = ({ gif, staggerIndex, onSelect }: Props) => {
       }}
       aria-label={gif.title || 'GIF'}
     >
-      {showVideo ? (
+      {/* poster underlay — always mounted, the video fades in over it */}
+      <img
+        src={gridPosterUrl(gif)}
+        alt=''
+        className='h-full w-full object-cover'
+      />
+      {showVideo && (
         <video
           ref={videoRef}
           src={gridVideoUrl(gif)}
-          poster={gridPosterUrl(gif)}
           playsInline
           muted
           loop
-          preload='metadata'
-          className='h-full w-full object-cover'
-        />
-      ) : (
-        <img
-          src={gridPosterUrl(gif)}
-          alt=''
-          loading='lazy'
-          className='h-full w-full object-cover'
+          preload='auto'
+          onCanPlay={() => setVideoReady(true)}
+          className={cn(
+            'absolute inset-0 h-full w-full object-cover transition-opacity duration-300',
+            videoReady ? 'opacity-100' : 'opacity-0',
+          )}
         />
       )}
 
