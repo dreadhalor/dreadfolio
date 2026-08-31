@@ -1,9 +1,210 @@
-@import 'dread-ui/style.css';
+@import 'tailwindcss';
 
-/* App-specific layout requirements */
+/* Brand fonts (Typekit) — filson-pro for body, moret for the wordmark.
+ * Same faces the rest of the portfolio uses; regular + bold only. */
+@font-face {
+  font-family: 'filson-pro';
+  src:
+    url('https://use.typekit.net/af/19c742/0000000000000000000157c9/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
+      format('woff2'),
+    url('https://use.typekit.net/af/19c742/0000000000000000000157c9/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
+      format('woff');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'filson-pro';
+  src:
+    url('https://use.typekit.net/af/c12453/0000000000000000000157bf/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3')
+      format('woff2'),
+    url('https://use.typekit.net/af/c12453/0000000000000000000157bf/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3')
+      format('woff');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'moret';
+  src:
+    url('https://use.typekit.net/af/4874f9/00000000000000007735cc79/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
+      format('woff2'),
+    url('https://use.typekit.net/af/4874f9/00000000000000007735cc79/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
+      format('woff');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'moret';
+  src:
+    url('https://use.typekit.net/af/1d0b2f/00000000000000007735cc81/30/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3')
+      format('woff2'),
+    url('https://use.typekit.net/af/1d0b2f/00000000000000007735cc81/30/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3')
+      format('woff');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 700;
+}
+
+@theme {
+  --font-sans: 'filson-pro', system-ui, -apple-system, sans-serif;
+  --font-serif: 'moret', Georgia, 'Times New Roman', serif;
+}
+
 html,
 body,
 #root {
   height: 100%;
   overflow: hidden;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: radial-gradient(
+      1200px 500px at 50% -100px,
+      rgba(168, 85, 247, 0.14),
+      transparent 70%
+    ),
+    radial-gradient(
+      900px 400px at 85% 10%,
+      rgba(34, 211, 238, 0.07),
+      transparent 70%
+    ),
+    #0b0b11;
+  color: #fff;
+}
+
+/* animated gradient wordmark */
+.logo-text {
+  font-family: 'Bricolage Grotesque', var(--font-serif);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(
+    100deg,
+    #f0abfc 0%,
+    #e879f9 22%,
+    #22d3ee 48%,
+    #a78bfa 74%,
+    #f0abfc 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: logo-slide 8s linear infinite;
+  filter: drop-shadow(0 2px 24px rgba(217, 70, 239, 0.28));
+}
+
+@keyframes logo-slide {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+.hero-glow {
+  position: absolute;
+  inset: -60px 0 -90px;
+  pointer-events: none;
+  background: radial-gradient(
+    480px 220px at 50% 30%,
+    rgba(232, 121, 249, 0.16),
+    transparent 70%
+  );
+  /* fade out before the box edge — a hard clip reads as a line across the
+     body gradient on mobile */
+  mask-image: linear-gradient(to bottom, black 50%, transparent 92%);
+}
+
+/* card entrance — staggered by column position */
+.gif-card {
+  animation: card-in 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 30ms);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.heart-pop {
+  animation: heart-pop 0.35s cubic-bezier(0.2, 0.7, 0.3, 1.4);
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* loading shimmer */
+.shimmer {
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.04) 40%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* transparent stickers sit on a subtle checkerboard */
+.sticker-bg {
+  background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.05) 25%,
+      transparent 25%
+    ),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+}
+
+/* slim dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gif-card,
+  .logo-text {
+    animation: none;
+  }
 }

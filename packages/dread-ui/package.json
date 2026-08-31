@@ -18,6 +18,10 @@
     "./built-style.css": {
       "require": "./output.css",
       "default": "./output.css"
+    },
+    "./ui": {
+      "import": "./src/ui-index.tsx",
+      "require": "./src/ui-index.tsx"
     }
   },
   "scripts": {

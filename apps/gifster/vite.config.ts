@@ -6,6 +6,11 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    // use-sync-external-store carries a nested react@19 (auto-install-peers);
+    // without dedupe the bundle gets two React runtimes and hooks explode.
+    dedupe: ['react', 'react-dom'],
+  },
   plugins: [
     react() as PluginOption,
     tailwindcss(),
