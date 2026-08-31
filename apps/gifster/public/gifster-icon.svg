@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <!-- GIFster brand mark — fuchsia→cyan gradient tile, rounded play triangle, sparkle.
+       Hue: fuchsia family. Silhouette: play triangle. Judged at 16px. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0abfc"/>
+      <stop offset="0.45" stop-color="#d946ef"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="1000" rx="220" fill="url(#g)"/>
+  <!-- play triangle, rounded via thick round-join stroke -->
+  <path d="M415 345 L415 655 L685 500 Z"
+        fill="#ffffff" stroke="#ffffff" stroke-width="110"
+        stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- sparkle -->
+  <path d="M745 200 L766 259 L825 280 L766 301 L745 360 L724 301 L665 280 L724 259 Z"
+        fill="#ffffff" opacity="0.95"/>
+</svg>
