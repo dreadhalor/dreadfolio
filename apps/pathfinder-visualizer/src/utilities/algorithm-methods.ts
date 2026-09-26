@@ -1,4 +1,4 @@
-import { shuffle } from 'lodash';
+import { shuffle } from './randomizers';
 import { expandEdge } from './maze-structures';
 import { GridAdjacencyList } from './data-structures/grid-adjacency-list';
 import { GridSet } from './data-structures/grid-set';

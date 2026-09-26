@@ -3,10 +3,10 @@ import { GridSet } from './data-structures/grid-set';
 import { getDimensions } from './maze-structures';
 
 export const finishAnimation = (grid: Square[][]) => {
-  const animation_queue = [];
+  const animation_queue: (() => void)[] = [];
   const { rows, cols } = getDimensions(grid);
   for (let i = 0; i < rows; i++) {
-    const finish_animation = [];
+    const finish_animation: (() => void)[] = [];
     for (let j = 0; j < cols; j++) {
       const tile = grid[i]?.[j];
       if (!tile) continue;

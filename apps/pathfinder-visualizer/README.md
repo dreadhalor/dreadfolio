@@ -17,20 +17,18 @@ Pathfinder Visualizer is an interactive educational tool that brings graph algor
 - **📊 Algorithm Comparison**: See how different algorithms approach the same problem
 - **🎮 Interactive Controls**: Pause, speed up, or reset animations
 - **📐 Responsive Grid**: Adapts to screen size for optimal viewing
-- **🖱️ Intuitive UI**: Clean Material-UI interface with dropdown menus
+- **🖱️ Intuitive UI**: A single toolbar of dropdown menus that fits phones too
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: React 18
+- **Framework**: React 19
 - **Language**: TypeScript
-- **Build Tool**: Vite 5
-- **Styling**: Tailwind CSS, SCSS
-- **UI Components**: Material-UI (@mui/material), dread-ui
-- **Utilities**: Lodash, uuid
+- **Build Tool**: Vite 7
+- **Styling**: Tailwind CSS 4
+- **UI Components**: Base UI (@base-ui/react) menus and select, Lucide icons
 - **Linting**: ESLint with TypeScript support
-- **Type Checking**: TypeScript 5.2.2
 
 ---
 
@@ -82,46 +80,27 @@ pnpm preview      # Preview production build locally
 pathfinder-visualizer/
 ├── src/
 │   ├── components/
-│   │   ├── grid-square.tsx           # Individual grid cell component
-│   │   ├── grid-square.scss          # Cell styling
-│   │   └── top-nav.tsx               # Navigation bar with controls
+│   │   ├── toolbar.tsx               # The mode select and the three menus
+│   │   ├── grid.tsx                  # The grid: pointer → square, drag painting
+│   │   ├── grid-square.tsx           # One square: its state, looks and animations
+│   │   └── grid-square.css           # The squares' pop, finish and path keyframes
 │   ├── utilities/
-│   │   ├── algorithm-methods.ts      # Algorithm execution logic
-│   │   ├── animations.ts             # Animation definitions
-│   │   ├── animator.ts               # Animation queue manager
-│   │   ├── draw-wrapper.tsx          # Grid drawing utilities
-│   │   ├── data-structures/
-│   │   │   ├── coordinate-utils.ts   # Coordinate helper functions
-│   │   │   ├── grid-adjacency-list.ts  # Graph representation
-│   │   │   ├── grid-set.ts           # Coordinate set operations
-│   │   │   ├── grid-union-find.ts    # Union-find for maze generation
-│   │   │   └── path-list.ts          # Path tracking
-│   │   ├── maze-generation/
-│   │   │   ├── ellers.ts             # Eller's algorithm
-│   │   │   ├── hunt-and-kill.ts      # Hunt-and-kill algorithm
-│   │   │   ├── kruskals.ts           # Kruskal's algorithm
-│   │   │   ├── prims.ts              # Prim's algorithm
-│   │   │   ├── recursive-backtracking.ts  # Recursive backtracking
-│   │   │   ├── recursive-division.ts  # Recursive division
-│   │   │   └── index.ts              # Algorithm exports
+│   │   ├── algorithm-methods.ts      # Shared maze/search helpers
+│   │   ├── animations.ts             # Animation step builders
+│   │   ├── animator.ts               # Plays animation steps a few per frame (cancellable)
+│   │   ├── data-structures/          # Grid sets, adjacency list, union-find, path list
+│   │   ├── maze-generation/          # Eller's, hunt-and-kill, Kruskal's, Prim's,
+│   │   │                             # recursive backtracking, recursive division
 │   │   ├── maze-structures.ts        # Maze utility functions
-│   │   ├── randomizers.ts            # Random generation helpers
-│   │   └── solvers/
-│   │       ├── a-star.ts             # A* pathfinding
-│   │       ├── bfs.ts                # Breadth-first search
-│   │       ├── bfs-raw.ts            # Raw BFS implementation
-│   │       └── dfs.ts                # Depth-first search
-│   ├── types.ts                      # TypeScript type definitions
-│   ├── app.tsx                       # Main application component
-│   ├── app.scss                      # Global app styles
-│   └── index.scss                    # Root styles
+│   │   ├── randomizers.ts            # Shuffle, coin flips, dice
+│   │   └── solvers/                  # A*, BFS, DFS (and the raw BFS used to place endpoints)
+│   ├── types.ts                      # Coordinates and the Square contract
+│   ├── app.tsx                       # Layout, grid sizing, actions, drawing
+│   ├── main.tsx                      # Entry point
+│   └── index.css                     # Tailwind, the brand font, page styles
 ├── package.json
 ├── tsconfig.json
-├── tsconfig.node.json
 ├── vite.config.ts
-├── tailwind.config.js
-├── postcss.config.js
-├── .eslintrc.cjs
 └── README.md
 ```
 
@@ -138,7 +117,7 @@ pathfinder-visualizer/
 
 ### Solving the Maze
 
-1. Select a drawing mode (Wall, Weight, etc.) from the dropdown
+1. Choose what a press places (Start, End or Wall) from the select
 2. Click **"Solve It!"** and choose an algorithm:
    - **A*** - Optimal, uses heuristics (Manhattan distance)
    - **BFS** - Optimal, explores level-by-level
@@ -158,8 +137,7 @@ Click **"Generate Maze"** and choose an algorithm:
 
 ### Controls
 
-- **Clear Map**: Removes all walls and weights
-- **User Menu**: Access achievements and settings
+- **Clear Map**: Clear Path removes a search's marks; Clear Walls removes every wall
 
 ---
 
@@ -304,17 +282,13 @@ Disabled rules for algorithm implementation flexibility:
 
 ## 📊 Bundle Analysis
 
-- **Main bundle**: 1,026 kB (gzipped: 299 kB)
-- **CSS**: 65.90 kB (gzipped: 10.77 kB)
-- **Large bundle** due to Material-UI and dread-ui components
-- **Optimizations**: Consider code splitting for algorithms
+- **Main bundle**: 376 kB (gzipped: 123 kB)
+- **CSS**: 14 kB (gzipped: 4 kB)
 
 ---
 
 ## 🐛 Known Limitations
 
-- **Mobile Touch**: Optimized for mouse, basic touch support
-- **Bundle Size**: Large due to Material-UI (consider dynamic imports)
 - **Grid Size**: Very large grids (100×100+) may impact performance
 - **Browser Compatibility**: Requires modern browser with ES2020 support
 
@@ -331,13 +305,11 @@ Disabled rules for algorithm implementation flexibility:
 - [ ] Algorithm statistics (nodes explored, path length)
 - [ ] Export/import maze layouts
 - [ ] Custom grid sizes
-- [ ] Mobile-optimized touch controls
 - [ ] Dark mode theme
 
 ### Technical Improvements
 - [ ] Code splitting by algorithm
 - [ ] Web Workers for algorithm execution
-- [ ] Reduce bundle size (Material-UI tree-shaking)
 - [ ] Unit tests for algorithms
 - [ ] E2E tests for user interactions
 - [ ] Performance profiling and optimization
@@ -363,7 +335,6 @@ MIT License - See root LICENSE file for details
 - Inspired by Clement Mihailescu's Pathfinding Visualizer
 - Built as part of the [dreadfolio monorepo](https://github.com/Dreadhalor/dreadfolio)
 - Algorithms based on classic computer science literature
-- Material-UI for beautiful React components
 
 ---
 

@@ -1,560 +1,250 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import './app.css';
-import { v4 as uuidv4 } from 'uuid';
-import GridSquare from './components/grid-square';
-import TopNav from './components/top-nav';
-import { bfs } from './utilities/solvers/bfs';
-import {
-  kruskals,
-  ellers,
-  recursiveBacktracking,
-  huntAndKill,
-  prims,
-} from './utilities/maze-generation/index';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Grid } from './components/grid';
+import { Toolbar, type MazeKind, type Mode, type SolverKind } from './components/toolbar';
 import { Animator } from './utilities/animator';
 import { finishAnimation } from './utilities/animations';
-import { recursiveDivision } from './utilities/maze-generation/recursive-division';
 import { aStar } from './utilities/solvers/a-star';
-import { dfs } from './utilities/solvers/dfs';
-import DrawWrapper from './utilities/draw-wrapper';
-import { useAchievements } from 'dread-ui';
-import { Square } from './types';
+import { bfs } from './utilities/solvers/bfs';
 import { bfs_raw } from './utilities/solvers/bfs-raw';
+import { dfs } from './utilities/solvers/dfs';
+import { ellers, huntAndKill, kruskals, prims, recursiveBacktracking } from './utilities/maze-generation/index';
+import { recursiveDivision } from './utilities/maze-generation/recursive-division';
+import type { Coordinates, Square } from './types';
 
-export type SetValueProps = {
-  square_uuid: string;
-  val?: number;
-  reset_override?: boolean;
-  checkAchievements?: boolean;
+type Dims = { rows: number; cols: number; size: number };
+
+/* The grid for a space: 25px squares (20 when it's under 600px wide), as many as fit, an odd
+   number each way (mazes run on the even cells, walls between). */
+function fit(w: number, h: number): Dims {
+  const size = w < 600 ? 20 : 25;
+  let rows = Math.floor(h / size), cols = Math.floor(w / size);
+  if (rows % 2 === 0 && rows > 0) rows--;
+  if (cols % 2 === 0 && cols > 0) cols--;
+  return { rows, cols, size };
+}
+
+/* Where start and end go on a fresh grid: three squares in from the ends of the middle row —
+   or of the middle column, if the grid is taller than it's wide. */
+function homes({ rows, cols }: Dims): [Coordinates, Coordinates] {
+  if (rows <= cols) {
+    const r = Math.floor(rows / 2);
+    return [[r, Math.min(3, cols - 1)], [r, Math.max(cols - 4, 0)]];
+  }
+  const c = Math.floor(cols / 2);
+  return [[Math.min(3, rows - 1), c], [Math.max(rows - 4, 0), c]];
+}
+
+/* Squares whose state belongs to a maze being generated or a search, not to what was drawn. */
+const TRANSIENT: Record<number, number> = { 4: 0, 5: 3, 6: 0, 7: 3 };
+/* Maze generators and how many steps each plays a frame. */
+const MAZES: Record<MazeKind, { fromWalls: boolean; perFrame: number; run: (grid: Square[][]) => { animations?: (() => void)[] } }> = {
+  kruskals: { fromWalls: true, perFrame: 1, run: kruskals },
+  backtracking: { fromWalls: true, perFrame: 2, run: recursiveBacktracking },
+  prims: { fromWalls: true, perFrame: 2, run: prims },
+  huntAndKill: { fromWalls: true, perFrame: 2, run: huntAndKill },
+  division: { fromWalls: false, perFrame: 1, run: (grid) => recursiveDivision(grid, 10) },
+  ellers: { fromWalls: true, perFrame: 1, run: ellers },
 };
 
-const App: React.FC = () => {
-  const [rows, setRows] = useState<number>();
-  const [cols, setCols] = useState<number>();
-  const squareSize = useRef<number>(25);
-
-  const { isUnlockable, unlockAchievementById } = useAchievements();
-
-  const createNewGrid = (num_rows: number, num_cols: number): Square[][] => {
-    const new_grid: Square[][] = [];
-    for (let i = 0; i < num_rows; i++) {
-      const row: Square[] = [];
-      for (let j = 0; j < num_cols; j++) {
-        row.push({ uuid: uuidv4(), row: i, col: j });
-      }
-      new_grid.push(row);
-    }
-    return new_grid;
-  };
-
-  const [grid, setGrid] = useState<Square[][]>();
-
-  const gridContainerRef = useRef<HTMLDivElement>(null);
+/**
+ * Pathfinder Visualizer: draw walls, place start and end, generate a maze, and watch a search
+ * find its way — A*, BFS, DFS — square by square.
+ */
+export default function App() {
+  const [dims, setDims] = useState<Dims | null>(null);
+  const [mode, setMode] = useState<Mode>(3);
+  const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const mode = useRef<number>(3);
-  const solved = useRef<boolean>(false);
-  const navRef = useRef<any>(null);
-  const animatorRef = useRef<Animator>(new Animator());
-  const dragValRef = useRef<number | null>(null);
+  const animator = useRef(new Animator()).current;
+  // Where start and end are (the squares say too; this is what a reset puts back).
+  const ends = useRef<[Coordinates, Coordinates]>([[0, 0], [0, 0]]);
+  // Whether a search's marks are on the board (any edit clears them).
+  const solved = useRef(false);
+  // A press held on the grid: moving start or end, or painting walls on or off.
+  const drag = useRef<{ move: 1 | 2 } | { paint: number; over: number } | null>(null);
 
-  const finished = () =>
-    grid && animatorRef.current.playAnimations([...finishAnimation(grid)]);
-  if (finished) animatorRef.current.setFinishFunction(finished);
+  const grid = useMemo(
+    () =>
+      dims ? Array.from({ length: dims.rows }, (_, row) => Array.from({ length: dims.cols }, (_, col): Square => ({ row, col, val: 0, pathVal: 0 }))) : null,
+    [dims],
+  );
+  const at = ([r, c]: Coordinates) => grid?.[r]?.[c];
 
-  const checkForPathReset = () => {
-    return animatorRef.current.animationsLeft() > 0 || solved.current;
-  };
-
-  const setValueCheck = (
-    candidate_square: Square,
-    uuid: string,
-    val: number,
-    reset_override = false,
-  ) => {
-    const tile_match = candidate_square.uuid === uuid;
-    const val_match = candidate_square.val === val;
-    const exact_match = tile_match && val_match;
-    if (exact_match) {
-      candidate_square.setVal!(() => 0);
-      return 0;
-    } else if (tile_match) {
-      if (val === 3 && candidate_square.pathVal === 2 && !reset_override)
-        resetPath();
-      if (val === 1 || val === 2) {
-        if (candidate_square.val === 3) return null;
-        if (!reset_override) resetPath();
-        removeVal(val);
-      }
-      candidate_square.setVal!(() => val);
-      return val;
-    }
-    return null;
-  };
-
-  const checkDrawingAchievement = (value: number | null) => {
-    switch (value) {
-      case 0:
-        if (isUnlockable('erase_wall', 'pathfinder-visualizer'))
-          unlockAchievementById('erase_wall', 'pathfinder-visualizer');
-        break;
-      case 1:
-        if (isUnlockable('move_start', 'pathfinder-visualizer'))
-          unlockAchievementById('move_start', 'pathfinder-visualizer');
-        break;
-      case 2:
-        if (isUnlockable('move_end', 'pathfinder-visualizer'))
-          unlockAchievementById('move_end', 'pathfinder-visualizer');
-        break;
-      case 3:
-        if (isUnlockable('draw_wall', 'pathfinder-visualizer'))
-          unlockAchievementById('draw_wall', 'pathfinder-visualizer');
-        break;
-      default:
-        break;
-    }
-  };
-  const setValue = ({
-    square_uuid,
-    val = mode.current,
-    reset_override = false,
-    checkAchievements = false,
-  }: SetValueProps) => {
-    let value_set = null;
-    if (!rows || !cols || !grid) return null;
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const possible = setValueCheck(
-          grid[i]![j]!,
-          square_uuid,
-          val,
-          reset_override,
-        );
-        if ((possible ?? null) !== null) value_set = possible;
-      }
-    }
-    if ((value_set ?? null) !== null && checkForPathReset() && !reset_override)
-      resetPath();
-    if (checkAchievements) checkDrawingAchievement(value_set);
-    return value_set;
-  };
-  const removeVal = (val: number) => {
-    if (!rows || !cols || !grid) return;
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const tile = grid[i]![j];
-        if (!tile) continue;
-        if (tile.val === val) tile.setVal!(() => 0);
-      }
-    }
-  };
+  // The grid fills the space below the toolbar, laid out again when that changes size.
   useLayoutEffect(() => {
-    resetGridSize();
-  }, []);  
-  useEffect(() => fullResetStartAndEnd(), [grid]);  
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => {
+      const next = fit(el.clientWidth, el.clientHeight);
+      setDims((d) => (d && d.rows === next.rows && d.cols === next.cols && d.size === next.size ? d : next));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
-  const fullResetStartAndEnd = () => {
-    let potential_start, potential_end;
-    const inset = 3;
-    if (!rows || !cols || !grid) return;
-    if (rows <= cols) {
-      const middle_row = Math.floor(rows / 2);
-      const start_row = inset < cols ? inset : cols - 1;
-      let end_row = cols - inset - 1;
-      end_row = end_row >= 0 ? end_row : 0;
-      potential_start = getTile([middle_row, start_row]);
-      potential_end = getTile([middle_row, end_row]);
-    } else {
-      const middle_col = Math.floor(cols / 2);
-      const start_col = inset < rows ? inset : rows - 1;
-      let end_col = rows - inset - 1;
-      end_col = end_col >= 0 ? end_col : 0;
-      potential_start = getTile([start_col, middle_col]);
-      potential_end = getTile([end_col, middle_col]);
-    }
-    if (potential_start) {
-      setValue({ square_uuid: potential_start.uuid, val: 1 });
-      potential_start.animate!(1);
-    }
-    if (potential_end) {
-      setValue({ square_uuid: potential_end.uuid, val: 2 });
-      potential_end.animate!(1);
-    }
-  };
-
-  function resetGridSize() {
-    if (!gridContainerRef.current) return;
-    const w = gridContainerRef.current.clientWidth,
-      h = gridContainerRef.current.clientHeight;
-    squareSize.current = w < 600 ? 20 : 25;
-    let new_rows = Math.floor(h / squareSize.current);
-    if (new_rows % 2 === 0 && new_rows > 0) new_rows--;
-    let new_cols = Math.floor(w / squareSize.current);
-    if (new_cols % 2 === 0 && new_cols > 0) new_cols--;
-    animatorRef.current.flushAnimationQueue();
-    setRows(() => new_rows);  
-    setCols(() => new_cols); //eslint disable-line exhaustive-deps
-    setGrid(() => createNewGrid(new_rows, new_cols)); //eslint disable-line exhaustive-deps
-    if (new_rows <= 1 || new_cols <= 1) {
-      requestAnimationFrame(resetGridSize);
-    }
-  }
+  // A fresh grid: nothing playing, start and end in their homes (after the squares have mounted
+  // and handed over their setters).
   useEffect(() => {
-    window.addEventListener('resize', resetGridSize);
-    return () => window.removeEventListener('resize', resetGridSize);
-  }, []);  
-
-  const gridStyle = {
-    margin: 'auto',
-    display: 'grid',
-    gap: '0px',
-    gridTemplateColumns: `repeat(${cols}, auto)`,
-  };
-
-  const getTile = (coords: [number, number]) => {
-    if (coords) return grid?.[coords[0]]?.[coords[1]];
-  };
-  const getStartAndEnd = () => {
-    let start = null,
-      end = null;
-    if (!rows || !cols || !grid) return [start, end];
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        if (grid[i]![j]!.val === 1) start = [i, j];
-        if (grid[i]![j]!.val === 2) end = [i, j];
-        if (start && end) break;
-      }
-    }
-    return [start, end] as [[number, number], [number, number]];
-  };
-  const getClosestPathSquare = (
-    new_grid: (Square | number)[][],
-    coords: [number, number],
-    val: number,
-  ) => {
-    return bfs_raw({
-      grid: new_grid,
-      startCoords: coords,
-      solutionFunc: (tile_val: number | Square) => tile_val === val,
-    });
-  };
-  const resetStartAndEnd = (
-    old_start: [number, number],
-    old_end: [number, number],
-  ) => {
-    if (!rows || !cols || !grid) return;
-    const new_grid = grid.map((row) =>
-      row.map((square) => {
-        if (!square.val) return 0;
-        if (square.val === 1 || square.val === 2) return 0;
-        return square.val;
-      }),
-    );
-
-    const start = getClosestPathSquare(new_grid, old_start, 0);
-    const end = getClosestPathSquare(new_grid, old_end, 0);
-
-    if (start) {
-      const tile = getTile(start);
-      if (!tile?.setVal || !tile?.animate) return;
-      tile.setVal(() => 1);
-      tile.animate(1);
-    }
-    if (end) {
-      const tile = getTile(end);
-      if (!tile?.setVal || !tile?.animate) return;
-      tile.setVal(() => 2);
-      tile.animate(1);
-    }
-  };
-
-  const resetPath = () => {
+    if (!grid || !dims) return;
+    animator.stop();
     solved.current = false;
-    animatorRef.current.flushAnimationQueue();
-    if (!rows || !cols || !grid) return;
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const tile = grid[i]![j];
-        if (
-          !tile ||
-          !tile.setPathVal ||
-          !tile.setDirection ||
-          !tile.setDisplayVal ||
-          !tile.setVal
-        )
-          continue;
-        if (tile.pathVal) tile.setPathVal(() => 0);
-        tile.setDirection(null);
-        tile.setDisplayVal(null);
-        switch (tile.val) {
-          case 4:
-            tile.setVal(() => 0);
-            break;
-          case 5:
-            tile.setVal(() => 3);
-            break;
-          case 6:
-            tile.setVal(() => 0);
-            break;
-          case 7:
-            tile.setVal(() => 3);
-            break;
-          default:
-            break;
-        }
-      }
-    }
-    navRef.current.forceRender();
-  };
-  const resetWalls = (animate_tiles = false) => {
-    const [start, end] = getStartAndEnd();
-    resetPath();
-    if (!rows || !cols || !grid) return;
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        const tile = grid[i]![j];
-        if (!tile || !tile.setVal || !tile.animate) continue;
-        if (start && i === start[0] && j === start[1]) {
-          tile.setVal(() => 1);
-          if (animate_tiles) tile.animate(1);
-        } else if (end && i === end[0] && j === end[1]) {
-          tile.setVal(() => 2);
-          if (animate_tiles) tile.animate(1);
-        } else tile.setVal(() => 0);
-      }
-    }
+    ends.current = homes(dims);
+    ends.current.forEach((cell, k) => {
+      const sq = at(cell);
+      sq?.setVal?.(k + 1);
+      sq?.animate?.(1);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grid]);
+
+  const each = (f: (sq: Square) => void) => grid?.forEach((row) => row.forEach(f));
+
+  /* Clears a search's marks (and anything a stopped maze left half-drawn). */
+  const clearPath = () => {
+    animator.stop();
+    solved.current = false;
+    each((sq) => {
+      if (sq.pathVal) sq.setPathVal?.(0);
+      sq.setDirection?.(null);
+      sq.setDisplayVal?.(null);
+      const t = TRANSIENT[sq.val ?? 0];
+      if (t !== undefined) sq.setVal?.(t);
+    });
   };
 
-  const wallifyItAll = () => {
-    resetPath();
-    if (!rows || !cols || !grid) return;
-    grid.forEach((row) =>
-      row.forEach((tile) => {
-        if (!tile.setVal || !tile.setDisplayVal) return;
-        tile.setVal(() => 3);
-        tile.setDisplayVal(null);
-      }),
-    );
-  };
-  const solveBFS = () => {
-    const endpoints = getStartAndEnd();
-    const start = endpoints[0];
-    resetPath();
-    if (!grid) return;
-    const { end, animations } = bfs({
-      maze: grid,
-      start_coords: start,
-      solution_func: (tile: Square) => tile.val === 2,
-      frontier_animation: (tile: Square) => tile.setPathVal!(() => 3),
-      traversal_animation: (tile: Square) => tile?.setPathVal!(() => 1),
-      path_animation: (tile: Square) => tile.setPathVal!(() => 2),
+  /* Start and end back where they were, over whatever's there. */
+  const restoreEnds = (pop: boolean) =>
+    ends.current.forEach((cell, k) => {
+      const sq = at(cell);
+      sq?.setVal?.(k + 1);
+      if (pop) sq?.animate?.(1);
     });
-    if (!animations) return;
-    if (animations)
-      animations.push(() => {
-        if (end) unlockAchievementById('solve_bfs', 'pathfinder-visualizer');
-        else unlockAchievementById('no_solution', 'pathfinder-visualizer');
-        if (!end && gridContainerRef.current) {
-          gridContainerRef.current.classList.remove('no-solution');
-          void gridContainerRef.current.offsetWidth;
-          gridContainerRef.current.classList.add('no-solution');
-        }
+
+  /* Every wall gone; start and end where they were (even if a maze was halfway over them). */
+  const clearWalls = (pop: boolean) => {
+    clearPath();
+    each((sq) => sq.setVal?.(0));
+    restoreEnds(pop);
+  };
+
+  const solve = (kind: SolverKind) => {
+    if (!grid) return;
+    clearPath();
+    const [start, end] = ends.current;
+    const marks = {
+      frontier_animation: (sq: Square) => sq.setPathVal?.(3),
+      path_animation: (sq: Square) => sq.setPathVal?.(2),
+    };
+    const result =
+      kind === 'astar'
+        ? aStar({ maze: grid, start_coords: start, end_coords: end, traverse_animation: (sq: Square) => sq.setPathVal?.(1), ...marks })
+        : (kind === 'bfs' ? bfs : dfs)({ maze: grid, start_coords: start, solution_func: (sq: Square) => sq.val === 2, traversal_animation: (sq: Square) => sq.setPathVal?.(1), ...marks });
+    const steps = result.animations ?? [];
+    // No way through: the grid shakes its head.
+    if (!result.end)
+      steps.push(() => {
+        const el = gridRef.current;
+        if (!el) return;
+        el.classList.remove('no-solution');
+        void el.offsetWidth;
+        el.classList.add('no-solution');
       });
-    animatorRef.current.playAnimations(animations, 6);
     solved.current = true;
-    navRef.current.forceRender();
-  };
-  const solveDFS = () => {
-    const endpoints = getStartAndEnd();
-    const start = endpoints[0];
-    resetPath();
-    if (!grid) return;
-    const { end, animations } = dfs({
-      maze: grid,
-      start_coords: start,
-      solution_func: (tile: Square) => tile.val === 2,
-      frontier_animation: (tile: Square) => tile.setPathVal!(() => 3),
-      traversal_animation: (tile: Square) => tile.setPathVal!(() => 1),
-      path_animation: (tile: Square) => tile.setPathVal!(() => 2),
-    });
-    if (!animations) return;
-    animations.push(() => {
-      if (end) unlockAchievementById('solve_dfs', 'pathfinder-visualizer');
-      else unlockAchievementById('no_solution', 'pathfinder-visualizer');
-      if (!end && gridContainerRef.current) {
-        gridContainerRef.current.classList.remove('no-solution');
-        void gridContainerRef.current.offsetWidth;
-        gridContainerRef.current.classList.add('no-solution');
-      }
-    });
-    animatorRef.current.playAnimations(animations, 6);
-    solved.current = true;
-    navRef.current.forceRender();
-  };
-  const solveAStar = () => {
-    const [start, end] = getStartAndEnd();
-    resetPath();
-    if (!grid) return;
-    const { end: result, animations } = aStar({
-      maze: grid,
-      start_coords: start,
-      end_coords: end,
-      traverse_animation: (tile: Square) => tile.setPathVal!(() => 1),
-      frontier_animation: (tile: Square) => tile.setPathVal!(() => 3),
-      path_animation: (tile: Square) => tile.setPathVal!(() => 2),
-    });
-    if (!animations) return;
-    animations.push(() => {
-      if (result) unlockAchievementById('solve_astar', 'pathfinder-visualizer');
-      else unlockAchievementById('no_solution', 'pathfinder-visualizer');
-      if (!result && gridContainerRef.current) {
-        gridContainerRef.current.classList.remove('no-solution');
-        void gridContainerRef.current.offsetWidth;
-        gridContainerRef.current.classList.add('no-solution');
-      }
-    });
-    animatorRef.current.playAnimations(animations, 6);
-    solved.current = true;
-    navRef.current.forceRender();
+    animator.play(steps, 6);
   };
 
-  const generateKruskals = () => {
-    const [start, end] = getStartAndEnd();
-    wallifyItAll();
+  const generate = (kind: MazeKind) => {
     if (!grid) return;
-    kruskals(grid, animatorRef);
-    unlockAchievementById('generate_kruskals', 'pathfinder-visualizer');
-    animatorRef.current.pushOneToOpenQueue(() => {
-      if (!start || !end) return;
-
-      resetStartAndEnd(start, end);
-    });
-    animatorRef.current.closeOpenQueue(true);
-  };
-  const generateEllers = () => {
-    const [start, end] = getStartAndEnd();
-    wallifyItAll();
-    if (!grid) return;
-    let { animations } = ellers(grid);
-    unlockAchievementById('generate_ellers', 'pathfinder-visualizer');
-    if (!animations) return;
-    animations = animations.concat(() => {
-      if (!start || !end) return;
-      resetStartAndEnd(start, end);
-    });
-
-    animatorRef.current.playAnimations(animations, 1, true);
-  };
-  const generateDFS = () => {
-    const [start, end] = getStartAndEnd();
-    wallifyItAll();
-    if (!grid) return;
-    let { animations } = recursiveBacktracking(grid);
-    unlockAchievementById(
-      'generate_recursive_backtracking',
-      'pathfinder-visualizer',
+    const maze = MAZES[kind];
+    const [start, end] = ends.current;
+    if (maze.fromWalls) {
+      clearPath();
+      each((sq) => {
+        sq.setVal?.(3);
+        sq.setDisplayVal?.(null);
+      });
+    } else clearWalls(false);
+    const { animations = [] } = maze.run(grid);
+    animator.play(
+      [
+        ...animations,
+        () => {
+          // Start and end onto the nearest open squares of the finished maze, then its wave.
+          const open = grid.map((row) => row.map((sq) => (sq.val === 1 || sq.val === 2 ? 0 : (sq.val ?? 0))));
+          const moved = [start, end].map((cell) => bfs_raw({ grid: open, startCoords: cell, solutionFunc: (v: number) => v === 0 }) ?? cell) as [Coordinates, Coordinates];
+          each((sq) => (sq.val === 1 || sq.val === 2) && sq.setVal?.(0));
+          ends.current = moved;
+          restoreEnds(true);
+        },
+      ],
+      maze.perFrame,
+      () => animator.play(finishAnimation(grid), 1),
     );
-    animations = animations.concat(() => {
-      if (!start || !end) return;
-      resetStartAndEnd(start, end);
-    });
+  };
 
-    animatorRef.current.playAnimations(animations, 2, true);
+  /* A press or drag onto a square. Start and end move with the pointer (never onto a wall or
+     each other); otherwise a press toggles a wall and the drag paints that change on. */
+  const edit = (cell: Coordinates, pressed: boolean) => {
+    const sq = at(cell);
+    if (!sq) return;
+    const v = sq.val ?? 0;
+    if (pressed) {
+      if (v === 1 || v === 2) drag.current = { move: v };
+      else if (mode !== 3) {
+        drag.current = { move: mode };
+        place(mode, cell);
+        return;
+      } else drag.current = { paint: v === 3 ? 0 : 3, over: v === 3 ? 3 : 0 };
+    }
+    const d = drag.current;
+    if (!d) return;
+    if ('move' in d) place(d.move, cell);
+    else if (v === d.over) {
+      if (solved.current || animator.busy) clearPath();
+      sq.setVal?.(d.paint);
+    }
   };
-  const generateHuntAndKill = () => {
-    const [start, end] = getStartAndEnd();
-    wallifyItAll();
-    if (!grid) return;
-    let { animations } = huntAndKill(grid);
-    unlockAchievementById('generate_hunt_and_kill', 'pathfinder-visualizer');
-    animations = animations.concat(() => {
-      if (!start || !end) return;
-      resetStartAndEnd(start, end);
-    });
-    animatorRef.current.playAnimations(animations, 2, true);
-  };
-  const generatePrims = () => {
-    const [start, end] = getStartAndEnd();
-    wallifyItAll();
-    if (!grid) return;
-    let { animations } = prims(grid);
-    unlockAchievementById('generate_prims', 'pathfinder-visualizer');
-    if (!animations) return;
-    animations = animations.concat(() => {
-      if (!start || !end) return;
-      resetStartAndEnd(start, end);
-    });
-    animatorRef.current.playAnimations(animations, 2, true);
-  };
-  const generateRecursiveDivision = () => {
-    const [start, end] = getStartAndEnd();
-    resetWalls(false);
 
-    if (!grid) return;
-    let { animations } = recursiveDivision(grid, 10);
-    animations = animations.concat(() => {
-      if (!start || !end) return;
-      resetStartAndEnd(start, end);
-    });
-    unlockAchievementById(
-      'generate_recursive_division',
-      'pathfinder-visualizer',
-    );
-    animatorRef.current.playAnimations(animations, 1, true);
+  const place = (which: 1 | 2, cell: Coordinates) => {
+    const sq = at(cell);
+    const other = ends.current[2 - which]!;
+    if (!sq || sq.val === 3 || (cell[0] === other[0] && cell[1] === other[1])) return;
+    const prev = ends.current[which - 1]!;
+    if (prev[0] === cell[0] && prev[1] === cell[1]) return;
+    if (solved.current || animator.busy) clearPath();
+    at(prev)?.setVal?.(0);
+    sq.setVal?.(which);
+    ends.current[which - 1] = cell;
   };
 
   return (
-    <div className='App site-bg-empty flex h-full w-full flex-col'>
-      <TopNav
-        ref={navRef}
-        modeRef={mode}
-        solveBFS={solveBFS}
-        solveDFS={solveDFS}
-        solveAStar={solveAStar}
-        clearPath={resetPath}
-        generateKruskals={generateKruskals}
-        generateEllers={generateEllers}
-        generateDFS={generateDFS}
-        generateHuntAndKill={generateHuntAndKill}
-        generatePrims={generatePrims}
-        generateRecursiveDivision={generateRecursiveDivision}
-        resetWalls={resetWalls}
+    <div className='flex h-full w-full flex-col'>
+      <Toolbar
+        mode={mode}
+        onMode={setMode}
+        onSolve={solve}
+        onGenerate={generate}
+        onClearPath={clearPath}
+        onClearWalls={() => clearWalls(true)}
       />
       <div className='relative min-h-0 w-full flex-1'>
-        <div className='absolute left-0 top-0 flex h-full w-full overflow-auto p-1'>
-          <div
-            ref={gridContainerRef}
-            className={
-              (rows && rows <= 1 ? 'opacity-0 ' : '') +
-              'flex h-full min-w-0 flex-1 flex-row'
-            }
-          >
-            <DrawWrapper
-              refToUse={gridRef}
-              className='flex h-full flex-1'
-              style={{ touchAction: 'none' }}
-            >
-              <div style={gridStyle} ref={gridRef}>
-                {grid &&
-                  grid.map((row) =>
-                    row.map((square) => (
-                      <GridSquare
-                        key={square.uuid}
-                        size={squareSize.current}
-                        rows={rows ?? 0}
-                        square={square}
-                        setValue={setValue}
-                        dragValRef={dragValRef}
-                        modeRef={mode}
-                      />
-                    )),
-                  )}
-              </div>
-            </DrawWrapper>
+        <div className='absolute inset-0 flex p-1'>
+          <div ref={containerRef} className='flex h-full min-w-0 flex-1' onPointerUp={() => (drag.current = null)} onPointerCancel={() => (drag.current = null)}>
+            {grid && dims && (
+              <Grid
+                key={`${dims.rows}x${dims.cols}x${dims.size}`}
+                grid={grid}
+                size={dims.size}
+                gridRef={gridRef}
+                onPress={(cell) => edit(cell, true)}
+                onDrag={(cell) => edit(cell, false)}
+              />
+            )}
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default App;
+}

@@ -1,4 +1,4 @@
-import { shuffle } from 'lodash';
+import { shuffle } from '../randomizers';
 import { getDirection } from '../algorithm-methods';
 import { GridSet } from '../data-structures/grid-set';
 import { getSolverAdjacencyList } from '../maze-structures';
