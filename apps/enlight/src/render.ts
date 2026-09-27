@@ -1,6 +1,6 @@
 import { Caster, type Occluders, type Pt } from './geometry.ts';
 import type { Note } from './rooms.ts';
-import type { Shape } from './shapes.ts';
+import { type Shape, shapeAt } from './shapes.ts';
 
 /** The onboarding: say hello, get a shape made, get the help found, then stay out of the way. */
 export type Stage = 'hello' | 'explore' | 'free';
@@ -124,12 +124,22 @@ export class Renderer {
     // A room that remembers keeps where the light has been faintly visible,
     // under everything else: explored corridors, dim, with the walls black.
     if (s.remember) {
-      if (s.light) this.stampMemory(s, s.light);
+      // From inside a wall, all the light sees is the wall: nothing to remember.
+      if (s.light && !shapeAt(s.shapes, s.light)) this.stampMemory(s, s.light);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 0.13;
       ctx.drawImage(this.memory, 0, 0);
       ctx.globalAlpha = 1;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // And walls stay black in the memory whatever it holds, even one dragged
+      // across floor that has already been explored.
+      ctx.fillStyle = '#000';
+      for (const { points } of s.shapes) {
+        ctx.beginPath();
+        ctx.moveTo(points[0]!.x, points[0]!.y);
+        for (let k = 1; k < points.length; k++) ctx.lineTo(points[k]!.x, points[k]!.y);
+        ctx.fill();
+      }
     }
 
     ctx.textAlign = 'center';
