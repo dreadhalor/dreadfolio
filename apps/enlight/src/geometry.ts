@@ -257,6 +257,28 @@ export function area(shape: readonly Pt[]): number {
   return Math.abs(sum) / 2;
 }
 
+/**
+ * How far along the ray from `o` in direction (dx, dy) the outline last
+ * crosses it: where the ray finally leaves the shape. 0 if it never crosses.
+ */
+export function lastCrossing(outline: readonly Pt[], o: Pt, dx: number, dy: number): number {
+  let far = 0;
+  for (let i = 0; i < outline.length; i++) {
+    const a = outline[i]!;
+    const b = outline[(i + 1) % outline.length]!;
+    const sx = b.x - a.x;
+    const sy = b.y - a.y;
+    const den = dx * sy - dy * sx;
+    if (den === 0) continue; // parallel
+    const wx = a.x - o.x;
+    const wy = a.y - o.y;
+    const t = (wx * sy - wy * sx) / den;
+    const u = (wx * dy - wy * dx) / den;
+    if (t >= 0 && u >= 0 && u <= 1) far = Math.max(far, t);
+  }
+  return far;
+}
+
 /** The mean of the vertices: a shape's handle for moving it as a whole. */
 export function centroid(shape: readonly Pt[]): Pt {
   let x = 0;

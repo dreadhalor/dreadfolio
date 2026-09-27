@@ -1,4 +1,4 @@
-import { type Pt, area, centroid, contains } from './geometry.ts';
+import { type Pt, area, centroid, contains, lastCrossing } from './geometry.ts';
 
 /**
  * What the palette makes. A number is a regular polygon with that many sides;
@@ -75,6 +75,12 @@ function lumpy(at: Pt, radius: number, turn: number): Pt[] {
   return points;
 }
 
+function furthest(points: readonly Pt[], c: Pt) {
+  let far = 0;
+  for (const p of points) far = Math.max(far, Math.hypot(p.x - c.x, p.y - c.y));
+  return far;
+}
+
 export function meanRadius(points: readonly Pt[], c = centroid(points)) {
   let sum = 0;
   for (const p of points) sum += Math.hypot(p.x - c.x, p.y - c.y);
@@ -82,18 +88,21 @@ export function meanRadius(points: readonly Pt[], c = centroid(points)) {
 }
 
 /**
- * Where the turn handle sits: just past the shape's furthest corner, on the
- * side it faces. `side` is PI when it has swapped to the far side, which it does
- * when the near one would be off screen.
+ * Where the turn handle sits: out from the shape's centre the way it faces,
+ * just past where that line leaves the outline. So it always sticks out of the
+ * shape itself, whatever its corners have been dragged into, rather than
+ * floating off level with some far corner. `side` is PI when it has swapped to
+ * the far side, which it does when the near one would be off screen.
  */
 export function turnHandle(shape: Shape, width: number, height: number, side?: number) {
   const c = centroid(shape.points);
-  let reach = 0;
-  for (const p of shape.points) reach = Math.max(reach, Math.hypot(p.x - c.x, p.y - c.y));
   const place = (s: number) => {
-    const angle = shape.turn + s;
-    const along = (d: number) => ({ x: c.x + Math.cos(angle) * d, y: c.y + Math.sin(angle) * d });
-    return { side: s, at: along(reach + KNOB_GAP), stem: along(reach) };
+    const dx = Math.cos(shape.turn + s);
+    const dy = Math.sin(shape.turn + s);
+    // A bent shape's centre can sit outside it, and that way may never meet the outline.
+    const edge = lastCrossing(shape.points, c, dx, dy) || furthest(shape.points, c);
+    const along = (d: number) => ({ x: c.x + dx * d, y: c.y + dy * d });
+    return { side: s, at: along(edge + KNOB_GAP), stem: along(edge) };
   };
   if (side !== undefined) return place(side);
   const near = place(0);

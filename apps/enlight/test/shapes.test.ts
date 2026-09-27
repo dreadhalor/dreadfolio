@@ -67,3 +67,24 @@ test('the turn handle swaps sides rather than leave the screen', () => {
   // A side chosen at the start of a drag is kept.
   assert.equal(turnHandle(high, 800, 600, 0).side, 0);
 });
+
+test('the turn handle sticks out of the shape itself, even a lopsided one', () => {
+  // Scott's quad (9/26): corners dragged out, handle facing up and to the left.
+  // The old rule put it past the furthest corner: 460px out, floating in space.
+  const shape = {
+    points: [
+      { x: 148, y: 383 },
+      { x: 759, y: 326 },
+      { x: 491, y: 743 },
+      { x: 273, y: 756 },
+    ],
+    turn: (-108 * Math.PI) / 180,
+    round: false,
+  };
+  const { at, stem } = turnHandle(shape, 844, 902);
+  const [a, b] = [shape.points[0]!, shape.points[1]!];
+  const offEdge =
+    ((b.x - a.x) * (stem.y - a.y) - (b.y - a.y) * (stem.x - a.x)) / Math.hypot(b.x - a.x, b.y - a.y);
+  assert.ok(Math.abs(offEdge) < 1e-6, `the stem starts on the top edge: ${JSON.stringify(stem)}`);
+  assert.ok(near(Math.hypot(at.x - stem.x, at.y - stem.y), 26, 1e-6), 'and the handle sits just past it');
+});

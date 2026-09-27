@@ -9,6 +9,7 @@ import {
   buildOccluders,
   contains,
   crossing,
+  lastCrossing,
 } from '../src/geometry.ts';
 
 /** A small seeded generator, so a failure can be replayed. */
@@ -148,4 +149,19 @@ test('hit tests', () => {
   assert.equal(area(tri), 50);
   assert.deepEqual(crossing({ x: 0, y: 0 }, { x: 2, y: 2 }, { x: 0, y: 2 }, { x: 2, y: 0 }), { x: 1, y: 1 });
   assert.equal(crossing({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }), null);
+});
+
+test('lastCrossing: where a ray finally leaves an outline', () => {
+  const box = [
+    { x: 0, y: 0 },
+    { x: 10, y: 0 },
+    { x: 10, y: 10 },
+    { x: 0, y: 10 },
+  ];
+  assert.equal(lastCrossing(box, { x: 5, y: 5 }, 1, 0), 5);
+  assert.equal(lastCrossing(box, { x: 2, y: 5 }, -1, 0), 2);
+  // From outside, pointing through it: the far side.
+  assert.equal(lastCrossing(box, { x: -5, y: 5 }, 1, 0), 15);
+  // From outside, pointing away: never.
+  assert.equal(lastCrossing(box, { x: -5, y: 5 }, -1, 0), 0);
 });
