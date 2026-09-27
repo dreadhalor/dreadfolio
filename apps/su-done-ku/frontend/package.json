@@ -1,31 +1,30 @@
 {
   "name": "su-done-ku",
-  "description": "Interactive Sudoku solver with step-by-step visualization of solving algorithms",
-  "version": "1.0.0",
+  "description": "A sudoku solver that works a puzzle the way a person would: one deduction at a time, each one explained",
+  "version": "2.0.0",
   "author": "Scott Hetrick",
   "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "dotenv -e ../../../.env vite",
-    "build": "dotenv -e ../../../.env vite build",
+    "dev": "vite",
+    "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "bank": "vite-node scripts/build-puzzle-bank.ts"
   },
   "dependencies": {
-    "dread-ui": "workspace:*",
-    "lodash": "^4.17.21",
-    "lucide-react": "^0.563.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@base-ui/react": "^1.2.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@repo/config": "workspace:*",
-    "@repo/su-done-ku-backend": "workspace:*",
-    "@types/lodash": "^4.17.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/node": "^20.10.3",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react-swc": "^3.7.1",
@@ -34,6 +33,7 @@
     "eslint-plugin-react-refresh": "^0.4.14",
     "typescript": "^5.6.3",
     "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^2.1.5"
   }
 }

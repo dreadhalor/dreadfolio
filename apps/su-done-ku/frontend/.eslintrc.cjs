@@ -2,7 +2,21 @@ module.exports = {
   root: true,
   env: { browser: true, es2020: true },
   extends: [
-    '@repo/config/eslint-react',
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
+    'plugin:react/jsx-runtime',
+    'plugin:react-hooks/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
-}
+  parser: '@typescript-eslint/parser',
+  parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  settings: { react: { version: '19.0' } },
+  plugins: ['react-refresh'],
+  rules: {
+    'react-refresh/only-export-components': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'react-hooks/exhaustive-deps': 'off',
+    'prefer-const': 'off',
+  },
+};

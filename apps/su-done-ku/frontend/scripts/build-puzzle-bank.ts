@@ -3,6 +3,8 @@
  * old server drew from: only puzzles the solver finishes, each graded by the hardest technique it
  * needed — easy: singles; medium: pointing, box/line, pairs; hard: triples, X-Wing, XY-Wing, quads.
  * Each keeps a note of every technique its solve used (a bit per technique, in TECHNIQUES order).
+ * And an example for each technique: the puzzle where it turns up soonest (hidden quads, which a
+ * simpler technique always beats to it, have none).
  *
  *   npx vite-node scripts/build-puzzle-bank.ts [sourceDir]
  *
@@ -11,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TECHNIQUES, gradeOf, parsePuzzle, solve, type Grade } from '../src/solver';
+import { TECHNIQUES, gradeOf, parsePuzzle, solve, type Grade, type TechniqueId } from '../src/solver';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const SOURCE = process.argv[2] ?? path.resolve(here, '../../backend/src/puzzles');
@@ -65,6 +67,29 @@ for (const p of sample('hard.txt', 4000)) consider(p, 'hard', () => true);
 for (const g of ['easy', 'medium', 'hard'] as const) {
   if (bank[g].length < PER_GRADE) throw new Error(`Only ${bank[g].length} ${g} puzzles found; widen the sampling.`);
 }
-fs.writeFileSync(OUT, JSON.stringify({ techniques: TECHNIQUES.map((t) => t.id), ...bank }) + '\n');
+
+// Examples: for each technique, the puzzle (from the bank, or for the rarest the wider lists)
+// where it's first needed soonest — then the easiest, then the shortest.
+const GRADES: Grade[] = ['easy', 'medium', 'hard'];
+type Candidate = { p: string; first: number; grade: number; length: number };
+const best = new Map<TechniqueId, Candidate>();
+const offer = (p: string) => {
+  const { outcome, steps } = solve(parsePuzzle(p));
+  if (outcome !== 'solved') return;
+  const grade = GRADES.indexOf(gradeOf(steps));
+  for (const { id } of TECHNIQUES) {
+    const first = steps.findIndex((s) => s.technique === id);
+    if (first < 0) continue;
+    const c = { p, first, grade, length: steps.length };
+    const b = best.get(id);
+    if (!b || c.first < b.first || (c.first === b.first && (c.grade < b.grade || (c.grade === b.grade && c.length < b.length)))) best.set(id, c);
+  }
+};
+for (const g of GRADES) for (const e of bank[g]) offer(e.p);
+for (const p of sample('hard.txt', 20000)) if (!best.has('nakedQuad')) offer(p);
+const examples = Object.fromEntries(TECHNIQUES.filter((t) => best.has(t.id)).map((t) => [t.id, best.get(t.id)!.p]));
+
+fs.writeFileSync(OUT, JSON.stringify({ techniques: TECHNIQUES.map((t) => t.id), ...bank, examples }) + '\n');
+console.log(`examples: ${TECHNIQUES.map((t) => (best.has(t.id) ? `${t.id}@${best.get(t.id)!.first}` : `${t.id}: none`)).join(', ')}`);
 const wings = bank.hard.filter((e) => e.u & WINGS).length;
 console.log(`wrote ${path.relative(process.cwd(), OUT)}: ${PER_GRADE} each; hard: ${wings} use a wing, ${PER_GRADE - wings} don't`);

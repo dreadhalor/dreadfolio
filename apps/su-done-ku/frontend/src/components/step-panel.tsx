@@ -1,333 +1,156 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionItem,
-  AccordionTrigger,
-  Badge,
-  BadgeVariants,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Checkbox,
-  Label,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-  useAchievements,
-} from 'dread-ui';
-import { useBoard } from '../providers/board-context';
-import { executeStep, strategies } from '../utils';
-import { useState } from 'react';
-import { cn } from '@repo/utils';
-import { Strategy } from '../utils/algorithms';
-import { HelpCircle } from 'lucide-react';
+import { Slider } from '@base-ui/react/slider';
+import clsx from 'clsx';
+import { ChevronLeft, ChevronRight, ChevronsRight, CircleAlert, CircleCheck, Pause, Play } from 'lucide-react';
+import type { Dispatch } from 'react';
+import { TECHNIQUE_BY_ID, squareName, type Deduction, type Level } from '../solver';
+import { viewOf, type Action, type Solve } from '../state';
+import { CARD, EYEBROW, PRIMARY, QUIET, SECONDARY } from './ui';
 
-type TechniqueInfo = {
-  name: string;
-  description: string;
-  difficulty: 'basic' | 'intermediate' | 'advanced';
-  pattern: string; // ASCII/emoji pattern representation
+const LEVEL_CHIP: Record<Level, string> = {
+  basic: 'bg-chip text-ink',
+  intermediate: 'bg-accent-soft text-accent-strong',
+  advanced: 'bg-violet-100 text-violet-700',
 };
 
-const techniqueInfo: Record<Strategy, TechniqueInfo> = {
-  crosshatch: {
-    name: 'Crosshatch',
-    description: 'Look for cells where only one number can go by scanning rows, columns, and boxes.',
-    difficulty: 'basic',
-    pattern: '🎯',
-  },
-  hiddenSingles: {
-    name: 'Hidden Singles',
-    description: 'Find numbers that can only appear in one cell within a row, column, or box.',
-    difficulty: 'basic',
-    pattern: '💎',
-  },
-  nakedPairs: {
-    name: 'Naked Pairs',
-    description: 'Two cells with only the same two candidates can eliminate those candidates from other cells.',
-    difficulty: 'intermediate',
-    pattern: '👥',
-  },
-  nakedTriples: {
-    name: 'Naked Triples',
-    description: 'Three cells with only the same three candidates eliminate those candidates from others.',
-    difficulty: 'intermediate',
-    pattern: '🔺',
-  },
-  hiddenPairs: {
-    name: 'Hidden Pairs',
-    description: 'Find pairs of numbers that can only appear in two cells, eliminating other candidates.',
-    difficulty: 'intermediate',
-    pattern: '🔍👥',
-  },
-  hiddenTriples: {
-    name: 'Hidden Triples',
-    description: 'Find triples of numbers that can only appear in three cells.',
-    difficulty: 'intermediate',
-    pattern: '🔍🔺',
-  },
-  nakedQuads: {
-    name: 'Naked Quads',
-    description: 'Four cells with only the same four candidates eliminate those from other cells.',
-    difficulty: 'advanced',
-    pattern: '⬜⬜⬜⬜',
-  },
-  hiddenQuads: {
-    name: 'Hidden Quads',
-    description: 'Find quads of numbers that can only appear in four cells.',
-    difficulty: 'advanced',
-    pattern: '🔍⬜⬜',
-  },
-  pointingPairs: {
-    name: 'Pointing Pairs',
-    description: 'If a candidate appears only twice in a box and they\'re in the same row/column, eliminate from that line.',
-    difficulty: 'advanced',
-    pattern: '➡️👥',
-  },
-  pointingTriples: {
-    name: 'Pointing Triples',
-    description: 'Like pointing pairs but with three candidates in a line within a box.',
-    difficulty: 'advanced',
-    pattern: '➡️🔺',
-  },
-  boxLineReduction: {
-    name: 'Box/Line Reduction',
-    description: 'If a candidate in a row/column only appears within one box, eliminate from rest of box.',
-    difficulty: 'advanced',
-    pattern: '📦➡️',
-  },
-};
+const listOf = (xs: string[]) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`);
 
-type StepControlProps = {
-  id: Strategy;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-};
-const StepControl = ({
-  id,
-  checked,
-  onCheckedChange,
-}: StepControlProps) => {
-  const { step, steps } = useBoard();
-  const failed = step?.failedStrategies?.includes(id);
-  const skipped = step?.skippedStrategies?.includes(id);
-  const isActive = step?.type === id;
-  
-  // Count successes for this strategy across all steps
-  const successCount = steps.filter((s) => s.type === id && s.eliminations.length > 0).length;
-  
-  const info = techniqueInfo[id];
+/** "Rules out 2 from B1 and B8" — beyond what a placement does to its own square. */
+function ruledOut(d: Deduction) {
+  const byDigit = new Map<number, number[]>();
+  for (const r of d.removals) if (r.square !== d.place?.square) byDigit.set(r.digit, [...(byDigit.get(r.digit) ?? []), r.square]);
+  if (!byDigit.size) return null;
+  // Digits in order, and each one's squares in reading order.
+  const parts = [...byDigit]
+    .sort(([a], [b]) => a - b)
+    .map(([digit, squares]) => `${digit} from ${listOf(squares.sort((a, b) => a - b).map(squareName))}`);
+  return `${d.place ? 'Also rules out' : 'Rules out'} ${parts.join('; ')}.`;
+}
+
+function sourceLabel(s: Solve) {
+  if (s.source.kind === 'random') return `${s.source.grade} puzzle`;
+  if (s.source.kind === 'example') return `Example: ${TECHNIQUE_BY_ID[s.source.technique].name}`;
+  return 'Your puzzle';
+}
+
+/**
+ * The step: what it's called, the reasoning in words, what it rules out; the controls to move
+ * through the solve; and, at the end, how it came out.
+ */
+export function StepPanel({
+  solve,
+  dispatch,
+  playing,
+  onPlay,
+}: {
+  solve: Solve;
+  dispatch: Dispatch<Action>;
+  playing: boolean;
+  onPlay: (on: boolean) => void;
+}) {
+  const { move, total, atEnd } = viewOf(solve);
+  const go = (to: number) => {
+    onPlay(false);
+    dispatch({ type: 'go', to });
+  };
+
+  let chip: { text: string; className: string } | null = null;
+  let text: string;
+  let detail: string | null = null;
+  if (!move) {
+    text = 'Every empty square starts with the digits its row, column and box still allow. Take a step to begin.';
+  } else if (move.kind === 'manual') {
+    chip = { text: 'By hand', className: 'bg-hand-soft text-hand' };
+    text = move.added ? `You put ${move.digit} back into ${squareName(move.square)}.` : `You took ${move.digit} out of ${squareName(move.square)}.`;
+    detail = 'The solver carries on from your pencil marks.';
+  } else {
+    const d = move.deduction;
+    chip = { text: d.label, className: LEVEL_CHIP[TECHNIQUE_BY_ID[d.technique].level] };
+    text = d.text;
+    detail = ruledOut(d);
+  }
+
+  const allOn = solve.enabled.size === Object.keys(TECHNIQUE_BY_ID).length;
+  const byHand = solve.moves.some((m) => m.kind === 'manual');
+  const ending =
+    solve.outcome === 'solved'
+      ? { tone: 'good', text: `Solved in ${total} step${total === 1 ? '' : 's'}.` }
+      : solve.outcome === 'broken'
+        ? { tone: 'bad', text: byHand ? 'Stuck for good: a pencil mark taken out by hand was the answer.' : 'This puzzle has no solution.' }
+        : {
+            tone: 'bad',
+            text:
+              solve.source.kind === 'entered' && !solve.source.unique
+                ? 'Stuck: this puzzle has more than one answer, so logic alone can’t finish it.'
+                : allOn
+                  ? 'Stuck: this puzzle needs a technique Su-Done-Ku doesn’t know yet.'
+                  : 'Stuck: nothing switched on finds another step. Switch more techniques on to keep going.',
+          };
 
   return (
-    <div
-      className={cn(
-        'group flex flex-col gap-2 rounded-lg border p-3 transition-all cursor-pointer',
-        checked 
-          ? 'border-blue-200 bg-white shadow-sm hover:shadow-md' 
-          : 'border-slate-200 bg-slate-50/50 hover:bg-white hover:border-slate-300',
-        isActive && 'ring-2 ring-blue-400 shadow-lg',
-        !checked && 'opacity-60',
-      )}
-      onClick={() => onCheckedChange(!checked)}
-    >
-      <div className='flex items-center gap-3'>
-        <Checkbox
-          id={id}
-          checked={checked}
-          onCheckedChange={(checked) => {
-            if (typeof checked === 'boolean') {
-              onCheckedChange(checked);
-            }
-          }}
-          onClick={(e) => e.stopPropagation()}
-          className='flex-shrink-0'
-        />
-        <div className='flex items-center gap-2 flex-1 min-w-0'>
-          <span className='text-xl leading-none'>{info.pattern}</span>
-          <Label htmlFor={id} className='cursor-pointer text-sm font-semibold text-slate-700'>
-            {info.name}
-          </Label>
-        </div>
-        {successCount > 0 && (
-          <Badge variant='default' className='text-[10px] px-1.5 py-0.5 bg-green-500'>
-            ✓ {successCount}×
-          </Badge>
-        )}
-        {(skipped || failed) && (
-          <Badge variant={failed ? 'destructive' : 'secondary'} className='text-[10px] px-1.5 py-0.5'>
-            {failed ? '✗ failed' : '⊝ skipped'}
-          </Badge>
-        )}
+    <section className={clsx(CARD, 'p-4 sm:p-5')} aria-label='The current step'>
+      <div className='flex items-center justify-between gap-3'>
+        <span className={EYEBROW}>
+          {sourceLabel(solve)} · {solve.at === 0 ? 'start' : `step ${solve.at} of ${total}`}
+        </span>
+        {chip && <span className={clsx('shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold', chip.className)}>{chip.text}</span>}
       </div>
-      <p className='text-[11px] text-slate-500 leading-relaxed pl-8'>{info.description}</p>
-    </div>
-  );
-};
 
-const StepPanel = () => {
-  const { step, addStep, isSolved, isErrored, isEditing } = useBoard();
-  const { unlockAchievementById } = useAchievements();
-  const [strategyStates, setStrategyStates] = useState({
-    crosshatch: true,
-    hiddenSingles: true,
-    nakedPairs: true,
-    nakedTriples: true,
-    hiddenPairs: true,
-    hiddenTriples: true,
-    nakedQuads: true,
-    hiddenQuads: true,
-    pointingPairs: true,
-    pointingTriples: true,
-    boxLineReduction: true,
-  });
-  const isNakedLockedSet = (strategy: string) =>
-    strategy === 'nakedPairs' ||
-    strategy === 'nakedTriples' ||
-    strategy === 'nakedQuads';
-  const handleStrategyChange = (strategy: Strategy) => (checked: boolean) => {
-    setStrategyStates((prev) => ({ ...prev, [strategy]: checked }));
-    if (isNakedLockedSet(strategy) && !checked)
-      unlockAchievementById('uncheck_naked_pairs', 'su-done-ku');
-    if (isNakedLockedSet(strategy) && checked)
-      unlockAchievementById('check_naked_pairs', 'su-done-ku');
-  };
+      <p aria-live='polite' className='mt-3 min-h-[4.5rem] text-[15px] leading-6 text-ink sm:text-base sm:leading-[1.6rem]'>
+        {text}
+      </p>
+      {detail && <p className='mt-1.5 text-[13px] leading-5 text-muted'>{detail}</p>}
 
-  const advanceStep = () => {
-    // iterate through strategies & execute all checked strategies until one makes an elimination
-    const board = executeStep(step!);
-    const failedStrategies: Strategy[] = [];
-    const skippedStrategies: Strategy[] = [];
-    for (const [strategy, checked] of Object.entries(strategyStates)) {
-      if (checked) {
-        const newStep = strategies[strategy as Strategy](board);
-        if (newStep.eliminations.length > 0) {
-          switch (newStep.type) {
-            case 'crosshatch':
-              unlockAchievementById('crosshatching', 'su-done-ku');
-              break;
-            case 'nakedPairs':
-              unlockAchievementById('naked_pair', 'su-done-ku');
-              break;
-            case 'nakedQuads':
-              unlockAchievementById('naked_quad', 'su-done-ku');
-              break;
-            case 'hiddenPairs':
-              unlockAchievementById('hidden_pair', 'su-done-ku');
-              break;
-            case 'pointingPairs':
-            case 'pointingTriples':
-              unlockAchievementById('pointing_set', 'su-done-ku');
-              break;
-            case 'boxLineReduction':
-              unlockAchievementById('box_line_reduction', 'su-done-ku');
-              break;
-          }
-          addStep({
-            ...newStep,
-            failedStrategies,
-            skippedStrategies,
-          });
-          return;
-        } else failedStrategies.push(strategy as Strategy);
-      } else skippedStrategies.push(strategy as Strategy);
-    }
-    // if no eliminations are made, execute a step with no eliminations
-    addStep({
-      type: 'none',
-      boardSnapshot: board,
-      eliminations: [],
-      failedStrategies,
-      skippedStrategies,
-    });
-    unlockAchievementById('stump_solver', 'su-done-ku');
-  };
-
-  const basicTechniques: Strategy[] = ['crosshatch', 'hiddenSingles'];
-  const intermediateTechniques: Strategy[] = ['nakedPairs', 'nakedTriples', 'hiddenPairs', 'hiddenTriples'];
-  const advancedTechniques: Strategy[] = ['nakedQuads', 'hiddenQuads', 'pointingPairs', 'pointingTriples', 'boxLineReduction'];
-
-  return (
-    <Card className='w-full shadow-lg'>
-      <CardHeader className='text-sm font-semibold text-slate-700'>
-        Solving Techniques
-      </CardHeader>
-      <CardContent className='space-y-4'>
-        {/* Take Step Button */}
-        <Button
-          className={cn(
-            'w-full rounded-lg text-base font-semibold shadow-sm transition-all',
-            isSolved && 'bg-green-500 hover:bg-green-600',
-            isErrored && 'bg-red-500 hover:bg-red-600',
-            !isSolved && !isErrored && 'bg-blue-600 hover:bg-blue-700',
+      {atEnd && (
+        <p
+          className={clsx(
+            'mt-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold',
+            ending.tone === 'good' ? 'bg-reason-soft text-reason' : 'bg-out-soft text-out',
           )}
-          onClick={() => advanceStep()}
-          disabled={isSolved || isErrored || isEditing}
-          size='lg'
         >
-          {isSolved ? '✓ Solved!' : isErrored ? '✗ Error!' : 'Take Step →'}
-        </Button>
+          {ending.tone === 'good' ? <CircleCheck size={18} /> : <CircleAlert size={18} />}
+          {ending.text}
+        </p>
+      )}
 
-        {/* Grouped Techniques */}
-        <Accordion type='multiple' defaultValue={['basic', 'intermediate', 'advanced']} className='space-y-2'>
-          <AccordionItem value='basic' className='rounded-lg border'>
-            <AccordionHeader>
-              <AccordionTrigger className='px-3 py-2 text-sm font-medium text-slate-700 hover:no-underline'>
-                Basic Techniques
-              </AccordionTrigger>
-            </AccordionHeader>
-            <AccordionContent className='space-y-2 p-2'>
-              {basicTechniques.map((strategy) => (
-                <StepControl
-                  key={strategy}
-                  id={strategy}
-                  checked={strategyStates[strategy]}
-                  onCheckedChange={handleStrategyChange(strategy)}
-                />
-              ))}
-            </AccordionContent>
-          </AccordionItem>
+      <div className='mt-4 flex items-center gap-2'>
+        <button type='button' className={clsx(SECONDARY, 'w-10 px-0')} onClick={() => go(solve.at - 1)} disabled={solve.at === 0} aria-label='Back a step'>
+          <ChevronLeft size={20} />
+        </button>
+        <button type='button' className={clsx(PRIMARY, 'flex-1')} onClick={() => go(solve.at + 1)} disabled={atEnd}>
+          Next step
+          <ChevronRight size={18} />
+        </button>
+        <button
+          type='button'
+          className={clsx(SECONDARY, 'w-10 px-0')}
+          onClick={() => onPlay(!playing)}
+          disabled={atEnd && !playing}
+          aria-label={playing ? 'Pause' : 'Play the steps'}
+        >
+          {playing ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+        <button type='button' className={clsx(QUIET, 'w-10 px-0')} onClick={() => go(total)} disabled={atEnd} aria-label='Skip to the end'>
+          <ChevronsRight size={20} />
+        </button>
+      </div>
 
-          <AccordionItem value='intermediate' className='rounded-lg border'>
-            <AccordionHeader>
-              <AccordionTrigger className='px-3 py-2 text-sm font-medium text-slate-700 hover:no-underline'>
-                Intermediate Techniques
-              </AccordionTrigger>
-            </AccordionHeader>
-            <AccordionContent className='space-y-2 p-2'>
-              {intermediateTechniques.map((strategy) => (
-                <StepControl
-                  key={strategy}
-                  id={strategy}
-                  checked={strategyStates[strategy]}
-                  onCheckedChange={handleStrategyChange(strategy)}
-                />
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value='advanced' className='rounded-lg border'>
-            <AccordionHeader>
-              <AccordionTrigger className='px-3 py-2 text-sm font-medium text-slate-700 hover:no-underline'>
-                Advanced Techniques
-              </AccordionTrigger>
-            </AccordionHeader>
-            <AccordionContent className='space-y-2 p-2'>
-              {advancedTechniques.map((strategy) => (
-                <StepControl
-                  key={strategy}
-                  id={strategy}
-                  checked={strategyStates[strategy]}
-                  onCheckedChange={handleStrategyChange(strategy)}
-                />
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </CardContent>
-    </Card>
+      <Slider.Root
+        value={solve.at}
+        min={0}
+        max={Math.max(1, total)}
+        step={1}
+        onValueChange={(v) => go(v as number)}
+        disabled={total === 0}
+        className='mt-4'
+        aria-label='Steps'
+      >
+        <Slider.Control className='flex h-5 w-full touch-none items-center'>
+          <Slider.Track className='h-1.5 w-full rounded-full bg-chip'>
+            <Slider.Indicator className='rounded-full bg-accent' />
+            <Slider.Thumb className='size-4 rounded-full border-2 border-accent bg-white shadow outline-none focus-visible:ring-2 focus-visible:ring-accent/50' />
+          </Slider.Track>
+        </Slider.Control>
+      </Slider.Root>
+    </section>
   );
-};
-export { StepPanel };
+}

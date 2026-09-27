@@ -1,126 +1,110 @@
-@import 'dread-ui/style.css';
+@import 'tailwindcss';
+
+/* The portfolio's brand face (Typekit): filson-pro, regular through extra-bold. */
+@font-face {
+  font-family: 'filson-pro';
+  src: url('https://use.typekit.net/af/19c742/0000000000000000000157c9/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n4&v=3')
+    format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'filson-pro';
+  src: url('https://use.typekit.net/af/fcca1c/0000000000000000000157c8/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n5&v=3')
+    format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'filson-pro';
+  src: url('https://use.typekit.net/af/c12453/0000000000000000000157bf/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3')
+    format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'filson-pro';
+  src: url('https://use.typekit.net/af/55adf8/0000000000000000000157c3/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n8&v=3')
+    format('woff2');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 800;
+}
+
+@theme {
+  --font-sans: 'filson-pro', system-ui, -apple-system, sans-serif;
+  --color-page: #eef2f7;
+  --color-ink: #0f172a;
+  --color-muted: #64748b;
+  --color-edge: #e2e8f0;
+  --color-chip: #f1f5f9;
+  /* The app's blue: its name, its buttons, and every digit the solver places. */
+  --color-accent: #2563eb;
+  --color-accent-strong: #1d4ed8;
+  --color-accent-soft: #dbeafe;
+  /* What a step rests on (green), what it rules out (red), a pencil mark changed by hand (amber). */
+  --color-reason: #16a34a;
+  --color-reason-soft: #dcfce7;
+  --color-out: #dc2626;
+  --color-out-soft: #fee2e2;
+  --color-hand: #d97706;
+  --color-hand-soft: #fef3c7;
+  /* The grid's lines: between squares, and between boxes (and round the board). */
+  --color-line: #cbd5e1;
+  --color-line-strong: #334155;
+}
 
 html,
 body,
 #root {
-  height: 100%;
-  width: 100%;
+  min-height: 100%;
   margin: 0;
-  padding: 0;
+  background-color: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* Smooth transitions for all interactive elements */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Add transform/width/height transitions only to specific elements that need them */
-[role='tablist'] > div:first-child:not(.transition-none),
-.history-slider-tick {
-  transition-property: background-color, border-color, color, fill, stroke,
-    transform, width, height, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
-
-/* Remove transitions for button clicks to feel snappy */
-button:active,
-[role='button']:active {
-  transition-duration: 0ms;
-}
-
-/* Premium keyframe animations */
-@keyframes fadeInScale {
-  from {
+/* A digit the solver has just placed: it drops in. */
+@keyframes place {
+  0% {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+/* A pencil mark just ruled out: struck through as it fades in. */
+@keyframes strike {
+  from {
+    transform: scaleX(0);
   }
   to {
-    opacity: 1;
-    transform: scale(1);
+    transform: scaleX(1);
   }
 }
-
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
+@layer utilities {
+  .animate-place {
+    animation: place 320ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
   }
-  50% {
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
+  .animate-strike {
+    animation: strike 260ms ease-out both;
+    transform-origin: left center;
   }
 }
-
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
+@media (prefers-reduced-motion: reduce) {
+  .animate-place,
+  .animate-strike {
+    animation: none;
   }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-  }
-}
-
-.animate-fade-in-scale {
-  animation: fadeInScale 0.3s ease-out;
-}
-
-.animate-bounce-in {
-  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.5),
-    transparent
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
 }

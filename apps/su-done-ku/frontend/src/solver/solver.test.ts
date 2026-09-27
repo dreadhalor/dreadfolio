@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'vitest';
-import * as PRESETS from '../boards';
 import bank from './puzzles.json';
 import {
   ALL,
@@ -66,7 +65,20 @@ function checkEveryStep(puzzle: string, enabled?: ReadonlySet<TechniqueId>) {
   return { steps, outcome };
 }
 
-const presets = Object.entries(PRESETS).map(([name, grid]) => [name, (grid as number[][]).flat().join('')] as const);
+/* Puzzles made to show off a technique (the app's old examples). */
+const PRESETS = {
+  hiddenSinglePuzzle: '009032000000700000162000000010020560000900000050000107000000403026009000005870000',
+  nakedPairPuzzle: '400000038002004100005300240070609004020000070600703090057008300003900400240000009',
+  nakedTriplePuzzle: '070408029002000004854020007008374200020000000003261700000093612200000403130642070',
+  hiddenPairPuzzle: '000000000904607000076804100309701080008000300050308702007502610000403208000000000',
+  hiddenTriplePuzzle: '000000000231090000065003100008924000100050006000136700009300570000010843000000000',
+  hiddenQuadPuzzle: '901500046425090081860010020502000000019000460600000002196040253200060817000001694',
+  pointingPairPuzzle: '032006100410000000000901000500090004060000071300020005000508000000000519057009860',
+  pointingTriplePuzzle: '930050000200630095856002000003180570005020980080005000000800159508210004000560008',
+  boxLineReductionPuzzle: '016007803092800000870001260048000300650009082039000650060900020080002936924600510',
+};
+const presets = Object.entries(PRESETS);
+const examples = Object.entries(bank.examples) as [TechniqueId, string][];
 const bankEntries = (['easy', 'medium', 'hard'] as const).flatMap((g) => bank[g].map((e) => ({ grade: g, ...e })));
 
 describe('every step is sound', () => {
@@ -75,6 +87,11 @@ describe('every step is sound', () => {
   });
   test('all 600 bundled puzzles, solved to the end', () => {
     for (const { p } of bankEntries) expect(checkEveryStep(p).outcome).toBe('solved');
+  });
+  test.each(examples)('the %s example, which uses it', (id, p) => {
+    const { steps, outcome } = checkEveryStep(p);
+    expect(outcome).toBe('solved');
+    expect(steps.some((s) => s.technique === id)).toBe(true);
   });
 });
 

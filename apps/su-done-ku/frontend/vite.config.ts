@@ -1,19 +1,14 @@
-import { defineConfig, PluginOption } from 'vite'; // Import the PluginOption type
+import { type PluginOption, defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import svgr from 'vite-plugin-svgr';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react() as PluginOption,
-    tailwindcss(),
-    tsconfigPaths() as PluginOption,
-    svgr() as PluginOption,
-  ], // Cast the plugins to PluginOption
-  base: '/su-done-ku/', // Set the base path
-  // One React for everything: some dependencies carry a nested copy of their own (a second React
-  // in the bundle crashes the app on its first hook).
-  resolve: { dedupe: ['react', 'react-dom'] },
+  resolve: {
+    // A nested react@19 (auto-install-peers) would give the bundle two React runtimes.
+    dedupe: ['react', 'react-dom'],
+  },
+  plugins: [react() as PluginOption, tailwindcss(), tsconfigPaths() as unknown as PluginOption],
+  base: '/su-done-ku/',
 });
