@@ -20,7 +20,6 @@ import {
   type Board,
   type Deduction,
   type Digit,
-  type Removal,
   type TechniqueId,
   type Unit,
 } from './board';
@@ -42,9 +41,6 @@ const COUNT_WORD = ['', 'one', 'two', 'three', 'four'];
 const placedIn = (b: Board, u: Unit) => u.squares.reduce((m, s) => (b.values[s] ? m | bit(b.values[s] as Digit) : m), 0);
 /* The empty squares in a unit that can still be d. */
 const spots = (b: Board, u: Unit, d: Digit) => u.squares.filter((s) => !b.values[s] && b.cands[s]! & bit(d));
-/* d ruled out of a newly placed square's peers. */
-const clearPeers = (b: Board, s: number, d: Digit): Removal[] =>
-  PEERS[s]!.filter((p) => !b.values[p] && b.cands[p]! & bit(d)).map((p) => ({ square: p, digit: d }));
 const lineName = (u: Unit) => unitName(u);
 
 function combos<T>(xs: readonly T[], k: number): T[][] {
@@ -62,7 +58,27 @@ function combos<T>(xs: readonly T[], k: number): T[][] {
 
 const unitsOf = (s: number) => [ROWS[rowOf(s)]!, COLUMNS[colOf(s)]!, BOXES[boxOf(s)]!];
 
-/* ---------- singles ---------- */
+/* ---------- crosshatching and singles ---------- */
+
+/** A placed digit still pencilled into a square that shares its row, column or box. */
+function crosshatch(b: Board): Deduction | null {
+  for (let s = 0; s < 81; s++) {
+    const d = b.values[s] as Digit;
+    if (!d) continue;
+    const peers = PEERS[s]!.filter((p) => !b.values[p] && b.cands[p]! & bit(d));
+    if (!peers.length) continue;
+    return {
+      technique: 'crosshatch',
+      label: 'Crosshatching',
+      text: `${squareName(s)} is ${d}, so no other square in its row, column or box can be ${d}.`,
+      removals: peers.map((p) => ({ square: p, digit: d })),
+      cause: [s],
+      causeDigits: [d],
+      units: unitsOf(s),
+    };
+  }
+  return null;
+}
 
 /** A square with only one candidate left. */
 function nakedSingle(b: Board): Deduction | null {
@@ -81,7 +97,7 @@ function nakedSingle(b: Board): Deduction | null {
       label: 'Naked single',
       text,
       place: { square: s, digit: d },
-      removals: clearPeers(b, s, d),
+      removals: [],
       cause: [s],
       causeDigits: [d],
       units: unitsOf(s),
@@ -105,7 +121,7 @@ function hiddenSingle(b: Board): Deduction | null {
         label: 'Hidden single',
         text: `In ${unitName(u)}, ${d} can only go in ${name}, so ${name} is ${d}.`,
         place: { square: s, digit: d },
-        removals: [...digitsOf(b.cands[s]! & ~bit(d)).map((o) => ({ square: s, digit: o })), ...clearPeers(b, s, d)],
+        removals: digitsOf(b.cands[s]! & ~bit(d)).map((o) => ({ square: s, digit: o })),
         cause: [s],
         causeDigits: [d],
         units: [u],
@@ -337,6 +353,7 @@ function xyWing(b: Board): Deduction | null {
 
 /** Every technique's finder. */
 export const FINDERS: Record<TechniqueId, (b: Board) => Deduction | null> = {
+  crosshatch,
   nakedSingle,
   hiddenSingle,
   pointing,

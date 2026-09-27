@@ -4,9 +4,8 @@ import { FINDERS } from './techniques';
 export * from './board';
 
 /*
- * The solver: one deduction at a time, easiest technique first, as a person would work — and when
- * a step places a digit, that digit is struck from the rest of its row, column and box in the same
- * step, the way a person tidies their pencil marks.
+ * The solver: one deduction at a time, easiest technique first, as a person would work — starting
+ * with crosshatching (striking each placed digit from its row, column and box).
  */
 
 export type Level = 'basic' | 'intermediate' | 'advanced';
@@ -16,6 +15,7 @@ export type Technique = { id: TechniqueId; name: string; level: Level; blurb: st
 
 /* Every technique, in the order they're tried: easiest first. */
 export const TECHNIQUES: readonly Technique[] = [
+  { id: 'crosshatch', name: 'Crosshatching', level: 'basic', blurb: 'A placed digit can’t be anywhere else in its row, column or box.' },
   { id: 'nakedSingle', name: 'Naked single', level: 'basic', blurb: 'A square down to one candidate is that digit.' },
   { id: 'hiddenSingle', name: 'Hidden single', level: 'basic', blurb: 'A digit with one place left in a row, column or box goes there.' },
   { id: 'pointing', name: 'Pointing pair / triple', level: 'intermediate', blurb: 'A digit that, inside a box, is stuck on one line owns that line’s spot for it.' },

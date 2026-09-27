@@ -65,8 +65,8 @@ export type Board = {
 
 /**
  * A puzzle (81 characters in reading order, a digit for each given, 0 or . for each empty square)
- * as the solver starts it: every empty square's candidates already narrowed to the digits its
- * row, column and box still allow — the pencil marks a person would write in first.
+ * as it starts: every empty square could be anything. Crosshatching — striking each placed
+ * digit from its row, column and box — is a step like any other (and usually the app's to do).
  */
 export function parsePuzzle(puzzle: string): Board {
   const chars = puzzle.replace(/\s/g, '');
@@ -76,13 +76,17 @@ export function parsePuzzle(puzzle: string): Board {
     if (!/[1-9]/.test(ch)) throw new Error(`Square ${squareName(i)} holds "${ch}", which isn't a digit.`);
     return Number(ch);
   });
-  const cands = values.map((v, s) => {
-    if (v) return bit(v as Digit);
-    let m = ALL;
-    for (const p of PEERS[s]!) if (values[p]) m &= ~bit(values[p] as Digit);
+  return { values, cands: values.map((v) => (v ? bit(v as Digit) : ALL)), givens: values.map(Boolean) };
+}
+
+/** Every empty square's candidates narrowed to what its row, column and box still allow. */
+export function crosshatched(b: Board): Board {
+  const cands = b.cands.map((m, s) => {
+    if (b.values[s]) return m;
+    for (const p of PEERS[s]!) if (b.values[p]) m &= ~bit(b.values[p] as Digit);
     return m;
   });
-  return { values, cands, givens: values.map(Boolean) };
+  return { values: b.values, cands, givens: b.givens };
 }
 
 export const toPuzzleString = (b: Board) => b.givens.map((g, s) => (g ? String(b.values[s]) : '0')).join('');
@@ -116,6 +120,7 @@ export function statusOf(b: Board): 'solving' | 'solved' | 'broken' {
 /* ---------- deductions ---------- */
 
 export type TechniqueId =
+  | 'crosshatch'
   | 'nakedSingle'
   | 'hiddenSingle'
   | 'pointing'
@@ -139,7 +144,7 @@ export type Deduction = {
   text: string;
   /* A digit it places, if it places one. */
   place?: { square: number; digit: Digit };
-  /* The candidates it rules out (for a placement: the square's others, and the digit from its peers). */
+  /* The candidates it rules out (for a placement: the square's others). */
   removals: Removal[];
   /* The squares the reasoning rests on, and the digits in them that matter. */
   cause: number[];

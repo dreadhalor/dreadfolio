@@ -1,10 +1,6 @@
-import { Popover } from '@base-ui/react/popover';
-import { Toggle } from '@base-ui/react/toggle';
 import clsx from 'clsx';
-import { useMemo, type ReactNode } from 'react';
-import { BOXES, DIGITS, PEERS, bit, rowLetter, squareName, type Board as BoardState, type Digit } from '../solver';
-import type { Move } from '../state';
-import { FOCUS, POPUP } from './ui';
+import { type ReactNode } from 'react';
+import { BOXES, DIGITS, bit, boxOf, colOf, rowLetter, rowOf, squareName, type Board as BoardState, type Deduction, type Digit } from '../solver';
 
 /* The row letters and column numbers round the board: the explanations name squares by them. */
 function Frame({ children, tone }: { children: (square: number) => ReactNode; tone: 'plain' | 'solved' | 'broken' }) {
@@ -41,174 +37,170 @@ function Frame({ children, tone }: { children: (square: number) => ReactNode; to
   );
 }
 
-/* What a move lights up on the board. */
-function highlightsOf(move: Move | null) {
-  const units = new Set<number>(), cause = new Set<number>(), causeDigits = new Set<Digit>();
-  const removed = new Map<number, Digit[]>();
-  let placed = -1;
-  if (move?.kind === 'deduction') {
-    const d = move.deduction;
-    for (const u of d.units) for (const s of u.squares) units.add(s);
-    for (const s of d.cause) cause.add(s);
-    for (const x of d.causeDigits) causeDigits.add(x);
-    for (const r of d.removals) removed.set(r.square, [...(removed.get(r.square) ?? []), r.digit]);
-    placed = d.place?.square ?? -1;
-  }
-  return { units, cause, causeDigits, removed, placed };
+/** What to light up on the board. */
+export type Lit = {
+  /* The rows, columns and boxes a step is about (a soft tint). */
+  units: ReadonlySet<number>;
+  /* The squares a step rests on, and their digits that matter (green). */
+  cause: ReadonlySet<number>;
+  causeDigits: ReadonlySet<Digit>;
+  /* Pencil marks a step rules out: still showing if it hasn't been applied, struck through in red. */
+  struck: ReadonlyMap<number, readonly Digit[]>;
+  /* Pencil marks the app just cleared on its own: fading away. */
+  fading: ReadonlyMap<number, readonly Digit[]>;
+  /* Digits just placed (they drop in), and a step's placement not yet made (its mark ringed in blue). */
+  placed: ReadonlySet<number>;
+  toPlace: { square: number; digit: Digit } | null;
+};
+export const NOTHING_LIT: Lit = { units: new Set(), cause: new Set(), causeDigits: new Set(), struck: new Map(), fading: new Map(), placed: new Set(), toPlace: null };
+
+const addTo = (m: Map<number, Digit[]>, square: number, digit: Digit) => m.set(square, [...(m.get(square) ?? []), digit]);
+
+/** A step, lit: `applied` if the board already shows its outcome (so a placement drops in rather than being ringed). */
+export function litStep(d: Deduction, applied: boolean): Lit {
+  const struck = new Map<number, Digit[]>();
+  for (const r of d.removals) if (!(applied && r.square === d.place?.square)) addTo(struck, r.square, r.digit);
+  return {
+    units: new Set(d.units.flatMap((u) => u.squares)),
+    cause: new Set(d.cause),
+    causeDigits: new Set(d.causeDigits),
+    struck,
+    fading: new Map(),
+    placed: new Set(applied && d.place ? [d.place.square] : []),
+    toPlace: !applied && d.place ? d.place : null,
+  };
 }
 
-const marks = Popover.createHandle<number>();
+/** A run of steps the app took, lit: what it placed drops in; what it cleared (or, applied = false, will clear) shows. */
+export function litRun(steps: readonly Deduction[], fade: boolean): Lit {
+  const marks = new Map<number, Digit[]>();
+  const placed = new Set<number>();
+  for (const d of steps) {
+    if (d.place) placed.add(d.place.square);
+    for (const r of d.removals) if (!placed.has(r.square)) addTo(marks, r.square, r.digit);
+  }
+  for (const s of placed) marks.delete(s);
+  return { ...NOTHING_LIT, placed, fading: fade ? marks : new Map(), struck: fade ? new Map() : marks };
+}
 
 /**
- * The board as a solve shows it: givens in ink, the solver's digits in blue, and every empty
- * square's pencil marks. The step that led here is lit: what it rests on in green, what it rules
- * out struck through in red, a digit it places dropping in. Tap an empty square to change its
- * pencil marks by hand.
+ * The board you play on. Givens in ink, your digits and the app's in blue; every empty square's
+ * pencil marks. The square you've chosen is ringed, its row, column and box shaded, and every
+ * other square with its digit picked out. Mistakes show red. On top of that, whatever's lit: a
+ * hint or a step of the solution (what it rests on in green, what it rules out struck in red), or
+ * the app's own latest moves (its digits dropping in, the marks it cleared fading).
  */
-export function SolveBoard({
+export function PlayBoard({
   board,
-  move,
+  selected,
+  onSelect,
+  mistakes,
+  lit,
   stamp,
   tone,
-  onMark,
 }: {
   board: BoardState;
-  move: Move | null;
-  /* Which step this is (so a placement or a strike plays again when its step comes round). */
+  selected: number | null;
+  onSelect?: (square: number) => void;
+  mistakes: ReadonlySet<number>;
+  lit: Lit;
+  /* Bumped when what's lit changes, so animations play again. */
   stamp: number;
   tone: 'plain' | 'solved' | 'broken';
-  onMark: (square: number, digit: Digit) => void;
 }) {
-  const lit = useMemo(() => highlightsOf(move), [move]);
-  const manual = move?.kind === 'manual' ? move : null;
+  const sel = selected;
+  const selValue = sel !== null ? board.values[sel]! : 0;
+  const near = (s: number) => sel !== null && s !== sel && (rowOf(s) === rowOf(sel) || colOf(s) === colOf(sel) || boxOf(s) === boxOf(sel));
 
   return (
-    <>
-      <Frame tone={tone}>
-        {(s) => {
-          const value = board.values[s]!;
-          const key = `${s}`;
-          if (value) {
-            const given = board.givens[s];
-            return (
-              <div
-                key={key}
-                className={clsx(
-                  'flex aspect-square items-center justify-center text-[6.4cqi] font-bold leading-none',
-                  lit.placed === s ? 'bg-accent-soft' : lit.units.has(s) ? 'bg-chip' : 'bg-white',
-                  given ? 'text-ink' : 'text-accent',
-                )}
-              >
-                <span className='sr-only'>{squareName(s)} </span>
-                <span key={lit.placed === s ? `${stamp}` : 'still'} className={clsx(lit.placed === s && 'animate-place')}>
-                  {value}
-                </span>
-              </div>
-            );
-          }
-          const cands = board.cands[s]!;
-          const removed = lit.removed.get(s) ?? [];
-          const isCause = lit.cause.has(s);
-          const byHand = manual?.square === s;
+    <Frame tone={tone}>
+      {(s) => {
+        const value = board.values[s]!;
+        const wrong = mistakes.has(s);
+        const bg = wrong
+          ? 'bg-out-soft'
+          : s === sel
+            ? 'bg-accent-soft'
+            : lit.cause.has(s)
+              ? 'bg-reason-soft shadow-[inset_0_0_0_2px_var(--color-reason)]'
+              : lit.toPlace?.square === s
+                ? 'bg-accent-soft/70 shadow-[inset_0_0_0_2px_var(--color-accent)]'
+                : lit.struck.has(s)
+                  ? 'bg-out-soft/60'
+                  : selValue && value === selValue
+                    ? 'bg-accent-soft/60'
+                    : lit.units.has(s) || near(s)
+                      ? 'bg-chip'
+                      : 'bg-white';
+        const common = clsx(
+          'relative aspect-square outline-none',
+          onSelect && 'cursor-pointer',
+          s === sel && 'z-10 shadow-[inset_0_0_0_2px_var(--color-accent)]',
+          bg,
+        );
+        const label = value
+          ? `${squareName(s)}: ${value}${board.givens[s] ? ' (given)' : ''}${wrong ? ', a mistake' : ''}`
+          : `${squareName(s)}: could be ${DIGITS.filter((d) => board.cands[s]! & bit(d)).join(', ') || 'nothing'}${wrong ? ' — its answer has been ruled out' : ''}`;
+
+        if (value) {
           return (
-            <Popover.Trigger
-              key={key}
-              handle={marks}
-              payload={s}
-              aria-label={`${squareName(s)}: could be ${DIGITS.filter((d) => cands & bit(d)).join(', ') || 'nothing'}`}
-              className={clsx(
-                'relative grid aspect-square cursor-pointer grid-cols-3 grid-rows-3 p-[0.5cqi] text-[2.85cqi] font-medium leading-none outline-none sm:text-[2.6cqi]',
-                'focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent',
-                cands === 0
-                  ? 'bg-out-soft'
-                  : byHand
-                    ? 'bg-hand-soft'
-                    : isCause
-                      ? 'bg-reason-soft shadow-[inset_0_0_0_2px_var(--color-reason)]'
-                      : removed.length
-                        ? 'bg-out-soft/70'
-                        : lit.units.has(s)
-                          ? 'bg-chip'
-                          : 'bg-white hover:bg-chip/70',
-              )}
-            >
-              {DIGITS.map((d) => {
-                const on = !!(cands & bit(d));
-                const out = removed.includes(d) || (byHand && manual.digit === d && !manual.added);
-                const reason = on && isCause && lit.causeDigits.has(d);
-                const hand = byHand && manual.digit === d;
+            <button key={s} type='button' aria-label={label} aria-pressed={s === sel} onClick={() => onSelect?.(s)} className={clsx(common, 'flex items-center justify-center text-[6.4cqi] font-bold leading-none')}>
+              <span
+                key={lit.placed.has(s) ? `${stamp}` : 'still'}
+                className={clsx(lit.placed.has(s) && 'animate-place', wrong ? 'text-out' : board.givens[s] ? 'text-ink' : 'text-accent')}
+              >
+                {value}
+              </span>
+            </button>
+          );
+        }
+        const cands = board.cands[s]!;
+        const struck = lit.struck.get(s) ?? [];
+        const fading = lit.fading.get(s) ?? [];
+        return (
+          <button
+            key={s}
+            type='button'
+            aria-label={label}
+            aria-pressed={s === sel}
+            onClick={() => onSelect?.(s)}
+            className={clsx(common, 'grid grid-cols-3 grid-rows-3 p-[0.5cqi] text-[2.85cqi] font-medium leading-none sm:text-[2.6cqi]', !wrong && s !== sel && 'hover:brightness-[0.97]')}
+          >
+            {DIGITS.map((d) => {
+              const on = !!(cands & bit(d));
+              const out = struck.includes(d);
+              const reason = on && lit.cause.has(s) && lit.causeDigits.has(d);
+              const goes = on && lit.toPlace?.square === s && lit.toPlace.digit === d;
+              const same = on && selValue === d;
+              if (on && !out)
                 return (
                   <span key={d} className='flex items-center justify-center'>
-                    {on ? (
-                      <span
-                        className={clsx(
-                          'flex size-[2.9cqi] items-center justify-center rounded-full',
-                          reason ? 'bg-reason font-bold text-white' : hand ? 'bg-hand font-bold text-white' : 'text-slate-500',
-                        )}
-                      >
-                        {d}
-                      </span>
-                    ) : out ? (
-                      <span className={clsx('relative font-bold', hand ? 'text-hand' : 'text-out')}>
-                        {d}
-                        <span
-                          key={stamp}
-                          className={clsx('animate-strike absolute left-[-25%] right-[-25%] top-1/2 h-[2px] -translate-y-1/2 rounded-full', hand ? 'bg-hand' : 'bg-out')}
-                        />
-                      </span>
-                    ) : null}
+                    <span
+                      className={clsx(
+                        'flex size-[2.9cqi] items-center justify-center rounded-full',
+                        reason ? 'bg-reason font-bold text-white' : goes ? 'bg-accent font-bold text-white' : same ? 'font-bold text-accent' : 'text-slate-500',
+                      )}
+                    >
+                      {d}
+                    </span>
                   </span>
                 );
-              })}
-              {cands === 0 && <span className='absolute inset-0 flex items-center justify-center text-[5cqi] font-bold text-out'>!</span>}
-            </Popover.Trigger>
-          );
-        }}
-      </Frame>
-      <Popover.Root handle={marks}>
-        {({ payload }) =>
-          payload === undefined ? null : (
-            <Popover.Portal>
-              <Popover.Positioner sideOffset={6} collisionPadding={8} className='z-50 outline-none'>
-                <Popover.Popup className={clsx(POPUP, 'w-44 p-3')}>
-                  <Popover.Title className='mb-2 text-xs font-bold text-muted'>
-                    Pencil marks in <span className='text-ink'>{squareName(payload)}</span>
-                  </Popover.Title>
-                  <div className='grid grid-cols-3 gap-1.5'>
-                    {DIGITS.map((d) => {
-                      const on = !!(board.cands[payload]! & bit(d));
-                      // (A digit already placed in its row, column or box can't be put back.)
-                      const taken = !on && PEERS[payload]!.some((p) => board.values[p] === d);
-                      return (
-                        <Toggle
-                          key={d}
-                          pressed={on}
-                          disabled={taken}
-                          onPressedChange={() => onMark(payload, d)}
-                          aria-label={taken ? `${d} is already in its row, column or box` : `${on ? 'Rule out' : 'Put back'} ${d}`}
-                          className={clsx(
-                            'flex h-10 items-center justify-center rounded-lg border text-base font-bold transition-colors',
-                            on
-                              ? 'cursor-pointer border-accent/30 bg-accent-soft text-accent'
-                              : taken
-                                ? 'cursor-default border-transparent bg-chip/70 text-slate-300 line-through'
-                                : 'cursor-pointer border-edge bg-white text-slate-300 hover:text-muted',
-                            FOCUS,
-                          )}
-                        >
-                          {d}
-                        </Toggle>
-                      );
-                    })}
-                  </div>
-                  <p className='mt-2 text-[11px] leading-4 text-muted'>The solver carries on from your marks.</p>
-                </Popover.Popup>
-              </Popover.Positioner>
-            </Popover.Portal>
-          )
-        }
-      </Popover.Root>
-    </>
+              if (out || fading.includes(d))
+                return (
+                  <span key={d} className='flex items-center justify-center'>
+                    <span key={`${stamp}`} className={clsx('relative font-bold text-out', !out && 'animate-fade-out')}>
+                      {d}
+                      <span className='animate-strike absolute left-[-25%] right-[-25%] top-1/2 h-[2px] -translate-y-1/2 rounded-full bg-out' />
+                    </span>
+                  </span>
+                );
+              return <span key={d} />;
+            })}
+            {cands === 0 && <span className='absolute inset-0 flex items-center justify-center text-[5cqi] font-bold text-out'>!</span>}
+          </button>
+        );
+      }}
+    </Frame>
   );
 }
 

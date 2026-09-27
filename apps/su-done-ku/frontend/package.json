@@ -1,6 +1,6 @@
 {
   "name": "su-done-ku",
-  "description": "A sudoku solver that works a puzzle the way a person would: one deduction at a time, each one explained",
+  "description": "Sudoku where you play only the parts you enjoy: pick which techniques are yours, and the app does the rest, pencil marks included",
   "version": "2.0.0",
   "author": "Scott Hetrick",
   "license": "MIT",

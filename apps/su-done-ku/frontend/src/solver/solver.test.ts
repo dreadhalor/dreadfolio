@@ -2,9 +2,11 @@ import { describe, expect, test } from 'vitest';
 import bank from './puzzles.json';
 import {
   ALL,
+  PEERS,
   TECHNIQUES,
   apply,
   bit,
+  crosshatched,
   gradeOf,
   nextStep,
   parsePuzzle,
@@ -158,7 +160,7 @@ describe('each technique, on a board built for it', () => {
 
 describe('the words', () => {
   const first = (puzzle: string, t: TechniqueId) =>
-    solve(parsePuzzle(puzzle), new Set<TechniqueId>(['nakedSingle', 'hiddenSingle', t])).steps.find((s) => s.technique === t)!;
+    solve(parsePuzzle(puzzle), new Set<TechniqueId>(['crosshatch', 'nakedSingle', 'hiddenSingle', t])).steps.find((s) => s.technique === t)!;
   const preset = Object.fromEntries(presets);
   test.each([
     ['nakedPairPuzzle', 'nakedPair', 'A2 and A3 can only be 1 or 6, so one is 1 and the other is 6. No other square in the top-left box can be 1 or 6.'],
@@ -169,21 +171,31 @@ describe('the words', () => {
     expect(first(preset[name]!, t).text).toBe(text);
   });
 
-  test('a first step, and what it rules out', () => {
-    const { deduction } = nextStep(parsePuzzle(preset.hiddenSinglePuzzle!));
-    expect(deduction?.label).toBe('Hidden single');
-    expect(deduction?.text).toBe('In the bottom-left box, 1 can only go in G3, so G3 is 1.');
-    // G3's other candidates, and 1 from its row, column and box.
-    expect(deduction?.removals.every((r) => r.square === deduction.place!.square || r.digit === 1)).toBe(true);
+  test('crosshatching comes first, one placed digit at a time', () => {
+    const b = parsePuzzle(preset.hiddenSinglePuzzle!);
+    const { deduction } = nextStep(b);
+    expect(deduction?.label).toBe('Crosshatching');
+    expect(deduction?.text).toBe('A3 is 9, so no other square in its row, column or box can be 9.');
+    // Every empty square that shares A3's row, column or box, and only those.
+    expect(deduction?.removals.map((r) => r.square).sort((x, y) => x - y)).toEqual(PEERS[2]!.filter((p) => !b.values[p]).sort((x, y) => x - y));
+    expect(deduction?.removals.every((r) => r.digit === 9)).toBe(true);
+  });
+
+  test('a hidden single places its digit and takes out only its own square’s other marks', () => {
+    const d = solve(parsePuzzle(preset.hiddenSinglePuzzle!)).steps.find((s) => s.technique === 'hiddenSingle')!;
+    expect(d.text).toBe('In the bottom-left box, 1 can only go in G3, so G3 is 1.');
+    expect(d.removals.every((r) => r.square === d.place!.square)).toBe(true);
   });
 });
 
 describe('the board', () => {
-  test('starts with the pencil marks filled in', () => {
-    const b = parsePuzzle(presets[0]![1]);
+  test('starts with every candidate open; crosshatching narrows them', () => {
+    const raw = parsePuzzle(presets[0]![1]);
+    for (let s = 0; s < 81; s++) if (!raw.values[s]) expect(raw.cands[s]).toBe(ALL);
+    const b = crosshatched(raw);
     for (let s = 0; s < 81; s++) {
       if (b.values[s]) continue;
-      for (let t = 0; t < 81; t++) if (b.values[t] && t !== s && (Math.floor(t / 9) === Math.floor(s / 9) || t % 9 === s % 9)) expect(b.cands[s]! & bit(b.values[t] as Digit)).toBe(0);
+      for (const p of PEERS[s]!) if (b.values[p]) expect(b.cands[s]! & bit(b.values[p] as Digit)).toBe(0);
     }
   });
   test('knows a clash and a dead end when it sees one', () => {

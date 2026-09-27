@@ -6,10 +6,11 @@ import icon from '../assets/icon.svg';
 import type { Grade } from '../solver';
 import { FOCUS, ITEM, POPUP, SECONDARY } from './ui';
 
-const GRADES: { grade: Grade; name: string; about: string }[] = [
-  { grade: 'easy', name: 'Easy', about: 'Singles only' },
+const GRADES: { grade: Grade | 'any'; name: string; about: string }[] = [
+  { grade: 'any', name: 'Surprise me', about: 'Any difficulty' },
+  { grade: 'easy', name: 'Easy', about: 'Crosshatching and singles' },
   { grade: 'medium', name: 'Medium', about: 'Pairs, and digits pinned inside a box or line' },
-  { grade: 'hard', name: 'Hard', about: 'Triples, X-Wings and XY-Wings' },
+  { grade: 'hard', name: 'Hard', about: 'Triples, quads, X-Wings and XY-Wings' },
 ];
 
 /* The key to the board's colours. */
@@ -48,14 +49,21 @@ function Help() {
             <Popover.Title className='mb-2 text-sm font-extrabold'>How it works</Popover.Title>
             <ul className='list-disc space-y-1.5 pl-4 marker:text-slate-300'>
               <li>
-                <b>Next step</b> makes one deduction — the easiest one there is — and says why. <b>Play</b> runs through them; the
-                slider goes back to any step.
+                Every technique is yours (<b>Me</b>) or the app’s (<b>Auto</b>). After each of your moves the app does the auto ones —
+                crosshatching and singles, to begin with — and stops as soon as the next step is one of yours, pencil marks all in place.
               </li>
-              <li>Every empty square starts with the digits its row, column and box still allow; a placed digit clears itself from the rest.</li>
-              <li>Tap an empty square to change its pencil marks yourself. The solver carries on from yours.</li>
               <li>
-                Switch techniques off to see how the solver manages without them, or press a technique’s <b>Example</b> to see it in
-                action.
+                Pick a square, then a digit. With <b>Pencil</b> on, a digit turns that pencil mark on or off. Arrow keys move; P toggles
+                pencil; Backspace erases.
+              </li>
+              <li>
+                Stuck? <b>Hint</b> says where to look; press again to see the step, and have it done for you if you like. <b>Solution</b>{' '}
+                walks you through the rest.
+              </li>
+              <li>A wrong digit, or a pencil mark taken out that was the answer, shows up red straight away.</li>
+              <li>
+                New puzzles always need at least one of your techniques. The target beside a technique gives you a puzzle that skips
+                straight to it.
               </li>
             </ul>
             <Legend className='mt-3 border-t border-edge pt-3' />
@@ -70,14 +78,23 @@ function Help() {
  * The bar across the top: the app's mark and name, a new puzzle (random at a difficulty, or typed
  * in), and how it works.
  */
-export function Header({ onRandom, onEnter }: { onRandom: (grade: Grade) => void; onEnter: () => void }) {
+export function Header({
+  onRandom,
+  onEnter,
+  available,
+}: {
+  onRandom: (grade: Grade | 'any') => void;
+  onEnter: () => void;
+  /* How many bundled puzzles of each grade need one of your techniques. */
+  available: Record<Grade | 'any', number>;
+}) {
   return (
     <header className='sticky top-0 z-30 border-b border-edge bg-white/90 backdrop-blur-md'>
       <div className='mx-auto flex h-14 max-w-6xl items-center gap-2 px-3 sm:gap-3 sm:px-6'>
         <img src={icon} alt='' className='size-8 shrink-0 rounded-lg shadow-sm ring-1 ring-black/5' />
         <div className='min-w-0 flex-1'>
           <h1 className='truncate text-lg font-extrabold leading-5 text-accent'>Su-Done-Ku</h1>
-          <p className='hidden truncate text-xs text-muted sm:block'>Sudoku, one deduction at a time</p>
+          <p className='hidden truncate text-xs text-muted sm:block'>Sudoku, just the parts you enjoy</p>
         </div>
         <Menu.Root>
           <Menu.Trigger className={clsx(SECONDARY, 'pl-3.5 pr-2.5')}>
@@ -89,14 +106,19 @@ export function Header({ onRandom, onEnter }: { onRandom: (grade: Grade) => void
               <Menu.Popup className={clsx(POPUP, 'w-72 p-1.5')}>
                 <Menu.Group>
                   <Menu.GroupLabel className='px-2.5 pb-1 pt-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted'>
-                    A random puzzle
+                    A puzzle for you
                   </Menu.GroupLabel>
                   {GRADES.map((g) => (
-                    <Menu.Item key={g.grade} className={ITEM} onClick={() => onRandom(g.grade)}>
+                    <Menu.Item
+                      key={g.grade}
+                      className={clsx(ITEM, 'data-[disabled]:cursor-default data-[disabled]:opacity-45')}
+                      disabled={!available[g.grade]}
+                      onClick={() => onRandom(g.grade)}
+                    >
                       <Shuffle size={16} className='mt-0.5 shrink-0 text-muted' />
                       <span>
                         <span className='block font-bold'>{g.name}</span>
-                        <span className='block text-xs text-muted'>{g.about}</span>
+                        <span className='block text-xs text-muted'>{available[g.grade] ? g.about : 'None of these need a technique you do yourself'}</span>
                       </span>
                     </Menu.Item>
                   ))}

@@ -35,3 +35,34 @@ export function countSolutions(puzzle: readonly number[], limit = 2): number {
   search();
   return found;
 }
+
+/** The answer to a puzzle (81 digits, 0 for blanks) — the first one found — or null if it has none. */
+export function solutionOf(puzzle: readonly number[]): number[] | null {
+  const v = puzzle.slice();
+  const taken = (s: number) => {
+    const r = Math.floor(s / 9), c = s % 9, br = r - (r % 3), bc = c - (c % 3);
+    let m = 0;
+    for (let i = 0; i < 9; i++) m |= (1 << v[r * 9 + i]!) | (1 << v[i * 9 + c]!) | (1 << v[(br + Math.floor(i / 3)) * 9 + bc + (i % 3)]!);
+    return m;
+  };
+  const search = (): boolean => {
+    let best = -1, options = 0, fewest = 10;
+    for (let s = 0; s < 81; s++) {
+      if (v[s]) continue;
+      const free = ~taken(s) & 0x3fe;
+      let n = 0;
+      for (let m = free; m; m &= m - 1) n++;
+      if (n === 0) return false;
+      if (n < fewest) [best, options, fewest] = [s, free, n];
+    }
+    if (best < 0) return true;
+    for (let d = 1; d <= 9; d++) {
+      if (!(options & (1 << d))) continue;
+      v[best] = d;
+      if (search()) return true;
+    }
+    v[best] = 0;
+    return false;
+  };
+  return search() ? v : null;
+}

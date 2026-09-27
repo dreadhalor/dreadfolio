@@ -1,7 +1,8 @@
 /*
  * Builds the puzzles the app ships with (src/solver/puzzles.json) from the big puzzle lists the
  * old server drew from: only puzzles the solver finishes, each graded by the hardest technique it
- * needed — easy: singles; medium: pointing, box/line, pairs; hard: triples, X-Wing, XY-Wing, quads.
+ * needed — easy: crosshatching and singles; medium: pointing, box/line, pairs; hard: triples,
+ * X-Wing, XY-Wing, quads.
  * Each keeps a note of every technique its solve used (a bit per technique, in TECHNIQUES order).
  * And an example for each technique: the puzzle where it turns up soonest (hidden quads, which a
  * simpler technique always beats to it, have none).
