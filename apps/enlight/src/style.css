@@ -57,6 +57,11 @@ body.ready {
   touch-action: manipulation;
 }
 
+/* Unlit, it lets clicks through to the scene. The keyboard can still reach it. */
+#help-toggle.dark {
+  pointer-events: none;
+}
+
 #help-toggle:focus-visible {
   outline: 2px solid #dd3838;
   outline-offset: 3px;
@@ -129,6 +134,117 @@ html:not(.touch) .touch-only {
 
 @media (prefers-reduced-motion: reduce) {
   body {
+    transition: none;
+  }
+}
+
+/* The palette: which kind of shape a double-click makes. Out of sight until
+   the first shape is made, so the opening is still just you and the light. */
+#tools {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(16, 16, 16, 0.72);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  cursor: default;
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  transition:
+    opacity 350ms ease,
+    transform 350ms ease;
+}
+
+#tools.shown {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+#tools button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #8e8e8e;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+#tools button[hidden] {
+  display: none;
+}
+
+#tools button:hover {
+  color: #e8e8e8;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#tools button[aria-pressed='true'] {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+#tools button:focus-visible {
+  outline: 2px solid #dd3838;
+  outline-offset: 1px;
+}
+
+#tools svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#tools .pips {
+  stroke-width: 3;
+}
+
+/* Delete belongs to the selection, so it wears the selection's red, set apart. */
+#delete-shape {
+  position: relative;
+  margin-left: 7px;
+}
+
+#delete-shape::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: -5px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+#tools #delete-shape {
+  color: #dd3838;
+}
+
+#tools #delete-shape:hover {
+  color: #ff5c5c;
+  background: rgba(221, 56, 56, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tools {
     transition: none;
   }
 }

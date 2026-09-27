@@ -15,6 +15,49 @@
         role="img"
         aria-label="A light that follows your pointer, casting shadows from the shapes you make."
       ></canvas>
+      <nav id="tools" aria-label="Shapes" inert>
+        <button type="button" data-kind="3" aria-label="Triangle (3)" title="Triangle (3)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5 19.8 18H4.2Z" /></svg>
+        </button>
+        <button type="button" data-kind="4" aria-label="Square (4)" title="Square (4)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5.5h13v13h-13Z" /></svg>
+        </button>
+        <button type="button" data-kind="5" aria-label="Pentagon (5)" title="Pentagon (5)">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4 20.1 9.9 17 19.4H7L3.9 9.9Z" />
+          </svg>
+        </button>
+        <button type="button" data-kind="6" aria-label="Hexagon (6)" title="Hexagon (6)">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3.5 12 7.75 4.64h8.5L20.5 12l-4.25 7.36h-8.5Z" />
+          </svg>
+        </button>
+        <button type="button" data-kind="circle" aria-label="Circle (0)" title="Circle (0)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" /></svg>
+        </button>
+        <button
+          type="button"
+          data-kind="random"
+          aria-label="Surprise me (R)"
+          title="Surprise me (R)"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="4" width="16" height="16" rx="3" />
+            <path class="pips" d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="delete-shape"
+          aria-label="Delete the selected shape (Delete)"
+          title="Delete (Delete)"
+          hidden
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+          </svg>
+        </button>
+      </nav>
       <button
         id="help-toggle"
         type="button"
@@ -36,13 +79,20 @@
           <h1 id="help-title">Welcome to Enlight!</h1>
           <ul>
             <li>
-              <span class="mouse-only">Double-click</span
-              ><span class="touch-only">Double-tap</span> anywhere to make a shape.
+              Pick a shape at the bottom, then
+              <span class="mouse-only">double-click</span
+              ><span class="touch-only">double-tap</span> anywhere to make one.
             </li>
             <li class="mouse-only">Drag a shape to move it around.</li>
-            <li class="mouse-only">Click a shape, then drag its corners to reshape it.</li>
+            <li class="mouse-only">
+              Click a shape, then drag its corners to reshape it, or its round handle to
+              turn and resize it.
+            </li>
             <li class="touch-only">Tap a shape to select it, then drag it around.</li>
-            <li class="touch-only">Drag a selected shape's corners to reshape it.</li>
+            <li class="touch-only">
+              Drag a selected shape's corners to reshape it, or its round handle to turn
+              and resize it.
+            </li>
             <li>
               <span class="mouse-only">Double-click</span
               ><span class="touch-only">Double-tap</span> a shape to get rid of it.

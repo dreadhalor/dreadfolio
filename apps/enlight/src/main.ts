@@ -1,8 +1,25 @@
 import './style.css';
 import fontUrl from './fonts/annie-use-your-telescope-latin.woff2?url';
-import { type Occluders, type Pt, buildOccluders, contains } from './geometry';
-import { HELP_SIZE, Renderer, type Stage } from './render';
-import { type Shape, keepOnScreen, randomShape, shapeAt } from './shapes';
+import {
+  type Occluders,
+  type Pt,
+  buildOccluders,
+  centroid,
+  contains,
+  crossing,
+} from './geometry.ts';
+import { HELP_SIZE, Renderer, type Scene, type Stage } from './render.ts';
+import {
+  type Kind,
+  type Shape,
+  baseRadius,
+  keepOnScreen,
+  makeShape,
+  meanRadius,
+  reshape,
+  shapeAt,
+  turnHandle,
+} from './shapes.ts';
 
 const DOUBLE_CLICK_MS = 500;
 /** How far apart the two clicks of a double-click may land. */
@@ -17,11 +34,19 @@ const HELP_MOVE_MS = 500;
  * the canvas trades a little density for frame rate.
  */
 const MAX_PIXELS = 8.3e6;
+/** Shift snaps the turn handle to this step. */
+const TURN_STEP = Math.PI / 12;
+/** The smallest a shape can be turned down to, by its average radius. */
+const MIN_RADIUS = 12;
+const TOOL_KEY = 'enlight.tool';
 
 const stageEl = document.querySelector<HTMLElement>('#stage')!;
 const canvas = document.querySelector<HTMLCanvasElement>('#scene')!;
 const helpButton = document.querySelector<HTMLButtonElement>('#help-toggle')!;
 const helpPanel = document.querySelector<HTMLElement>('#help')!;
+const toolsEl = document.querySelector<HTMLElement>('#tools')!;
+const toolButtons = [...toolsEl.querySelectorAll<HTMLButtonElement>('[data-kind]')];
+const deleteButton = document.querySelector<HTMLButtonElement>('#delete-shape')!;
 const renderer = new Renderer(canvas);
 
 const params = new URLSearchParams(location.search);
@@ -39,11 +64,29 @@ let stage: Stage = 'hello';
 let touch = matchMedia('(hover: none)').matches;
 let helpOpen = false;
 let helpHover = false;
+/** Whether the latest press began on the "?" itself. */
+let helpPressed = false;
 let helpMove: { from: Pt; start: number } | null = null;
+/** What a double-click makes. Remembered per browser, for coming back to. */
+let tool: Kind = loadTool();
 
 type Drag =
   | { kind: 'shape'; shape: Shape; from: Pt; origin: Pt[] }
-  | { kind: 'corner'; shape: Shape; corner: Pt };
+  | { kind: 'corner'; shape: Shape; corner: Pt }
+  | {
+      kind: 'turn';
+      shape: Shape;
+      centre: Pt;
+      origin: Pt[];
+      /** The shape's turn when the handle was taken. */
+      turn: number;
+      /** Which side of the shape the handle was on, kept for the whole drag. */
+      side: number;
+      /** The pointer's angle and distance from the centre at the start. */
+      angle: number;
+      reach: number;
+      radius: number;
+    };
 
 interface Press {
   id: number;
@@ -62,6 +105,7 @@ const chebyshev = (a: Pt, b: Pt) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y -
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 const dragSlop = () => (touch ? 10 : 4);
 const cornerReach = () => (touch ? 26 : 20);
+const turnReach = () => (touch ? 24 : 15);
 
 // ---- Frames: drawn on demand, never on a loop that runs while nothing moves.
 
@@ -97,18 +141,35 @@ function governSamples() {
 
 function frame(now: number) {
   queued = false;
-  occluders ??= buildOccluders(shapes, {
-    x0: -MARGIN,
-    y0: -MARGIN,
-    x1: width + MARGIN,
-    y1: height + MARGIN,
-  });
-  const help = stage === 'hello' ? null : { at: helpPosition(now), hover: helpHover };
-  if (help) {
-    helpButton.style.transform = `translate(${help.at.x - HELP_SIZE / 2}px, ${help.at.y - HELP_SIZE / 2}px)`;
+  occluders ??= buildOccluders(
+    shapes.map((s) => s.points),
+    { x0: -MARGIN, y0: -MARGIN, x1: width + MARGIN, y1: height + MARGIN },
+  );
+  let help: Scene['help'] = null;
+  if (stage !== 'hello') {
+    const at = helpPosition(now);
+    // The "?" only answers where you can see it: in the dark, a click there
+    // is a click on whatever is there instead.
+    const lit = !!light && reaches(light, at);
+    help = { at, hover: helpHover && lit };
+    helpButton.style.transform = `translate(${at.x - HELP_SIZE / 2}px, ${at.y - HELP_SIZE / 2}px)`;
+    helpButton.classList.toggle('dark', !lit);
   }
-  // A mouse hovering near a corner grows its handle; a lifted finger isn't hovering.
-  const corner = selected && pointer && !press && !touch ? cornerNear(selected, pointer) : null;
+  syncTools();
+
+  const held = press?.drag ?? null;
+  let knob: Scene['knob'] = null;
+  let corner: Pt | null = null;
+  if (selected) {
+    const handle = turnHandle(selected, width, height, held?.kind === 'turn' ? held.side : undefined);
+    // A mouse hovering over a handle grows it; a lifted finger isn't hovering.
+    const hover = !press && !touch ? pointer : null;
+    const onKnob = !!hover && Math.hypot(hover.x - handle.at.x, hover.y - handle.at.y) < turnReach();
+    knob = { at: handle.at, stem: handle.stem, hot: onKnob || held?.kind === 'turn' };
+    if (held?.kind === 'corner') corner = held.corner;
+    else if (hover && !onKnob && !selected.round) corner = cornerNear(selected, hover);
+  }
+
   renderer.draw({
     width,
     height,
@@ -116,8 +177,9 @@ function frame(now: number) {
     occluders,
     light,
     selected,
-    corner: press?.drag?.kind === 'corner' ? press.drag.corner : corner,
-    grabbing: press?.drag?.kind === 'corner' && press.strayed,
+    corner,
+    grabbing: held?.kind === 'corner' && !!press?.strayed,
+    knob,
     stage,
     touch,
     help,
@@ -135,17 +197,42 @@ function aim(p: Pt) {
   light = { x: p.x, y: p.y };
 }
 
+/** Whether light at `from` falls on `to`: no shape's edge in the way. */
+function reaches(from: Pt, to: Pt) {
+  for (const { points } of shapes) {
+    for (let i = 0; i < points.length; i++) {
+      if (crossing(from, to, points[i]!, points[(i + 1) % points.length]!)) return false;
+    }
+  }
+  return true;
+}
+
 /**
  * What a press takes hold of, if anything. A mouse can hover, so pressing any
  * shape grabs it. A finger can't: a finger moving about is the light moving,
- * so by touch only the selected shape (a tap selects) or its corners can be
+ * so by touch only the selected shape (a tap selects) or its handles can be
  * grabbed. Where shapes overlap, the selected one wins.
  */
 function grab(p: Pt): Drag | null {
   if (selected) {
-    const corner = cornerNear(selected, p);
+    const handle = turnHandle(selected, width, height);
+    if (Math.hypot(p.x - handle.at.x, p.y - handle.at.y) < turnReach()) {
+      const centre = centroid(selected.points);
+      return {
+        kind: 'turn',
+        shape: selected,
+        centre,
+        origin: selected.points.map((q) => ({ ...q })),
+        turn: selected.turn,
+        side: handle.side,
+        angle: Math.atan2(p.y - centre.y, p.x - centre.x),
+        reach: Math.max(1, Math.hypot(p.x - centre.x, p.y - centre.y)),
+        radius: meanRadius(selected.points, centre),
+      };
+    }
+    const corner = selected.round ? null : cornerNear(selected, p);
     if (corner) return { kind: 'corner', shape: selected, corner };
-    if (contains(selected, p.x, p.y)) return hold(selected, p);
+    if (contains(selected.points, p.x, p.y)) return hold(selected, p);
   }
   if (touch) return null;
   const shape = shapeAt(shapes, p);
@@ -155,13 +242,13 @@ function grab(p: Pt): Drag | null {
 }
 
 function hold(shape: Shape, p: Pt): Drag {
-  return { kind: 'shape', shape, from: p, origin: shape.map((q) => ({ ...q })) };
+  return { kind: 'shape', shape, from: p, origin: shape.points.map((q) => ({ ...q })) };
 }
 
 function cornerNear(shape: Shape, p: Pt): Pt | null {
   let best: Pt | null = null;
   let bestDistance = cornerReach();
-  for (const corner of shape) {
+  for (const corner of shape.points) {
     const d = Math.hypot(corner.x - p.x, corner.y - p.y);
     if (d < bestDistance) {
       best = corner;
@@ -171,18 +258,38 @@ function cornerNear(shape: Shape, p: Pt): Pt | null {
   return best;
 }
 
-function drag(d: Drag, p: Pt) {
+function drag(d: Drag, p: Pt, snap: boolean) {
   if (d.kind === 'shape') {
     const dx = p.x - d.from.x;
     const dy = p.y - d.from.y;
-    d.shape.forEach((q, i) => {
+    d.shape.points.forEach((q, i) => {
       q.x = d.origin[i]!.x + dx;
       q.y = d.origin[i]!.y + dy;
     });
     keepOnScreen(d.shape, width, height);
-  } else {
+  } else if (d.kind === 'corner') {
     d.corner.x = clamp(p.x, 0, width);
     d.corner.y = clamp(p.y, 0, height);
+  } else {
+    // Round the centre with the pointer; nearer or further from it, smaller or bigger.
+    const { centre, origin } = d;
+    let spin = Math.atan2(p.y - centre.y, p.x - centre.x) - d.angle;
+    if (snap) spin = Math.round((d.turn + spin) / TURN_STEP) * TURN_STEP - d.turn;
+    const biggest = Math.min(width, height) * 0.45;
+    const scale = clamp(
+      Math.hypot(p.x - centre.x, p.y - centre.y) / d.reach,
+      MIN_RADIUS / d.radius,
+      Math.max(1, biggest / d.radius),
+    );
+    const cos = Math.cos(spin) * scale;
+    const sin = Math.sin(spin) * scale;
+    d.shape.points.forEach((q, i) => {
+      const x = origin[i]!.x - centre.x;
+      const y = origin[i]!.y - centre.y;
+      q.x = centre.x + x * cos - y * sin;
+      q.y = centre.y + x * sin + y * cos;
+    });
+    d.shape.turn = d.turn + spin;
   }
   occluders = null;
 }
@@ -210,7 +317,7 @@ function click(p: Pt, time: number, done: Press) {
     if (shape) {
       remove(shape);
     } else {
-      shapes.push(randomShape(p, width, height));
+      shapes.push(makeShape(tool, p, baseRadius(width, height)));
       occluders = null;
       if (stage === 'hello') setStage('explore');
     }
@@ -233,9 +340,11 @@ stageEl.addEventListener('pointerdown', (e) => {
   setTouch(e.pointerType !== 'mouse');
   const p = point(e);
   pointer = p;
-  if (e.target === helpButton) {
+  helpPressed = e.target === helpButton;
+  // The controls look after their own clicks.
+  if (e.target instanceof Element && e.target.closest('#tools, #help-toggle')) {
     invalidate();
-    return; // the button's own click handles it
+    return;
   }
   press = { id: e.pointerId, at: p, drag: null, strayed: false, closesHelp: helpOpen };
   if (!helpOpen) press.drag = grab(p);
@@ -250,7 +359,7 @@ stageEl.addEventListener('pointermove', (e) => {
   pointer = p;
   if (press && e.pointerId === press.id) {
     if (!press.strayed && chebyshev(p, press.at) > dragSlop()) press.strayed = true;
-    if (press.drag && press.strayed) drag(press.drag, p);
+    if (press.drag && press.strayed) drag(press.drag, p, e.shiftKey);
   }
   aim(p);
   invalidate();
@@ -271,6 +380,63 @@ stageEl.addEventListener('pointerleave', (e) => {
   if (e.pointerType !== 'mouse' || press) return;
   pointer = null;
   light = null;
+  invalidate();
+});
+
+// ---- The palette: which kind of shape a double-click makes. With a shape
+// selected, picking a kind turns that shape into it, in place.
+
+function loadTool(): Kind {
+  try {
+    return parseKind(localStorage.getItem(TOOL_KEY)) ?? 4;
+  } catch {
+    return 4;
+  }
+}
+
+function parseKind(value: string | null | undefined): Kind | null {
+  if (value === 'circle' || value === 'random') return value;
+  const sides = Number(value);
+  return sides === 3 || sides === 4 || sides === 5 || sides === 6 ? sides : null;
+}
+
+function setTool(kind: Kind) {
+  tool = kind;
+  try {
+    localStorage.setItem(TOOL_KEY, String(kind));
+  } catch {
+    // Private windows and blocked storage: it just won't be remembered.
+  }
+  if (selected) {
+    reshape(selected, kind);
+    keepOnScreen(selected, width, height);
+    occluders = null;
+  }
+  invalidate();
+}
+
+let shownTools: string | null = null;
+/** Mirror the state into the palette, touching the DOM only when something changed. */
+function syncTools() {
+  const state = `${stage !== 'hello'}|${!!selected}|${tool}`;
+  if (state === shownTools) return;
+  shownTools = state;
+  toolsEl.classList.toggle('shown', stage !== 'hello');
+  toolsEl.inert = stage === 'hello';
+  deleteButton.hidden = !selected;
+  for (const button of toolButtons) {
+    button.setAttribute('aria-pressed', String(parseKind(button.dataset.kind) === tool));
+  }
+}
+
+for (const button of toolButtons) {
+  button.addEventListener('click', () => {
+    const kind = parseKind(button.dataset.kind);
+    if (kind !== null) setTool(kind);
+  });
+}
+deleteButton.addEventListener('click', () => {
+  if (selected) remove(selected);
   invalidate();
 });
 
@@ -322,7 +488,13 @@ function setHelp(open: boolean) {
   invalidate();
 }
 
-helpButton.addEventListener('click', () => setHelp(!helpOpen));
+helpButton.addEventListener('click', (e) => {
+  // A tap that landed in the dark moves the light there, which can light the
+  // "?" up under the finger before the tap's click arrives. That click was
+  // meant for whatever the tap began on. (Keyboard clicks have no detail.)
+  if (e.detail > 0 && !helpPressed) return;
+  setHelp(!helpOpen);
+});
 helpButton.addEventListener('pointerenter', () => {
   helpHover = true;
   invalidate();
@@ -332,6 +504,9 @@ helpButton.addEventListener('pointerleave', () => {
   invalidate();
 });
 
+/** Keys that pick a kind of shape: the number of sides, 0 for a circle, R for a surprise. */
+const KIND_KEYS: Record<string, Kind> = { '3': 3, '4': 4, '5': 5, '6': 6, '0': 'circle', r: 'random' };
+
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (helpOpen) setHelp(false);
@@ -340,6 +515,8 @@ window.addEventListener('keydown', (e) => {
     remove(selected);
   } else if (e.key === '?' && stage !== 'hello') {
     setHelp(!helpOpen);
+  } else if (KIND_KEYS[e.key.toLowerCase()] !== undefined && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    setTool(KIND_KEYS[e.key.toLowerCase()]!);
   } else {
     return;
   }

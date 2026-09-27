@@ -10,15 +10,19 @@ framework, just the maths.
 
 - The light is your pointer, and it goes anywhere, into a shape too, which
   lights it from the inside.
-- Double-click (double-tap) anywhere to make a shape.
-- With a mouse, drag a shape to move it; click it, then drag its corners to
-  reshape it.
-- By touch, a finger dragging about only moves the light, so tap a shape to
-  select it first; then drag it, or its corners.
-- Double-click (double-tap) a shape, or press Delete while it is selected, to
+- Pick a shape from the palette at the bottom (triangle, square, pentagon,
+  hexagon, circle, or a random lump), then double-click (double-tap) anywhere
+  to make one. Keys: `3`-`6` for sides, `0` for a circle, `R` for random.
+- With a mouse, drag a shape to move it. By touch, a finger dragging about only
+  moves the light, so tap a shape to select it first, then drag it.
+- A selected shape has a dot on each corner (drag to reshape) and a round turn
+  handle: drag it round to turn the shape, further out or in to resize it.
+  Shift snaps the turn to 15 degrees. Picking a kind in the palette turns the
+  selected shape into that kind, in place.
+- Double-click (double-tap) a shape, press Delete, or use the palette's bin to
   get rid of it.
 - The `?` opens the instructions again. Like everything else here, it only
-  shows where the light falls.
+  shows, and only answers, where the light falls.
 
 `?soft=N` pins how many point lights make up the soft light (default 32).
 
@@ -54,14 +58,14 @@ frames start coming back slowly the light drops to 16 point lights.
 
 ```
 src/
-  main.ts       input, onboarding, frame scheduling
-  render.ts     the light layer, rims, copy, corner handles, the orb
+  main.ts       input, onboarding, the palette, frame scheduling
+  render.ts     the light layer, rims, copy, handles, the orb
   geometry.ts   visibility polygons and hit tests
-  shapes.ts     making, finding and keeping shapes on screen
+  shapes.ts     the kinds of shape, the turn handle, finding shapes
   style.css     layout and the help card
   fonts/        Annie Use Your Telescope (SIL Open Font License, see OFL.txt)
 test/
-  geometry.test.ts
+  geometry.test.ts, shapes.test.ts
 ```
 
 ## Scripts
@@ -69,7 +73,7 @@ test/
 ```bash
 pnpm dev     # dev server
 pnpm build   # production build into dist/, served under /enlight/
-pnpm test    # geometry tests (Node 22.6+ runs the TypeScript directly)
+pnpm test    # geometry and shape tests (Node 22.6+ runs the TypeScript directly)
 pnpm lint
 ```
 

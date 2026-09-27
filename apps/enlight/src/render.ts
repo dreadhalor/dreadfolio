@@ -1,5 +1,5 @@
-import { Caster, type Occluders, type Pt } from './geometry';
-import { type Shape, shapeAt } from './shapes';
+import { Caster, type Occluders, type Pt } from './geometry.ts';
+import { type Shape, shapeAt } from './shapes.ts';
 
 /** The onboarding: say hello, get a shape made, get the help found, then stay out of the way. */
 export type Stage = 'hello' | 'explore' | 'free';
@@ -15,6 +15,8 @@ export interface Scene {
   /** The corner under the pointer, or the one being dragged. */
   corner: Pt | null;
   grabbing: boolean;
+  /** The selected shape's turn handle, and the stem that joins it to the shape. */
+  knob: { at: Pt; stem: Pt; hot: boolean } | null;
   stage: Stage;
   /** Word the hints for fingers rather than a mouse. */
   touch: boolean;
@@ -115,9 +117,11 @@ export class Renderer {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    this.drawCorners(s);
     // Over the "?", the orb would sit right on top of it: keep only its bloom.
     if (s.light) this.drawOrb(s.light, !s.help?.hover);
+    // Handles go over the light: the light rides the pointer, so a handle
+    // being dragged is always right under it.
+    this.drawHandles(s);
   }
 
   /**
@@ -206,10 +210,10 @@ export class Renderer {
     c.strokeStyle = rim;
     c.lineWidth = 4;
     c.lineCap = 'butt';
-    for (const shape of s.shapes) {
-      for (let i = 0; i < shape.length; i++) {
-        const a = shape[i]!;
-        const b = shape[(i + 1) % shape.length]!;
+    for (const { points } of s.shapes) {
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i]!;
+        const b = points[(i + 1) % points.length]!;
         const ex = b.x - a.x;
         const ey = b.y - a.y;
         const lx = light.x - (a.x + b.x) / 2;
@@ -228,11 +232,31 @@ export class Renderer {
     c.globalAlpha = 1;
   }
 
-  private drawCorners(s: Scene) {
+  /** The selected shape's handles: a dot on each corner, and the turn handle on its stem. */
+  private drawHandles(s: Scene) {
     if (!s.selected) return;
     const c = this.ctx;
+    if (s.knob) {
+      const { at, stem, hot } = s.knob;
+      c.strokeStyle = ACCENT;
+      c.globalAlpha = 0.6;
+      c.lineWidth = 1.5;
+      c.beginPath();
+      c.moveTo(stem.x, stem.y);
+      c.lineTo(at.x, at.y);
+      c.stroke();
+      c.globalAlpha = 1;
+      c.fillStyle = '#161616';
+      c.lineWidth = 2;
+      c.beginPath();
+      c.arc(at.x, at.y, hot ? 9 : 7, 0, Math.PI * 2);
+      c.fill();
+      c.stroke();
+    }
+    // A circle has too many corners to handle one at a time.
+    if (s.selected.round) return;
     c.fillStyle = ACCENT;
-    for (const p of s.selected) {
+    for (const p of s.selected.points) {
       const r = p === s.corner ? (s.grabbing ? 9 : 7) : 4.5;
       c.beginPath();
       c.arc(p.x, p.y, r, 0, Math.PI * 2);
