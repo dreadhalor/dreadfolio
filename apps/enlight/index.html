@@ -15,7 +15,29 @@
         role="img"
         aria-label="A light that follows your pointer, casting shadows from the shapes you make."
       ></canvas>
-      <nav id="tools" aria-label="Shapes" inert>
+      <nav id="tools" aria-label="Shapes and rooms" inert>
+        <div id="rooms" role="menu" aria-label="Rooms" hidden>
+          <button type="button" role="menuitem" data-room="colonnade">Colonnade</button>
+          <button type="button" role="menuitem" data-room="maze">Maze</button>
+          <button type="button" role="menuitem" data-room="lantern">Lantern</button>
+          <button type="button" role="menuitem" data-room="sundial">Sundial</button>
+          <hr />
+          <button type="button" role="menuitem" data-room="empty">Clear everything</button>
+        </div>
+        <button
+          type="button"
+          id="rooms-toggle"
+          aria-label="Rooms to explore"
+          title="Rooms to explore"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="rooms"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 21h18M6 21V4.5a1 1 0 0 1 .8-1l8-1.5a1 1 0 0 1 1.2 1V21M16 5h2a1 1 0 0 1 1 1v15" />
+            <path class="pips" d="M13 12.5h.01" />
+          </svg>
+        </button>
         <button type="button" data-kind="3" aria-label="Triangle (3)" title="Triangle (3)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5 19.8 18H4.2Z" /></svg>
         </button>
@@ -83,15 +105,16 @@
               <span class="mouse-only">double-click</span
               ><span class="touch-only">double-tap</span> anywhere to make one.
             </li>
+            <li>Or open the door for a room to explore. Each one hides a secret!</li>
             <li class="mouse-only">Drag a shape to move it around.</li>
             <li class="mouse-only">
-              Click a shape, then drag its corners to reshape it, or its round handle to
-              turn and resize it.
+              Click a shape, then drag its corners or sides to reshape it, or its round
+              handle to turn and resize it.
             </li>
             <li class="touch-only">Tap a shape to select it, then drag it around.</li>
             <li class="touch-only">
-              Drag a selected shape's corners to reshape it, or its round handle to turn
-              and resize it.
+              Drag a selected shape's corners or sides to reshape it, or its round handle
+              to turn and resize it.
             </li>
             <li>
               <span class="mouse-only">Double-click</span

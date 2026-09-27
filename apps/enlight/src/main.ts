@@ -17,9 +17,13 @@ import {
   makeShape,
   meanRadius,
   reshape,
+  nearestSide,
+  pushSide,
   shapeAt,
+  sideNormal,
   turnHandle,
 } from './shapes.ts';
+import { type Note, type RoomId, buildRoom } from './rooms.ts';
 
 const DOUBLE_CLICK_MS = 500;
 /** How far apart the two clicks of a double-click may land. */
@@ -47,6 +51,8 @@ const helpPanel = document.querySelector<HTMLElement>('#help')!;
 const toolsEl = document.querySelector<HTMLElement>('#tools')!;
 const toolButtons = [...toolsEl.querySelectorAll<HTMLButtonElement>('[data-kind]')];
 const deleteButton = document.querySelector<HTMLButtonElement>('#delete-shape')!;
+const roomsToggle = document.querySelector<HTMLButtonElement>('#rooms-toggle')!;
+const roomsMenu = document.querySelector<HTMLElement>('#rooms')!;
 const renderer = new Renderer(canvas);
 
 const params = new URLSearchParams(location.search);
@@ -69,10 +75,25 @@ let helpPressed = false;
 let helpMove: { from: Pt; start: number } | null = null;
 /** What a double-click makes. Remembered per browser, for coming back to. */
 let tool: Kind = loadTool();
+/** The words hidden in the room that's open, if any. */
+let notes: Note[] = [];
+/** Whether the open room keeps a trace of where the light has been. */
+let remember = false;
+let menuOpen = false;
 
 type Drag =
   | { kind: 'shape'; shape: Shape; from: Pt; origin: Pt[] }
   | { kind: 'corner'; shape: Shape; corner: Pt }
+  | {
+      kind: 'side';
+      shape: Shape;
+      /** The side runs from corner `index` to the next. */
+      index: number;
+      from: Pt;
+      /** Where its two corners were when the drag began. */
+      ends: [Pt, Pt];
+      normal: Pt;
+    }
   | {
       kind: 'turn';
       shape: Shape;
@@ -106,6 +127,7 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), h
 const dragSlop = () => (touch ? 10 : 4);
 const cornerReach = () => (touch ? 26 : 20);
 const turnReach = () => (touch ? 24 : 15);
+const sideReach = () => (touch ? 16 : 9);
 
 // ---- Frames: drawn on demand, never on a loop that runs while nothing moves.
 
@@ -163,6 +185,7 @@ function frame(now: number) {
   const held = press?.drag ?? null;
   let knob: Scene['knob'] = null;
   let corner: Pt | null = null;
+  let side: Scene['side'] = null;
   if (selected) {
     const handle = turnHandle(selected, width, height, held?.kind === 'turn' ? held.side : undefined);
     // A mouse hovering over a handle grows it; a lifted finger isn't hovering.
@@ -171,6 +194,14 @@ function frame(now: number) {
     knob = { at: handle.at, stem: handle.stem, hot: onKnob || held?.kind === 'turn' };
     if (held?.kind === 'corner') corner = held.corner;
     else if (hover && !onKnob && !selected.round) corner = cornerNear(selected, hover);
+    const pts = selected.points;
+    const edge =
+      held?.kind === 'side'
+        ? held.index
+        : hover && !onKnob && !corner && !selected.round
+          ? nearestSide(selected, hover, sideReach())
+          : null;
+    if (edge !== null) side = [pts[edge]!, pts[(edge + 1) % pts.length]!];
   }
 
   renderer.draw({
@@ -183,6 +214,9 @@ function frame(now: number) {
     corner,
     grabbing: held?.kind === 'corner' && !!press?.strayed,
     knob,
+    side,
+    notes,
+    remember,
     stage,
     touch,
     help,
@@ -236,6 +270,20 @@ function grab(p: Pt): Drag | null {
     }
     const corner = selected.round ? null : cornerNear(selected, p);
     if (corner) return { kind: 'corner', shape: selected, corner };
+    const index = selected.round ? null : nearestSide(selected, p, sideReach());
+    if (index !== null) {
+      const pts = selected.points;
+      const a = pts[index]!;
+      const b = pts[(index + 1) % pts.length]!;
+      return {
+        kind: 'side',
+        shape: selected,
+        index,
+        from: p,
+        ends: [{ ...a }, { ...b }],
+        normal: sideNormal(a, b),
+      };
+    }
     if (contains(selected.points, p.x, p.y)) return hold(selected, p);
   }
   if (touch) return null;
@@ -271,6 +319,10 @@ function drag(d: Drag, p: Pt, snap: boolean) {
       q.y = d.origin[i]!.y + dy;
     });
     keepOnScreen(d.shape, width, height);
+  } else if (d.kind === 'side') {
+    // Straight out or in, along the side's normal: it stays parallel to itself.
+    const push = (p.x - d.from.x) * d.normal.x + (p.y - d.from.y) * d.normal.y;
+    pushSide(d.shape, d.index, d.ends, push, width, height);
   } else if (d.kind === 'corner') {
     d.corner.x = clamp(p.x, 0, width);
     d.corner.y = clamp(p.y, 0, height);
@@ -345,8 +397,15 @@ stageEl.addEventListener('pointerdown', (e) => {
   const p = point(e);
   pointer = p;
   helpPressed = e.target === helpButton;
+  const onTools = e.target instanceof Element && !!e.target.closest('#tools');
+  // A press anywhere else only closes the rooms menu.
+  if (menuOpen && !onTools) {
+    setMenu(false);
+    invalidate();
+    return;
+  }
   // The controls look after their own clicks.
-  if (e.target instanceof Element && e.target.closest('#tools, #help-toggle')) {
+  if (onTools || e.target === helpButton) {
     invalidate();
     return;
   }
@@ -444,6 +503,35 @@ deleteButton.addEventListener('click', () => {
   invalidate();
 });
 
+// ---- Rooms: ready-made places to explore, each hiding some words. Opening
+// one replaces whatever is on the floor; "clear" leaves it bare.
+
+function setMenu(open: boolean) {
+  menuOpen = open;
+  roomsMenu.hidden = !open;
+  roomsToggle.setAttribute('aria-expanded', String(open));
+}
+
+function openRoom(id: RoomId | 'empty') {
+  const room = id === 'empty' ? null : buildRoom(id, width, height);
+  shapes.splice(0, shapes.length, ...(room?.shapes ?? []));
+  notes = room?.notes ?? [];
+  remember = !!room?.remember;
+  renderer.forget();
+  selected = null;
+  occluders = null;
+  // A mouse's light stays with the mouse; a finger's goes where the room wants it.
+  if (room && touch) light = { ...room.start };
+  if (stage === 'explore') setStage('free');
+  setMenu(false);
+  invalidate();
+}
+
+roomsToggle.addEventListener('click', () => setMenu(!menuOpen));
+for (const item of roomsMenu.querySelectorAll<HTMLButtonElement>('[data-room]')) {
+  item.addEventListener('click', () => openRoom(item.dataset.room as RoomId | 'empty'));
+}
+
 // ---- Help: the "?" is only drawn where the light falls, like everything
 // else here. The button is its invisible hit target, and the keyboard's way in.
 
@@ -513,7 +601,8 @@ const KIND_KEYS: Record<string, Kind> = { '3': 3, '4': 4, '5': 5, '6': 6, '0': '
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    if (helpOpen) setHelp(false);
+    if (menuOpen) setMenu(false);
+    else if (helpOpen) setHelp(false);
     else selected = null;
   } else if ((e.key === 'Delete' || e.key === 'Backspace') && selected && !helpOpen) {
     remove(selected);

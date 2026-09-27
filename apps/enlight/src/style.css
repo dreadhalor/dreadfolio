@@ -168,7 +168,7 @@ html:not(.touch) .touch-only {
   transform: translate(-50%, 0);
 }
 
-#tools button {
+#tools > button {
   display: grid;
   place-items: center;
   width: 40px;
@@ -185,16 +185,17 @@ html:not(.touch) .touch-only {
     background-color 150ms ease;
 }
 
-#tools button[hidden] {
+#tools > button[hidden] {
   display: none;
 }
 
-#tools button:hover {
+#tools > button:hover {
   color: #e8e8e8;
   background: rgba(255, 255, 255, 0.08);
 }
 
-#tools button[aria-pressed='true'] {
+#tools > button[aria-pressed='true'],
+#rooms-toggle[aria-expanded='true'] {
   color: #fff;
   background: rgba(255, 255, 255, 0.16);
 }
@@ -246,5 +247,80 @@ html:not(.touch) .touch-only {
 @media (prefers-reduced-motion: reduce) {
   #tools {
     transition: none;
+  }
+}
+
+/* The door to the rooms, set apart from the shapes like the bin is. */
+#rooms-toggle {
+  position: relative;
+  margin-right: 7px;
+}
+
+#rooms-toggle::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: -5px;
+  bottom: 10px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+#rooms {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 190px;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(16, 16, 16, 0.9);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+#rooms[hidden] {
+  display: none;
+}
+
+#rooms button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #d6d6d6;
+  font-family: 'Annie Use Your Telescope', cursive;
+  font-size: 22px;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#rooms button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#rooms hr {
+  width: 100%;
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Narrow phones: the palette has to fit eight buttons across. */
+@media (max-width: 400px) {
+  #tools > button {
+    width: 36px;
+    height: 36px;
+  }
+
+  #tools svg {
+    width: 20px;
+    height: 20px;
   }
 }

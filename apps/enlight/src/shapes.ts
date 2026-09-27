@@ -1,4 +1,11 @@
-import { type Pt, area, centroid, contains, lastCrossing } from './geometry.ts';
+import {
+  type Pt,
+  area,
+  centroid,
+  contains,
+  distanceToSegment,
+  lastCrossing,
+} from './geometry.ts';
 
 /**
  * What the palette makes. A number is a regular polygon with that many sides;
@@ -47,7 +54,7 @@ export function reshape(shape: Shape, kind: Kind) {
  * A regular polygon, standing on a flat base while its handle points up: a
  * square sits square to the screen, a triangle points up.
  */
-function regular(sides: number, at: Pt, radius: number, turn: number): Pt[] {
+export function regular(sides: number, at: Pt, radius: number, turn: number): Pt[] {
   const start = turn - UP + Math.PI / 2 + Math.PI / sides;
   const points: Pt[] = [];
   for (let i = 0; i < sides; i++) {
@@ -136,4 +143,64 @@ export function keepOnScreen(shape: Shape, width: number, height: number) {
     p.x += dx;
     p.y += dy;
   }
+}
+
+/** The side of a shape within `reach` of `p`, as the index of its first corner. */
+export function nearestSide(shape: Shape, p: Pt, reach: number): number | null {
+  const { points } = shape;
+  let best: number | null = null;
+  let bestDistance = reach;
+  for (let i = 0; i < points.length; i++) {
+    const d = distanceToSegment(p, points[i]!, points[(i + 1) % points.length]!);
+    if (d < bestDistance) {
+      best = i;
+      bestDistance = d;
+    }
+  }
+  return best;
+}
+
+/**
+ * Push side i straight out (or in) by `push`, from where its two corners were
+ * when the drag began. It stays parallel to itself, so a square stretches into
+ * a rectangle. The push stops where either corner would leave the screen.
+ */
+export function pushSide(
+  shape: Shape,
+  i: number,
+  from: readonly [Pt, Pt],
+  push: number,
+  width: number,
+  height: number,
+) {
+  const [a, b] = from;
+  const { x: nx, y: ny } = sideNormal(a, b);
+  let lo = -Infinity;
+  let hi = Infinity;
+  for (const e of from) {
+    for (const [v, dv, max] of [
+      [e.x, nx, width],
+      [e.y, ny, height],
+    ] as const) {
+      if (Math.abs(dv) < 1e-9) continue;
+      const t0 = -v / dv;
+      const t1 = (max - v) / dv;
+      lo = Math.max(lo, Math.min(t0, t1));
+      hi = Math.min(hi, Math.max(t0, t1));
+    }
+  }
+  // A corner that started off screen doesn't pin the side where it is.
+  const amount = Math.min(Math.max(push, Math.min(lo, 0)), Math.max(hi, 0));
+  const { points } = shape;
+  const j = (i + 1) % points.length;
+  points[i]!.x = a.x + nx * amount;
+  points[i]!.y = a.y + ny * amount;
+  points[j]!.x = b.x + nx * amount;
+  points[j]!.y = b.y + ny * amount;
+}
+
+/** The outward-or-inward direction a side is pushed along: its unit normal. */
+export function sideNormal(a: Pt, b: Pt): Pt {
+  const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+  return { x: -(b.y - a.y) / length, y: (b.x - a.x) / length };
 }

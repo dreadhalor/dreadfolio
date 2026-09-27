@@ -15,10 +15,15 @@ framework, just the maths.
   to make one. Keys: `3`-`6` for sides, `0` for a circle, `R` for random.
 - With a mouse, drag a shape to move it. By touch, a finger dragging about only
   moves the light, so tap a shape to select it first, then drag it.
-- A selected shape has a dot on each corner (drag to reshape) and a round turn
-  handle: drag it round to turn the shape, further out or in to resize it.
-  Shift snaps the turn to 15 degrees. Picking a kind in the palette turns the
-  selected shape into that kind, in place.
+- A selected shape has a dot on each corner (drag to reshape), sides you can
+  push out or pull in (they stay parallel, so a square stretches into a wall),
+  and a round turn handle: drag it round to turn the shape, further out or in
+  to resize it. Shift snaps the turn to 15 degrees. Picking a kind in the
+  palette turns the selected shape into that kind, in place.
+- The door at the left of the palette opens a room to explore, each built to
+  fit the screen and each hiding some words: a Colonnade whose shadows show a
+  secret, a Maze that remembers where your light has been, a Lantern whose
+  beams you steer onto words, and a Sundial whose shadow tells the time.
 - Double-click (double-tap) a shape, press Delete, or use the palette's bin to
   get rid of it.
 - The `?` opens the instructions again. Like everything else here, it only
@@ -38,8 +43,14 @@ Crossings are found once whenever the shapes change, not every frame.
 
 Rather than test every ray against every wall, the caster sweeps round the
 light: each wall covers a span of angles as seen from the light, and a ray is
-only tested against the walls whose span it falls in. `test/geometry.test.ts`
-checks the sweep against the brute-force version, point for point.
+only tested against the walls whose span it falls in.
+
+It also skips what each shape hides behind itself: seen from outside a shape,
+a wall with the light on its inner side can never be the nearest thing a ray
+meets, and a corner (or crossing) between two such walls can never show. That
+is about half of every shape. `test/geometry.test.ts` checks the lit region
+against the brute-force version (every ray at every wall, at every corner), by
+area and point by point, over 1,500 random scenes.
 
 **Soft shadows.** A real light has a size, so its shadows have soft edges. The
 light is a disc of 32 point lights, spread over it in a sunflower spiral; each
@@ -65,11 +76,12 @@ src/
   main.ts       input, onboarding, the palette, frame scheduling
   render.ts     the light layer, rims, copy, handles, the orb
   geometry.ts   visibility polygons and hit tests
-  shapes.ts     the kinds of shape, the turn handle, finding shapes
+  shapes.ts     the kinds of shape, the turn handle, sides, finding shapes
+  rooms.ts      the rooms and the words hidden in them
   style.css     layout and the help card
   fonts/        Annie Use Your Telescope (SIL Open Font License, see OFL.txt)
 test/
-  geometry.test.ts, shapes.test.ts
+  geometry.test.ts, shapes.test.ts, rooms.test.ts
 ```
 
 ## Scripts
@@ -77,7 +89,7 @@ test/
 ```bash
 pnpm dev     # dev server
 pnpm build   # production build into dist/, served under /enlight/
-pnpm test    # geometry and shape tests (Node 22.6+ runs the TypeScript directly)
+pnpm test    # geometry, shape and room tests (Node 22.6+ runs the TypeScript directly)
 pnpm lint
 ```
 

@@ -1,4 +1,5 @@
 import { Caster, type Occluders, type Pt } from './geometry.ts';
+import type { Note } from './rooms.ts';
 import type { Shape } from './shapes.ts';
 
 /** The onboarding: say hello, get a shape made, get the help found, then stay out of the way. */
@@ -17,6 +18,12 @@ export interface Scene {
   grabbing: boolean;
   /** The selected shape's turn handle, and the stem that joins it to the shape. */
   knob: { at: Pt; stem: Pt; hot: boolean } | null;
+  /** The side under the pointer, or the one being pushed. */
+  side: readonly [Pt, Pt] | null;
+  /** Words hidden in the room. */
+  notes: readonly Note[];
+  /** Leave a faint trace everywhere the light has been (the maze). */
+  remember: boolean;
   stage: Stage;
   /** Word the hints for fingers rather than a mouse. */
   touch: boolean;
@@ -67,6 +74,9 @@ export class Renderer {
   /** The light on its own, composed off screen and laid over the dark. */
   private layer = document.createElement('canvas');
   private lctx: CanvasRenderingContext2D;
+  /** Everywhere the light has reached, white on clear, for rooms that remember. */
+  private memory = document.createElement('canvas');
+  private mctx: CanvasRenderingContext2D;
   private caster = new Caster();
   private dpr = 1;
   private disc = discSamples(0);
@@ -74,13 +84,20 @@ export class Renderer {
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!;
     this.lctx = this.layer.getContext('2d')!;
+    this.mctx = this.memory.getContext('2d')!;
+  }
+
+  /** Forget everywhere the light has been. */
+  forget() {
+    this.mctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.mctx.clearRect(0, 0, this.memory.width, this.memory.height);
   }
 
   resize(width: number, height: number, dpr: number) {
     this.dpr = dpr;
     const w = Math.max(1, Math.round(width * dpr));
     const h = Math.max(1, Math.round(height * dpr));
-    for (const c of [this.canvas, this.layer]) {
+    for (const c of [this.canvas, this.layer, this.memory]) {
       if (c.width !== w) c.width = w;
       if (c.height !== h) c.height = h;
     }
@@ -104,14 +121,26 @@ export class Renderer {
         : s.stage === 'explore'
           ? 'Explore me!'
           : null;
+    // A room that remembers keeps where the light has been faintly visible,
+    // under everything else: explored corridors, dim, with the walls black.
+    if (s.remember) {
+      if (s.light) this.stampMemory(s, s.light);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 0.13;
+      ctx.drawImage(this.memory, 0, 0);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
     if (dark) {
       ctx.font = `${size}px ${FONT}`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#fff';
       const y = s.height / 2 + (s.stage === 'explore' ? size * 2 : 0);
       ctx.fillText(dark, s.width / 2, y);
     }
+    this.drawNotes(ctx, s.notes, 'dark');
 
     if (s.light) {
       this.composeLight(s, s.light, size);
@@ -174,14 +203,15 @@ export class Renderer {
     c.globalCompositeOperation = 'source-atop';
     this.drawRims(s, light, reach);
 
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillStyle = '#000';
     if (s.stage === 'hello') {
       c.font = `${size}px ${FONT}`;
-      c.textAlign = 'center';
-      c.textBaseline = 'middle';
-      c.fillStyle = '#000';
       const hint = s.touch ? 'Double tap me!' : 'Double click me!';
       c.fillText(hint, s.width / 2, s.height / 2 - size * 2);
     }
+    this.drawNotes(c, s.notes, 'light');
 
     if (s.help) {
       c.save();
@@ -229,10 +259,42 @@ export class Renderer {
     c.globalAlpha = 1;
   }
 
+  /** Add what the light can see from where it is now to the memory. */
+  private stampMemory(s: Scene, light: Pt) {
+    const c = this.mctx;
+    c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    const count = this.caster.cast(light.x, light.y, s.occluders);
+    const pts = this.caster.points;
+    c.fillStyle = '#fff';
+    c.beginPath();
+    c.moveTo(pts[0]!, pts[1]!);
+    for (let k = 1; k < count; k++) c.lineTo(pts[k * 2]!, pts[k * 2 + 1]!);
+    c.fill();
+  }
+
+  /** A room's hidden words of one kind, in whatever style the context is set to. */
+  private drawNotes(c: CanvasRenderingContext2D, notes: readonly Note[], kind: Note['kind']) {
+    for (const note of notes) {
+      if (note.kind !== kind) continue;
+      c.font = `${note.size}px ${FONT}`;
+      c.fillText(note.text, note.at.x, note.at.y);
+    }
+  }
+
   /** The selected shape's handles: a dot on each corner, and the turn handle on its stem. */
   private drawHandles(s: Scene) {
     if (!s.selected) return;
     const c = this.ctx;
+    if (s.side) {
+      const [a, b] = s.side;
+      c.strokeStyle = ACCENT;
+      c.lineWidth = 3;
+      c.lineCap = 'round';
+      c.beginPath();
+      c.moveTo(a.x, a.y);
+      c.lineTo(b.x, b.y);
+      c.stroke();
+    }
     if (s.knob) {
       const { at, stem, hot } = s.knob;
       c.strokeStyle = ACCENT;

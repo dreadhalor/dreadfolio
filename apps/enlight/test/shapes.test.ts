@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { centroid } from '../src/geometry.ts';
-import { UP, makeShape, meanRadius, reshape, turnHandle } from '../src/shapes.ts';
+import {
+  UP,
+  makeShape,
+  meanRadius,
+  pushSide,
+  reshape,
+  sideNormal,
+  turnHandle,
+} from '../src/shapes.ts';
 
 const near = (a: number, b: number, eps = 1e-9) => Math.abs(a - b) < eps;
 const at = { x: 400, y: 300 };
@@ -87,4 +95,22 @@ test('the turn handle sticks out of the shape itself, even a lopsided one', () =
     ((b.x - a.x) * (stem.y - a.y) - (b.y - a.y) * (stem.x - a.x)) / Math.hypot(b.x - a.x, b.y - a.y);
   assert.ok(Math.abs(offEdge) < 1e-6, `the stem starts on the top edge: ${JSON.stringify(stem)}`);
   assert.ok(near(Math.hypot(at.x - stem.x, at.y - stem.y), 26, 1e-6), 'and the handle sits just past it');
+});
+
+test('pushing a side keeps it parallel: a square becomes a rectangle', () => {
+  const shape = makeShape(4, { x: 400, y: 300 }, 50);
+  // The right side: the one whose corners both sit right of centre.
+  const right = shape.points.findIndex((p, i) => p.x > 400 && shape.points[(i + 1) % 4]!.x > 400);
+  const from = [{ ...shape.points[right]! }, { ...shape.points[(right + 1) % 4]! }] as const;
+  // Outward is whichever way along the side's normal points away from the centre.
+  const n = sideNormal(from[0], from[1]);
+  const out = Math.sign(n.x * (from[0].x - 400) + n.y * (from[0].y - 300));
+  pushSide(shape, right, from, 20 * out, 800, 600);
+  const [a, b] = [shape.points[right]!, shape.points[(right + 1) % 4]!];
+  assert.ok(near(a.x, 400 + 50 / Math.SQRT2 + 20, 1e-6), `out by 20: ${a.x}`);
+  assert.ok(near(a.x, b.x), 'still vertical');
+  assert.ok(near(a.y, from[0].y) && near(b.y, from[1].y), 'and no taller');
+  // Pushed far past the screen's edge, it stops at the edge.
+  pushSide(shape, right, from, 1000 * out, 800, 600);
+  assert.ok(near(Math.max(...shape.points.map((p) => p.x)), 800), 'stops at the edge');
 });

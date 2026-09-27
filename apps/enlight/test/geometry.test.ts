@@ -9,6 +9,7 @@ import {
   buildOccluders,
   contains,
   crossing,
+  distanceToSegment,
   lastCrossing,
 } from '../src/geometry.ts';
 
@@ -72,7 +73,15 @@ function bruteForce(ox: number, oy: number, occ: Occluders): number[] {
   return out;
 }
 
-test('the sweep finds exactly what testing every wall finds', () => {
+const polygonOf = (flat: ArrayLike<number>, count: number): Pt[] =>
+  Array.from({ length: count }, (_, i) => ({ x: flat[i * 2]!, y: flat[i * 2 + 1]! }));
+
+const nearOutline = (polygon: Pt[], p: Pt) =>
+  polygon.some((a, i) => distanceToSegment(p, a, polygon[(i + 1) % polygon.length]!) < 0.01);
+
+test('the fast caster lights exactly what testing every wall at every corner lights', () => {
+  // It skips corners and walls a shape hides behind itself, so its outline has
+  // fewer (collinear) points; the lit region must be the same region.
   const caster = new Caster();
   let polygons = 0;
   for (let seed = 1; seed <= 60; seed++) {
@@ -87,9 +96,18 @@ test('the sweep finds exactly what testing every wall finds', () => {
         const t = rand();
         o = { x: a.x + (b.x - a.x) * t + (rand() - 0.5) * 0.01, y: a.y + (b.y - a.y) * t };
       }
+      // Cast first: a cast can grow the buffer `points` refers to.
       const count = caster.cast(o.x, o.y, occ);
-      const got = Array.from(caster.points.subarray(0, count * 2));
-      assert.deepEqual(got, bruteForce(o.x, o.y, occ), `seed ${seed}, origin ${o.x},${o.y}`);
+      const got = polygonOf(caster.points, count);
+      const reference = bruteForce(o.x, o.y, occ);
+      const want = polygonOf(reference, reference.length / 2);
+      const [ga, wa] = [area(got), area(want)];
+      assert.ok(Math.abs(ga - wa) <= 1e-6 * Math.max(1, wa), `seed ${seed}, origin ${o.x},${o.y}: area ${ga} vs ${wa}`);
+      for (let n = 0; n < 40; n++) {
+        const p = { x: -40 + rand() * 1520, y: -40 + rand() * 980 };
+        if (nearOutline(got, p) || nearOutline(want, p)) continue;
+        assert.equal(contains(got, p.x, p.y), contains(want, p.x, p.y), `seed ${seed}: lit at ${p.x},${p.y}?`);
+      }
       polygons++;
     }
   }
