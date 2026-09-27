@@ -4,7 +4,8 @@ import {
   hiddenQuadPuzzle,
   hiddenTriplePuzzle,
 } from '../boards';
-import { executeStep, parseBoard, strategies } from '../utils';
+import { executeStep, parseBoard, parseBoardString, strategies, type Step, type Strategy } from '../utils';
+import bank from '../solver/puzzles.json';
 import {
   hiddenPairPuzzleSnapshot,
   hiddenQuadPuzzleSnapshot,
@@ -47,4 +48,25 @@ test('hidden quad is found', () => {
   const step3 = executeStep(strategies.hiddenQuads(step2));
   const result = convertBoardToSnapshot(step3);
   expect(result).toMatchObject(hiddenQuadPuzzleSnapshot);
+});
+
+test('this solver finishes every puzzle Generate can hand it', () => {
+  const wings = (1 << bank.techniques.indexOf('xWing')) | (1 << bank.techniques.indexOf('xyWing'));
+  for (const grade of ['easy', 'medium', 'hard'] as const) {
+    const offered = bank[grade].filter((e) => !(e.u & wings));
+    expect(offered.length).toBeGreaterThanOrEqual(60);
+    for (const { p } of offered) {
+      // The Take Step loop: every technique on, the first that eliminates anything is the step.
+      let step: Step = { type: 'start', boardSnapshot: parseBoardString(p), eliminations: [] };
+      for (let n = 0; n < 500; n++) {
+        const board = executeStep(step);
+        if (board.flat().every((c) => c.hintValues.length === 1)) break;
+        const next = (Object.keys(strategies) as Strategy[]).map((k) => strategies[k](board)).find((s) => s.eliminations.length > 0);
+        expect(next, `${grade} ${p} gets stuck`).toBeDefined();
+        step = next!;
+      }
+      const solved = executeStep(step).flat().map((c) => c.hintValues);
+      expect(solved.every((h) => h.length === 1), `${grade} ${p} is solved`).toBe(true);
+    }
+  }
 });

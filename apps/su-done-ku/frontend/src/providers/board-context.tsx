@@ -12,12 +12,11 @@ import {
   createEmptyBoard,
   createEmptyEditingPuzzle,
   executeStep,
-  parseAPIBoard,
+  parseBoardString,
   parseEditingPuzzle,
 } from '../utils';
 import { editCell as _editCell } from '../utils/index';
-import { ApiResponseBody } from '@repo/su-done-ku-backend/src/types';
-import { getBackendBaseUrl } from '@repo/utils';
+import { randomPuzzle } from '../solver/bank';
 import { useAchievements } from 'dread-ui';
 
 type BoardContextType = {
@@ -184,20 +183,10 @@ export const BoardProvider = ({ children }: BoardProviderProps) => {
     setIsGenerating(true);
     
     try {
-      // Use Lambda API URL in production, fallback to local Express server in dev
-      const apiUrl = import.meta.env.VITE_SUDOKU_API_URL || 
-                     `${getBackendBaseUrl(import.meta.env.PROD)}/su-done-ku/api/random`;
-      
-      const response = await fetch(
-        `${apiUrl}${difficulty ? `?difficulty=${difficulty}` : ''}`,
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Failed to generate puzzle: ${response.statusText}`);
-      }
-      
-      const data = (await response.json()) as ApiResponseBody;
-      const puzzle = parseAPIBoard(data);
+      // One of the app's own puzzles (src/solver/puzzles.json) — among the hard ones, only those
+      // this solver can finish (it has no X-Wing or XY-Wing).
+      const grade = difficulty === 'easy' || difficulty === 'hard' ? difficulty : 'medium';
+      const puzzle = parseBoardString(randomPuzzle(grade, ['xWing', 'xyWing']));
       const initStep: Step = {
         type: 'start',
         boardSnapshot: JSON.parse(JSON.stringify(puzzle)),

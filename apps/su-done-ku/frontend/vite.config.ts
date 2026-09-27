@@ -13,4 +13,7 @@ export default defineConfig({
     svgr() as PluginOption,
   ], // Cast the plugins to PluginOption
   base: '/su-done-ku/', // Set the base path
+  // One React for everything: some dependencies carry a nested copy of their own (a second React
+  // in the bundle crashes the app on its first hook).
+  resolve: { dedupe: ['react', 'react-dom'] },
 });
