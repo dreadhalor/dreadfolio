@@ -2,7 +2,7 @@ import { Popover } from '@base-ui/react/popover';
 import { Toggle } from '@base-ui/react/toggle';
 import clsx from 'clsx';
 import { useMemo, type ReactNode } from 'react';
-import { BOXES, DIGITS, bit, rowLetter, squareName, type Board as BoardState, type Digit } from '../solver';
+import { BOXES, DIGITS, PEERS, bit, rowLetter, squareName, type Board as BoardState, type Digit } from '../solver';
 import type { Move } from '../state';
 import { FOCUS, POPUP } from './ui';
 
@@ -24,7 +24,7 @@ function Frame({ children, tone }: { children: (square: number) => ReactNode; to
         ))}
       </div>
       <div
-        role='grid'
+        role='group'
         aria-label='Sudoku board'
         className={clsx(
           '@container grid aspect-square select-none grid-cols-3 gap-[2px] rounded-xl p-[3px] shadow-md transition-colors duration-500',
@@ -93,14 +93,13 @@ export function SolveBoard({
             return (
               <div
                 key={key}
-                role='gridcell'
-                aria-label={`${squareName(s)}: ${value}`}
                 className={clsx(
                   'flex aspect-square items-center justify-center text-[6.4cqi] font-bold leading-none',
                   lit.placed === s ? 'bg-accent-soft' : lit.units.has(s) ? 'bg-chip' : 'bg-white',
                   given ? 'text-ink' : 'text-accent',
                 )}
               >
+                <span className='sr-only'>{squareName(s)} </span>
                 <span key={lit.placed === s ? `${stamp}` : 'still'} className={clsx(lit.placed === s && 'animate-place')}>
                   {value}
                 </span>
@@ -178,15 +177,22 @@ export function SolveBoard({
                   <div className='grid grid-cols-3 gap-1.5'>
                     {DIGITS.map((d) => {
                       const on = !!(board.cands[payload]! & bit(d));
+                      // (A digit already placed in its row, column or box can't be put back.)
+                      const taken = !on && PEERS[payload]!.some((p) => board.values[p] === d);
                       return (
                         <Toggle
                           key={d}
                           pressed={on}
+                          disabled={taken}
                           onPressedChange={() => onMark(payload, d)}
-                          aria-label={`${on ? 'Rule out' : 'Put back'} ${d}`}
+                          aria-label={taken ? `${d} is already in its row, column or box` : `${on ? 'Rule out' : 'Put back'} ${d}`}
                           className={clsx(
-                            'flex h-10 cursor-pointer items-center justify-center rounded-lg border text-base font-bold transition-colors',
-                            on ? 'border-accent/30 bg-accent-soft text-accent' : 'border-edge bg-white text-slate-300 hover:text-muted',
+                            'flex h-10 items-center justify-center rounded-lg border text-base font-bold transition-colors',
+                            on
+                              ? 'cursor-pointer border-accent/30 bg-accent-soft text-accent'
+                              : taken
+                                ? 'cursor-default border-transparent bg-chip/70 text-slate-300 line-through'
+                                : 'cursor-pointer border-edge bg-white text-slate-300 hover:text-muted',
                             FOCUS,
                           )}
                         >
@@ -225,7 +231,7 @@ export function EditBoard({
           key={s}
           type='button'
           aria-label={`${squareName(s)}: ${grid[s] || 'empty'}`}
-          aria-pressed={selected === s}
+          aria-current={selected === s ? 'true' : undefined}
           onClick={() => onSelect(s)}
           className={clsx(
             'flex aspect-square cursor-pointer items-center justify-center text-[6.4cqi] font-bold leading-none outline-none',

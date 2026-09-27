@@ -66,7 +66,9 @@ export default function App() {
   const startEditing = (grid: number[] = Array<number>(81).fill(0)) => {
     setPlaying(false);
     setEntryError(null);
-    setEditing({ grid, selected: grid.findIndex((v) => !v) });
+    // (The first blank chosen; a full grid, none — pick a square to change.)
+    const blank = grid.indexOf(0);
+    setEditing({ grid, selected: blank >= 0 ? blank : null });
   };
 
   /* ---------- typing a puzzle in ---------- */
@@ -120,7 +122,8 @@ export default function App() {
         e.preventDefault();
         return;
       }
-      if (target?.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
+      // Space and Enter belong to whatever control has the focus.
+      if (target?.closest('button, a[href], [role="checkbox"], [role="switch"], [role="slider"]') && (e.key === ' ' || e.key === 'Enter')) return;
       const go = (to: number) => {
         setPlaying(false);
         dispatch({ type: 'go', to });

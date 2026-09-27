@@ -1,5 +1,6 @@
 import {
   ALL_TECHNIQUES,
+  PEERS,
   apply,
   bit,
   parsePuzzle,
@@ -66,8 +67,9 @@ export type Action =
 export function solveReducer(s: Solve, a: Action): Solve {
   switch (a.type) {
     case 'load': {
-      // An example always has its technique on — and opens on the step it's first used.
-      const enabled = a.source.kind === 'example' ? new Set([...s.enabled, a.source.technique]) : s.enabled;
+      // An example is shown the way it was found — every technique on — and opens on the step its
+      // technique is first used.
+      const enabled = a.source.kind === 'example' ? ALL_TECHNIQUES : s.enabled;
       const base = { source: a.source, boards: [parsePuzzle(a.puzzle)], moves: [], enabled };
       const planned = { ...base, ...replan(base, 0), at: 0 };
       if (a.source.kind === 'example') {
@@ -90,6 +92,8 @@ export function solveReducer(s: Solve, a: Action): Solve {
       const board = s.boards[s.at]!;
       if (board.values[a.square]) return s;
       const added = !(board.cands[a.square]! & bit(a.digit));
+      // A digit already placed in its row, column or box can't go back in.
+      if (added && PEERS[a.square]!.some((p) => board.values[p] === a.digit)) return s;
       const next = {
         ...s,
         boards: [...s.boards.slice(0, s.at + 1), toggleCandidate(board, a.square, a.digit)],
