@@ -1,5 +1,5 @@
 import { Caster, type Occluders, type Pt } from './geometry.ts';
-import { type Shape, shapeAt } from './shapes.ts';
+import type { Shape } from './shapes.ts';
 
 /** The onboarding: say hello, get a shape made, get the help found, then stay out of the way. */
 export type Stage = 'hello' | 'explore' | 'free';
@@ -24,13 +24,16 @@ export interface Scene {
   help: { at: Pt; hover: boolean } | null;
   /** How many point lights stand in for the one soft light. */
   samples: number;
+  /**
+   * The light is a disc this wide. It sets how soft shadows are, and how far
+   * the light has to travel to hand over from one side of an edge to the other.
+   */
+  radius: number;
 }
 
 export const FONT = "'Annie Use Your Telescope', cursive";
 export const HELP_SIZE = 36;
-/** The light is a disc this wide, which is what gives shadows their soft edges. */
-const LIGHT_RADIUS = 10;
-const ORB_RADIUS = 11;
+export const LIGHT_RADIUS = 10;
 const ACCENT = '#dd3838';
 
 /** The help icon, a 12-unit circle with the question mark cut out of it. */
@@ -118,7 +121,7 @@ export class Renderer {
     }
 
     // Over the "?", the orb would sit right on top of it: keep only its bloom.
-    if (s.light) this.drawOrb(s.light, !s.help?.hover);
+    if (s.light) this.drawOrb(s.light, !s.help?.hover, s.radius);
     // Handles go over the light: the light rides the pointer, so a handle
     // being dragged is always right under it.
     this.drawHandles(s);
@@ -137,26 +140,20 @@ export class Renderer {
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Coverage. A disc of light is many point lights; each adds its share
-    // wherever it can see, so a pixel lit by some of them is in penumbra. Point
-    // lights that land inside a shape the light itself is not in are dropped:
-    // they would light that shape from within.
+    // wherever it can see, so a pixel lit by some of them is in penumbra. The
+    // ones that fall inside a shape light it from within, so as the disc
+    // crosses an edge, the light hands over from one side to the other a
+    // share at a time: into a shape, out of one, or across where two overlap.
     if (this.disc.length !== s.samples * 2) this.disc = discSamples(s.samples);
-    const home = shapeAt(s.shapes, light);
-    const origins: number[] = [];
-    for (let i = 0; i < s.samples; i++) {
-      const x = light.x + this.disc[i * 2]! * LIGHT_RADIUS;
-      const y = light.y + this.disc[i * 2 + 1]! * LIGHT_RADIUS;
-      if (shapeAt(s.shapes, { x, y }) === home) origins.push(x, y);
-    }
-    const kept = origins.length / 2;
-    if (kept === 0) return;
     c.globalCompositeOperation = 'lighter';
     // Each point light's share, rounded UP to a whole 8-bit step, so a pixel
     // they all reach adds up to fully opaque and no dark copy ghosts through
     // the light. (With a power-of-two count the steps come out exact.)
-    c.fillStyle = `rgba(255, 255, 255, ${Math.ceil(255 / kept) / 255})`;
-    for (let i = 0; i < kept; i++) {
-      const count = this.caster.cast(origins[i * 2]!, origins[i * 2 + 1]!, s.occluders);
+    c.fillStyle = `rgba(255, 255, 255, ${Math.ceil(255 / s.samples) / 255})`;
+    for (let i = 0; i < s.samples; i++) {
+      const x = light.x + this.disc[i * 2]! * s.radius;
+      const y = light.y + this.disc[i * 2 + 1]! * s.radius;
+      const count = this.caster.cast(x, y, s.occluders);
       const pts = this.caster.points;
       c.beginPath();
       c.moveTo(pts[0]!, pts[1]!);
@@ -264,22 +261,23 @@ export class Renderer {
     }
   }
 
-  /** The light itself, with a little bloom. */
-  private drawOrb(p: Pt, core: boolean) {
+  /** The light itself, as big as the disc its shadows come from, with a little bloom. */
+  private drawOrb(p: Pt, core: boolean, radius: number) {
     const c = this.ctx;
-    const bloom = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, ORB_RADIUS * 4);
+    const orb = radius + 1;
+    const bloom = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, orb * 4);
     bloom.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
     bloom.addColorStop(1, 'rgba(255, 255, 255, 0)');
     c.globalCompositeOperation = 'lighter';
     c.fillStyle = bloom;
     c.beginPath();
-    c.arc(p.x, p.y, ORB_RADIUS * 4, 0, Math.PI * 2);
+    c.arc(p.x, p.y, orb * 4, 0, Math.PI * 2);
     c.fill();
     c.globalCompositeOperation = 'source-over';
     if (!core) return;
     c.fillStyle = '#fff';
     c.beginPath();
-    c.arc(p.x, p.y, ORB_RADIUS, 0, Math.PI * 2);
+    c.arc(p.x, p.y, orb, 0, Math.PI * 2);
     c.fill();
   }
 }

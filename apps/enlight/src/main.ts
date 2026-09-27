@@ -8,7 +8,7 @@ import {
   contains,
   crossing,
 } from './geometry.ts';
-import { HELP_SIZE, Renderer, type Scene, type Stage } from './render.ts';
+import { HELP_SIZE, LIGHT_RADIUS, Renderer, type Scene, type Stage } from './render.ts';
 import {
   type Kind,
   type Shape,
@@ -114,6 +114,9 @@ const turnReach = () => (touch ? 24 : 15);
  * up exactly in 8 bits. `?soft=N` pins it; otherwise it halves (to no fewer
  * than 16) if frames keep taking too long to come back.
  */
+/** `?radius=N` sizes the light: softer shadows, and a slower hand-over across edges. */
+const lightRadius = clamp(Number(params.get('radius')) || LIGHT_RADIUS, 2, 60);
+
 const pinnedSamples = Number(params.get('soft'));
 let samples = Number.isInteger(pinnedSamples) && pinnedSamples > 0 ? Math.min(pinnedSamples, 128) : 32;
 const governed = samples === 32;
@@ -184,6 +187,7 @@ function frame(now: number) {
     touch,
     help,
     samples,
+    radius: lightRadius,
   });
   governSamples();
   if (helpMove) invalidate();

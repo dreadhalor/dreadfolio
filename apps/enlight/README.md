@@ -25,6 +25,8 @@ framework, just the maths.
   shows, and only answers, where the light falls.
 
 `?soft=N` pins how many point lights make up the soft light (default 32).
+`?radius=N` sizes the light in pixels (default 10): bigger means softer shadows
+and a slower hand-over as the light crosses into or out of a shape.
 
 ## How it works
 
@@ -43,7 +45,9 @@ checks the sweep against the brute-force version, point for point.
 light is a disc of 32 point lights, spread over it in a sunflower spiral; each
 adds its share wherever it can see. Where only some of them reach, you are in
 the penumbra. That coverage is then multiplied by one radial falloff, painted
-once, so the gradient stays smooth.
+once, so the gradient stays smooth. Point lights that end up inside a shape
+light it from within, so when the light crosses an edge (into a shape, out of
+one, or where two overlap) it hands over from one side to the other gradually.
 
 **Everything else is drawn by the light.** Copy that should only appear in the
 dark is painted underneath and hidden by the light; copy, the `?` and the bright
