@@ -2,6 +2,7 @@ import { Menu } from '@base-ui/react/menu';
 import { Popover } from '@base-ui/react/popover';
 import clsx from 'clsx';
 import { ChevronDown, CircleHelp, PencilLine, Shuffle } from 'lucide-react';
+import icon from '../assets/icon.svg';
 import type { Grade } from '../solver';
 import { FOCUS, ITEM, POPUP, SECONDARY } from './ui';
 
@@ -73,7 +74,7 @@ export function Header({ onRandom, onEnter }: { onRandom: (grade: Grade) => void
   return (
     <header className='sticky top-0 z-30 border-b border-edge bg-white/90 backdrop-blur-md'>
       <div className='mx-auto flex h-14 max-w-6xl items-center gap-2 px-3 sm:gap-3 sm:px-6'>
-        <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt='' className='size-8 shrink-0 rounded-lg shadow-sm ring-1 ring-black/5' />
+        <img src={icon} alt='' className='size-8 shrink-0 rounded-lg shadow-sm ring-1 ring-black/5' />
         <div className='min-w-0 flex-1'>
           <h1 className='truncate text-lg font-extrabold leading-5 text-accent'>Su-Done-Ku</h1>
           <p className='hidden truncate text-xs text-muted sm:block'>Sudoku, one deduction at a time</p>
