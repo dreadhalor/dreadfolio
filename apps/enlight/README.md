@@ -8,11 +8,15 @@ framework, just the maths.
 
 ## Playing
 
+- The light is your pointer, and it goes anywhere, into a shape too, which
+  lights it from the inside.
 - Double-click (double-tap) anywhere to make a shape.
-- Drag a shape to move it. The light waits outside while you do, so you can
-  watch its shadow swing round.
-- Click a shape, then drag its corners to reshape it.
-- Double-click a shape, or press Delete while it is selected, to get rid of it.
+- With a mouse, drag a shape to move it; click it, then drag its corners to
+  reshape it.
+- By touch, a finger dragging about only moves the light, so tap a shape to
+  select it first; then drag it, or its corners.
+- Double-click (double-tap) a shape, or press Delete while it is selected, to
+  get rid of it.
 - The `?` opens the instructions again. Like everything else here, it only
   shows where the light falls.
 

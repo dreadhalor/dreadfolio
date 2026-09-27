@@ -1,6 +1,6 @@
 import './style.css';
 import fontUrl from './fonts/annie-use-your-telescope-latin.woff2?url';
-import { type Occluders, type Pt, buildOccluders } from './geometry';
+import { type Occluders, type Pt, buildOccluders, contains } from './geometry';
 import { HELP_SIZE, Renderer, type Stage } from './render';
 import { type Shape, keepOnScreen, randomShape, shapeAt } from './shapes';
 
@@ -107,7 +107,8 @@ function frame(now: number) {
   if (help) {
     helpButton.style.transform = `translate(${help.at.x - HELP_SIZE / 2}px, ${help.at.y - HELP_SIZE / 2}px)`;
   }
-  const corner = selected && pointer && !press ? cornerNear(selected, pointer) : null;
+  // A mouse hovering near a corner grows its handle; a lifted finger isn't hovering.
+  const corner = selected && pointer && !press && !touch ? cornerNear(selected, pointer) : null;
   renderer.draw({
     width,
     height,
@@ -126,11 +127,35 @@ function frame(now: number) {
   if (helpMove) invalidate();
 }
 
-// ---- The light follows the pointer, but never into a shape: it waits
-// outside, where it can still show you the shadows of whatever you are moving.
+// ---- The light is the pointer. It goes wherever the pointer goes: into a
+// shape too, which lights that shape from the inside, and along with anything
+// being dragged.
 
 function aim(p: Pt) {
-  if (!shapeAt(shapes, p)) light = { x: p.x, y: p.y };
+  light = { x: p.x, y: p.y };
+}
+
+/**
+ * What a press takes hold of, if anything. A mouse can hover, so pressing any
+ * shape grabs it. A finger can't: a finger moving about is the light moving,
+ * so by touch only the selected shape (a tap selects) or its corners can be
+ * grabbed. Where shapes overlap, the selected one wins.
+ */
+function grab(p: Pt): Drag | null {
+  if (selected) {
+    const corner = cornerNear(selected, p);
+    if (corner) return { kind: 'corner', shape: selected, corner };
+    if (contains(selected, p.x, p.y)) return hold(selected, p);
+  }
+  if (touch) return null;
+  const shape = shapeAt(shapes, p);
+  if (!shape) return null;
+  selected = shape;
+  return hold(shape, p);
+}
+
+function hold(shape: Shape, p: Pt): Drag {
+  return { kind: 'shape', shape, from: p, origin: shape.map((q) => ({ ...q })) };
 }
 
 function cornerNear(shape: Shape, p: Pt): Pt | null {
@@ -192,15 +217,9 @@ function click(p: Pt, time: number, done: Press) {
     return;
   }
   lastClick = { at: p, time };
-  // Pressing a shape already selected it; a click on open ground lets go.
-  if (!done.drag) selected = null;
-}
-
-function updateCursor() {
-  let cursor = 'none';
-  if (press?.drag && press.strayed) cursor = 'grabbing';
-  else if (pointer && !touch && shapeAt(shapes, pointer)) cursor = 'grab';
-  stageEl.style.cursor = cursor;
+  // A press that took hold of something has settled the selection already.
+  // Otherwise a click selects the shape under it, or on open ground lets go.
+  if (!done.drag) selected = shapeAt(shapes, p);
 }
 
 function setTouch(next: boolean) {
@@ -219,19 +238,9 @@ stageEl.addEventListener('pointerdown', (e) => {
     return; // the button's own click handles it
   }
   press = { id: e.pointerId, at: p, drag: null, strayed: false, closesHelp: helpOpen };
-  if (!helpOpen) {
-    const corner = selected && cornerNear(selected, p);
-    const shape = corner ? null : shapeAt(shapes, p);
-    if (corner) {
-      press.drag = { kind: 'corner', shape: selected!, corner };
-    } else if (shape) {
-      selected = shape;
-      press.drag = { kind: 'shape', shape, from: p, origin: shape.map((q) => ({ ...q })) };
-    }
-  }
-  if (!press.drag) aim(p);
+  if (!helpOpen) press.drag = grab(p);
+  aim(p);
   stageEl.setPointerCapture(e.pointerId);
-  updateCursor();
   invalidate();
 });
 
@@ -241,15 +250,9 @@ stageEl.addEventListener('pointermove', (e) => {
   pointer = p;
   if (press && e.pointerId === press.id) {
     if (!press.strayed && chebyshev(p, press.at) > dragSlop()) press.strayed = true;
-    if (press.drag) {
-      if (press.strayed) drag(press.drag, p);
-    } else {
-      aim(p);
-    }
-  } else if (e.pointerType === 'mouse') {
-    aim(p);
+    if (press.drag && press.strayed) drag(press.drag, p);
   }
-  updateCursor();
+  aim(p);
   invalidate();
 });
 
@@ -257,11 +260,7 @@ function release(e: PointerEvent, completed: boolean) {
   if (!press || e.pointerId !== press.id) return;
   const done = press;
   press = null;
-  const p = point(e);
-  if (completed && !done.strayed) click(p, e.timeStamp, done);
-  // Let go of whatever was held: the light can come back to the pointer.
-  aim(p);
-  updateCursor();
+  if (completed && !done.strayed) click(point(e), e.timeStamp, done);
   invalidate();
 }
 stageEl.addEventListener('pointerup', (e) => release(e, true));
@@ -272,7 +271,6 @@ stageEl.addEventListener('pointerleave', (e) => {
   if (e.pointerType !== 'mouse' || press) return;
   pointer = null;
   light = null;
-  updateCursor();
   invalidate();
 });
 
