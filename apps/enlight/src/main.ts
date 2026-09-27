@@ -1,503 +1,395 @@
-import { draw, fuzzyRadius } from './draw';
-import {
-  getArea,
-  isPointInPolygon,
-  isPointInRadius,
-  subdivideAll,
-} from './line-utils';
 import './style.css';
-import { Segment, Point } from './interfaces';
-import {
-  Polygon,
-  createRectangle,
-  createRandomPolygon,
-} from './classes/Polygon';
-// import polygon_data from './polygons';
-import FontFaceObserver from 'fontfaceobserver-es';
+import fontUrl from './fonts/annie-use-your-telescope-latin.woff2?url';
+import { type Occluders, type Pt, buildOccluders } from './geometry';
+import { HELP_SIZE, Renderer, type Stage } from './render';
+import { type Shape, keepOnScreen, randomShape, shapeAt } from './shapes';
 
-const question_mark_size = 36;
-const question_mark_idle_url = new URL(
-  '/AiFillQuestionCircle.svg',
-  import.meta.url
-).href;
-const question_mark_mouseover_url = new URL(
-  '/AiFillQuestionCircleMouseover.svg',
-  import.meta.url
-).href;
-let question_mark_location = { x: 0, y: 0 };
-const question_mark_idle = new Image();
-question_mark_idle.src = question_mark_idle_url;
-const question_mark_mouseover = new Image();
-question_mark_mouseover.src = question_mark_mouseover_url;
-const question_mark = new Image();
+const DOUBLE_CLICK_MS = 500;
+/** How far apart the two clicks of a double-click may land. */
+const DOUBLE_CLICK_SLOP = 15;
+/** The frame round the screen that every ray ends on, wider than the light. */
+const MARGIN = 40;
+const HELP_INSET = 10;
+const HELP_MOVE_MS = 500;
+/**
+ * The canvas is at most this many pixels. Every point light fills most of the
+ * screen, so on a huge high-density display the pixels are the cost; past this
+ * the canvas trades a little density for frame rate.
+ */
+const MAX_PIXELS = 8.3e6;
 
-question_mark.src = question_mark_idle_url;
+const stageEl = document.querySelector<HTMLElement>('#stage')!;
+const canvas = document.querySelector<HTMLCanvasElement>('#scene')!;
+const helpButton = document.querySelector<HTMLButtonElement>('#help-toggle')!;
+const helpPanel = document.querySelector<HTMLElement>('#help')!;
+const renderer = new Renderer(canvas);
 
-export enum State {
-  MouseoverMe,
-  ExploreMe,
-  FreePlay,
+const params = new URLSearchParams(location.search);
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+let width = 0;
+let height = 0;
+const shapes: Shape[] = [];
+/** Rebuilt lazily, on the next frame after the geometry changes. */
+let occluders: Occluders | null = null;
+let light: Pt | null = null;
+let pointer: Pt | null = null;
+let selected: Shape | null = null;
+let stage: Stage = 'hello';
+let touch = matchMedia('(hover: none)').matches;
+let helpOpen = false;
+let helpHover = false;
+let helpMove: { from: Pt; start: number } | null = null;
+
+type Drag =
+  | { kind: 'shape'; shape: Shape; from: Pt; origin: Pt[] }
+  | { kind: 'corner'; shape: Shape; corner: Pt };
+
+interface Press {
+  id: number;
+  at: Pt;
+  drag: Drag | null;
+  /** Once it strays past the slop it is a drag, never a click. */
+  strayed: boolean;
+  /** A press while the help is up only closes it. */
+  closesHelp: boolean;
+}
+let press: Press | null = null;
+let lastClick: { at: Pt; time: number } | null = null;
+
+const point = (e: PointerEvent): Pt => ({ x: e.clientX, y: e.clientY });
+const chebyshev = (a: Pt, b: Pt) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+const dragSlop = () => (touch ? 10 : 4);
+const cornerReach = () => (touch ? 26 : 20);
+
+// ---- Frames: drawn on demand, never on a loop that runs while nothing moves.
+
+/**
+ * A soft light is this many point lights. A power of two, so their shares add
+ * up exactly in 8 bits. `?soft=N` pins it; otherwise it halves (to no fewer
+ * than 16) if frames keep taking too long to come back.
+ */
+const pinnedSamples = Number(params.get('soft'));
+let samples = Number.isInteger(pinnedSamples) && pinnedSamples > 0 ? Math.min(pinnedSamples, 128) : 32;
+const governed = samples === 32;
+const SLOW_FRAME_MS = 34;
+const turnarounds: number[] = [];
+
+let queued = false;
+let requestedAt = 0;
+function invalidate() {
+  if (queued) return;
+  queued = true;
+  requestedAt = performance.now();
+  requestAnimationFrame(frame);
 }
 
-const canvas = document.querySelector<HTMLCanvasElement>('#canvas')!;
-canvas.width = document.body.offsetWidth;
-canvas.height = document.body.offsetHeight;
-const mouse = document.createElement('canvas');
-const ctx_mouse = mouse.getContext('2d')!;
-const mouse_radius = 11;
-mouse.width = mouse_radius * 2;
-mouse.height = mouse_radius * 2;
-ctx_mouse.fillStyle = '#fff';
-ctx_mouse.arc(mouse_radius, mouse_radius, mouse_radius, 0, 2 * Math.PI);
-ctx_mouse.fill();
+/** From asking for a frame to having drawn it: waiting on the GPU and our own work both count. */
+function governSamples() {
+  if (!governed || samples <= 16) return;
+  turnarounds.push(performance.now() - requestedAt);
+  if (turnarounds.length < 24) return;
+  const sorted = [...turnarounds].sort((a, b) => a - b);
+  turnarounds.length = 0;
+  if (sorted[12]! > SLOW_FRAME_MS) samples /= 2;
+}
 
-const overlay = document.querySelector<HTMLDivElement>('#overlay')!;
-const info = document.querySelector<HTMLDivElement>('#info')!;
-let info_open = false;
-const qmark = document.querySelector<HTMLImageElement>('#qmark')!;
-
-qmark.onclick = () => {
-  info_open = info.style.display === 'none' ? true : false;
-};
-qmark.onpointerover = () => {
-  question_mark.src = question_mark_mouseover_url;
-};
-qmark.onpointerup = () => {
-  question_mark.src = question_mark_idle_url;
-};
-qmark.onpointerleave = () => {
-  question_mark.src = question_mark_idle_url;
-};
-
-const font_name = 'Annie Use Your Telescope';
-const font_size = '60px';
-
-let state = State.MouseoverMe;
-
-let mouseover: Point | null = null;
-let mousedown: Point | null = null;
-let lastClick: Point | null = null;
-let leftClickRadius = false;
-let justDblClicked = false;
-const dblClickTime = 500;
-const clickRadius = 15;
-
-const point_radius = 20;
-let updateCanvas = true;
-let updateMove = true;
-
-const borders: Polygon[] = [];
-const border_margin = 2;
-
-const setBorders = (borders: Polygon[]) => {
-  while (borders.pop());
-  const width = canvas.width;
-  const height = canvas.height;
-  const center = { x: width / 2, y: height / 2 };
-  borders.push(
-    createRectangle(center, width + border_margin, height + border_margin),
-    createRectangle(center, width + fuzzyRadius * 4, height + fuzzyRadius * 4)
-  );
-  updateMove = true;
-};
-
-let prev_canvas_dimensions = { width: 0, height: 0 };
-const checkBorders = () => {
-  const width = canvas.width;
-  const height = canvas.height;
-  if (
-    prev_canvas_dimensions.width !== width ||
-    prev_canvas_dimensions.height !== height
-  ) {
-    updateMove = true;
-  }
-  prev_canvas_dimensions = { width, height };
-};
-// const getBorders = () => {
-//   checkBorders();
-//   let width = canvas.width;
-//   let height = canvas.height;
-//   let center = { x: width / 2, y: height / 2 };
-//   let result = [
-//     createRectangle(center, width + border_margin, height + border_margin),
-//     createRectangle(center, width + fuzzyRadius * 4, height + fuzzyRadius * 4),
-//   ];
-//   return result;
-// };
-
-// setBorders(borders);
-
-const polygons: Polygon[] = [
-  // createSquare({ x: 400, y: 300 }, 100),
-  // createRectangle({ x: 500, y: 500 }, 200, 100),
-  // createRectangle(center, width * 0.9, height * 0.9),
-  // createRectangle(center, width * 0.8, height * 0.8),
-  // createRectangle(center, width * 0.7, height * 0.7),
-  // createRectangle(center, width * 0.6, height * 0.6),
-  // createRectangle(center, width * 0.5, height * 0.5),
-  // createRectangle(center, width * 0.4, height * 0.4),
-  // createRectangle(center, width * 0.3, height * 0.3),
-];
-// for (let points of polygon_data) {
-//   polygons.push(new Polygon(points));
-// }
-
-let selected_polygons: Polygon[] = [];
-let selected_point: Point | null = null;
-
-const segments: Segment[] = [
-  // { a: { x: 700, y: 150 }, b: { x: 900, y: 150 } },
-  // { a: { x: 800, y: 50 }, b: { x: 800, y: 250 } },
-  // { a: { x: 0, y: 0 }, b: { x: 640, y: 360 } },
-];
-
-function calculateSegments(
-  borders: Segment[],
-  polygons: Polygon[],
-  segments: Segment[]
-) {
-  let result = borders;
-  result = result.concat(segments);
-  polygons.forEach((polygon) => {
-    if (selected_point) {
-      result = result.concat(polygon.getSegments());
-    } else if (selected_polygons.includes(polygon)) {
-      // result = result.concat(polygon.getPreviewSegments(...getMovement()));
-      result = result.concat(polygon.getSegments());
-    } else result = result.concat(polygon.getSegments());
+function frame(now: number) {
+  queued = false;
+  occluders ??= buildOccluders(shapes, {
+    x0: -MARGIN,
+    y0: -MARGIN,
+    x1: width + MARGIN,
+    y1: height + MARGIN,
   });
-  result = subdivideAll(result);
-  return result;
-}
-function getBorderSegments() {
-  return borders.map((border) => border.getSegments()).flat(1);
-  // return getBorders()
-  //   .map((border) => border.getSegments())
-  //   .flat(1);
-}
-
-function setSelectedPolygons(event: PointerEvent) {
-  let potential_polygons = getIntersectingPolygons(event, polygons);
-  //if potential_polygons is larger than 1, remove all but the polygon with the smallest area
-  if (potential_polygons.length > 1) {
-    potential_polygons = potential_polygons.sort(
-      (a, b) => getArea(a) - getArea(b)
-    );
-    potential_polygons = potential_polygons.slice(0, 1);
+  const help = stage === 'hello' ? null : { at: helpPosition(now), hover: helpHover };
+  if (help) {
+    helpButton.style.transform = `translate(${help.at.x - HELP_SIZE / 2}px, ${help.at.y - HELP_SIZE / 2}px)`;
   }
-  selected_polygons = potential_polygons;
-}
-function getIntersectingPolygons(
-  event: PointerEvent,
-  polygons: Polygon[] = []
-) {
-  return polygons.filter((polygon) =>
-    isPointInPolygon(polygon, { x: event.clientX, y: event.clientY })
-  );
-}
-
-let physics_segments: Segment[] = calculateSegments(
-  getBorderSegments(),
-  polygons,
-  segments
-);
-let visible_points: Point[] = [];
-
-// DRAW LOOP
-function drawLoop() {
-  checkBorders();
-  if (updateMove) {
-    updateSegments();
-    updateMove = false;
-  }
-  //set the cursor of info to the mouse canvas
-  // document.body.style.cursor = `url(${mouse.toDataURL()}) ${mouse_radius} ${mouse_radius}, auto`;
-
-  if (info_open) qmark.style.pointerEvents = 'none';
-  else qmark.style.pointerEvents = 'auto';
-  if (
-    info.style.display !== 'none' &&
-    !info_open &&
-    state === State.ExploreMe
-  ) {
-    state = State.FreePlay;
-  }
-  info.style.display = info_open ? 'flex' : 'none';
-
-  switch (state) {
-    case State.ExploreMe:
-      question_mark_location = { x: canvas.width / 2, y: canvas.height / 2 };
-      qmark.style.display = 'block';
-      break;
-    case State.FreePlay:
-      question_mark_location = {
-        x: canvas.width - question_mark_size / 2 - 10,
-        y: question_mark_size / 2 + 10,
-      };
-      qmark.style.display = 'block';
-      break;
-    default:
-      qmark.style.display = 'none';
-      break;
-  }
-  qmark.style.left = `${question_mark_location.x - question_mark_size / 2}px`;
-  qmark.style.top = `${question_mark_location.y - question_mark_size / 2}px`;
-  const rect = qmark.getBoundingClientRect();
-  if (updateCanvas || updateMove) {
-    draw(
-      state,
-      physics_segments,
-      mouseover!,
-      visible_points,
-      selected_point,
-      `${font_size} ${font_name}`,
-      question_mark,
-      {
-        x: rect.left + question_mark_size / 2,
-        y: rect.top + question_mark_size / 2,
-      },
-      question_mark_size
-    );
-    updateCanvas = true;
-    // updateMove = false;
-  }
-  requestAnimationFrame(drawLoop);
-}
-window.onload = function () {
-  //dont start the draw loop until the font is loaded
-  const font_loader = new FontFaceObserver(font_name);
-  font_loader.load().then(() => {
-    document.body.style.opacity = '1';
-    drawLoop();
+  const corner = selected && pointer && !press ? cornerNear(selected, pointer) : null;
+  renderer.draw({
+    width,
+    height,
+    shapes,
+    occluders,
+    light,
+    selected,
+    corner: press?.drag?.kind === 'corner' ? press.drag.corner : corner,
+    grabbing: press?.drag?.kind === 'corner' && press.strayed,
+    stage,
+    touch,
+    help,
+    samples,
   });
-};
-
-function chebyshevDistance(a: Point, b: Point) {
-  return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
-}
-function checkClick(pointerup: PointerEvent) {
-  if (
-    mousedown &&
-    !leftClickRadius &&
-    chebyshevDistance(mousedown, pointerup) < clickRadius
-  ) {
-    return true;
-  }
-  return false;
-}
-function checkDblClick(event: PointerEvent) {
-  //if the time between event & lastClick is less than dblClickTime
-  //and the distance between event & lastClick is less than clickRadius
-  //then return true
-  if (
-    !justDblClicked &&
-    !leftClickRadius &&
-    lastClick &&
-    lastClick.timeStamp &&
-    event.timeStamp - lastClick.timeStamp < dblClickTime &&
-    chebyshevDistance(lastClick, event) < clickRadius
-  ) {
-    return true;
-  }
-  return false;
-}
-function click(event: PointerEvent) {
-  if (info_open) info_open = false;
-  justDblClicked = false;
-  lastClick = {
-    x: event.clientX,
-    y: event.clientY,
-    timeStamp: event.timeStamp,
-  };
-  if (!selected_point) {
-    // add all polygons in the irregular polygon array polygons which contain the mouse position to selected_polygons
-    setSelectedPolygons(event);
-  }
-  updateVisiblePoints();
+  governSamples();
+  if (helpMove) invalidate();
 }
 
-function onDblClick(event: PointerEvent) {
-  justDblClicked = true;
-  let in_selected = false;
-  for (const polygon of getIntersectingPolygons(event, polygons)) {
-    const polygon_index = polygons.indexOf(polygon);
-    const selected_index = selected_polygons.indexOf(polygon);
-    if (polygon_index > -1 && selected_index > -1) {
-      polygons.splice(polygon_index, 1);
-      in_selected = true;
+// ---- The light follows the pointer, but never into a shape: it waits
+// outside, where it can still show you the shadows of whatever you are moving.
+
+function aim(p: Pt) {
+  if (!shapeAt(shapes, p)) light = { x: p.x, y: p.y };
+}
+
+function cornerNear(shape: Shape, p: Pt): Pt | null {
+  let best: Pt | null = null;
+  let bestDistance = cornerReach();
+  for (const corner of shape) {
+    const d = Math.hypot(corner.x - p.x, corner.y - p.y);
+    if (d < bestDistance) {
+      best = corner;
+      bestDistance = d;
     }
   }
-  if (!in_selected) {
-    const random_polygon = createRandomPolygon({
-      x: event.clientX,
-      y: event.clientY,
+  return best;
+}
+
+function drag(d: Drag, p: Pt) {
+  if (d.kind === 'shape') {
+    const dx = p.x - d.from.x;
+    const dy = p.y - d.from.y;
+    d.shape.forEach((q, i) => {
+      q.x = d.origin[i]!.x + dx;
+      q.y = d.origin[i]!.y + dy;
     });
-    polygons.push(random_polygon);
-    // selected_polygons = [random_polygon];
-    if (state === State.MouseoverMe) state = State.ExploreMe;
-  } else selected_polygons = [];
-  updateSegments();
-  selected_point = null;
-  updateVisiblePoints();
+    keepOnScreen(d.shape, width, height);
+  } else {
+    d.corner.x = clamp(p.x, 0, width);
+    d.corner.y = clamp(p.y, 0, height);
+  }
+  occluders = null;
 }
 
-function setMouseover(event: PointerEvent | null) {
-  if (event) {
-    mouseover = { x: event.clientX, y: event.clientY };
-    // if mousedown is not null & the chebyshev distance between mouseover and mousedown is greater than clickRadius, set leftClickRadius to true
-    if (mousedown && chebyshevDistance(mousedown, mouseover) > clickRadius) {
-      leftClickRadius = true;
-    }
-  } else mouseover = null;
-}
-function setMousedown(event: PointerEvent | null) {
-  if (event) {
-    mousedown = {
-      x: event.clientX,
-      y: event.clientY,
-      timeStamp: event.timeStamp,
-    };
-  } else mousedown = null;
-  leftClickRadius = false;
+function remove(shape: Shape) {
+  shapes.splice(shapes.indexOf(shape), 1);
+  if (selected === shape) selected = null;
+  occluders = null;
 }
 
-function updateVisiblePoints() {
-  //set the visible_points array to the points of all polygons in the selected_polygons array
-  visible_points = selected_polygons
-    .map((polygon) => polygon.getPoints())
-    .flat(1);
-  updateCanvas = true;
-}
-
-function getMovement(): [number, number] {
-  if (!mouseover || !mousedown) return [0, 0];
-  return [mouseover.x - mousedown?.x, mouseover.y - mousedown!.y];
-}
-
-// updateSegments();
-//define updateSegments()
-function updateSegments() {
-  setBorders(borders);
-  physics_segments = calculateSegments(getBorderSegments(), polygons, segments);
-}
-
-window.onresize = () => {
-  setBorders(borders);
-  updateSegments();
-};
-
-const pointermove = (event: PointerEvent) => {
-  // if the mouse is down and selected_polygons is not empty, set updateMove to true
-  if (mousedown && selected_polygons.length > 0) updateMove = true;
-  // updateMove = true;
-  if (updateMove) {
-    // update selected_point's position
-    if (selected_point) {
-      for (const polygon of selected_polygons) {
-        const point = polygon.getPoint(selected_point.x, selected_point.y);
-        if (point) {
-          point.x = event.clientX;
-          point.y = event.clientY;
-          selected_point = point;
-          break;
-        }
-      }
-      updateVisiblePoints();
+function click(p: Pt, time: number, done: Press) {
+  if (done.closesHelp) {
+    setHelp(false);
+    lastClick = null;
+    return;
+  }
+  const double =
+    lastClick &&
+    time - lastClick.time < DOUBLE_CLICK_MS &&
+    chebyshev(p, lastClick.at) < DOUBLE_CLICK_SLOP;
+  if (double) {
+    // Consumed: a third click starts over rather than doubling again.
+    lastClick = null;
+    const shape = shapeAt(shapes, p);
+    if (shape) {
+      remove(shape);
     } else {
-      // update all selected_polygons' positions
-      for (const polygon of selected_polygons) {
-        if (!updateMove) updateMove = true;
-        polygon.move(...getMovement());
-      }
+      shapes.push(randomShape(p, width, height));
+      occluders = null;
+      if (stage === 'hello') setStage('explore');
     }
-    // recalculate the segments
-    physics_segments = calculateSegments(
-      getBorderSegments(),
-      polygons,
-      segments
-    );
-
-    updateVisiblePoints();
+    return;
   }
-  setMouseover(event);
-  updateCanvas = true;
-};
-// canvas.onpointermove = pointermove;
-overlay.onpointermove = pointermove;
+  lastClick = { at: p, time };
+  // Pressing a shape already selected it; a click on open ground lets go.
+  if (!done.drag) selected = null;
+}
 
-//store the mouse position on mouse down over the canvas
-const pointerdown = (event: PointerEvent) => {
-  question_mark_location = { x: event.clientX, y: event.clientY };
-  setMousedown(event);
-  let in_point = false;
-  //loop through each point in the visible_points array and check if the mouse is within the radius of the point
-  for (const point of visible_points) {
-    if (isPointInRadius(point, mousedown, point_radius)) {
-      in_point = true;
-      selected_point = point;
-      break;
+function updateCursor() {
+  let cursor = 'none';
+  if (press?.drag && press.strayed) cursor = 'grabbing';
+  else if (pointer && !touch && shapeAt(shapes, pointer)) cursor = 'grab';
+  stageEl.style.cursor = cursor;
+}
+
+function setTouch(next: boolean) {
+  if (next === touch) return;
+  touch = next;
+  document.documentElement.classList.toggle('touch', touch);
+}
+
+stageEl.addEventListener('pointerdown', (e) => {
+  if (!e.isPrimary || e.button > 0) return;
+  setTouch(e.pointerType !== 'mouse');
+  const p = point(e);
+  pointer = p;
+  if (e.target === helpButton) {
+    invalidate();
+    return; // the button's own click handles it
+  }
+  press = { id: e.pointerId, at: p, drag: null, strayed: false, closesHelp: helpOpen };
+  if (!helpOpen) {
+    const corner = selected && cornerNear(selected, p);
+    const shape = corner ? null : shapeAt(shapes, p);
+    if (corner) {
+      press.drag = { kind: 'corner', shape: selected!, corner };
+    } else if (shape) {
+      selected = shape;
+      press.drag = { kind: 'shape', shape, from: p, origin: shape.map((q) => ({ ...q })) };
     }
   }
-  if (!in_point) selected_point = null;
-  if (!selected_point) {
-    let in_selected = false;
-    for (const polygon of selected_polygons) {
-      //if the mouse is inside of the polygon, set in_selected to true
-      if (isPointInPolygon(polygon, { x: event.clientX, y: event.clientY })) {
-        in_selected = true;
-        break;
-      }
-    }
-    if (!in_selected) {
-      selected_polygons = [];
+  if (!press.drag) aim(p);
+  stageEl.setPointerCapture(e.pointerId);
+  updateCursor();
+  invalidate();
+});
+
+stageEl.addEventListener('pointermove', (e) => {
+  if (!e.isPrimary) return;
+  const p = point(e);
+  pointer = p;
+  if (press && e.pointerId === press.id) {
+    if (!press.strayed && chebyshev(p, press.at) > dragSlop()) press.strayed = true;
+    if (press.drag) {
+      if (press.strayed) drag(press.drag, p);
     } else {
-      // click each polygon in selected_polygons
-      for (const polygon of selected_polygons) {
-        polygon.click();
-      }
+      aim(p);
     }
+  } else if (e.pointerType === 'mouse') {
+    aim(p);
   }
-  updateVisiblePoints();
-  setMouseover(event);
-  updateCanvas = true;
-};
-// canvas.onpointerdown = pointerdown;
-overlay.onpointerdown = pointerdown;
+  updateCursor();
+  invalidate();
+});
 
-const pointerup = (event: PointerEvent) => {
-  if (!selected_point) {
-    // for each polygon in selected_polygons, unclick()
-    for (const polygon of selected_polygons) {
-      polygon.unclick();
-    }
+function release(e: PointerEvent, completed: boolean) {
+  if (!press || e.pointerId !== press.id) return;
+  const done = press;
+  press = null;
+  const p = point(e);
+  if (completed && !done.strayed) click(p, e.timeStamp, done);
+  // Let go of whatever was held: the light can come back to the pointer.
+  aim(p);
+  updateCursor();
+  invalidate();
+}
+stageEl.addEventListener('pointerup', (e) => release(e, true));
+stageEl.addEventListener('pointercancel', (e) => release(e, false));
+
+stageEl.addEventListener('pointerleave', (e) => {
+  // A mouse that leaves takes the light with it. A lifted finger leaves it be.
+  if (e.pointerType !== 'mouse' || press) return;
+  pointer = null;
+  light = null;
+  updateCursor();
+  invalidate();
+});
+
+// ---- Help: the "?" is only drawn where the light falls, like everything
+// else here. The button is its invisible hit target, and the keyboard's way in.
+
+function helpSpot(s: Stage): Pt {
+  if (s === 'explore') return { x: width / 2, y: height / 2 };
+  const edge = HELP_SIZE / 2 + HELP_INSET;
+  return { x: width - edge, y: edge };
+}
+
+function helpPosition(now: number): Pt {
+  const to = helpSpot(stage);
+  if (!helpMove) return to;
+  // A frame can be stamped a moment before the move began.
+  const t = Math.max(0, (now - helpMove.start) / HELP_MOVE_MS);
+  if (t >= 1) {
+    helpMove = null;
+    return to;
   }
-  const clicked = checkClick(event);
-  const dblClick = checkDblClick(event);
-  if (dblClick) onDblClick(event);
-  else if (clicked) click(event);
-  selected_point = null;
-  setMousedown(null);
-  updateCanvas = true;
-};
-// canvas.onpointerup = pointerup;
-overlay.onpointerup = pointerup;
+  const k = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+  return {
+    x: helpMove.from.x + (to.x - helpMove.from.x) * k,
+    y: helpMove.from.y + (to.y - helpMove.from.y) * k,
+  };
+}
 
-const mouseleave = () => {
-  setMousedown(null);
-  setMouseover(null);
-  //unclick all selected_polygons
-  for (const polygon of selected_polygons) {
-    polygon.unclick();
+function setStage(next: Stage) {
+  if (stage === 'explore' && next === 'free' && !reducedMotion.matches) {
+    helpMove = { from: helpSpot('explore'), start: performance.now() };
   }
-  selected_point = null;
-  updateVisiblePoints();
-};
-// canvas.onmouseleave = mouseleave;
-overlay.onmouseleave = mouseleave;
+  stage = next;
+  helpButton.hidden = stage === 'hello';
+}
 
-// disable typescript linting for the next line
-// @ts-expect-error - Adding debug method to window object
-window.exportPolygons = function () {
-  const result = polygons.map((polygon) => polygon.getPointsCoords());
-  console.log(result);
-};
+function setHelp(open: boolean) {
+  if (open === helpOpen) return;
+  helpOpen = open;
+  helpPanel.hidden = !open;
+  helpButton.setAttribute('aria-expanded', String(open));
+  if (open) {
+    helpPanel.focus({ preventScroll: true });
+  } else {
+    if (helpPanel.contains(document.activeElement)) helpButton.focus({ preventScroll: true });
+    // Closing it the first time sends the "?" off to its corner.
+    if (stage === 'explore') setStage('free');
+  }
+  invalidate();
+}
+
+helpButton.addEventListener('click', () => setHelp(!helpOpen));
+helpButton.addEventListener('pointerenter', () => {
+  helpHover = true;
+  invalidate();
+});
+helpButton.addEventListener('pointerleave', () => {
+  helpHover = false;
+  invalidate();
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (helpOpen) setHelp(false);
+    else selected = null;
+  } else if ((e.key === 'Delete' || e.key === 'Backspace') && selected && !helpOpen) {
+    remove(selected);
+  } else if (e.key === '?' && stage !== 'hello') {
+    setHelp(!helpOpen);
+  } else {
+    return;
+  }
+  e.preventDefault();
+  invalidate();
+});
+
+// ---- Size: the canvas matches the screen pixel for pixel (up to 2x), so
+// edges and copy stay sharp on high-density displays.
+
+function resize() {
+  const box = stageEl.getBoundingClientRect();
+  width = box.width;
+  height = box.height;
+  const density = Math.min(window.devicePixelRatio || 1, 2);
+  // Never below one canvas pixel per CSS pixel, which is where the old app sat.
+  const cap = Math.max(1, Math.sqrt(MAX_PIXELS / Math.max(1, width * height)));
+  renderer.resize(width, height, Math.min(density, cap));
+  for (const shape of shapes) keepOnScreen(shape, width, height);
+  occluders = null;
+  invalidate();
+}
+new ResizeObserver(resize).observe(stageEl);
+
+/** Dragging the window to a screen of another density changes no box size. */
+function watchDensity() {
+  matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`).addEventListener(
+    'change',
+    () => {
+      resize();
+      watchDensity();
+    },
+    { once: true },
+  );
+}
+watchDensity();
+
+// ---- Start. The copy is in the handwriting face, so wait a moment for it,
+// but never forever: on a slow or blocked font the fallback will do.
+
+document.documentElement.classList.toggle('touch', touch);
+const face = new FontFace('Annie Use Your Telescope', `url(${fontUrl}) format('woff2')`);
+document.fonts.add(face);
+const fontLoaded = face.load().then(
+  () => invalidate(),
+  () => undefined,
+);
+Promise.race([fontLoaded, new Promise((r) => setTimeout(r, 1500))]).then(() => {
+  document.body.classList.add('ready');
+  invalidate();
+});
