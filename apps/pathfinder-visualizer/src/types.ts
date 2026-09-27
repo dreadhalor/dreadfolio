@@ -18,7 +18,8 @@ export interface Square {
   setVal?: Dispatch<SetStateAction<number>>;
   pathVal?: number;
   setPathVal?: Dispatch<SetStateAction<number>>;
-  animate?: (kind: number) => void;
+  /** 1 a pop (placed, carved), 2 the wave across a finished maze. */
+  animate?: (kind: 1 | 2) => void;
   setDisplayVal?: (val: number | null) => void;
   setDirection?: (val: string | null) => void;
 }

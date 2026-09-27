@@ -72,7 +72,8 @@ export const bfs = ({
     const parent = pathMap.get(path_node) ?? null;
     const direction = getDirection({ node: path_node, child });
     const animCoords = maze[r]?.[c];
-    if (!animCoords) continue;
+    // (Every node on the path is on the grid; if one weren't, stop rather than spin here.)
+    if (!animCoords) break;
     animations.push(() => {
       path_animation(animCoords);
       animCoords.setDirection?.(direction);

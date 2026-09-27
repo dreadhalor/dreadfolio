@@ -1,6 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Grid } from './components/grid';
-import { Toolbar, type MazeKind, type Mode, type SolverKind } from './components/toolbar';
+import { Header } from './components/header';
+import { StatusBar } from './components/status-bar';
+import { MAZE_LABEL, SOLVER_NAME, type MazeKind, type Mode, type SolverKind } from './components/toolbar';
+import { HINT, count, setStatus } from './status';
 import { Animator } from './utilities/animator';
 import { finishAnimation } from './utilities/animations';
 import { aStar } from './utilities/solvers/a-star';
@@ -60,6 +63,9 @@ export default function App() {
   const ends = useRef<[Coordinates, Coordinates]>([[0, 0], [0, 0]]);
   // Whether a search's marks are on the board (any edit clears them).
   const solved = useRef(false);
+  // Whether a maze is being built (its last step puts start and end back; stopped before then,
+  // they must be put back by hand).
+  const building = useRef(false);
   // A press held on the grid: moving start or end, or painting walls on or off.
   const drag = useRef<{ move: 1 | 2 } | { paint: number; over: number } | null>(null);
 
@@ -70,7 +76,7 @@ export default function App() {
   );
   const at = ([r, c]: Coordinates) => grid?.[r]?.[c];
 
-  // The grid fills the space below the toolbar, laid out again when that changes size.
+  // The grid fills the space between the bars, laid out again when that changes size.
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -85,23 +91,25 @@ export default function App() {
   }, []);
 
   // A fresh grid: nothing playing, start and end in their homes (after the squares have mounted
-  // and handed over their setters).
+  // and handed over their setters), and the status line back to its hint.
   useEffect(() => {
     if (!grid || !dims) return;
     animator.stop();
     solved.current = false;
+    building.current = false;
     ends.current = homes(dims);
     ends.current.forEach((cell, k) => {
       const sq = at(cell);
       sq?.setVal?.(k + 1);
       sq?.animate?.(1);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setStatus(HINT);
   }, [grid]);
 
   const each = (f: (sq: Square) => void) => grid?.forEach((row) => row.forEach(f));
 
-  /* Clears a search's marks (and anything a stopped maze left half-drawn). */
+  /* Clears a search's marks (and anything a stopped maze left half-drawn — putting back the
+     start and end it had walled over). */
   const clearPath = () => {
     animator.stop();
     solved.current = false;
@@ -112,6 +120,10 @@ export default function App() {
       const t = TRANSIENT[sq.val ?? 0];
       if (t !== undefined) sq.setVal?.(t);
     });
+    if (building.current) {
+      building.current = false;
+      restoreEnds(false);
+    }
   };
 
   /* Start and end back where they were, over whatever's there. */
@@ -129,18 +141,41 @@ export default function App() {
     restoreEnds(pop);
   };
 
+  /* Wipes a run — the search's marks, a maze being built — and starts the status line over. */
+  const interrupt = () => {
+    clearPath();
+    setStatus(HINT);
+  };
+
   const solve = (kind: SolverKind) => {
     if (!grid) return;
     clearPath();
     const [start, end] = ends.current;
+    const name = SOLVER_NAME[kind];
+    // The status line counts along as the search plays (ten times a second is plenty to read),
+    // then says it's tracing the path back; a screen reader hears only that it's begun.
+    let visited = 0, onPath = 0, shown = 0;
+    const searching = `${name} is searching…`;
+    const visit = (sq: Square) => {
+      sq.setPathVal?.(1);
+      visited++;
+      const now = performance.now();
+      if (now - shown < 100) return;
+      shown = now;
+      setStatus({ text: `${searching} ${count(visited, 'square')} visited`, short: `${name}: ${visited} visited`, spoken: searching });
+    };
     const marks = {
       frontier_animation: (sq: Square) => sq.setPathVal?.(3),
-      path_animation: (sq: Square) => sq.setPathVal?.(2),
+      path_animation: (sq: Square) => {
+        sq.setPathVal?.(2);
+        if (onPath++ === 0)
+          setStatus({ text: `${name} reached the end after ${count(visited, 'square')}. Tracing the path back…`, short: `${name}: tracing the path…` });
+      },
     };
     const result =
       kind === 'astar'
-        ? aStar({ maze: grid, start_coords: start, end_coords: end, traverse_animation: (sq: Square) => sq.setPathVal?.(1), ...marks })
-        : (kind === 'bfs' ? bfs : dfs)({ maze: grid, start_coords: start, solution_func: (sq: Square) => sq.val === 2, traversal_animation: (sq: Square) => sq.setPathVal?.(1), ...marks });
+        ? aStar({ maze: grid, start_coords: start, end_coords: end, traverse_animation: visit, ...marks })
+        : (kind === 'bfs' ? bfs : dfs)({ maze: grid, start_coords: start, solution_func: (sq: Square) => sq.val === 2, traversal_animation: visit, ...marks });
     const steps = result.animations ?? [];
     // No way through: the grid shakes its head.
     if (!result.end)
@@ -152,13 +187,27 @@ export default function App() {
         el.classList.add('no-solution');
       });
     solved.current = true;
-    animator.play(steps, 6);
+    animator.play(steps, 6, () =>
+      setStatus(
+        result.end
+          ? {
+              text: `${name} found a path: ${count(onPath - 1, 'step')}, ${count(visited, 'square')} visited.`,
+              short: `${name}: ${count(onPath - 1, 'step')} · ${visited} visited`,
+            }
+          : {
+              text: `${name} can't reach the end: it's walled off. ${count(visited, 'square')} visited.`,
+              short: `${name}: no way through`,
+            },
+      ),
+    );
   };
 
   const generate = (kind: MazeKind) => {
     if (!grid) return;
     const maze = MAZES[kind];
     const [start, end] = ends.current;
+    const label = MAZE_LABEL[kind];
+    setStatus({ text: `Generating a maze with ${label}…`, short: 'Generating a maze…' });
     if (maze.fromWalls) {
       clearPath();
       each((sq) => {
@@ -167,6 +216,7 @@ export default function App() {
       });
     } else clearWalls(false);
     const { animations = [] } = maze.run(grid);
+    building.current = true;
     animator.play(
       [
         ...animations,
@@ -177,10 +227,14 @@ export default function App() {
           each((sq) => (sq.val === 1 || sq.val === 2) && sq.setVal?.(0));
           ends.current = moved;
           restoreEnds(true);
+          building.current = false;
         },
       ],
       maze.perFrame,
-      () => animator.play(finishAnimation(grid), 1),
+      () => {
+        setStatus({ text: `Maze ready (${label}). Now pick a search from Solve It!`, short: 'Maze ready. Now Solve It!' });
+        animator.play(finishAnimation(grid), 1);
+      },
     );
   };
 
@@ -202,7 +256,8 @@ export default function App() {
     if (!d) return;
     if ('move' in d) place(d.move, cell);
     else if (v === d.over) {
-      if (solved.current || animator.busy) clearPath();
+      // (The wave across a finished maze is only for show: drawing carries on over it.)
+      if (solved.current || building.current) interrupt();
       sq.setVal?.(d.paint);
     }
   };
@@ -213,7 +268,7 @@ export default function App() {
     if (!sq || sq.val === 3 || (cell[0] === other[0] && cell[1] === other[1])) return;
     const prev = ends.current[which - 1]!;
     if (prev[0] === cell[0] && prev[1] === cell[1]) return;
-    if (solved.current || animator.busy) clearPath();
+    if (solved.current || building.current) interrupt();
     at(prev)?.setVal?.(0);
     sq.setVal?.(which);
     ends.current[which - 1] = cell;
@@ -221,13 +276,16 @@ export default function App() {
 
   return (
     <div className='flex h-full w-full flex-col'>
-      <Toolbar
+      <Header
         mode={mode}
         onMode={setMode}
         onSolve={solve}
         onGenerate={generate}
-        onClearPath={clearPath}
-        onClearWalls={() => clearWalls(true)}
+        onClearPath={interrupt}
+        onClearWalls={() => {
+          clearWalls(true);
+          setStatus(HINT);
+        }}
       />
       <div className='relative min-h-0 w-full flex-1'>
         <div className='absolute inset-0 flex p-1'>
@@ -245,6 +303,7 @@ export default function App() {
           </div>
         </div>
       </div>
+      <StatusBar />
     </div>
   );
 }

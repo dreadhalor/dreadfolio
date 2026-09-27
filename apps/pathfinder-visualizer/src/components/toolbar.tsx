@@ -1,22 +1,29 @@
 import { Menu } from '@base-ui/react/menu';
 import { Select } from '@base-ui/react/select';
+import { Toggle } from '@base-ui/react/toggle';
+import { ToggleGroup } from '@base-ui/react/toggle-group';
 import { Check, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import clsx from 'clsx';
+import { Swatch } from './legend';
+import { FOCUS, ITEM, POPUP } from './ui';
 
+/** What a press on the grid places: 1 the start, 2 the end, 3 walls. */
 export type Mode = 1 | 2 | 3;
 export type SolverKind = 'astar' | 'bfs' | 'dfs';
 export type MazeKind = 'kruskals' | 'backtracking' | 'prims' | 'huntAndKill' | 'division' | 'ellers';
 
-const MODES: { value: Mode; label: string }[] = [
-  { value: 1, label: 'Start' },
-  { value: 2, label: 'End' },
-  { value: 3, label: 'Wall' },
+const MODES: { value: Mode; label: string; color: string }[] = [
+  { value: 3, label: 'Wall', color: 'var(--color-page)' },
+  { value: 1, label: 'Start', color: 'var(--color-start)' },
+  { value: 2, label: 'End', color: 'var(--color-end)' },
 ];
 const SOLVERS: { kind: SolverKind; label: string }[] = [
   { kind: 'astar', label: 'A* Algorithm' },
   { kind: 'bfs', label: "Dijkstra's Algorithm/BFS" },
   { kind: 'dfs', label: 'Depth-First Search' },
 ];
+/* What the status line calls each search. */
+export const SOLVER_NAME: Record<SolverKind, string> = { astar: 'A*', bfs: 'BFS', dfs: 'DFS' };
 const MAZES: { kind: MazeKind; label: string }[] = [
   { kind: 'kruskals', label: "Kruskal's Algorithm" },
   { kind: 'backtracking', label: 'Recursive Backtracking' },
@@ -25,13 +32,8 @@ const MAZES: { kind: MazeKind; label: string }[] = [
   { kind: 'division', label: 'Recursive Division' },
   { kind: 'ellers', label: "Eller's Algorithm" },
 ];
-
-/* A popup's look — white, a hairline border, a soft shadow — and how it comes and goes. */
-const POPUP = clsx(
-  'min-w-[8em] origin-[var(--transform-origin)] rounded-md border border-edge bg-white text-ink shadow-lg outline-none',
-  'transition-[scale,opacity] duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
-);
-const ITEM = 'flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 leading-6 outline-none data-[highlighted]:bg-chip';
+/* What the status line calls each maze (its menu label). */
+export const MAZE_LABEL = Object.fromEntries(MAZES.map((m) => [m.kind, m.label])) as Record<MazeKind, string>;
 
 /* A dropdown in the toolbar: the button (bold caps and a chevron) and its menu. */
 function Dropdown<K extends string>({
@@ -47,10 +49,16 @@ function Dropdown<K extends string>({
 }) {
   return (
     <Menu.Root>
-      <Menu.Trigger className='caption inline-flex h-9 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-chip pl-3 pr-1.5 text-ink shadow-sm outline-none transition-colors hover:bg-chip/80 focus-visible:ring-1 focus-visible:ring-ring sm:pl-4 sm:pr-2'>
+      <Menu.Trigger
+        className={clsx(
+          'caption inline-flex h-9 shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg bg-chip px-2.5 text-ink shadow-sm outline-none transition-colors hover:bg-chip/80 min-[360px]:pl-3 min-[360px]:pr-1.5 sm:pl-4 sm:pr-2',
+          FOCUS,
+        )}
+      >
         <span className='sm:hidden'>{short}</span>
         <span className='hidden sm:inline'>{label}</span>
-        <ChevronDown size={18} strokeWidth={3} />
+        {/* (On the narrowest phones the chevrons go, so the row still fits.) */}
+        <ChevronDown size={18} strokeWidth={3} className='max-[359px]:hidden' />
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner sideOffset={4} align='start' collisionPadding={8} className='z-50 outline-none'>
@@ -67,25 +75,47 @@ function Dropdown<K extends string>({
   );
 }
 
-type Props = {
-  mode: Mode;
-  onMode: (mode: Mode) => void;
-  onSolve: (kind: SolverKind) => void;
-  onGenerate: (kind: MazeKind) => void;
-  onClearPath: () => void;
-  onClearWalls: () => void;
-};
-
-/**
- * The toolbar: what a press on the grid places (start, end, or walls), and the three menus —
- * Solve It!, Generate Maze, Clear Map. On a phone the buttons' labels shorten so the row fits.
+/*
+ * What a press places. Where there's room, all three choices side by side, each with the colour
+ * it draws in; on narrower screens the same choices in a compact select.
  */
-export function Toolbar({ mode, onMode, onSolve, onGenerate, onClearPath, onClearWalls }: Props) {
+function ModeControl({ mode, onMode }: { mode: Mode; onMode: (mode: Mode) => void }) {
   return (
-    <nav className='flex h-11 shrink-0 items-center justify-center gap-1.5 overflow-x-auto bg-slate-200 px-2 sm:gap-2'>
+    <>
+      <ToggleGroup
+        aria-label='What a press on the grid places'
+        value={[String(mode)]}
+        // A single-choice group: pressing the chosen one again would empty it, so ignore that.
+        onValueChange={(v) => v.length && onMode(Number(v[0]) as Mode)}
+        className='hidden h-9 shrink-0 items-center gap-0.5 rounded-lg bg-white/60 p-0.5 shadow-sm ring-1 ring-edge md:flex'
+      >
+        {MODES.map((m) => (
+          <Toggle
+            key={m.value}
+            value={String(m.value)}
+            className={clsx(
+              'flex h-8 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-sm text-ink/60 outline-none transition-colors',
+              'hover:text-ink data-[pressed]:bg-white data-[pressed]:text-ink data-[pressed]:shadow-sm',
+              FOCUS,
+            )}
+          >
+            <Swatch color={m.color} />
+            {m.label}
+          </Toggle>
+        ))}
+      </ToggleGroup>
       <Select.Root value={mode} onValueChange={(v) => v !== null && onMode(v as Mode)} items={MODES}>
-        <Select.Trigger className='flex h-9 w-[76px] shrink-0 cursor-pointer items-center justify-between rounded-md border border-edge bg-white px-3 text-ink shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring sm:w-[90px]'>
-          <Select.Value />
+        <Select.Trigger
+          aria-label='What a press on the grid places'
+          className={clsx(
+            'flex h-9 w-[76px] shrink-0 cursor-pointer items-center justify-between gap-1 rounded-md border border-edge bg-white px-2 text-ink shadow-sm outline-none sm:w-[96px] sm:gap-1.5 sm:px-2.5 md:hidden',
+            FOCUS,
+          )}
+        >
+          <Swatch color={MODES.find((m) => m.value === mode)!.color} />
+          <span className='flex-1 text-left'>
+            <Select.Value />
+          </span>
           <Select.Icon>
             <ChevronsUpDown size={16} className='opacity-50' />
           </Select.Icon>
@@ -95,7 +125,8 @@ export function Toolbar({ mode, onMode, onSolve, onGenerate, onClearPath, onClea
             <Select.Popup className={clsx(POPUP, 'min-w-[var(--anchor-width)] py-1')}>
               <Select.List>
                 {MODES.map((m) => (
-                  <Select.Item key={m.value} value={m.value} className={clsx(ITEM, 'relative mx-1 pr-8')}>
+                  <Select.Item key={m.value} value={m.value} className={clsx(ITEM, 'relative mx-1 gap-2 pr-8')}>
+                    <Swatch color={m.color} />
                     <Select.ItemText>{m.label}</Select.ItemText>
                     <Select.ItemIndicator className='absolute right-2'>
                       <Check size={16} />
@@ -107,6 +138,28 @@ export function Toolbar({ mode, onMode, onSolve, onGenerate, onClearPath, onClea
           </Select.Positioner>
         </Select.Portal>
       </Select.Root>
+    </>
+  );
+}
+
+type Props = {
+  mode: Mode;
+  onMode: (mode: Mode) => void;
+  onSolve: (kind: SolverKind) => void;
+  onGenerate: (kind: MazeKind) => void;
+  onClearPath: () => void;
+  onClearWalls: () => void;
+};
+
+/**
+ * The controls: what a press on the grid places (walls, the start, or the end), and the three
+ * menus — Solve It!, Generate Maze, Clear Map. On a phone the buttons' labels shorten so the row
+ * fits.
+ */
+export function Toolbar({ mode, onMode, onSolve, onGenerate, onClearPath, onClearWalls }: Props) {
+  return (
+    <div className='flex shrink-0 items-center gap-1 sm:gap-2'>
+      <ModeControl mode={mode} onMode={onMode} />
       <Dropdown label='Solve It!' short='Solve' items={SOLVERS} onPick={onSolve} />
       <Dropdown label='Generate Maze' short='Maze' items={MAZES} onPick={onGenerate} />
       <Dropdown
@@ -118,6 +171,6 @@ export function Toolbar({ mode, onMode, onSolve, onGenerate, onClearPath, onClea
         ]}
         onPick={(kind) => (kind === 'path' ? onClearPath() : onClearWalls())}
       />
-    </nav>
+    </div>
   );
 }

@@ -38,6 +38,14 @@
   --color-chip: hsl(210 40% 96.1%);
   --color-edge: hsl(214.3 31.8% 91.4%);
   --color-ring: hsl(215 20.2% 65.1%);
+  /* The board's colours — the squares, and the key that names them. The page behind the grid is
+     also the walls' colour: a wall is a square gone clear, the page showing through. */
+  --color-page: rgb(108 117 125);
+  --color-start: #00f000;
+  --color-end: #ff6b6b;
+  --color-frontier: #a3ffaf;
+  --color-visited: #add8e6;
+  --color-path: #ffff00;
 }
 
 @layer components {
@@ -58,8 +66,7 @@ body,
   width: 100%;
   overflow: hidden;
   margin: 0;
-  /* The page behind the grid: walls are squares gone clear, showing it. */
-  background-color: rgb(108, 117, 125);
+  background-color: var(--color-page);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-family: var(--font-sans);

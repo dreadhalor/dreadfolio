@@ -4,20 +4,19 @@
 
 [View Live Demo](https://scottjhetrick.com/pathfinder-visualizer/)
 
-Pathfinder Visualizer is an interactive educational tool that brings graph algorithms to life. Watch A*, BFS, DFS, and other pathfinding algorithms find their way through mazes, and explore 7 different maze generation techniques including Kruskal's, Prim's, and Recursive Backtracking.
+Pathfinder Visualizer is an interactive educational tool that brings graph algorithms to life. Watch A*, BFS and DFS find their way through mazes, and six maze generators — Kruskal's, Prim's, Recursive Backtracking and more — build them square by square.
 
 ---
 
 ## ✨ Features
 
-- **🔍 Pathfinding Algorithms**: Visualize A*, BFS, DFS, and more finding the shortest path
-- **🏗️ Maze Generation**: 7 different maze generation algorithms to explore
-- **🎨 Interactive Grid**: Draw walls, move start/end points with mouse or touch
+- **🔍 Pathfinding Algorithms**: Watch A*, BFS and DFS search from start to end
+- **🏗️ Maze Generation**: Six maze generation algorithms, animated as they build
+- **🎨 Interactive Grid**: Draw and erase walls, move start/end points with mouse or touch
 - **⚡ Real-time Animation**: Watch algorithms explore the grid step-by-step
-- **📊 Algorithm Comparison**: See how different algorithms approach the same problem
-- **🎮 Interactive Controls**: Pause, speed up, or reset animations
-- **📐 Responsive Grid**: Adapts to screen size for optimal viewing
-- **🖱️ Intuitive UI**: A single toolbar of dropdown menus that fits phones too
+- **📊 Live Results**: A status line counts the squares a search visits, then reports the path's length (or that there's no way through)
+- **❔ Built-in Help**: A how-to and a colour key, one tap away
+- **📐 Responsive Layout**: The grid fills whatever space there is; the header and controls adapt down to phones
 
 ---
 
@@ -27,7 +26,7 @@ Pathfinder Visualizer is an interactive educational tool that brings graph algor
 - **Language**: TypeScript
 - **Build Tool**: Vite 7
 - **Styling**: Tailwind CSS 4
-- **UI Components**: Base UI (@base-ui/react) menus and select, Lucide icons
+- **UI Components**: Base UI (@base-ui/react) menus, select, toggle group and popover; Lucide icons
 - **Linting**: ESLint with TypeScript support
 
 ---
@@ -80,7 +79,11 @@ pnpm preview      # Preview production build locally
 pathfinder-visualizer/
 ├── src/
 │   ├── components/
-│   │   ├── toolbar.tsx               # The mode select and the three menus
+│   │   ├── header.tsx                # The app's name, the controls, help
+│   │   ├── toolbar.tsx               # What a press places (Wall/Start/End) and the three menus
+│   │   ├── help.tsx                  # The how-to popover
+│   │   ├── legend.tsx                # The colour key
+│   │   ├── status-bar.tsx            # The colour key and the status line
 │   │   ├── grid.tsx                  # The grid: pointer → square, drag painting
 │   │   ├── grid-square.tsx           # One square: its state, looks and animations
 │   │   └── grid-square.css           # The squares' pop, finish and path keyframes
@@ -94,10 +97,11 @@ pathfinder-visualizer/
 │   │   ├── maze-structures.ts        # Maze utility functions
 │   │   ├── randomizers.ts            # Shuffle, coin flips, dice
 │   │   └── solvers/                  # A*, BFS, DFS (and the raw BFS used to place endpoints)
+│   ├── status.ts                     # The status line's store (only the status bar redraws)
 │   ├── types.ts                      # Coordinates and the Square contract
 │   ├── app.tsx                       # Layout, grid sizing, actions, drawing
 │   ├── main.tsx                      # Entry point
-│   └── index.css                     # Tailwind, the brand font, page styles
+│   └── index.css                     # Tailwind, the brand font, the board's colour tokens
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
@@ -113,16 +117,16 @@ pathfinder-visualizer/
 1. **Start Point** (Green): Drag to move
 2. **End Point** (Red): Drag to move
 3. **Drawing Walls**: Click and drag on empty cells
-4. **Erasing**: Click on wall cells to remove them
+4. **Erasing**: Start a drag on a wall to erase instead
+5. **Placing Start/End**: Pick Start or End in the toolbar, then click where it goes
 
 ### Solving the Maze
 
-1. Choose what a press places (Start, End or Wall) from the select
-2. Click **"Solve It!"** and choose an algorithm:
+1. Click **"Solve It!"** and choose an algorithm:
    - **A*** - Optimal, uses heuristics (Manhattan distance)
    - **BFS** - Optimal, explores level-by-level
    - **DFS** - Not optimal, explores depth-first
-3. Watch the algorithm explore the grid in real-time
+2. Watch the algorithm explore the grid in real-time; the status line reports the path's length and how many squares were visited
 
 ### Generating Mazes
 
@@ -173,7 +177,7 @@ Click **"Generate Maze"** and choose an algorithm:
 #### Prim's Algorithm
 - Grows maze from single cell
 - Maintains frontier of cells
-- Weighted random selection
+- Picks the next frontier cell at random
 
 #### Recursive Backtracking
 - DFS-based generation
@@ -202,19 +206,20 @@ Click **"Generate Maze"** and choose an algorithm:
 ### Grid Colors
 
 - **White**: Empty, walkable cell
-- **Dark Gray**: Wall (impassable)
+- **Slate**: Wall (impassable) — a square gone clear, the page showing through
 - **Green**: Start point
 - **Red**: End point
-- **Light Blue**: Cells being explored
-- **Yellow**: Shortest path
-- **Purple**: Visited cells
+- **Light Green**: Frontier (queued to be searched)
+- **Light Blue**: Visited cells
+- **Yellow**: The path found, with arrows toward the end
+
+The colours are CSS tokens in `index.css`, shared by the squares and the key.
 
 ### Animations
 
-- Smooth CSS transitions
+- Smooth CSS transitions and pops
 - Frame-by-frame algorithm visualization
-- Adjustable animation speed
-- Pause/resume capability
+- Starting anything new stops whatever was still playing
 
 ---
 
@@ -238,7 +243,7 @@ This project demonstrates:
 
 1. **Algorithm Implementation**: Real-world implementations of classic CS algorithms
 2. **Data Structures**: Union-find, adjacency lists, custom coordinate structures
-3. **Animation Systems**: Queue-based animation with pause/resume
+3. **Animation Systems**: A cancellable, frame-paced animation queue
 4. **State Management**: Complex React state for grid manipulation
 5. **TypeScript Patterns**: Strong typing for coordinates, algorithms, and data structures
 6. **Performance Optimization**: Efficient grid updates and rendering
@@ -266,7 +271,8 @@ Extends the monorepo's base TypeScript config with React-specific settings:
 
 ```typescript
 export default defineConfig({
-  plugins: [react(), tsconfigPaths(), svgr()],
+  resolve: { dedupe: ['react', 'react-dom'] },
+  plugins: [react(), tailwindcss(), tsconfigPaths()],
   base: '/pathfinder-visualizer/',
 });
 ```
@@ -282,8 +288,8 @@ Disabled rules for algorithm implementation flexibility:
 
 ## 📊 Bundle Analysis
 
-- **Main bundle**: 376 kB (gzipped: 123 kB)
-- **CSS**: 14 kB (gzipped: 4 kB)
+- **Main bundle**: 398 kB (gzipped: 131 kB)
+- **CSS**: 20 kB (gzipped: 5 kB)
 
 ---
 
@@ -297,12 +303,11 @@ Disabled rules for algorithm implementation flexibility:
 ## 🔮 Future Enhancements
 
 ### Planned Features
-- [ ] Additional algorithms (Dijkstra's, Bidirectional BFS)
+- [ ] Additional algorithms (Bidirectional BFS, Greedy best-first)
 - [ ] Weighted graphs support
 - [ ] Diagonal movement option
 - [ ] Algorithm speed control slider
 - [ ] Step-by-step mode
-- [ ] Algorithm statistics (nodes explored, path length)
 - [ ] Export/import maze layouts
 - [ ] Custom grid sizes
 - [ ] Dark mode theme

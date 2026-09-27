@@ -7,11 +7,11 @@ import './grid-square.css';
 const STYLES: Record<string, CSSProperties> = {
   empty: { transitionProperty: 'background-color', transitionDuration: '0.3s' },
   wall: { opacity: 0, boxShadow: 'none', transitionProperty: 'opacity', transitionDuration: '0.4s' },
-  start: { backgroundColor: '#00f000' },
-  end: { backgroundColor: '#ff6b6b' },
-  path: { backgroundColor: 'yellow' },
-  visited: { backgroundColor: 'lightblue' },
-  frontier: { backgroundColor: '#a3ffaf' },
+  start: { backgroundColor: 'var(--color-start)' },
+  end: { backgroundColor: 'var(--color-end)' },
+  path: { backgroundColor: 'var(--color-path)' },
+  visited: { backgroundColor: 'var(--color-visited)' },
+  frontier: { backgroundColor: 'var(--color-frontier)' },
   scan: { backgroundColor: '#80ff91', transitionProperty: 'none', boxShadow: 'none' },
   scanPath: { backgroundColor: '#0ae627' },
   carving: { backgroundColor: '#ffa3a3' },
@@ -51,12 +51,12 @@ export function GridSquare({ square, size, rows }: Props) {
     };
     square.setDisplayVal = setDisplayVal;
     square.setDirection = setDirection;
-    // The app's three animations: a pop (placed, carved), the finishing wave, and the reset.
+    // The app's two animations: a pop (placed, carved) and the wave across a finished maze.
     square.animate = (kind) => {
       const el = ref.current;
       if (!el) return;
-      const cls = kind === 1 ? 'pop' : kind === 2 ? 'finish' : 'reset';
-      el.classList.remove('pop', ...(kind === 1 ? [] : ['finish']), ...(kind === 3 ? ['reset'] : []));
+      const cls = kind === 1 ? 'pop' : 'finish';
+      el.classList.remove('pop', ...(kind === 1 ? [] : ['finish']));
       void el.offsetWidth;
       el.classList.add(cls);
     };
@@ -91,7 +91,6 @@ export function GridSquare({ square, size, rows }: Props) {
         const name = e.animationName;
         if (name === 'just_pop') e.currentTarget.classList.remove('pop');
         else if (name === 'finished') e.currentTarget.classList.remove('finish');
-        else if (name === 'reset') e.currentTarget.classList.remove('reset');
       }}
     >
       {direction ?? displayVal ?? ''}
