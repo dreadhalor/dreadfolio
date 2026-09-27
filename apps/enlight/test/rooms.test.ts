@@ -12,7 +12,7 @@ const SCREENS: [number, number][] = [
   [844, 390],
   [768, 1024],
 ];
-const ROOMS: RoomId[] = ['colonnade', 'maze', 'lantern', 'sundial'];
+const ROOMS: RoomId[] = ['colonnade', 'maze', 'lantern', 'shadowdial'];
 
 function seeded(seed: number) {
   return () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 2 ** 32;
@@ -75,9 +75,9 @@ test('lantern: every word starts behind a slat, out of the beams', () => {
   }
 });
 
-test('sundial: from the start, the shadow points at XII and only XII', () => {
+test('shadowdial: from the start, the shadow points at XII and only XII', () => {
   for (const [w, h] of SCREENS) {
-    const room = buildRoom('sundial', w, h);
+    const room = buildRoom('shadowdial', w, h);
     assert.equal(room.notes.length, 12);
     const shaded = room.notes.filter((n) => blocked(room.shapes, room.start, n.at)).map((n) => n.text);
     assert.deepEqual(shaded, ['XII'], `${w}x${h}`);

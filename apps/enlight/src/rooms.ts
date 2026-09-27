@@ -22,7 +22,7 @@ export interface Room {
   remember?: boolean;
 }
 
-export type RoomId = 'colonnade' | 'maze' | 'lantern' | 'sundial';
+export type RoomId = 'colonnade' | 'maze' | 'lantern' | 'shadowdial';
 
 /** Rooms keep clear of the "?" along the top and the palette along the bottom. */
 const TOP = 64;
@@ -53,7 +53,7 @@ export function buildRoom(id: RoomId, width: number, height: number, random = Ma
   if (id === 'colonnade') return colonnade(floor);
   if (id === 'maze') return maze(floor, random);
   if (id === 'lantern') return lantern(floor);
-  return sundial(floor);
+  return shadowdial(floor);
 }
 
 function pillar(at: Pt, radius: number): Shape {
@@ -263,7 +263,7 @@ const HOURS = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X
  * One pillar in an open floor, and a ring of hours that only show in its
  * shadow: walk the light round it and the shadow tells the time.
  */
-function sundial(f: Floor): Room {
+function shadowdial(f: Floor): Room {
   const c = { x: f.cx, y: f.cy };
   const ring = (f.short / 2) * 0.78;
   const size = clamp(ring * 0.14, 16, 34);

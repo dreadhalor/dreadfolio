@@ -23,7 +23,7 @@ framework, just the maths.
 - The door at the left of the palette opens a room to explore, each built to
   fit the screen and each hiding some words: a Colonnade whose shadows show a
   secret, a Maze that remembers where your light has been, a Lantern whose
-  beams you steer onto words, and a Sundial whose shadow tells the time.
+  beams you steer onto words, and a Shadowdial whose shadow tells the time.
 - Double-click (double-tap) a shape, press Delete, or use the palette's bin to
   get rid of it.
 - The `?` opens the instructions again. Like everything else here, it only
