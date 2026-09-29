@@ -8,10 +8,12 @@ import { FpsSketchProps } from '../index';
  * one of them each frame, and a p5 fill() and rect() for every falling grain every frame is what
  * made it chug on large screens.
  *
- * The rules: a grain gains `gravity` cells a frame of speed and, once past 1, moves that many
- * cells (and one more) a frame — straight down while it can, else down a free diagonal (a random
- * one if both are). A grain that can't move stops, and settles for good once every cell under it
- * is settled sand (or it's on the floor) — unless the eraser takes what it stands on.
+ * The rules: a grain with room under it falls, gaining `gravity` cells a frame of speed and
+ * moving that many cells (and one more) a frame — straight down while it can, else down a free
+ * diagonal (a random one if both are). A grain that can't move stops, and settles for good once
+ * every cell under it is settled sand (or it's on the floor) — unless the eraser takes what it
+ * stands on. Then what stood on it falls, at once and together: each grain woken as the one under
+ * it leaves, at the speed that one left at, all in the same frame.
  */
 
 export type SandColor = 'rainbow' | 'desert' | 'custom';
@@ -156,14 +158,15 @@ export const SandSketch = (p5: P5CanvasInstance<SandProps>) => {
     return hsv((p5.frameCount / 2 + 20) % 360 + Math.random() * 20, 1, 1);
   };
 
-  // A cell emptied under settled sand: whatever stood on it can fall again.
-  const wake = (x: number, y: number) => {
+  // A cell emptied under settled sand: whatever stood on it falls again, at the speed of what
+  // just left from under it (so a column comes down together rather than a layer at a time).
+  const wake = (x: number, y: number, v: number) => {
     if (y === 0) return;
     for (let cx = Math.max(0, x - 1); cx <= Math.min(cols - 1, x + 1); cx++) {
       const k = cx * rows + y - 1;
       if (state[k] === SETTLED) {
         state[k] = FALLING;
-        speed[k] = 0;
+        speed[k] = v;
         falling[cx]!++;
       }
     }
@@ -184,7 +187,7 @@ export const SandSketch = (p5: P5CanvasInstance<SandProps>) => {
           if (state[k] === FALLING) falling[x]!--;
           state[k] = EMPTY;
           paint(x, y, BLACK);
-          wake(x, y);
+          wake(x, y, 0);
           continue;
         }
         if (Math.random() > density) continue;
@@ -216,39 +219,40 @@ export const SandSketch = (p5: P5CanvasInstance<SandProps>) => {
       falling[x]!--;
       return;
     }
+    // Room under it: it falls now, a cell this frame at the least — it used to hover until it had
+    // built up a whole cell of speed, so sand the eraser had cut out from under hung in the air
+    // for seconds, a layer at a time.
     const v = (speed[k] = speed[k]! + settings.gravity);
-    if (v > 1) {
-      let cx = x;
-      let cy = y;
-      for (let n = Math.trunc(v); n >= 0; n--) {
-        const below = cy + 1;
-        if (below >= rows) break;
-        const bb = cx * rows + below;
-        if (state[bb] !== EMPTY) {
-          const left = cx > 0 && state[bb - rows] === EMPTY;
-          const right = cx < cols - 1 && state[bb + rows] === EMPTY;
-          if (!left && !right) break;
-          cx += left && right ? (Math.random() < 0.5 ? -1 : 1) : left ? -1 : 1;
-        }
-        cy = below;
+    let cx = x;
+    let cy = y;
+    for (let n = Math.trunc(v); n >= 0; n--) {
+      const below = cy + 1;
+      if (below >= rows) break;
+      const bb = cx * rows + below;
+      if (state[bb] !== EMPTY) {
+        const left = cx > 0 && state[bb - rows] === EMPTY;
+        const right = cx < cols - 1 && state[bb + rows] === EMPTY;
+        if (!left && !right) break;
+        cx += left && right ? (Math.random() < 0.5 ? -1 : 1) : left ? -1 : 1;
       }
-      if (cx !== x || cy !== y) {
-        const to = cx * rows + cy;
-        state[to] = FALLING;
-        speed[to] = v;
-        color[to] = color[k]!;
-        state[k] = EMPTY;
-        speed[k] = 0;
-        falling[x]!--;
-        falling[cx]!++;
-        paint(x, y, BLACK);
-        paint(cx, cy, color[to]!);
-        wake(x, y);
-        return;
-      }
-      // if we can't move at all, stop
-      speed[k] = 0;
+      cy = below;
     }
+    if (cx !== x || cy !== y) {
+      const to = cx * rows + cy;
+      state[to] = FALLING;
+      speed[to] = v;
+      color[to] = color[k]!;
+      state[k] = EMPTY;
+      speed[k] = 0;
+      falling[x]!--;
+      falling[cx]!++;
+      paint(x, y, BLACK);
+      paint(cx, cy, color[to]!);
+      wake(x, y, v);
+      return;
+    }
+    // if we can't move at all, stop
+    speed[k] = 0;
   };
 
   // Pouring is a press that started on the canvas: p5 hears presses anywhere in the window, the
