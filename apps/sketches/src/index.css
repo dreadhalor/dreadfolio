@@ -11,8 +11,8 @@ body,
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
-  /* White behind the canvas: a sketch that clears to transparent (RGB Blobs) shows the page. */
-  background-color: #fff;
+  /* Black behind the canvas, as the sketches are: what shows while one loads. */
+  background-color: #000;
 }

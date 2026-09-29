@@ -18,7 +18,6 @@ import { InfinityMirror } from './infinity-mirror/infinity-mirror';
 import { LoFiMountains } from './lo-fi-mountains/lo-fi-mountains';
 import { BadSuns } from './bad-suns/bad-suns';
 import { Skyscraper } from './skyscraper/skyscraper';
-import { RgbBlobs } from './rgb-blobs/rgb-blobs';
 export * from './marching-squares/marching-squares';
 // import { ThreeDEngine } from './3d-engine/3d-engine';
 import { Ripples } from './ripples/ripples';
@@ -119,10 +118,6 @@ export const sketches = {
   skyscraper: {
     name: 'Skyscraper',
     sketch: Skyscraper,
-  },
-  'rgb-blobs': {
-    name: 'RGB Blobs',
-    sketch: RgbBlobs,
   },
   // '3d-engine': {
   //   name: '3D Engine',

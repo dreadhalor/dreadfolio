@@ -9,4 +9,7 @@ export default defineConfig({
   base: '/sketches/',
   // One React in the bundle: the monorepo's install nests React 19 under shared packages.
   resolve: { dedupe: ['react', 'react-dom'] },
+  // One script: the wrapper's lazy canvas (and its error boundary) were two more requests, made
+  // one after the other once the bundle had run — each a round trip before any sketch could draw.
+  build: { rollupOptions: { output: { inlineDynamicImports: true } } },
 });
