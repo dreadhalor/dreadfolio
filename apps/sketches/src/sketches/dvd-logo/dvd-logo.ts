@@ -1,22 +1,18 @@
 import { P5CanvasInstance } from '@p5-wrapper/react';
 import { FpsSketchProps } from '..';
 import dvdLogo from './dvd-logo.svg';
-import { Image } from 'p5';
+import P5 from 'p5';
 
 export const DvdLogo = (p5: P5CanvasInstance<FpsSketchProps>) => {
   let x: number, y: number;
   let xspeed = 5,
     yspeed = 5;
-  let dvd: Image;
+  let dvd: P5.Image;
   let hue: number;
 
-  // Preload the DVD logo image
-  p5.preload = () => {
-    dvd = p5.loadImage(dvdLogo);
-  };
-
-  // Setup the sketch
-  p5.setup = () => {
+  // Setup the sketch, once the DVD logo has loaded (p5 2: an async setup, not preload)
+  p5.setup = async () => {
+    dvd = await p5.loadImage(dvdLogo);
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
     x = p5.random(p5.width - dvd.width); // Ensure the logo starts fully within the canvas
     y = p5.random(p5.height - dvd.height);

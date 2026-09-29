@@ -9,7 +9,7 @@ import { FlowField } from './flow-field/flow-field';
 import { DvdLogo } from './dvd-logo/dvd-logo';
 import { Scrunching } from './scrunching/scrunching';
 import { MoonlightOcean } from './moonlight-ocean/moonlight-ocean';
-import { BreathingPlane } from './breathing-plane/breathing-plane';
+// import { BreathingPlane } from './breathing-plane/breathing-plane';
 import { DotGlobe } from './dot-globe/dot-globe';
 // import { CircleMesh } from './circle-mesh/circle-mesh';
 import { Honeycombing } from './honeycombing/honeycombing';
@@ -20,7 +20,7 @@ import { BadSuns } from './bad-suns/bad-suns';
 import { Skyscraper } from './skyscraper/skyscraper';
 import { RgbBlobs } from './rgb-blobs/rgb-blobs';
 export * from './marching-squares/marching-squares';
-import { ThreeDEngine } from './3d-engine/3d-engine';
+// import { ThreeDEngine } from './3d-engine/3d-engine';
 import { Ripples } from './ripples/ripples';
 
 export type FpsSketchProps = SketchProps & {
@@ -74,10 +74,10 @@ export const sketches = {
     name: 'Moonlight Ocean',
     sketch: MoonlightOcean,
   },
-  'breathing-plane': {
-    name: 'Breathing Plane',
-    sketch: BreathingPlane,
-  },
+  // 'breathing-plane': {
+  //   name: 'Breathing Plane',
+  //   sketch: BreathingPlane,
+  // },
   'dot-globe': {
     name: 'Dot Globe',
     sketch: DotGlobe,
@@ -124,10 +124,10 @@ export const sketches = {
     name: 'RGB Blobs',
     sketch: RgbBlobs,
   },
-  '3d-engine': {
-    name: '3D Engine',
-    sketch: ThreeDEngine,
-  },
+  // '3d-engine': {
+  //   name: '3D Engine',
+  //   sketch: ThreeDEngine,
+  // },
   ripples: {
     name: 'Ripples',
     sketch: Ripples,

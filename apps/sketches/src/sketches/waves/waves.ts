@@ -8,6 +8,11 @@ export const Waves = (p5: P5CanvasInstance<FpsSketchProps>) => {
   };
 
   let t = 0; // Time variable
+  // What steers the wave (its direction and how tight it is): the pointer, eased; until it moves,
+  // a slow drift, so the wave keeps turning on its own.
+  let steerX = 0,
+    steerY = 0,
+    pointed = false;
 
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight);
@@ -19,8 +24,12 @@ export const Waves = (p5: P5CanvasInstance<FpsSketchProps>) => {
     p5.background(255);
     p5.stroke('rgb(55, 80, 224)');
 
-    const xAngle = p5.map(0, 0, p5.width, -4 * p5.PI, 4 * p5.PI, true);
-    const yAngle = p5.map(0, 0, p5.height, -4 * p5.PI, 4 * p5.PI, true);
+    const tx = pointed ? p5.mouseX : p5.width * (0.5 + 0.45 * Math.sin(t * 0.21));
+    const ty = pointed ? p5.mouseY : p5.height * (0.5 + 0.45 * Math.cos(t * 0.13));
+    steerX += (tx - steerX) * 0.05;
+    steerY += (ty - steerY) * 0.05;
+    const xAngle = p5.map(steerX, 0, p5.width, -4 * p5.PI, 4 * p5.PI, true);
+    const yAngle = p5.map(steerY, 0, p5.height, -4 * p5.PI, 4 * p5.PI, true);
 
     // Make a x and y grid of points
     for (let x = 0; x <= p5.width; x += 50) {
@@ -37,6 +46,11 @@ export const Waves = (p5: P5CanvasInstance<FpsSketchProps>) => {
     }
 
     t += 0.01; // Update time
+  };
+
+  // Pointer events in p5 2: a finger dragging counts, as a mouse moving does.
+  p5.mouseMoved = p5.mouseDragged = () => {
+    pointed = true;
   };
 
   p5.windowResized = () => {

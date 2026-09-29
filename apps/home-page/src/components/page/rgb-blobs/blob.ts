@@ -1,7 +1,6 @@
 import P5 from 'p5';
 import { margin, scl } from './rgb-blobs';
 export class Blob {
-  p5: P5;
   layer: P5.Graphics;
   pos: P5.Vector;
   vel: P5.Vector;
@@ -10,13 +9,11 @@ export class Blob {
   radius = 300;
   mass = 30;
 
-  // The sketch for its maths and constants; the layer it draws on (a p5 2 buffer only draws).
-  constructor(p5: P5, layer: P5.Graphics, x: number, y: number, color: P5.Color) {
-    this.p5 = p5;
+  constructor(layer: P5.Graphics, x: number, y: number, color: P5.Color) {
     this.layer = layer;
-    this.pos = p5.createVector(x, y);
-    this.vel = p5.createVector(0, 0);
-    this.acc = p5.createVector(0, 0);
+    this.pos = this.layer.createVector(x, y);
+    this.vel = this.layer.createVector(0, 0);
+    this.acc = this.layer.createVector(0, 0);
     this.color = color;
   }
 
@@ -44,12 +41,12 @@ export class Blob {
     if (this.pos.y > this.layer.height - margin)
       this.vel.y = -Math.abs(this.vel.y);
     if (this.pos.y < margin) this.vel.y = Math.abs(this.vel.y);
-    this.pos.x = this.p5.constrain(
+    this.pos.x = this.layer.constrain(
       this.pos.x,
       margin,
       this.layer.width - margin,
     );
-    this.pos.y = this.p5.constrain(
+    this.pos.y = this.layer.constrain(
       this.pos.y,
       margin,
       this.layer.height - margin,
@@ -62,7 +59,7 @@ export class Blob {
 
   draw() {
     this.layer.push();
-    this.layer.blendMode(this.p5.SCREEN);
+    this.layer.blendMode(this.layer.SCREEN);
     this.layer.fill(this.color);
     this.layer.ellipse(this.pos.x, this.pos.y, this.radius * 2);
     this.layer.pop();

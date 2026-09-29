@@ -60,15 +60,19 @@ function drawWaves(p5: P5) {
   p5.strokeCap(p5.SQUARE);
   p5.fill(39);
 
+  // The dashes are the 2D canvas's own; a P2D sketch's context is one.
+  const ctx = p5.drawingContext as CanvasRenderingContext2D;
+  // Its waves' first and last points only steer the curve, as curveVertex's did in p5 1.
+  p5.splineProperty('ends', p5.EXCLUDE);
   for (let wave = 0; wave < waves.count; wave++) {
-    if (p5.drawingContext.setLineDash) {
+    if (ctx.setLineDash) {
       const distance = easeInQuad(wave / waves.count, 0, 1, 1);
       const gapBetweenWaves = p5.map(distance, 0, 1, 1, 40);
       p5.strokeWeight(
         distance * (waves.stroke.max - waves.stroke.min) + waves.stroke.min,
       );
-      p5.drawingContext.setLineDash(randomDash(distance, p5));
-      p5.drawingContext.lineDashOffset = p5.frameCount * -1 * distance;
+      ctx.setLineDash(randomDash(distance, p5));
+      ctx.lineDashOffset = p5.frameCount * -1 * distance;
 
       p5.beginShape();
       for (let x = -50; x < p5.width + 100; x += 50) {
@@ -77,7 +81,7 @@ function drawWaves(p5: P5) {
           p5.sin(x / 100 + p5.frameCount / -35 + wave) *
             p5.noise(wave, x) *
             waves.waveAmplitude;
-        p5.curveVertex(x, y + waves.yOffset);
+        p5.splineVertex(x, y + waves.yOffset);
       }
       p5.vertex(p5.width + 50, p5.height + 50);
       p5.vertex(-50, p5.height + 50);

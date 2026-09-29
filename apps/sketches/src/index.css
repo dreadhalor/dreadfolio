@@ -1,3 +1,5 @@
+@import 'tailwindcss';
+
 
 html,
 body,
@@ -11,5 +13,6 @@ body,
 :root {
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* White behind the canvas: a sketch that clears to transparent (RGB Blobs) shows the page. */
+  background-color: #fff;
 }

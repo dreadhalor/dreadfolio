@@ -7,4 +7,6 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   plugins: [react(), tailwindcss(), tsconfigPaths() as PluginOption],
   base: '/sketches/',
+  // One React in the bundle: the monorepo's install nests React 19 under shared packages.
+  resolve: { dedupe: ['react', 'react-dom'] },
 });

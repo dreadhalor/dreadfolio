@@ -46,9 +46,8 @@ export class Particle {
     );
     buffer1.strokeWeight(2);
     // if the particle teleported to the other side of the canvas, don't draw a line
-    if (
-      buffer1.dist(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y) < 100
-    )
+    // (the maths lives on the sketch: a p5 2 buffer only draws)
+    if (p5.dist(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y) < 100)
       buffer1.line(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y);
     buffer2.stroke(255);
     buffer2.fill(0);

@@ -1,13 +1,10 @@
-import './index.css';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { App } from './app';
-import 'dread-ui/style.css';
+import './index.css';
 
-const root = document.getElementById('root')!;
-
-ReactDOM.createRoot(root).render(
-  <React.StrictMode>
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <App />
-  </React.StrictMode>,
+  </StrictMode>,
 );

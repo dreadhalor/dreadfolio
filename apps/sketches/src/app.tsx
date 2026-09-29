@@ -1,44 +1,42 @@
-import { ReactP5Wrapper, Sketch, SketchProps } from '@p5-wrapper/react';
-import {
-  circleMargin,
-  squareSize,
-  circleDiameter,
-  sketches,
-  SketchKey,
-} from './sketches';
+import { P5Canvas, type Sketch } from '@p5-wrapper/react';
 import { useRef, useState } from 'react';
-import { throttle } from 'lodash';
 import { ControlPanel } from './components/control-panel';
+import { circleMargin, sketches, squareSize, type SketchKey } from './sketches';
 
-const getSketchNames = () => {
-  return Object.keys(sketches) as SketchKey[];
-};
-// const getLastSketch = () => getSketchNames().at(-1)!;
-const getRandomSketch = () => {
-  const keys = getSketchNames();
-  return keys[Math.floor(Math.random() * keys.length)]!;
-};
+// It opens on one of the strongest, picked at random so a second visit sees another; the rest are
+// a pick away in the panel.
+const OPENERS: SketchKey[] = ['flow-field', 'joy-division', 'scrunching', 'lo-fi-mountains', 'ripples', 'moonlight-ocean'];
+const getRandomSketch = () => OPENERS[Math.floor(Math.random() * OPENERS.length)]!;
+
+/* fn, at most once every `ms` (the sketches report their frame rate every frame). */
+function throttle<A extends unknown[]>(fn: (...args: A) => void, ms: number) {
+  let last = -Infinity;
+  return (...args: A) => {
+    const now = performance.now();
+    if (now - last < ms) return;
+    last = now;
+    fn(...args);
+  };
+}
+
 const App = () => {
-  const [fps, setFps] = useState();
+  const [fps, setFps] = useState<number>();
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<SketchKey>(getRandomSketch());
+  const [sketch, setSketch] = useState<SketchKey>(getRandomSketch);
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);
   const [showMetaballGrid, setShowMetaballGrid] = useState(false);
   const [showMetaballValues, setShowMetaballValues] = useState(false);
   const [linearInterpolation, setLinearInterpolation] = useState(true);
-  const [metaballCount, setMetaballCount] = useState(3);
-  const [metaballSize, setMetaballSize] = useState(circleDiameter);
+  // Enough metaballs that they meet and merge often (three mostly drift apart and read as three
+  // rings; many more fuse into one).
+  const [metaballCount, setMetaballCount] = useState(4);
+  const [metaballSize, setMetaballSize] = useState(100);
 
-  const loadSketch = (sketch: string) => {
-    setSketch(sketch as SketchKey);
-    throttledSetFps.current(undefined);
-  };
-
-  const getSketch = () => {
-    // use sketches to get the sketch
-    return sketches[sketch].sketch as Sketch<SketchProps>;
+  const loadSketch = (key: SketchKey) => {
+    setSketch(key);
+    setFps(undefined);
   };
 
   return (
@@ -64,8 +62,8 @@ const App = () => {
         metaballSize={metaballSize}
         setMetaballSize={setMetaballSize}
       />
-      <ReactP5Wrapper
-        sketch={getSketch()}
+      <P5Canvas
+        sketch={sketches[sketch].sketch as Sketch}
         setFps={throttledSetFps.current}
         distanceField={distanceField}
         showMetaballs={showMetaballs}

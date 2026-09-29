@@ -1,12 +1,12 @@
 import { ReactP5Wrapper } from '@p5-wrapper/react';
-import { sketches } from '../../../../sketches/src/sketches';
+import { RgbBlobs } from './rgb-blobs/rgb-blobs';
 import { cn } from '@repo/utils';
 import { useHomepage } from '../../providers/homepage-provider';
 
 const PageBg = () => {
   const { offset, parallaxBaseHeight } = useHomepage();
 
-  const sketch = sketches['rgb-blobs'].sketch;
+  const sketch = RgbBlobs;
   const parallaxProp = 0.15;
   const h_c = parallaxBaseHeight - window.innerHeight;
   const parallaxHeight = window.innerHeight + h_c * parallaxProp;

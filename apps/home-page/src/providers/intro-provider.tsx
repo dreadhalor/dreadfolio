@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { SketchKey } from '../../../sketches/src/sketches';
+// The intro's sketches, by name: it keeps them in state (nothing here draws them).
+type SketchKey = string;
 
 type IntroContextValue = {
   count: number;

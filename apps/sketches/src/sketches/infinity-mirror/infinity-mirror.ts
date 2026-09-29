@@ -12,6 +12,9 @@ export const InfinityMirror = (p5: P5) => {
   // Setup function
   p5.setup = () => {
     p5.createCanvas(p5.windowWidth, p5.windowHeight, p5.WEBGL);
+    // Its points are sized in pixels by depth already: p5 2's perspective on strokes (the default)
+    // would swell the near ones into blobs.
+    p5.linePerspective(false);
     p5.frameRate(30);
     p5.smooth();
     p5.pixelDensity(2);

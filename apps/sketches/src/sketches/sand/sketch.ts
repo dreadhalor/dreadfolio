@@ -44,37 +44,41 @@ export const SandSketch = (p5: P5CanvasInstance<FpsSketchProps>) => {
     grid = make2DArray(cols, rows);
   };
 
+  // Pour a circle of sand of radius r around (col, row), a grain in each cell with chance `density`.
+  const pour = (col0: number, row0: number, r: number, density: number) => {
+    for (let i = -r; i <= r; i++) {
+      for (let j = -r; j <= r; j++) {
+        const col = col0 + i;
+        if (col < 0 || col >= cols) continue;
+        const row = row0 + j;
+        if (row < 0 || row >= rows) continue;
+        if (i * i + j * j > r * r || p5.random(1) > density) continue;
+        const cell = grid[col]?.[row];
+        if (!cell) continue;
+        // slowly cycle through all hues, but start with a nice sand color
+        const hue = (p5.frameCount / 2 + 20) % 360;
+        if (!cell.occupant) cell.occupant = new Sand(cell, hue);
+        else {
+          cell.occupant.hue = hue;
+          cell.occupant.drawnSettled = false;
+        }
+      }
+    }
+  };
+
+  // Until the visitor pours, a spout does — a thin stream swinging across the top for its first
+  // AUTO_POUR frames, so the sketch opens alive — and a line at the foot says how.
+  const AUTO_POUR = 60 * 40;
+  let poured = false;
+
   p5.draw = () => {
     if (setFps) setFps(p5.frameRate());
     if (p5.mouseIsPressed) {
-      const mouseCol = Math.floor(p5.mouseX / cellSize);
-      const mouseRow = Math.floor(p5.mouseY / cellSize);
-      // randomly generate a circle of sand around the mouse with a radius of generationRadius
-      for (let i = -generationRadius; i <= generationRadius; i++) {
-        for (let j = -generationRadius; j <= generationRadius; j++) {
-          const col = mouseCol + i;
-          if (col < 0 || col >= cols) continue;
-          const row = mouseRow + j;
-          if (row < 0 || row >= rows) continue;
-          if (
-            Math.pow(i, 2) + Math.pow(j, 2) <=
-            Math.pow(generationRadius, 2)
-          ) {
-            if (p5.random(1) > 0.8) {
-              const cell = grid[col]?.[row];
-              if (cell) {
-                // slowly cycle through all hues, but start with a nice sand color
-                const hue = (p5.frameCount / 2 + 20) % 360;
-                if (!cell.occupant) cell.occupant = new Sand(cell, hue);
-                else {
-                  cell.occupant.hue = hue;
-                  cell.occupant.drawnSettled = false;
-                }
-              }
-            }
-          }
-        }
-      }
+      poured = true;
+      pour(Math.floor(p5.mouseX / cellSize), Math.floor(p5.mouseY / cellSize), generationRadius, 0.2);
+    } else if (!poured && p5.frameCount < AUTO_POUR) {
+      const x = cols * (0.5 + 0.32 * Math.sin(p5.frameCount / 110));
+      pour(Math.floor(x), Math.floor(rows * 0.08), 4, 0.35);
     }
 
     p5.background(0);
@@ -90,6 +94,14 @@ export const SandSketch = (p5: P5CanvasInstance<FpsSketchProps>) => {
     }
 
     p5.image(buffer, 0, 0); // Display the off-screen buffer each frame
+
+    if (!poured) {
+      p5.noStroke();
+      p5.fill(0, 0, 255, 0.55 + 0.25 * Math.sin(p5.frameCount / 30));
+      p5.textAlign(p5.CENTER, p5.BOTTOM);
+      p5.textSize(14);
+      p5.text('click and drag to pour', p5.width / 2, p5.height - 24);
+    }
   };
 
   return p5;

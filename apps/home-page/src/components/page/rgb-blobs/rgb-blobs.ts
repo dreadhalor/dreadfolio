@@ -1,8 +1,16 @@
+/*
+ * The page's background: the sketches app's RGB Blobs as it was on p5 1, kept here so this (the v3
+ * homepage, on React 18, p5 1 and @p5-wrapper/react 4) no longer depends on that app, which has
+ * moved on to React 19 and p5 2.
+ */
 import P5 from 'p5';
-import { generateFlowField } from '../../utils';
+import { generateFlowField } from './flow-field';
 import { Blob } from './blob';
-import { FpsSketchProps } from '..';
-import { P5CanvasInstance } from '@p5-wrapper/react';
+import { P5CanvasInstance, SketchProps } from '@p5-wrapper/react';
+
+type FpsSketchProps = SketchProps & {
+  setFps?: (framerate: number) => void;
+};
 
 export const scl = 10;
 export const margin = 50;
@@ -37,8 +45,11 @@ export const RgbBlobs = (p5: RgbBlobsProps) => {
   const zInc = 0.003;
   const blobs: Blob[] = [];
   let flowfield: P5.Vector[] = [];
-  // Made in setup: a p5 2 colour needs the canvas's renderer.
-  const colors: P5.Color[] = [];
+  const colors = [
+    p5.color(255, 0, 0),
+    p5.color(0, 255, 0),
+    p5.color(0, 0, 255),
+  ];
   let blobLayer: P5.Graphics;
   let layer2: P5.Graphics;
 
@@ -52,7 +63,6 @@ export const RgbBlobs = (p5: RgbBlobsProps) => {
     for (let i = 0; i < colors.length; i++) {
       blobs.push(
         new Blob(
-          p5,
           blobLayer,
           p5.random(p5.width - margin * 2) + margin,
           p5.random(p5.height - margin * 2) + margin,
@@ -61,7 +71,6 @@ export const RgbBlobs = (p5: RgbBlobsProps) => {
       );
       blobs.push(
         new Blob(
-          p5,
           blobLayer,
           p5.random(p5.width - margin * 2) + margin,
           p5.random(p5.height - margin * 2) + margin,
@@ -73,15 +82,16 @@ export const RgbBlobs = (p5: RgbBlobsProps) => {
 
   p5.setup = () => {
     p5.createCanvas(width || p5.windowWidth, height || p5.windowHeight);
-    colors.push(p5.color(255, 0, 0), p5.color(0, 255, 0), p5.color(0, 0, 255));
     p5.pixelDensity(2);
     p5.frameRate(60);
 
     blobLayer = p5.createGraphics(p5.width, p5.height);
     blobLayer.pixelDensity(2);
+    blobLayer.frameRate(60);
 
     layer2 = p5.createGraphics(p5.width, p5.height);
     layer2.pixelDensity(2);
+    layer2.frameRate(60);
 
     setupFlowField();
     resetBlobs();
