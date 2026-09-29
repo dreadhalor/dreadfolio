@@ -4,10 +4,9 @@ import { ControlPanel } from './components/control-panel';
 import { circleMargin, sketches, squareSize, type SketchKey } from './sketches';
 import { SAND_DEFAULTS } from './sketches/sand/sketch';
 
-// It opens on one of the strongest, picked at random so a second visit sees another; the rest are
-// a pick away in the panel.
-const OPENERS: SketchKey[] = ['flow-field', 'joy-division', 'scrunching', 'lo-fi-mountains', 'ripples', 'moonlight-ocean'];
-const getRandomSketch = () => OPENERS[Math.floor(Math.random() * OPENERS.length)]!;
+// It opens on Sand (Scott's pick): pouring from the first frame, the controls right there. The
+// rest are a pick away in the panel.
+const OPENER: SketchKey = 'sand';
 
 /* fn, at most once every `ms` (the sketches report their frame rate every frame). */
 function throttle<A extends unknown[]>(fn: (...args: A) => void, ms: number) {
@@ -23,7 +22,7 @@ function throttle<A extends unknown[]>(fn: (...args: A) => void, ms: number) {
 const App = () => {
   const [fps, setFps] = useState<number>();
   const throttledSetFps = useRef(throttle(setFps, 100));
-  const [sketch, setSketch] = useState<SketchKey>(getRandomSketch);
+  const [sketch, setSketch] = useState<SketchKey>(OPENER);
   const [distanceField, setDistanceField] = useState(circleMargin);
   const [metaballSquareSize, setMetaballSquareSize] = useState(squareSize);
   const [showMetaballs, setShowMetaballs] = useState(false);
