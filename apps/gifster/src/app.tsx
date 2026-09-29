@@ -259,7 +259,7 @@ const App = () => {
                   {query ? `No favorites match “${query}”` : 'No favorites yet'}
                 </p>
                 <p className='max-w-sm text-sm text-white/40'>
-                  Hover any GIF and hit the heart — favorites live in your
+                  Hover any GIF and hit the heart. Favorites live in your
                   browser, no account needed.
                 </p>
               </div>

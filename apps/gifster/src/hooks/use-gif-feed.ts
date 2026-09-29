@@ -75,7 +75,7 @@ export const useGifFeed = (query: string, type: MediaType) => {
           return;
         const rateLimited = isRateLimited(err);
         const message = rateLimited
-          ? "Giphy's free-tier rate limit is catching its breath — retrying automatically."
+          ? "Giphy's free-tier rate limit is catching its breath. Retrying automatically."
           : err instanceof Error
             ? err.message
             : 'Network error';
