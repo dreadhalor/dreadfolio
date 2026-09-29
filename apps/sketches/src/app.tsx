@@ -1,8 +1,16 @@
-import { P5Canvas, type Sketch } from '@p5-wrapper/react';
-import { useRef, useState } from 'react';
+import { P5Canvas, type P5CanvasProps, type Sketch } from '@p5-wrapper/react';
+import { useRef, useState, type ReactElement } from 'react';
 import { ControlPanel } from './components/control-panel';
 import { circleMargin, sketches, squareSize, type SketchKey } from './sketches';
 import { SAND_DEFAULTS } from './sketches/sand/sketch';
+
+/*
+ * P5Canvas as a caller sees it: a component taking the sketch's props. Its declared type is
+ * written against React 19's types (a component may return a bigint or a promise), and the
+ * monorepo pins @types/react to 18 for every app (root package.json, pnpm.overrides) — under
+ * which that type isn't a component at all, and its props come out as never.
+ */
+const Canvas = P5Canvas as unknown as (props: P5CanvasProps) => ReactElement | null;
 
 // It opens on Sand (Scott's pick): pouring from the first frame, the controls right there. The
 // rest are a pick away in the panel.
@@ -68,7 +76,7 @@ const App = () => {
         setSand={setSand}
         clearSand={() => setSandClears((n) => n + 1)}
       />
-      <P5Canvas
+      <Canvas
         sketch={sketches[sketch].sketch as Sketch}
         setFps={throttledSetFps.current}
         distanceField={distanceField}
