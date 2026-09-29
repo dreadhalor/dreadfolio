@@ -66,7 +66,7 @@ export function Editor({
       </div>
 
       <p className={clsx('mt-3 min-h-5 text-[13px] leading-5', problem ? 'text-out' : 'text-muted')}>
-        {problem ?? `${givens} given${givens === 1 ? '' : 's'} — ready to solve.`}
+        {problem ?? `${givens} given${givens === 1 ? '' : 's'}, ready to solve.`}
       </p>
 
       <div className='mt-3 flex items-center gap-2'>

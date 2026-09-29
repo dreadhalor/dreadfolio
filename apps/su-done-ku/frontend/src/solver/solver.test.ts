@@ -145,7 +145,7 @@ describe('each technique, on a board built for it', () => {
     expect(d.cause.map(squareName)).toEqual(['B2', 'B7', 'H2', 'H7']);
     expect(removed(d)).toEqual(['A', 'C', 'D', 'E', 'F', 'G', 'I'].flatMap((r) => [`${r}2:5`, `${r}7:5`]).sort());
     expect(d.text).toBe(
-      'In rows B and H, 5 can only go in columns 2 and 7. So the two 5s sit on opposite corners of that rectangle — B2 and H7, or B7 and H2 — ' +
+      'In rows B and H, 5 can only go in columns 2 and 7. So the two 5s sit on opposite corners of that rectangle (B2 and H7, or B7 and H2), ' +
         'and either way columns 2 and 7 each get their 5 there. No other square in those columns can be 5.',
     );
   });

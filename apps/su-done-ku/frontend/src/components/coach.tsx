@@ -20,9 +20,9 @@ const aOr = (word: string) => (/^[aeiouX]/i.test(word) ? 'an' : 'a');
 
 /** Where to look for a step, without giving it away. */
 export function nudgeFor(d: Deduction) {
-  if (d.technique === 'crosshatch') return `A placed digit is still pencilled in somewhere it can't go — try ${unitName(d.units[0]!)}.`;
+  if (d.technique === 'crosshatch') return `A placed digit is still pencilled in somewhere it can't go. Try ${unitName(d.units[0]!)}.`;
   const name = lower(d.label);
-  return `Look for ${aOr(name)} ${name}${d.units[0] ? ` — try ${unitName(d.units[0])}` : ''}.`;
+  return `Look for ${aOr(name)} ${name}${d.units[0] ? `. Try ${unitName(d.units[0])}` : ''}.`;
 }
 
 /** "Rules out 2 from B1 and B8" — beyond what a placement does to its own square. */

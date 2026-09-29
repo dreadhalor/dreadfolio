@@ -49,8 +49,8 @@ function Help() {
             <Popover.Title className='mb-2 text-sm font-extrabold'>How it works</Popover.Title>
             <ul className='list-disc space-y-1.5 pl-4 marker:text-slate-300'>
               <li>
-                Every technique is yours (<b>Me</b>) or the app’s (<b>Auto</b>). After each of your moves the app does the auto ones —
-                crosshatching and singles, to begin with — and stops as soon as the next step is one of yours, pencil marks all in place.
+                Every technique is yours (<b>Me</b>) or the app’s (<b>Auto</b>). After each of your moves the app does the auto ones (crosshatching
+                and singles, to begin with) and stops as soon as the next step is one of yours, pencil marks all in place.
               </li>
               <li>
                 Pick a square, then a digit. With <b>Pencil</b> on, a digit turns that pencil mark on or off. Arrow keys move; P toggles

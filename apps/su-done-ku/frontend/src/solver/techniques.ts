@@ -299,8 +299,8 @@ function xWing(b: Board): Deduction | null {
           technique: 'xWing',
           label: 'X-Wing',
           text:
-            `In ${baseNames}, ${d} can only go in ${coverNames}. So the two ${d}s sit on opposite corners of that rectangle — ` +
-            `${squareName(a0)} and ${squareName(b1)}, or ${squareName(a1)} and ${squareName(b0)} — and either way ${coverNames} ` +
+            `In ${baseNames}, ${d} can only go in ${coverNames}. So the two ${d}s sit on opposite corners of that rectangle (` +
+            `${squareName(a0)} and ${squareName(b1)}, or ${squareName(a1)} and ${squareName(b0)}), and either way ${coverNames} ` +
             `each get their ${d} there. No other square in those ${byRow ? 'columns' : 'rows'} can be ${d}.`,
           removals,
           cause: corners,

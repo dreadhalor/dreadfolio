@@ -140,7 +140,7 @@ export function PlayBoard({
         );
         const label = value
           ? `${squareName(s)}: ${value}${board.givens[s] ? ' (given)' : ''}${wrong ? ', a mistake' : ''}`
-          : `${squareName(s)}: could be ${DIGITS.filter((d) => board.cands[s]! & bit(d)).join(', ') || 'nothing'}${wrong ? ' — its answer has been ruled out' : ''}`;
+          : `${squareName(s)}: could be ${DIGITS.filter((d) => board.cands[s]! & bit(d)).join(', ') || 'nothing'}${wrong ? ' (its answer has been ruled out)' : ''}`;
 
         if (value) {
           return (
