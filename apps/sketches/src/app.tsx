@@ -2,6 +2,7 @@ import { P5Canvas, type Sketch } from '@p5-wrapper/react';
 import { useRef, useState } from 'react';
 import { ControlPanel } from './components/control-panel';
 import { circleMargin, sketches, squareSize, type SketchKey } from './sketches';
+import { SAND_DEFAULTS } from './sketches/sand/sketch';
 
 // It opens on one of the strongest, picked at random so a second visit sees another; the rest are
 // a pick away in the panel.
@@ -33,6 +34,9 @@ const App = () => {
   // rings; many more fuse into one).
   const [metaballCount, setMetaballCount] = useState(4);
   const [metaballSize, setMetaballSize] = useState(100);
+  const [sand, setSand] = useState(SAND_DEFAULTS);
+  // Bumped to clear the Sand canvas.
+  const [sandClears, setSandClears] = useState(0);
 
   const loadSketch = (key: SketchKey) => {
     setSketch(key);
@@ -61,6 +65,9 @@ const App = () => {
         setMetaballCount={setMetaballCount}
         metaballSize={metaballSize}
         setMetaballSize={setMetaballSize}
+        sand={sand}
+        setSand={setSand}
+        clearSand={() => setSandClears((n) => n + 1)}
       />
       <P5Canvas
         sketch={sketches[sketch].sketch as Sketch}
@@ -73,6 +80,8 @@ const App = () => {
         linearInterpolation={linearInterpolation}
         metaballCount={metaballCount}
         metaballSize={metaballSize}
+        sand={sand}
+        sandClears={sandClears}
       />
     </>
   );

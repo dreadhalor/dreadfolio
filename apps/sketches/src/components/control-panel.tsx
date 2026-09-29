@@ -2,10 +2,13 @@ import { Accordion } from '@base-ui/react/accordion';
 import { Checkbox } from '@base-ui/react/checkbox';
 import { Select } from '@base-ui/react/select';
 import { Slider } from '@base-ui/react/slider';
+import { Toggle as BaseToggle } from '@base-ui/react/toggle';
+import { ToggleGroup } from '@base-ui/react/toggle-group';
 import clsx from 'clsx';
-import { Check, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronDown, ChevronsUpDown, Eraser, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { sketches, type SketchKey } from '../sketches';
+import type { SandColor, SandSettings } from '../sketches/sand/sketch';
 
 /* The sketches, as the picker lists them. */
 const ITEMS = Object.entries(sketches).map(([value, { name }]) => ({ value: value as SketchKey, label: name }));
@@ -33,14 +36,39 @@ type ControlPanelProps = {
   setMetaballCount: (count: number) => void;
   metaballSize: number;
   setMetaballSize: (size: number) => void;
+  sand: SandSettings;
+  setSand: (sand: SandSettings) => void;
+  clearSand: () => void;
 };
 
-/* A labelled slider, its value beside its name. */
-const Setting = ({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (value: number) => void }) => (
-  <Slider.Root value={value} onValueChange={(v) => onChange(v)} min={min} max={max} step={1} className='flex flex-col gap-1.5'>
+const SAND_COLORS: { value: SandColor; label: string }[] = [
+  { value: 'rainbow', label: 'Rainbow' },
+  { value: 'desert', label: 'Desert' },
+  { value: 'custom', label: 'Custom' },
+];
+
+/* A labelled slider, its value beside its name (or `display`, for a value that wants a unit). */
+const Setting = ({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  display,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  display?: string;
+  onChange: (value: number) => void;
+}) => (
+  <Slider.Root value={value} onValueChange={(v) => onChange(v)} min={min} max={max} step={step} className='flex flex-col gap-1.5'>
     <div className='flex items-center justify-between text-xs'>
       <Slider.Label className='text-white/70'>{label}</Slider.Label>
-      <Slider.Value className='tabular-nums' />
+      {display === undefined ? <Slider.Value className='tabular-nums' /> : <span className='tabular-nums'>{display}</span>}
     </div>
     <Slider.Control className='flex h-4 cursor-pointer touch-none items-center select-none'>
       <Slider.Track className='h-1 w-full rounded-full bg-white/20'>
@@ -91,7 +119,11 @@ const ControlPanel = ({
   setMetaballCount,
   metaballSize,
   setMetaballSize,
+  sand,
+  setSand,
+  clearSand,
 }: ControlPanelProps) => {
+  const setSandField = <K extends keyof SandSettings>(key: K, value: SandSettings[K]) => setSand({ ...sand, [key]: value });
   const [selectOpen, setSelectOpen] = useState(false);
 
   return (
@@ -146,6 +178,63 @@ const ControlPanel = ({
                 </Select.Positioner>
               </Select.Portal>
             </Select.Root>
+            {sketch === 'sand' && (
+              <div className='flex flex-col gap-3 pt-1'>
+                <Setting label='Brush' value={sand.brush} min={4} max={120} display={`${sand.brush}px`} onChange={(v) => setSandField('brush', v)} />
+                <Setting label='Flow' value={sand.flow} min={1} max={100} display={`${sand.flow}%`} onChange={(v) => setSandField('flow', v)} />
+                <Setting label='Grain size' value={sand.grain} min={1} max={8} display={`${sand.grain}px`} onChange={(v) => setSandField('grain', v)} />
+                <Setting label='Gravity' value={sand.gravity} min={0.05} max={0.8} step={0.05} display={sand.gravity.toFixed(2)} onChange={(v) => setSandField('gravity', v)} />
+                <div className='flex flex-col gap-1.5'>
+                  <span className='text-xs text-white/70'>Color</span>
+                  <ToggleGroup
+                    value={[sand.color]}
+                    onValueChange={(v) => v[0] && setSandField('color', v[0] as SandColor)}
+                    className='flex gap-1 rounded-md border border-white/15 bg-white/5 p-0.5'
+                  >
+                    {SAND_COLORS.map(({ value, label }) => (
+                      <BaseToggle
+                        key={value}
+                        value={value}
+                        className={clsx('flex-1 cursor-pointer rounded px-2 py-1 text-xs text-white/70 hover:text-white data-[pressed]:bg-white/15 data-[pressed]:text-white', FOCUS)}
+                      >
+                        {label}
+                      </BaseToggle>
+                    ))}
+                  </ToggleGroup>
+                </div>
+                {sand.color === 'custom' && (
+                  <div className='flex items-end gap-2'>
+                    <div className='flex-1'>
+                      <Setting label='Hue' value={sand.hue} min={0} max={359} display={`${sand.hue}°`} onChange={(v) => setSandField('hue', v)} />
+                    </div>
+                    <span className='mb-0.5 size-4 shrink-0 rounded-full border border-white/30' style={{ background: `hsl(${sand.hue} 90% 55%)` }} />
+                  </div>
+                )}
+                <div className='flex items-center justify-between gap-2 pt-1'>
+                  <label className='flex cursor-pointer items-center gap-2 text-xs select-none'>
+                    <Checkbox.Root
+                      checked={sand.erase}
+                      onCheckedChange={(c) => setSandField('erase', c)}
+                      className={clsx('flex size-4 items-center justify-center rounded border border-white/40 data-[checked]:border-[#ed225d] data-[checked]:bg-[#ed225d]', FOCUS)}
+                    >
+                      <Checkbox.Indicator>
+                        <Check size={12} strokeWidth={3} />
+                      </Checkbox.Indicator>
+                    </Checkbox.Root>
+                    <Eraser size={14} className='opacity-70' />
+                    Erase
+                  </label>
+                  <button
+                    type='button'
+                    onClick={clearSand}
+                    className={clsx('flex cursor-pointer items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-xs hover:bg-white/10', FOCUS)}
+                  >
+                    <Trash2 size={13} className='opacity-70' />
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
             {sketch === 'metaballs' && (
               <div className='flex flex-col gap-3 pt-1'>
                 <Setting label='Distance field' value={distanceField} min={0} max={100} onChange={setDistanceField} />
